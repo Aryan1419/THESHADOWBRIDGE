@@ -1,0 +1,295 @@
+{
+  "bookings": [
+    {
+      "id": "mock-1",
+      "name": "Rohan Sharma",
+      "phone": "9876543210",
+      "email": "rohan.sharma@example.com",
+      "city": "Noida",
+      "childAge": "7",
+      "requirement": "Special Education Shadow Teacher",
+      "message": "Looking for behavioral support in classroom for my child.",
+      "paymentStatus": "paid",
+      "amount": 99,
+      "createdAt": "2026-07-03T15:59:45.351Z"
+    },
+    {
+      "id": "mock-2",
+      "name": "Aishwarya Patel",
+      "phone": "9812345678",
+      "email": "aishwarya@example.com",
+      "city": "Ahmedabad",
+      "childAge": "9",
+      "requirement": "Home Tutor",
+      "message": "Need a tutor with patience for dyscalculia support.",
+      "paymentStatus": "paid",
+      "amount": 99,
+      "createdAt": "2026-07-04T03:59:45.351Z"
+    },
+    {
+      "id": "book-1rsg57j",
+      "name": "Aryan Beltharia",
+      "phone": "06396309989",
+      "email": "aryanbeltharia1419@gmail.com",
+      "city": "Noida",
+      "childAge": "7",
+      "requirement": "Special Education Remedial Support",
+      "message": "",
+      "paymentStatus": "paid",
+      "amount": 99,
+      "createdAt": "2026-07-04T15:59:45.382Z"
+    },
+    {
+      "id": "book-cfatyrg",
+      "name": "Aryan Beltharia",
+      "phone": "06396309989",
+      "email": "aryanbeltharia1419@gmail.com",
+      "city": "Noida",
+      "childAge": "7",
+      "requirement": "Classroom Shadow Teacher",
+      "message": "",
+      "paymentStatus": "paid",
+      "amount": 99,
+      "createdAt": "2026-07-14T08:25:46.211Z"
+    },
+    {
+      "id": "book-2iydham",
+      "name": "Aryan Beltharia",
+      "phone": "06396309989",
+      "email": "aryanbeltharia1419@gmail.com",
+      "city": "Noida",
+      "childAge": "7",
+      "requirement": "Classroom Shadow Teacher",
+      "message": "",
+      "paymentStatus": "paid",
+      "amount": 99,
+      "createdAt": "2026-07-14T08:27:19.756Z"
+    },
+    {
+      "id": "book-wy9gtmg",
+      "name": "Aryan Beltharia",
+      "phone": "06396309989",
+      "email": "aryanbeltharia1419@gmail.com",
+      "city": "Noida",
+      "childAge": "7",
+      "requirement": "Classroom Shadow Teacher",
+      "message": "",
+      "paymentStatus": "paid",
+      "amount": 99,
+      "createdAt": "2026-07-14T13:57:33.135Z"
+    },
+    {
+      "id": "book-yz8rdwp",
+      "name": "Aryan Beltharia",
+      "phone": "06396309989",
+      "email": "aryanbeltharia1419@gmail.com",
+      "city": "Noida",
+      "childAge": "9",
+      "requirement": "Academic Home Tutor",
+      "message": "",
+      "paymentStatus": "paid",
+      "amount": 99,
+      "createdAt": "2026-07-14T13:59:57.205Z"
+    },
+    {
+      "id": "book-tzoruzh",
+      "name": "Aryan Beltharia",
+      "phone": "06396309989",
+      "email": "aryanbeltharia1419@gmail.com",
+      "city": "Noida",
+      "childAge": "7",
+      "requirement": "Classroom Shadow Teacher",
+      "message": "",
+      "paymentStatus": "paid",
+      "amount": 99,
+      "createdAt": "2026-07-14T14:00:50.182Z"
+    },
+    {
+      "id": "book-djkrze4",
+      "name": "Aryan Beltharia",
+      "phone": "06396309989",
+      "email": "aryanbeltharia1419@gmail.com",
+      "city": "Noida",
+      "childAge": "7",
+      "requirement": "Classroom Shadow Teacher",
+      "message": "",
+      "paymentStatus": "paid",
+      "amount": 99,
+      "createdAt": "2026-07-14T14:06:03.939Z"
+    },
+    {
+      "id": "book-f4ym9z0",
+      "name": "Aryan Beltharia",
+      "phone": "06396309989",
+      "email": "aryanbeltharia1419@gmail.com",
+      "city": "Noida",
+      "childAge": "7",
+      "requirement": "Classroom Shadow Teacher",
+      "message": "",
+      "paymentStatus": "paid",
+      "amount": 99,
+      "createdAt": "2026-07-15T17:02:34.057Z"
+    }
+  ],
+  "parentRegistrations": [
+    {
+      "id": "parent-mock-1",
+      "parentName": "Sanjay Reddy",
+      "phone": "9988776655",
+      "email": "sanjay.reddy@example.com",
+      "city": "Hyderabad",
+      "childName": "Aryan Reddy",
+      "childAge": "6",
+      "childGrade": "1st Grade",
+      "challenges": "ADHD and speech delay",
+      "supportNeeded": "Shadow Teacher in School",
+      "createdAt": "2026-07-02T15:59:45.351Z"
+    }
+  ],
+  "teacherRegistrations": [
+    {
+      "id": "teacher-mock-1",
+      "name": "Priyanka Sen",
+      "phone": "9123456780",
+      "email": "priyanka.sen@example.com",
+      "city": "Noida",
+      "qualification": "B.Ed in Special Education",
+      "experience": "4 Years",
+      "skills": "Autism Spectrum Support, ABA therapy",
+      "createdAt": "2026-07-01T15:59:45.351Z"
+    }
+  ],
+  "tutorRegistrations": [
+    {
+      "id": "tutor-mock-1",
+      "name": "Vikram Joshi",
+      "phone": "9001122334",
+      "email": "vikram.tutor@example.com",
+      "city": "Ahmedabad",
+      "subjects": "Mathematics & Science",
+      "grades": "Primary to Middle School",
+      "experience": "6 Years",
+      "qualification": "B.Sc, B.Ed",
+      "createdAt": "2026-07-04T10:59:45.351Z"
+    }
+  ],
+  "contacts": [
+    {
+      "id": "contact-mock-1",
+      "name": "Meera Rao",
+      "phone": "9888877777",
+      "email": "meera.rao@example.com",
+      "city": "Hyderabad",
+      "message": "Do you provide services in Secunderabad area?",
+      "createdAt": "2026-07-04T13:59:45.351Z"
+    }
+  ],
+  "admin_users": [
+    {
+      "id": "admin-1",
+      "email": "pratibha@theshadowbridge.com",
+      "password": "adminpassword",
+      "role": "admin"
+    }
+  ],
+  "tutors": [
+    {
+      "id": "tutor-seed-1",
+      "name": "Rohan Sen",
+      "dob": "1998-05-15",
+      "gender": "Male",
+      "phone": "9876543201",
+      "email": "rohan.sen@example.com",
+      "city": "Hyderabad",
+      "address": "Flat 302, Hitech Heights, Gachibowli",
+      "qualification": "B.Sc. in Mathematics, B.Ed",
+      "specialization": "Algebra & Physics",
+      "experience": "2-5 Years",
+      "certificates": "Advanced Remedial Math Trainer Certificate",
+      "subjects": "Science, Mathematics",
+      "grades": "Middle School (6th-8th), High School (9th-10th)",
+      "expectedSalary": "₹15,000/month",
+      "mode": "Offline at Home",
+      "registration_id": "TUT-2026-3829",
+      "status": "Interview Awaiting",
+      "created_at": "2026-07-14T04:25:46.189Z",
+      "notes": "Strong mathematical background. Available in Gachibowli area."
+    }
+  ],
+  "shadow_teachers": [
+    {
+      "id": "shadow-seed-1",
+      "name": "Priya Nair",
+      "dob": "1995-10-22",
+      "gender": "Female",
+      "phone": "9812345602",
+      "email": "priya.nair@example.com",
+      "city": "Noida",
+      "address": "Tower D, Royal Residency, Sector 62",
+      "preferredLocations": "Sector 62, Sector 120",
+      "qualification": "B.Ed Special Education",
+      "specialization": "Autism Spectrum Disorder support",
+      "experience": "2-5 Years",
+      "certificates": "ABA Therapy Certification, Dyslexia Workshop",
+      "specialNeedsExp": "Yes",
+      "comfortableAreas": "Autism Spectrum Disorder ASD, ADHD, Learning Disabilities",
+      "openToTravel": "Yes",
+      "preferredWorkType": "Full-time",
+      "status": "Interview Scheduled",
+      "aadharCardName": "aadhar_priya.pdf",
+      "qualificationCertName": "bed_cert_priya.pdf",
+      "profilePhotoName": "photo_priya.jpg",
+      "registration_id": "TSB-2026-4928",
+      "created_at": "2026-07-13T20:25:46.189Z",
+      "notes": "Very articulate, well-certified in ABA techniques."
+    }
+  ],
+  "parent_shadow_requests": [
+    {
+      "id": "parent-shadow-seed-1",
+      "parentName": "Meera Sharma",
+      "relationship": "Mother",
+      "phone": "9888877701",
+      "email": "meera.sharma@example.com",
+      "childName": "Aarav Sharma",
+      "childDob": "2019-03-12",
+      "childGender": "Boy",
+      "childGrade": "Kindergarten",
+      "hasDiagnosis": "Yes",
+      "diagnosis": "Autism Spectrum Disorder (Mild)",
+      "difficulties": "Attention/Focus, Social Interaction",
+      "city": "Noida",
+      "schoolLocation": "DPS Sector 62, Noida",
+      "homeLocation": "Royal Residency, Sector 62",
+      "takesTherapy": "Yes",
+      "therapies": "Occupational Therapy, Speech Therapy",
+      "status": "Consultation Scheduled",
+      "consultation_paid": true,
+      "registration_id": "SB-2026-8849",
+      "created_at": "2026-07-14T06:25:46.189Z",
+      "notes": "Parent is eager for trial matching before school reopen next month."
+    }
+  ],
+  "parent_tutor_requests": [
+    {
+      "id": "parent-tutor-seed-1",
+      "parentName": "Amit Patel",
+      "relationship": "Father",
+      "phone": "9777788802",
+      "email": "amit.patel@example.com",
+      "childName": "Jiya Patel",
+      "childDob": "2017-08-04",
+      "childGender": "Girl",
+      "childGrade": "3rd Grade",
+      "tutorType": "Concept Clarity/Homework Help",
+      "subjects": "Science, Social Science",
+      "city": "Ahmedabad",
+      "homeLocation": "Satellite, Ahmedabad",
+      "status": "Consultation Scheduled",
+      "consultation_paid": true,
+      "registration_id": "SB-2026-9048",
+      "created_at": "2026-07-13T14:25:46.189Z",
+      "notes": "Looking for a female tutor with specialized experience in dyscalculia."
+    }
+  ]
+}
