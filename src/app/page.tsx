@@ -556,47 +556,28 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <div className="flex gap-4">
-                  <div className="p-3 bg-brand-light rounded-xl text-primary flex-shrink-0">
-                    <Phone size={20} className="text-secondary" />
+                  <div className="p-3 bg-brand-light rounded-xl text-primary flex-shrink-0 flex items-center justify-center w-12 h-12">
+                    <Phone size={22} className="text-secondary" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-brand-dark">Phone Numbers</h4>
-                    <p className="text-brand-muted text-sm">+91 98765 43210</p>
-                    <p className="text-brand-muted text-sm">+91 98123 45678</p>
+                    <h4 className="font-bold text-brand-dark text-base">Phone Support</h4>
+                    <p className="text-brand-muted text-sm font-semibold">+91 99743 90725</p>
                   </div>
                 </div>
 
                 <div className="flex gap-4">
-                  <div className="p-3 bg-brand-light rounded-xl text-primary flex-shrink-0">
-                    <Send size={20} className="text-secondary" />
+                  <div className="p-3 bg-brand-light rounded-xl text-primary flex-shrink-0 flex items-center justify-center w-12 h-12">
+                    <Send size={22} className="text-secondary" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-brand-dark">Email Support</h4>
-                    <p className="text-brand-muted text-sm">info@shadowbridge.in</p>
-                    <p className="text-brand-muted text-sm">support@shadowbridge.in</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="p-3 bg-brand-light rounded-xl text-primary flex-shrink-0">
-                    <MapPin size={20} className="text-secondary" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-brand-dark">Corporate Office</h4>
-                    <p className="text-brand-muted text-sm">Hitech City, Hyderabad, Telangana, 500081</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="p-3 bg-brand-light rounded-xl text-primary flex-shrink-0">
-                    <Clock size={20} className="text-secondary" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-brand-dark">Working Hours</h4>
-                    <p className="text-brand-muted text-sm">Monday - Saturday: 9:00 AM - 6:00 PM</p>
-                    <p className="text-brand-muted text-sm">Sunday: Closed</p>
+                    <h4 className="font-bold text-brand-dark text-base">Email Support</h4>
+                    <p className="text-brand-muted text-sm font-semibold">
+                      <a href="mailto:aryanbeltharia1419@gmail.com" className="hover:text-accent transition-colors">
+                        aryanbeltharia1419@gmail.com
+                      </a>
+                    </p>
                   </div>
                 </div>
               </div>

@@ -100,25 +100,17 @@ export default function Footer() {
             <ul className="space-y-3.5 text-sm text-gray-300">
               <li className="flex gap-2">
                 <Phone size={16} className="text-accent flex-shrink-0 mt-0.5" />
-                <div className="flex flex-col">
-                  <span>+91 98765 43210</span>
-                  <span>+91 98123 45678</span>
-                </div>
+                <span>+91 99743 90725</span>
               </li>
               <li className="flex gap-2">
                 <Mail size={16} className="text-accent flex-shrink-0 mt-0.5" />
-                <span className="break-all">info@shadowbridge.in</span>
+                <a href="mailto:aryanbeltharia1419@gmail.com" className="hover:text-accent transition-colors break-all">
+                  aryanbeltharia1419@gmail.com
+                </a>
               </li>
               <li className="flex gap-2">
                 <MapPin size={16} className="text-accent flex-shrink-0 mt-0.5" />
-                <span>Hitech City, Hyderabad, Telangana, 500081</span>
-              </li>
-              <li className="flex gap-2">
-                <Clock size={16} className="text-accent flex-shrink-0 mt-0.5" />
-                <div className="flex flex-col">
-                  <span>Mon - Sat: 9 AM - 6 PM</span>
-                  <span>Sunday: Closed</span>
-                </div>
+                <span>Delta 1, D-38, Greater Noida, Uttar Pradesh</span>
               </li>
             </ul>
           </div>

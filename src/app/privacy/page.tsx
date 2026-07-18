@@ -51,7 +51,7 @@ export default function PrivacyPolicy() {
 
             <h2 className="font-serif text-xl font-bold text-primary mt-6">4. Contact Us</h2>
             <p>
-              If you have any questions about this Privacy Policy or wish to modify or request deletion of your information, please contact us at <span className="font-bold text-primary">privacy@shadowbridge.in</span>.
+              If you have any questions about this Privacy Policy or wish to modify or request deletion of your information, please contact us at <span className="font-bold text-primary">aryanbeltharia1419@gmail.com</span>.
             </p>
           </div>
         </div>

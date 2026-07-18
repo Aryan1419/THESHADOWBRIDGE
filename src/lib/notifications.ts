@@ -69,8 +69,8 @@ export function wrapInEmailTemplate(subject: string, bodyContentHtml: string): s
                   <td align="center" style="background-color: #F3EEF8; padding: 30px; text-align: center; color: #6A5B7C; font-size: 12px; border-top: 1px solid #E6E2EB;">
                     <p style="margin: 0 0 10px 0; font-weight: bold; color: #3B2A6B;">The Shadow Bridge Co.</p>
                     <p style="margin: 0 0 15px 0; line-height: 1.4;">
-                      Office 203, Madhapur, Hitec City, Hyderabad, Telangana, 500081<br>
-                      Phone: +91 98123 45678 &bull; Email: info@shadowbridge.in
+                      Delta 1, D-38, Greater Noida, Uttar Pradesh<br>
+                      Phone: +91 99743 90725 &bull; Email: aryanbeltharia1419@gmail.com
                     </p>
                     <div style="margin: 15px 0;">
                       <span style="color: #C89B3C; font-weight: bold;">Ahmedabad &bull; Hyderabad</span>

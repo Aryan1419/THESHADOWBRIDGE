@@ -48,14 +48,14 @@ export default function Contact() {
     {
       city: "Ahmedabad Branch",
       address: "Suite 102, S.G. Highway, Bodakdev, Ahmedabad, Gujarat, 380054",
-      phone: "+91 98123 45678",
-      email: "ahmedabad@shadowbridge.in"
+      phone: "+91 99743 90725",
+      email: "aryanbeltharia1419@gmail.com"
     },
     {
       city: "Hyderabad Branch",
       address: "Office 203, Madhapur, Hitec City, Hyderabad, Telangana, 500081",
-      phone: "+91 99887 76655",
-      email: "hyderabad@shadowbridge.in"
+      phone: "+91 99743 90725",
+      email: "aryanbeltharia1419@gmail.com"
     }
   ];
 
@@ -96,27 +96,23 @@ export default function Contact() {
               </div>
 
               {/* Central Contacts */}
-              <div className="space-y-4">
+              <div className="space-y-6">
                 <div className="flex gap-4 p-4 border border-brand-border bg-brand-light/20 rounded-2xl">
                   <Phone className="text-primary flex-shrink-0 mt-1" size={20} />
                   <div>
                     <h4 className="font-bold text-brand-dark">Central Helpline</h4>
-                    <p className="text-brand-muted text-sm">+91 98765 43210 (Mon-Sat, 9AM-6PM)</p>
+                    <p className="text-brand-muted text-sm font-semibold">+91 99743 90725</p>
                   </div>
                 </div>
                 <div className="flex gap-4 p-4 border border-brand-border bg-brand-light/20 rounded-2xl">
                   <Mail className="text-primary flex-shrink-0 mt-1" size={20} />
                   <div>
                     <h4 className="font-bold text-brand-dark">Email Support</h4>
-                    <p className="text-brand-muted text-sm">info@shadowbridge.in</p>
-                  </div>
-                </div>
-                <div className="flex gap-4 p-4 border border-brand-border bg-brand-light/20 rounded-2xl">
-                  <Clock className="text-primary flex-shrink-0 mt-1" size={20} />
-                  <div>
-                    <h4 className="font-bold text-brand-dark">Operating Hours</h4>
-                    <p className="text-brand-muted text-sm">Monday - Saturday: 9:00 AM - 6:00 PM</p>
-                    <p className="text-brand-muted text-sm font-semibold text-accent">Sunday: Closed</p>
+                    <p className="text-brand-muted text-sm font-semibold">
+                      <a href="mailto:aryanbeltharia1419@gmail.com" className="hover:text-accent transition-colors">
+                        aryanbeltharia1419@gmail.com
+                      </a>
+                    </p>
                   </div>
                 </div>
               </div>
