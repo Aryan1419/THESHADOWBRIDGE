@@ -110,7 +110,7 @@ export default function Contact() {
                   <MapPin className="text-accent mx-auto animate-bounce" size={32} />
                   <h4 className="font-serif font-bold text-primary">Interactive Map Grid</h4>
                   <p className="text-xs text-brand-muted max-w-xs">
-                    Our verified shadow teachers work at primary and secondary schools across Ahmedabad and Hitec City.
+                    Our verified shadow teachers work at primary and secondary schools across Delhi NCR, Ahmedabad, Hyderabad & Bangalore.
                   </p>
                 </div>
               </div>
@@ -192,8 +192,10 @@ export default function Contact() {
                         className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
                       >
                         <option value="">Select City</option>
+                        <option value="Delhi NCR">Delhi NCR</option>
                         <option value="Ahmedabad">Ahmedabad</option>
                         <option value="Hyderabad">Hyderabad</option>
+                        <option value="Bangalore">Bangalore</option>
                       </select>
                     </div>
                   </div>

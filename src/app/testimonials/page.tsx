@@ -99,7 +99,7 @@ export default function Testimonials() {
             <>
               {/* Filters */}
               <div className="flex justify-center gap-3 mb-12 flex-wrap">
-                {['All', 'Ahmedabad', 'Hyderabad'].map((city) => (
+                {['All', 'Delhi NCR', 'Ahmedabad', 'Hyderabad', 'Bangalore'].map((city) => (
                   <button
                     key={city}
                     onClick={() => setSelectedCity(city)}

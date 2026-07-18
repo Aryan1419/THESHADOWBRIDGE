@@ -750,8 +750,10 @@ export default function AdminDashboard() {
                     className="p-2 border border-brand-border bg-white rounded-xl text-xs text-brand-dark focus:outline-none"
                   >
                     <option value="">All Cities</option>
+                    <option value="Delhi NCR">Delhi NCR</option>
                     <option value="Ahmedabad">Ahmedabad</option>
                     <option value="Hyderabad">Hyderabad</option>
+                    <option value="Bangalore">Bangalore</option>
                   </select>
                 </div>
 
@@ -903,8 +905,10 @@ export default function AdminDashboard() {
                     className="p-2 border border-brand-border bg-white rounded-xl text-xs text-brand-dark focus:outline-none"
                   >
                     <option value="">All Cities</option>
+                    <option value="Delhi NCR">Delhi NCR</option>
                     <option value="Ahmedabad">Ahmedabad</option>
                     <option value="Hyderabad">Hyderabad</option>
+                    <option value="Bangalore">Bangalore</option>
                   </select>
                 </div>
 
@@ -1104,8 +1108,10 @@ export default function AdminDashboard() {
                     className="p-2 border border-brand-border bg-white rounded-xl text-xs text-brand-dark focus:outline-none"
                   >
                     <option value="">All Cities</option>
+                    <option value="Delhi NCR">Delhi NCR</option>
                     <option value="Ahmedabad">Ahmedabad</option>
                     <option value="Hyderabad">Hyderabad</option>
+                    <option value="Bangalore">Bangalore</option>
                   </select>
                 </div>
 

@@ -16,11 +16,11 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "The Shadow Bridge | Trained Shadow Teachers & Home Tutors",
-  description: "Connecting families with professionally trained Shadow Teachers and Home Tutors in Ahmedabad and Hyderabad. Special education, behavior support, and inclusive learning assistance.",
-  keywords: "shadow teacher, home tutor, special education, child support, inclusive learning, Ahmedabad, Hyderabad, autism tutor, ADHD support",
+  description: "Connecting families with professionally trained Shadow Teachers and Home Tutors in Delhi NCR, Ahmedabad, Hyderabad & Bangalore. Special education, behavior support, and inclusive learning assistance.",
+  keywords: "shadow teacher, home tutor, special education, child support, inclusive learning, Delhi NCR, Ahmedabad, Hyderabad, Bangalore, autism tutor, ADHD support",
   openGraph: {
     title: "The Shadow Bridge | Shadow Teachers & Tutors",
-    description: "Empowering children with academic, behavioral, and inclusive support. Ahmedabad, Hyderabad.",
+    description: "Empowering children with academic, behavioral, and inclusive support. Delhi NCR, Ahmedabad, Hyderabad & Bangalore.",
     url: "https://theshadowbridge.com",
     siteName: "The Shadow Bridge",
     locale: "en_IN",

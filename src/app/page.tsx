@@ -82,15 +82,27 @@ export default function Home() {
   // Cities Section
   const cities = [
     {
+      name: "Delhi NCR",
+      skyline: "🕌🏛️🏙️",
+      desc: "Trusted Support for Your Child's Growth in Delhi NCR.",
+      color: "from-secondary/10 to-secondary/30"
+    },
+    {
       name: "Ahmedabad",
       skyline: "🏛️🕌🏢",
       desc: "Trusted Support for Your Child's Growth in Ahmedabad.",
-      color: "from-secondary/10 to-secondary/30"
+      color: "from-accent/10 to-accent/30"
     },
     {
       name: "Hyderabad",
       skyline: "🏰🏢🏬",
-      desc: "Experienced & Verified Shadows in Hyderabad.",
+      desc: "Experienced & Verified Shadow Teachers in Hyderabad.",
+      color: "from-secondary/10 to-secondary/30"
+    },
+    {
+      name: "Bangalore",
+      skyline: "🌳🏢🏫",
+      desc: "Experienced & Verified Shadow Teachers and Tutors in Bangalore.",
       color: "from-accent/10 to-accent/30"
     }
   ];
@@ -234,7 +246,7 @@ export default function Home() {
       <section className="py-6 bg-brand-light border-y border-brand-border text-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-primary font-serif text-lg sm:text-xl font-bold flex flex-wrap items-center justify-center gap-2">
-            <span className="text-secondary font-black">✓</span> Trusted by Parents in Ahmedabad, Hyderabad
+            <span className="text-secondary font-black">✓</span> Trusted by Parents in Delhi NCR, Ahmedabad, Hyderabad & Bangalore
           </p>
         </div>
       </section>
@@ -291,7 +303,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
             {cities.map((city, idx) => (
               <motion.div
                 key={idx}
@@ -659,8 +671,10 @@ export default function Home() {
                         className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
                       >
                         <option value="">Select City</option>
+                        <option value="Delhi NCR">Delhi NCR</option>
                         <option value="Ahmedabad">Ahmedabad</option>
                         <option value="Hyderabad">Hyderabad</option>
+                        <option value="Bangalore">Bangalore</option>
                       </select>
                     </div>
                   </div>

@@ -265,8 +265,10 @@ export default function BookConsultation() {
                           className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
                         >
                           <option value="">Select City</option>
+                          <option value="Delhi NCR">Delhi NCR</option>
                           <option value="Ahmedabad">Ahmedabad</option>
                           <option value="Hyderabad">Hyderabad</option>
+                          <option value="Bangalore">Bangalore</option>
                         </select>
                       </div>
                     </div>
