@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { FileText, Mail, Phone, MapPin } from 'lucide-react';
+import { FileText, Mail, Phone } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -32,7 +32,7 @@ export default function TermsConditions() {
       {/* Content */}
       <section className="py-16 bg-white">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <article className="prose-terms space-y-8">
+          <article className="prose-terms space-y-8 text-left">
 
             {/* Intro */}
             <p className="text-brand-muted text-sm sm:text-[15px] leading-relaxed">
@@ -83,11 +83,11 @@ export default function TermsConditions() {
             {/* Section 5 */}
             <div className="space-y-3">
               <h2 className="font-serif text-lg font-bold text-primary">5. Fees &amp; Payments</h2>
-              <ul className="list-disc pl-6 space-y-2 text-brand-muted text-sm leading-relaxed">
+              <ul className="list-disc pl-6 space-y-2.5 text-brand-muted text-sm leading-relaxed">
                 <li><strong>Consultation Fee:</strong> ₹99, payable at the time of registration to book an initial consultation. This fee is <strong>non-refundable</strong>, as it covers the cost of our team&apos;s time in reviewing your requirements and conducting the consultation.</li>
                 <li><strong>Placement Fee:</strong> ₹5,000 (Shadow Teacher) or ₹3,000 (Home Tutor), payable only once a match has been confirmed and accepted by the family. This is a one-time fee.</li>
                 <li>All payments are processed through our third-party payment gateway (Razorpay). We do not store your card, UPI, or banking details on our servers.</li>
-                <li><strong>Refund Policy:</strong> Placement fees are non-refundable once a Tutor/Shadow Teacher has been confirmed and onboarding has begun. If a placement fails within the initial period due to reasons attributable to the Tutor/Shadow Teacher, we will offer a replacement match at no additional placement fee, subject to availability.</li>
+                <li><strong>Refund Policy:</strong> If a placement fails within the first 14 days due to reasons attributable to the Tutor/Shadow Teacher (e.g. unprofessional conduct, unreliability, or unsuitability that could not reasonably have been anticipated at the time of matching), the parent may choose between: (a) a free replacement match at no additional placement fee, subject to availability of a suitable alternative, or (b) a partial refund of the placement fee, the amount of which will be communicated at the time of the request based on the stage of the placement. Requests must be raised with our team within 14 days of the placement starting. Beyond this period, or where the failure is not attributable to the Tutor/Shadow Teacher, the placement fee is non-refundable.</li>
                 <li>Fees paid directly to a Tutor or Shadow Teacher for ongoing sessions (beyond our one-time placement fee) are a private arrangement between the family and the professional, and are not collected or managed by us.</li>
               </ul>
             </div>
@@ -166,9 +166,10 @@ export default function TermsConditions() {
             {/* Section 12 */}
             <div className="space-y-3">
               <h2 className="font-serif text-lg font-bold text-primary">12. Cancellations</h2>
-              <p className="text-brand-muted text-sm leading-relaxed">
-                Cancellation policies for consultations and placements are determined on a case-by-case basis. Parents who wish to cancel a scheduled consultation or an in-progress placement should contact us directly. Refund eligibility, if any, will depend on the stage of the engagement and the specific circumstances. We will work with you in good faith to find a fair resolution.
-              </p>
+              <ul className="list-disc pl-6 space-y-2 text-brand-muted text-sm leading-relaxed">
+                <li><strong>Consultation:</strong> Once a consultation is booked and the ₹99 fee is paid, it cannot be cancelled or refunded, in line with the non-refundable nature of this fee (see Section 5). If you are unable to attend your scheduled consultation, please contact us as soon as possible and we will do our best to reschedule at our discretion.</li>
+                <li><strong>Placement:</strong> Either the family or the Tutor/Shadow Teacher may end an ongoing placement at any time by providing reasonable notice to us and to the other party. The placement fee, once paid, is non-refundable except as described under the Refund Policy in Section 5 above.</li>
+              </ul>
             </div>
 
             {/* Section 13 */}
@@ -183,7 +184,7 @@ export default function TermsConditions() {
             <div className="space-y-3">
               <h2 className="font-serif text-lg font-bold text-primary">14. Governing Law &amp; Dispute Resolution</h2>
               <p className="text-brand-muted text-sm leading-relaxed">
-                These Terms are governed by the laws of India. Any disputes arising from these Terms or use of the Platform shall be subject to the exclusive jurisdiction of the courts in Greater Noida, Uttar Pradesh.
+                These Terms are governed by the laws of India. Any disputes arising from these Terms or use of the Platform shall be subject to the exclusive jurisdiction of the courts of competent jurisdiction in India.
               </p>
             </div>
 
@@ -200,11 +201,7 @@ export default function TermsConditions() {
                 </div>
                 <div className="flex items-center gap-3 text-sm text-brand-dark font-medium">
                   <Phone size={16} className="text-accent shrink-0" />
-                  <a href="tel:+916396309989" className="hover:text-accent transition-colors">+91 6396309989</a>
-                </div>
-                <div className="flex items-start gap-3 text-sm text-brand-dark font-medium">
-                  <MapPin size={16} className="text-accent shrink-0 mt-0.5" />
-                  <span>Delta 1, D-38, Greater Noida, Uttar Pradesh</span>
+                  <a href="tel:+919974390725" className="hover:text-accent transition-colors">+91 99743 90725</a>
                 </div>
               </div>
             </div>

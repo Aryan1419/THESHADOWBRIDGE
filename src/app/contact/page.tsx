@@ -44,20 +44,7 @@ export default function Contact() {
     }
   };
 
-  const branches = [
-    {
-      city: "Ahmedabad Branch",
-      address: "Suite 102, S.G. Highway, Bodakdev, Ahmedabad, Gujarat, 380054",
-      phone: "+91 99743 90725",
-      email: "aryanbeltharia1419@gmail.com"
-    },
-    {
-      city: "Hyderabad Branch",
-      address: "Office 203, Madhapur, Hitec City, Hyderabad, Telangana, 500081",
-      phone: "+91 99743 90725",
-      email: "aryanbeltharia1419@gmail.com"
-    }
-  ];
+
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -74,7 +61,7 @@ export default function Contact() {
             Contact Our Team
           </h1>
           <p className="text-brand-muted text-base sm:text-lg max-w-2xl mx-auto">
-            Get in touch with our local branches or submit a request for parent registration assessments.
+            Get in touch with our team or submit a request for parent registration assessments.
           </p>
         </div>
       </section>
@@ -91,7 +78,7 @@ export default function Contact() {
                   Get Connected Instantly
                 </h2>
                 <p className="text-brand-muted text-sm sm:text-base leading-relaxed">
-                  Have questions about our training modules, fees, or matching checklists? Submit a query and a branch representative will call you.
+                  Have questions about our training modules, fees, or matching checklists? Submit a query and a representative will call you.
                 </p>
               </div>
 
@@ -241,36 +228,7 @@ export default function Contact() {
         </div>
       </section>
 
-      {/* Branches details */}
-      <section className="py-20 bg-brand-light/30 border-t border-brand-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="font-serif text-3xl font-extrabold text-primary mb-4">Our Local Branches</h2>
-            <p className="text-brand-muted text-sm sm:text-base">
-              You can contact our branch managers directly for regional assistance.
-            </p>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {branches.map((b, i) => (
-              <div key={i} className="bg-white p-8 rounded-2xl border border-brand-border shadow-sm flex flex-col justify-between">
-                <div>
-                  <div className="inline-block p-2 bg-primary/10 text-primary rounded-lg mb-4 text-xs font-bold uppercase tracking-wider">
-                    {b.city}
-                  </div>
-                  <p className="text-brand-dark text-sm sm:text-base font-semibold leading-relaxed mb-6">
-                    {b.address}
-                  </p>
-                </div>
-                <div className="border-t border-brand-border/60 pt-4 space-y-1">
-                  <p className="text-xs text-brand-muted">Phone: <span className="font-bold text-brand-dark">{b.phone}</span></p>
-                  <p className="text-xs text-brand-muted">Email: <span className="font-bold text-primary break-all">{b.email}</span></p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       <Footer />
     </div>

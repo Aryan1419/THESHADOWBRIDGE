@@ -93,6 +93,7 @@ export interface TutorRecord {
   registration_id: string; // TUT-2026-XXXX
   status: 'Interview Awaiting' | 'Interview Scheduled' | 'Shortlisted' | 'Onboarding' | 'Active' | 'Rejected';
   created_at: string;
+  terms_accepted_at?: string;
 }
 
 export interface ShadowTeacherRecord {
@@ -122,6 +123,7 @@ export interface ShadowTeacherRecord {
   registration_id: string; // TSB-2026-XXXX
   created_at: string;
   notes?: string;
+  terms_accepted_at?: string;
 }
 
 export interface ParentShadowRequestRecord {
@@ -150,6 +152,7 @@ export interface ParentShadowRequestRecord {
   created_at: string;
   suggestedMatchId?: string; // Links to tutor or shadow teacher ID
   notes?: string;
+  terms_accepted_at?: string;
 }
 
 export interface ParentTutorRequestRecord {
@@ -173,6 +176,7 @@ export interface ParentTutorRequestRecord {
   created_at: string;
   suggestedMatchId?: string; // Links to tutor ID
   notes?: string;
+  terms_accepted_at?: string;
 }
 
 export interface ReviewRecord {

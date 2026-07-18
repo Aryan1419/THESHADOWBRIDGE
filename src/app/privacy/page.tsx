@@ -35,10 +35,10 @@ export default function PrivacyPolicy() {
           <article className="prose-terms space-y-8 text-left">
 
             {/* Intro */}
-            <p className="text-brand-muted text-sm sm:text-[15px] leading-relaxed font-medium">
+            <p className="text-brand-muted text-sm sm:text-[15px] leading-relaxed">
               The Shadow Bridge (&quot;we,&quot; &quot;us,&quot; &quot;our,&quot; &quot;the Platform&quot;) is committed to protecting the privacy of the families, children, Tutors, and Shadow Teachers who use our services. This Privacy Policy explains what information we collect, why we collect it, how we use and protect it, and the choices you have. By using our website and services, you consent to the practices described here.
             </p>
-            <p className="text-brand-muted text-sm sm:text-[15px] leading-relaxed font-medium">
+            <p className="text-brand-muted text-sm sm:text-[15px] leading-relaxed">
               Because our services involve information about children, including sensitive details related to diagnoses and developmental needs, we treat this data with particular care. Please read this policy carefully.
             </p>
 
@@ -48,38 +48,38 @@ export default function PrivacyPolicy() {
             <div className="space-y-4">
               <h2 className="font-serif text-lg font-bold text-primary">1. Information We Collect</h2>
               
-              <div className="space-y-3 pl-4 border-l-2 border-accent/30">
+              <div className="space-y-2 pl-4 border-l-2 border-accent/30">
                 <h3 className="font-bold text-brand-dark text-sm">From Parents/Guardians (about themselves)</h3>
                 <p className="text-brand-muted text-sm leading-relaxed">
                   Name, relationship to child, mobile number, email address, city/location.
                 </p>
               </div>
 
-              <div className="space-y-3 pl-4 border-l-2 border-accent/30">
+              <div className="space-y-2 pl-4 border-l-2 border-accent/30">
                 <h3 className="font-bold text-brand-dark text-sm">From Parents/Guardians (about their child)</h3>
                 <p className="text-brand-muted text-sm leading-relaxed">
                   Child&apos;s name, date of birth, gender, grade/standard, school and home location, and — where voluntarily provided — information about diagnosis, areas of difficulty (e.g. attention, communication, behavior, learning, social interaction), and any therapies the child is currently receiving.
                 </p>
-                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 leading-relaxed font-medium">
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 leading-relaxed font-medium mt-1">
                   <strong>This information is sensitive personal data.</strong> We collect it only because it is necessary to understand your child&apos;s needs and find a suitable, appropriately trained match. You are never required to disclose more than you are comfortable sharing, though incomplete information may affect our ability to find the best match.
                 </div>
               </div>
 
-              <div className="space-y-3 pl-4 border-l-2 border-accent/30">
+              <div className="space-y-2 pl-4 border-l-2 border-accent/30">
                 <h3 className="font-bold text-brand-dark text-sm">From Tutors &amp; Shadow Teachers</h3>
                 <p className="text-brand-muted text-sm leading-relaxed">
                   Name, date of birth, gender, contact details, address, educational qualifications, certifications, experience details, areas of specialization or comfort (e.g. experience with ASD, ADHD, learning disabilities), availability, and — for Shadow Teacher registration — identity and qualification documents (e.g. Aadhar card, certificates) and a profile photo.
                 </p>
               </div>
 
-              <div className="space-y-3 pl-4 border-l-2 border-accent/30">
+              <div className="space-y-2 pl-4 border-l-2 border-accent/30">
                 <h3 className="font-bold text-brand-dark text-sm">Payment Information</h3>
                 <p className="text-brand-muted text-sm leading-relaxed">
                   When you make a payment (consultation fee or placement fee), payment processing is handled entirely by our payment partner, <strong>Razorpay</strong>. We do not collect, see, or store your full card, UPI, or bank account details on our servers. We retain only the payment status, amount, and transaction reference ID for our records.
                 </p>
               </div>
 
-              <div className="space-y-3 pl-4 border-l-2 border-accent/30">
+              <div className="space-y-2 pl-4 border-l-2 border-accent/30">
                 <h3 className="font-bold text-brand-dark text-sm">Automatically Collected Information</h3>
                 <p className="text-brand-muted text-sm leading-relaxed">
                   Basic technical data such as browser type, device type, and general usage patterns on our website, used to maintain and improve the Platform.
@@ -104,14 +104,14 @@ export default function PrivacyPolicy() {
                 <li>Comply with legal obligations, including reporting to appropriate authorities where required (e.g. in matters relating to child safety)</li>
               </ul>
               <p className="text-brand-muted text-sm leading-relaxed font-semibold">
-                We do <span className="underline">not</span> sell, rent, or trade your personal information, or your child&apos;s information, to any third party for marketing purposes.
+                We do not sell, rent, or trade your personal information, or your child&apos;s information, to any third party for marketing purposes.
               </p>
             </div>
 
             {/* Section 3 */}
             <div className="space-y-3">
               <h2 className="font-serif text-lg font-bold text-primary">3. Who Can Access Your Information</h2>
-              <ul className="list-disc pl-6 space-y-3.5 text-brand-muted text-sm leading-relaxed">
+              <ul className="list-disc pl-6 space-y-3 text-brand-muted text-sm leading-relaxed">
                 <li>
                   <strong>Our team (Admin access):</strong> Pratibha Mishra and authorized team members can access registration details, consultation notes, and status information in order to manage matches and provide support. Access is restricted to logged-in, authorized admin accounts only.
                 </li>
@@ -219,6 +219,15 @@ export default function PrivacyPolicy() {
               <h2 className="font-serif text-lg font-bold text-primary">10. Changes to This Policy</h2>
               <p className="text-brand-muted text-sm leading-relaxed">
                 We may update this Privacy Policy from time to time to reflect changes in our practices or for legal reasons. We will update the &quot;Last Updated&quot; date above when changes are made. Continued use of the Platform after changes are posted constitutes acceptance of the revised policy.
+              </p>
+            </div>
+
+            <hr className="border-brand-border" />
+
+            {/* Disclaimer */}
+            <div className="p-5 bg-brand-light border border-brand-border rounded-2xl space-y-2">
+              <p className="text-xs text-brand-muted leading-relaxed italic">
+                This document is a starting template and has not been reviewed by a licensed lawyer. Given that this Platform collects sensitive personal data — including children&apos;s health and diagnostic information — and processes payments, we strongly recommend having this Privacy Policy reviewed by a qualified lawyer familiar with India&apos;s Digital Personal Data Protection Act (DPDP Act, 2023) and applicable child-safety regulations before publishing it live.
               </p>
             </div>
 

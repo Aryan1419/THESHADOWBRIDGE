@@ -108,10 +108,6 @@ export default function Footer() {
                   aryanbeltharia1419@gmail.com
                 </a>
               </li>
-              <li className="flex gap-2">
-                <MapPin size={16} className="text-accent flex-shrink-0 mt-0.5" />
-                <span>Delta 1, D-38, Greater Noida, Uttar Pradesh</span>
-              </li>
             </ul>
           </div>
 

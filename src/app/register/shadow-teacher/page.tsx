@@ -20,6 +20,7 @@ export default function ShadowTeacherRegister() {
   const [regId, setRegId] = useState('');
   const [regDate, setRegDate] = useState('');
   const [confirmSubmit, setConfirmSubmit] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const [tagInput, setTagInput] = useState('');
 
@@ -137,7 +138,7 @@ export default function ShadowTeacherRegister() {
       case 4:
         return !!(formData.aadharCard && formData.qualificationCert && formData.profilePhoto);
       case 5:
-        return confirmSubmit;
+        return confirmSubmit && agreeTerms;
       default:
         return true;
     }
@@ -167,7 +168,7 @@ export default function ShadowTeacherRegister() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!confirmSubmit) {
+    if (!confirmSubmit || !agreeTerms) {
       setShowErrors(true);
       return;
     }
@@ -1022,11 +1023,11 @@ export default function ShadowTeacherRegister() {
                               className="accent-primary rounded w-4 h-4 mt-0.5 flex-shrink-0"
                             />
                             <span>I confirm that all the information provided by me is true and correct *</span>
-                          </label>
-                          <label className="flex items-start gap-2.5 text-xs sm:text-sm text-brand-dark font-semibold cursor-pointer select-none">
+                          </label>                          <label className="flex items-start gap-2.5 text-xs sm:text-sm text-brand-dark font-semibold cursor-pointer select-none">
                             <input
                               type="checkbox"
-                              required
+                              checked={agreeTerms}
+                              onChange={(e) => setAgreeTerms(e.target.checked)}
                               className="accent-primary rounded w-4 h-4 mt-0.5 flex-shrink-0"
                             />
                             <span>
@@ -1071,7 +1072,7 @@ export default function ShadowTeacherRegister() {
                     ) : (
                       <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || !confirmSubmit || !agreeTerms}
                         className="btn-gradient px-8 py-4 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
                       >
                         {loading ? 'Submitting...' : 'Complete Your Registration'}

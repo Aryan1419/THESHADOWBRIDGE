@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS public.tutors (
     expected_salary TEXT,
     mode TEXT,
     notes TEXT,
+    terms_accepted_at TEXT,
     registration_id TEXT UNIQUE NOT NULL,
     status TEXT NOT NULL DEFAULT 'Interview Awaiting',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
@@ -53,6 +54,7 @@ CREATE TABLE IF NOT EXISTS public.shadow_teachers (
     experience_cert_name TEXT,
     profile_photo_name TEXT,
     registration_id TEXT UNIQUE NOT NULL,
+    terms_accepted_at TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
     notes TEXT
 );
@@ -86,6 +88,7 @@ CREATE TABLE IF NOT EXISTS public.parent_shadow_requests (
     razorpay_payment_id TEXT,
     razorpay_order_id TEXT,
     razorpay_signature TEXT,
+    terms_accepted_at TEXT,
     notes TEXT
 );
 
@@ -113,6 +116,7 @@ CREATE TABLE IF NOT EXISTS public.parent_tutor_requests (
     razorpay_payment_id TEXT,
     razorpay_order_id TEXT,
     razorpay_signature TEXT,
+    terms_accepted_at TEXT,
     notes TEXT
 );
 
@@ -317,3 +321,9 @@ ALTER TABLE public.parent_tutor_requests ADD COLUMN IF NOT EXISTS placement_paym
 ALTER TABLE public.parent_tutor_requests ADD COLUMN IF NOT EXISTS placement_order_id TEXT;
 ALTER TABLE public.parent_tutor_requests ADD COLUMN IF NOT EXISTS placement_signature TEXT;
 ALTER TABLE public.parent_tutor_requests ADD COLUMN IF NOT EXISTS placement_amount NUMERIC;
+
+-- Add terms_accepted_at columns to requests and profiles tables
+ALTER TABLE public.tutors ADD COLUMN IF NOT EXISTS terms_accepted_at TEXT;
+ALTER TABLE public.shadow_teachers ADD COLUMN IF NOT EXISTS terms_accepted_at TEXT;
+ALTER TABLE public.parent_shadow_requests ADD COLUMN IF NOT EXISTS terms_accepted_at TEXT;
+ALTER TABLE public.parent_tutor_requests ADD COLUMN IF NOT EXISTS terms_accepted_at TEXT;

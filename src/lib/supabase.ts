@@ -7,9 +7,13 @@ if (!supabaseUrl || !supabaseServiceKey) {
   console.warn('Supabase URL or Service Role Key is missing in environment variables.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseServiceKey || 'placeholder-key',
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false
+    }
   }
-});
+);

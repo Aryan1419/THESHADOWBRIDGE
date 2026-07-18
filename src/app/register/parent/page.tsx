@@ -31,6 +31,8 @@ export default function ParentRegister() {
   const [regId, setRegId] = useState('');
   const [regDate, setRegDate] = useState('');
   const [showErrors, setShowErrors] = useState(false);
+  const [confirmSubmit, setConfirmSubmit] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
 
   const [formData, setFormData] = useState({
     // Step 1: Parent Info
@@ -107,7 +109,7 @@ export default function ParentRegister() {
             (!formData.therapies.includes('Others') || formData.otherTherapy)
           );
         case 6:
-          return true; // Review step
+          return confirmSubmit && agreeTerms; // Review step
         default:
           return true;
       }
@@ -126,7 +128,7 @@ export default function ParentRegister() {
         case 4:
           return !!(formData.city && formData.homeLocation);
         case 5:
-          return true; // Review step
+          return confirmSubmit && agreeTerms; // Review step
         default:
           return true;
       }
@@ -1104,11 +1106,24 @@ export default function ParentRegister() {
                             </div>
 
                             {/* Terms and Privacy Checkbox */}
-                            <div className="border-t border-brand-border pt-4 pb-2 text-left">
+                            <div className="border-t border-brand-border pt-4 pb-2 text-left space-y-3">
                               <label className="flex items-start gap-2.5 text-xs text-brand-dark font-bold cursor-pointer select-none">
                                 <input
                                   type="checkbox"
-                                  required
+                                  checked={confirmSubmit}
+                                  onChange={(e) => setConfirmSubmit(e.target.checked)}
+                                  className="accent-primary rounded w-4 h-4 mt-0.5 flex-shrink-0"
+                                />
+                                <span>
+                                  I confirm that all the information provided by me is true and correct *
+                                </span>
+                              </label>
+
+                              <label className="flex items-start gap-2.5 text-xs text-brand-dark font-bold cursor-pointer select-none">
+                                <input
+                                  type="checkbox"
+                                  checked={agreeTerms}
+                                  onChange={(e) => setAgreeTerms(e.target.checked)}
                                   className="accent-primary rounded w-4 h-4 mt-0.5 flex-shrink-0"
                                 />
                                 <span>
@@ -1177,7 +1192,7 @@ export default function ParentRegister() {
                         ) : (
                           <button
                             type="submit"
-                            disabled={loading}
+                            disabled={loading || !confirmSubmit || !agreeTerms}
                             className="btn-gradient px-8 py-4 rounded-xl font-bold text-sm shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                           >
                             {loading ? 'Processing...' : 'Proceed to Pay (₹99)'}

@@ -202,7 +202,8 @@ export async function POST(request: Request) {
           notes: '',
           razorpayPaymentId,
           razorpayOrderId,
-          razorpaySignature
+          razorpaySignature,
+          termsAcceptedAt: createdAt
         };
 
         const { error } = await supabase
@@ -288,7 +289,8 @@ export async function POST(request: Request) {
           notes: '',
           razorpayPaymentId,
           razorpayOrderId,
-          razorpaySignature
+          razorpaySignature,
+          termsAcceptedAt: createdAt
         };
 
         const { error } = await supabase
@@ -393,7 +395,8 @@ export async function POST(request: Request) {
         profilePhotoName: profilePhotoName || '',
         registration_id: generatedId,
         created_at: createdAt,
-        notes: ''
+        notes: '',
+        termsAcceptedAt: createdAt
       };
 
       const { error } = await supabase
@@ -458,7 +461,8 @@ export async function POST(request: Request) {
         registration_id: generatedId,
         status: 'Interview Awaiting',
         created_at: createdAt,
-        notes: ''
+        notes: '',
+        termsAcceptedAt: createdAt
       };
 
       const { error } = await supabase
