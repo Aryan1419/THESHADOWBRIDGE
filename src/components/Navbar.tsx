@@ -76,14 +76,8 @@ export default function Navbar() {
             {/* Logo */}
             <div className="flex-shrink-0">
               <Link href="/" className="flex items-center gap-3 group">
-                <span className="p-1.5 rounded-xl bg-gradient-to-br from-primary to-secondary text-white shadow-md group-hover:scale-105 transition-transform flex items-center justify-center">
-                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="8" cy="6" r="2.5" />
-                    <path d="M4 15c0-2.5 1.8-4 4-4s4 1.5 4 4v5" />
-                    <circle cx="16" cy="10" r="1.5" />
-                    <path d="M13.5 16c0-1.5 1-2.5 2.5-2.5s2.5 1 2.5 2.5v4" />
-                    <path d="M10.5 13.5h2.5" className="stroke-accent" />
-                  </svg>
+                <span className="w-11 h-11 rounded-xl bg-white shadow-md group-hover:scale-105 transition-transform flex items-center justify-center overflow-hidden border border-brand-border p-1 flex-shrink-0">
+                  <img src="/favicon-192.png" alt="The Shadow Bridge Logo" className="w-full h-full object-contain" />
                 </span>
                 <div className="flex flex-col">
                   <span className="font-serif text-xl sm:text-2xl font-black text-primary tracking-tight leading-none">

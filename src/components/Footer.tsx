@@ -11,14 +11,8 @@ export default function Footer() {
           {/* Column 1: Company Info */}
           <div className="md:col-span-2 lg:col-span-2">
             <Link href="/" className="flex items-center gap-3 group mb-5">
-              <span className="p-1.5 rounded-xl bg-gradient-to-br from-accent to-secondary text-white shadow-md flex items-center justify-center">
-                <svg className="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="8" cy="6" r="2.5" />
-                  <path d="M4 15c0-2.5 1.8-4 4-4s4 1.5 4 4v5" />
-                  <circle cx="16" cy="10" r="1.5" />
-                  <path d="M13.5 16c0-1.5 1-2.5 2.5-2.5s2.5 1 2.5 2.5v4" />
-                  <path d="M10.5 13.5h2.5" className="stroke-accent" />
-                </svg>
+              <span className="w-10 h-10 rounded-xl bg-white shadow-md flex items-center justify-center overflow-hidden border border-brand-border p-1 flex-shrink-0">
+                <img src="/favicon-192.png" alt="The Shadow Bridge Logo" className="w-full h-full object-contain" />
               </span>
               <div className="flex flex-col">
                 <span className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-white leading-none animate-pulse">
