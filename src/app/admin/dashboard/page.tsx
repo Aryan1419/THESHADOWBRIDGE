@@ -7,7 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, Users, User, GraduationCap, ClipboardList, Settings, LogOut,
   RefreshCw, Search, Filter, ShieldCheck, Mail, Phone, MapPin, Calendar,
-  CheckCircle, X, ChevronRight, FileText, AlertCircle, Save, Info, Sparkles, CreditCard
+  CheckCircle, X, ChevronRight, FileText, AlertCircle, Save, Info, Sparkles, CreditCard,
+  Star, CheckCircle2
 } from 'lucide-react';
 
 import { DatabaseSchema, TutorRecord, ShadowTeacherRecord, ParentShadowRequestRecord, ParentTutorRequestRecord } from '@/lib/db';
@@ -27,7 +28,7 @@ export default function AdminDashboard() {
   const [toastLog, setToastLog] = useState<string | null>(null);
 
   // Navigation tab state
-  const [activeTab, setActiveTab] = useState<'overview' | 'tutors' | 'shadows' | 'parents' | 'payments' | 'notifications' | 'settings'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'tutors' | 'shadows' | 'parents' | 'payments' | 'notifications' | 'settings' | 'reviews'>('overview');
   
   // Parent Requests sub-tab state
   const [parentSubTab, setParentSubTab] = useState<'shadow' | 'tutor'>('shadow');
@@ -52,6 +53,15 @@ export default function AdminDashboard() {
   const [editNotes, setEditNotes] = useState('');
   const [editMatchId, setEditMatchId] = useState('');
 
+  // Reviews moderation states
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [moderatingReviewId, setModeratingReviewId] = useState<string | null>(null);
+  const [reviewEditText, setReviewEditText] = useState<string>('');
+  const [rejectionNote, setRejectionNote] = useState<string>('');
+  const [isEditingReview, setIsEditingReview] = useState<boolean>(false);
+  const [isRejectingReview, setIsRejectingReview] = useState<boolean>(false);
+  const [loadingReviews, setLoadingReviews] = useState<boolean>(false);
+
   // Authentication guard check
   useEffect(() => {
     const token = localStorage.getItem('admin_token');
@@ -61,6 +71,7 @@ export default function AdminDashboard() {
     } else {
       setAdminEmail(email || 'pratibha@theshadowbridge.com');
       fetchDatabase();
+      fetchReviews();
     }
   }, [router]);
 
@@ -82,6 +93,71 @@ export default function AdminDashboard() {
       console.error('Failed to load database:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchReviews = async () => {
+    setLoadingReviews(true);
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const res = await fetch('/api/reviews', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setReviews(data.reviews);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch reviews:', err);
+    } finally {
+      setLoadingReviews(false);
+    }
+  };
+
+  const handleReviewAction = async (reviewId: string, action: 'approve' | 'reject' | 'edit', extraData?: { reviewText?: string; rejectionNote?: string }) => {
+    setUpdating(true);
+    setToastLog(null);
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const res = await fetch('/api/admin/reviews', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          reviewId,
+          action,
+          reviewText: extraData?.reviewText,
+          rejectionNote: extraData?.rejectionNote
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to moderate review');
+      }
+
+      if (data.success) {
+        setToastLog(`[Review Moderated] Review ID ${reviewId} successfully set to action "${action}".`);
+        fetchReviews();
+        // Reset states
+        setModeratingReviewId(null);
+        setReviewEditText('');
+        setRejectionNote('');
+        setIsEditingReview(false);
+        setIsRejectingReview(false);
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message);
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -442,6 +518,7 @@ export default function AdminDashboard() {
               { key: 'shadows', label: 'Shadow Teachers', icon: GraduationCap },
               { key: 'parents', label: 'Parent Requests', icon: ClipboardList },
               { key: 'payments', label: 'Payments Ledger', icon: CreditCard },
+              { key: 'reviews', label: 'Parent Reviews', icon: Star },
               { key: 'notifications', label: 'Notifications Log', icon: Mail },
               { key: 'settings', label: 'Settings', icon: Settings }
             ].map((item) => {
@@ -1353,6 +1430,153 @@ export default function AdminDashboard() {
             </div>
           )}
 
+          {/* TAB 7: PARENT REVIEWS MODERATION */}
+          {activeTab === 'reviews' && (
+            <div className="space-y-6 animate-fade-in-up text-left">
+              <div className="flex justify-between items-center">
+                <div className="space-y-1">
+                  <h2 className="font-serif text-xl font-bold text-primary flex items-center gap-2">
+                    <Star className="text-accent fill-accent animate-pulse" size={22} />
+                    Parent Reviews Moderation
+                  </h2>
+                  <p className="text-xs text-brand-muted font-medium">
+                    Approve, reject, or edit parental reviews before they are published publicly on the website.
+                  </p>
+                </div>
+                <button
+                  onClick={fetchReviews}
+                  disabled={loadingReviews}
+                  className="flex items-center gap-1.5 px-4 py-2 border border-brand-border bg-white text-primary rounded-xl text-xs font-bold hover:bg-brand-light transition-all cursor-pointer disabled:opacity-50"
+                >
+                  <RefreshCw size={14} className={loadingReviews ? 'animate-spin' : ''} />
+                  Reload Reviews
+                </button>
+              </div>
+
+              {loadingReviews ? (
+                <div className="bg-white border border-brand-border rounded-3xl p-12 text-center shadow-sm">
+                  <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <p className="text-xs text-brand-muted uppercase font-bold tracking-wider">Fetching Reviews...</p>
+                </div>
+              ) : reviews.length === 0 ? (
+                <div className="bg-white border border-brand-border rounded-3xl p-12 text-center shadow-sm space-y-4">
+                  <div className="w-14 h-14 bg-brand-light rounded-full flex items-center justify-center mx-auto text-brand-muted border border-brand-border/60">
+                    <Star size={24} />
+                  </div>
+                  <div className="space-y-1">
+                    <h4 className="font-serif text-base font-bold text-primary">No Reviews Logged</h4>
+                    <p className="text-xs text-brand-muted max-w-sm mx-auto leading-relaxed">
+                      Parents whose placement status is "Support Started" or "Active" will be able to submit their experience reviews here.
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white border border-brand-border rounded-3xl shadow-sm overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr className="bg-brand-light/60 border-b border-brand-border text-[10px] text-brand-muted uppercase font-bold tracking-wider">
+                          <th className="p-4">Submitted Date</th>
+                          <th className="p-4">Parent / ID</th>
+                          <th className="p-4">Service & City</th>
+                          <th className="p-4">Rating</th>
+                          <th className="p-4">Review Text</th>
+                          <th className="p-4">Status</th>
+                          <th className="p-4 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-brand-border/60 text-xs font-medium text-brand-dark">
+                        {reviews.map((rev) => {
+                          const ratingStars = Array(5).fill(0).map((_, i) => (
+                            <Star key={i} size={14} fill={i < rev.rating ? 'currentColor' : 'none'} className="text-amber-400" />
+                          ));
+
+                          return (
+                            <tr key={rev.id} className="hover:bg-brand-light/20 transition-colors">
+                              <td className="p-4 whitespace-nowrap text-brand-muted">
+                                {new Date(rev.submitted_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                              </td>
+                              <td className="p-4">
+                                <div className="font-bold text-primary">{rev.parent_name}</div>
+                                <div className="text-[10px] text-brand-muted font-mono">{rev.parent_registration_id}</div>
+                              </td>
+                              <td className="p-4">
+                                <div className="font-bold text-primary">{rev.service_type}</div>
+                                <div className="text-[10px] text-brand-muted font-semibold">{rev.city}</div>
+                              </td>
+                              <td className="p-4">
+                                <div className="flex gap-0.5">{ratingStars}</div>
+                              </td>
+                              <td className="p-4 max-w-sm">
+                                <p className="leading-relaxed font-sans font-normal italic text-brand-muted line-clamp-3 hover:line-clamp-none transition-all duration-300">
+                                  "{rev.review_text}"
+                                </p>
+                                {rev.child_first_name && (
+                                  <div className="text-[10px] text-accent font-bold mt-1 uppercase tracking-wider">
+                                    Child Display Name: {rev.child_first_name}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="p-4">
+                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold inline-block border ${
+                                  rev.status === 'approved'
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                    : rev.status === 'rejected'
+                                    ? 'bg-rose-50 text-rose-700 border-rose-200'
+                                    : 'bg-amber-50 text-amber-700 border-amber-200'
+                                }`}>
+                                  {rev.status}
+                                </span>
+                                {rev.status === 'rejected' && rev.rejection_note && (
+                                  <p className="text-[9px] text-rose-600 mt-1 italic leading-tight">
+                                    Note: {rev.rejection_note}
+                                  </p>
+                                )}
+                              </td>
+                              <td className="p-4 text-right whitespace-nowrap">
+                                <div className="flex justify-end items-center gap-2">
+                                  {rev.status !== 'approved' && (
+                                    <button
+                                      onClick={() => handleReviewAction(rev.id, 'approve')}
+                                      className="px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-[10px] font-bold hover:bg-emerald-700 transition-all cursor-pointer shadow-sm"
+                                    >
+                                      Approve
+                                    </button>
+                                  )}
+                                  <button
+                                    onClick={() => {
+                                      setModeratingReviewId(rev.id);
+                                      setReviewEditText(rev.review_text);
+                                      setIsEditingReview(true);
+                                    }}
+                                    className="px-2.5 py-1.5 border border-brand-border bg-white text-primary rounded-lg text-[10px] font-bold hover:bg-brand-light transition-all cursor-pointer shadow-sm"
+                                  >
+                                    Edit Typos
+                                  </button>
+                                  {rev.status !== 'rejected' && (
+                                    <button
+                                      onClick={() => {
+                                        setModeratingReviewId(rev.id);
+                                        setIsRejectingReview(true);
+                                      }}
+                                      className="px-2.5 py-1.5 bg-rose-600 text-white rounded-lg text-[10px] font-bold hover:bg-rose-700 transition-all cursor-pointer shadow-sm"
+                                    >
+                                      Reject
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
         </div>
       </main>
 
@@ -1662,6 +1886,70 @@ export default function AdminDashboard() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* 4. REVIEWS EDIT / REJECT MODALS */}
+      {isEditingReview && moderatingReviewId && (
+        <div className="fixed inset-0 bg-primary/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-lg w-full border border-brand-border shadow-2xl text-left animate-fade-in-up">
+            <h3 className="font-serif text-lg font-bold text-primary mb-2">Edit Review Text</h3>
+            <p className="text-xs text-brand-muted mb-4">You are editing minor typos in the parent review text. Do not alter the substance or rating of the review.</p>
+            
+            <textarea
+              rows={5}
+              className="w-full bg-brand-light border border-brand-border rounded-2xl p-4 text-xs font-medium text-brand-dark focus:outline-none focus:border-accent"
+              value={reviewEditText}
+              onChange={(e) => setReviewEditText(e.target.value)}
+            />
+            
+            <div className="flex justify-end gap-3 mt-4">
+              <button
+                onClick={() => { setIsEditingReview(false); setModeratingReviewId(null); }}
+                className="px-4 py-2 border border-brand-border rounded-xl text-xs font-bold text-brand-muted hover:bg-brand-light cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleReviewAction(moderatingReviewId, 'edit', { reviewText: reviewEditText })}
+                className="px-4 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:bg-secondary cursor-pointer"
+              >
+                Save Typos
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isRejectingReview && moderatingReviewId && (
+        <div className="fixed inset-0 bg-primary/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full border border-brand-border shadow-2xl text-left animate-fade-in-up">
+            <h3 className="font-serif text-lg font-bold text-primary mb-2">Reject Review</h3>
+            <p className="text-xs text-brand-muted mb-4 font-medium">Please enter an internal note explaining the reason for rejection (optional):</p>
+            
+            <input
+              type="text"
+              placeholder="e.g. Contains inappropriate language / fake entry"
+              className="w-full bg-brand-light border border-brand-border rounded-2xl px-4 py-3 text-xs font-medium text-brand-dark focus:outline-none focus:border-accent"
+              value={rejectionNote}
+              onChange={(e) => setRejectionNote(e.target.value)}
+            />
+            
+            <div className="flex justify-end gap-3 mt-5">
+              <button
+                onClick={() => { setIsRejectingReview(false); setModeratingReviewId(null); }}
+                className="px-4 py-2 border border-brand-border rounded-xl text-xs font-bold text-brand-muted hover:bg-brand-light cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleReviewAction(moderatingReviewId, 'reject', { rejectionNote })}
+                className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold hover:bg-rose-700 cursor-pointer"
+              >
+                Confirm Rejection
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

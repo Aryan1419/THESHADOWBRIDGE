@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { 
   CheckCircle, Calendar, ShieldAlert, Sparkles, User, Briefcase, 
   MapPin, Clock, ArrowRight, UserCheck, Search, HelpCircle, Check, Info, ClipboardList,
-  ShieldCheck, CreditCard
+  ShieldCheck, CreditCard, Star, CheckCircle2
 } from 'lucide-react';
 
 import Navbar from '@/components/Navbar';
@@ -35,6 +35,52 @@ function DashboardContent() {
   const [subType, setSubType] = useState<string>('');
   const [matchedCandidate, setMatchedCandidate] = useState<any | null>(null);
   const [paymentLoading, setPaymentLoading] = useState(false);
+
+  // Review submission states
+  const [reviewRating, setReviewRating] = useState<number>(5);
+  const [reviewHoverRating, setReviewHoverRating] = useState<number>(0);
+  const [childFirstName, setChildFirstName] = useState<string>('');
+  const [reviewText, setReviewText] = useState<string>('');
+  const [consentPublic, setConsentPublic] = useState<boolean>(false);
+  const [submittingReview, setSubmittingReview] = useState<boolean>(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState<boolean>(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+
+  const handleReviewSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!dbRecord) return;
+    
+    setSubmittingReview(true);
+    setReviewError(null);
+
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          registrationId: dbRecord.registration_id,
+          rating: reviewRating,
+          reviewText,
+          childFirstName,
+          consentPublic
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to submit review');
+      }
+
+      if (data.success) {
+        setReviewSubmitted(true);
+      }
+    } catch (err: any) {
+      console.error(err);
+      setReviewError(err.message);
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
 
   useEffect(() => {
     const r = searchParams.get('role');
@@ -66,6 +112,19 @@ function DashboardContent() {
         .finally(() => {
           setDbLoading(false);
         });
+
+      // Fetch review status
+      fetch(`/api/reviews?regId=${regId}`)
+        .then(res => {
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          return res.json();
+        })
+        .then(data => {
+          if (data.success && data.exists) {
+            setReviewSubmitted(true);
+          }
+        })
+        .catch(err => console.error('Failed to check review status:', err));
     } else {
       setDbRecord(null);
     }
@@ -714,6 +773,119 @@ function DashboardContent() {
                         )}
                       </button>
                     </>
+                  )}
+                </div>
+              )}
+
+              {/* FEEDBACK & RATING FORM */}
+              {role === 'parent' && (currentStatus === 'Support Started' || currentStatus === 'Active') && (
+                <div className="bg-white border border-brand-border rounded-3xl p-6 sm:p-8 shadow-sm space-y-6 text-left relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-1.5 h-full bg-accent"></div>
+                  
+                  <div className="space-y-1">
+                    <h3 className="font-serif text-lg font-bold text-primary flex items-center gap-1.5">
+                      <Star className="text-accent fill-accent" size={20} />
+                      Rate Your Experience
+                    </h3>
+                    <p className="text-xs text-brand-muted leading-relaxed">
+                      Your child's program has started. Share your honest feedback to help us monitor and improve our inclusive support services.
+                    </p>
+                  </div>
+
+                  {reviewSubmitted ? (
+                    <div className="bg-emerald-50/50 border border-emerald-100 p-5 rounded-2xl flex flex-col items-center text-center gap-3">
+                      <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                        <CheckCircle2 size={24} />
+                      </div>
+                      <div>
+                        <h4 className="font-serif text-sm font-bold text-emerald-800">Review Logged</h4>
+                        <p className="text-xs text-emerald-700/80 mt-1 font-semibold">
+                          Thank you for your feedback! Your review will be published after a quick review.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleReviewSubmit} className="space-y-4">
+                      {reviewError && (
+                        <div className="bg-rose-50 border border-rose-100 text-rose-700 text-xs p-3 rounded-xl font-medium">
+                          {reviewError}
+                        </div>
+                      )}
+                      
+                      {/* Star Rating Input */}
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-brand-muted uppercase font-bold block">Star Rating</label>
+                        <div className="flex gap-1.5">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => setReviewRating(star)}
+                              onMouseEnter={() => setReviewHoverRating(star)}
+                              onMouseLeave={() => setReviewHoverRating(0)}
+                              className="text-amber-400 focus:outline-none transition-transform hover:scale-110 cursor-pointer"
+                            >
+                              <Star
+                                size={28}
+                                fill={star <= (reviewHoverRating || reviewRating) ? 'currentColor' : 'none'}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Optional Child First Name */}
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-brand-muted uppercase font-bold flex justify-between">
+                          <span>Child's First Name (Optional)</span>
+                          <span className="text-[9px] lowercase font-normal italic">for privacy</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={childFirstName}
+                          onChange={(e) => setChildFirstName(e.target.value)}
+                          placeholder="e.g. Aarav"
+                          className="w-full bg-brand-light border border-brand-border rounded-xl px-4 py-2.5 text-xs text-brand-dark focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 font-medium"
+                        />
+                      </div>
+
+                      {/* Written Review */}
+                      <div className="space-y-1.5">
+                        <label className="text-[10px] text-brand-muted uppercase font-bold block">Your Review</label>
+                        <textarea
+                          rows={4}
+                          value={reviewText}
+                          onChange={(e) => setReviewText(e.target.value)}
+                          placeholder="How did the shadow teacher or home tutor support your child? What outcomes have you observed?"
+                          className="w-full bg-brand-light border border-brand-border rounded-xl px-4 py-3 text-xs text-brand-dark focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 font-medium resize-none"
+                        ></textarea>
+                        <span className="text-[9px] text-brand-muted block text-right font-medium">
+                          {reviewText.length} / 1000 characters (min 10)
+                        </span>
+                      </div>
+
+                      {/* Consent Checkbox */}
+                      <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                        <input
+                          type="checkbox"
+                          checked={consentPublic}
+                          onChange={(e) => setConsentPublic(e.target.checked)}
+                          className="mt-0.5 rounded border-brand-border text-accent focus:ring-accent accent-accent"
+                        />
+                        <span className="text-[11px] text-brand-muted leading-snug font-medium text-left">
+                          I agree this review may be displayed publicly on The Shadow Bridge website.
+                        </span>
+                      </label>
+
+                      {/* Submit button */}
+                      <button
+                        type="submit"
+                        disabled={submittingReview}
+                        className="btn-gradient w-full py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-1.5 shadow-md hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer disabled:opacity-50"
+                      >
+                        {submittingReview ? 'Submitting Feedback...' : 'Submit Feedback'}
+                      </button>
+                    </form>
                   )}
                 </div>
               )}

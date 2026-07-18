@@ -175,6 +175,21 @@ export interface ParentTutorRequestRecord {
   notes?: string;
 }
 
+export interface ReviewRecord {
+  id: string;
+  parent_registration_id: string;
+  parent_name: string;
+  child_first_name?: string;
+  rating: number;
+  review_text: string;
+  city: string;
+  service_type: 'Shadow Teacher' | 'Home Tutor';
+  status: 'pending' | 'approved' | 'rejected';
+  submitted_at: string;
+  approved_at?: string;
+  rejection_note?: string;
+}
+
 export interface AdminUserRecord {
   id: string;
   email: string;
@@ -196,6 +211,7 @@ export interface DatabaseSchema {
   parent_tutor_requests: ParentTutorRequestRecord[];
   admin_users: AdminUserRecord[];
   notifications: any[];
+  reviews: ReviewRecord[];
 }
 
 const DEFAULT_DB: DatabaseSchema = {
@@ -205,6 +221,7 @@ const DEFAULT_DB: DatabaseSchema = {
   tutorRegistrations: [],
   contacts: [],
   notifications: [],
+  reviews: [],
 
   // Seed default admin and mock records
   admin_users: [
