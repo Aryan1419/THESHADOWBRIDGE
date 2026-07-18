@@ -836,14 +836,32 @@ export default function TutorRegister() {
                         </div>
 
                         <div className="border-t border-brand-border/60 pt-4 space-y-3">
-                          <label className="flex items-start gap-2.5 text-xs sm:text-sm text-brand-dark font-semibold cursor-pointer">
+                          <label className="flex items-start gap-2.5 text-xs sm:text-sm text-brand-dark font-semibold cursor-pointer select-none">
                             <input
                               type="checkbox"
                               checked={confirmSubmit}
                               onChange={(e) => setConfirmSubmit(e.target.checked)}
-                              className="accent-primary rounded w-4 h-4 mt-0.5"
+                              className="accent-primary rounded w-4 h-4 mt-0.5 flex-shrink-0"
                             />
                             <span>I confirm that all the information provided by me is true and correct *</span>
+                          </label>
+                          <label className="flex items-start gap-2.5 text-xs sm:text-sm text-brand-dark font-semibold cursor-pointer select-none">
+                            <input
+                              type="checkbox"
+                              required
+                              className="accent-primary rounded w-4 h-4 mt-0.5 flex-shrink-0"
+                            />
+                            <span>
+                              I have read and agree to the{' '}
+                              <Link href="/terms" target="_blank" className="text-accent underline font-bold hover:text-primary transition-colors">
+                                Terms &amp; Conditions
+                              </Link>{' '}
+                              and{' '}
+                              <Link href="/privacy" target="_blank" className="text-accent underline font-bold hover:text-primary transition-colors">
+                                Privacy Policy
+                              </Link>
+                              . *
+                            </span>
                           </label>
                         </div>
                       </motion.div>

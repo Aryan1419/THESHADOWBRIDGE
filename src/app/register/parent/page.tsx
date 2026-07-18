@@ -1103,6 +1103,28 @@ export default function ParentRegister() {
 
                             </div>
 
+                            {/* Terms and Privacy Checkbox */}
+                            <div className="border-t border-brand-border pt-4 pb-2 text-left">
+                              <label className="flex items-start gap-2.5 text-xs text-brand-dark font-bold cursor-pointer select-none">
+                                <input
+                                  type="checkbox"
+                                  required
+                                  className="accent-primary rounded w-4 h-4 mt-0.5 flex-shrink-0"
+                                />
+                                <span>
+                                  I have read and agree to the{' '}
+                                  <Link href="/terms" target="_blank" className="text-accent underline hover:text-primary transition-colors">
+                                    Terms &amp; Conditions
+                                  </Link>{' '}
+                                  and{' '}
+                                  <Link href="/privacy" target="_blank" className="text-accent underline hover:text-primary transition-colors">
+                                    Privacy Policy
+                                  </Link>
+                                  . *
+                                </span>
+                              </label>
+                            </div>
+
                             {/* Billing details */}
                             <div className="border-t-2 border-dashed border-brand-border pt-4 text-left">
                               <h4 className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Initial Assessment consultation</h4>
