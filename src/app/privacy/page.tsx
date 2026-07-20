@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Shield, Mail, Phone } from 'lucide-react';
+import { Shield, Mail } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -205,11 +205,7 @@ export default function PrivacyPolicy() {
               <div className="bg-brand-light border border-brand-border rounded-2xl p-5 space-y-3">
                 <div className="flex items-center gap-3 text-sm text-brand-dark font-medium">
                   <Mail size={16} className="text-accent shrink-0" />
-                  <a href="mailto:aryanbeltharia1419@gmail.com" className="hover:text-accent transition-colors">aryanbeltharia1419@gmail.com</a>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-brand-dark font-medium">
-                  <Phone size={16} className="text-accent shrink-0" />
-                  <a href="tel:+919974390725" className="hover:text-accent transition-colors">+91 99743 90725</a>
+                  <a href="mailto:theshadowbridgesupport@gmail.com" className="hover:text-accent transition-colors">theshadowbridgesupport@gmail.com</a>
                 </div>
               </div>
             </div>

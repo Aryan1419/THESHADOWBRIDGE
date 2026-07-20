@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 
 // Known admin fallback credentials (used when Supabase is unconfigured or unreachable)
 const DEFAULT_ADMINS = [
+  { email: 'theshadowbridgesupport@gmail.com', password: 'adminpassword' },
   { email: 'pratibha@theshadowbridge.com', password: 'adminpassword' },
   { email: 'aryanbeltharia1419@gmail.com', password: 'adminpassword' },
   { email: 'admin@shadowbridge.in', password: 'adminpassword' }

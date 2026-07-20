@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Phone, Mail, MapPin, Clock } from 'lucide-react';
+import { Mail } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -93,13 +93,9 @@ export default function Footer() {
             <h3 className="font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">Contact Us</h3>
             <ul className="space-y-3.5 text-sm text-gray-300">
               <li className="flex gap-2">
-                <Phone size={16} className="text-accent flex-shrink-0 mt-0.5" />
-                <span>+91 99743 90725</span>
-              </li>
-              <li className="flex gap-2">
                 <Mail size={16} className="text-accent flex-shrink-0 mt-0.5" />
-                <a href="mailto:aryanbeltharia1419@gmail.com" className="hover:text-accent transition-colors break-all">
-                  aryanbeltharia1419@gmail.com
+                <a href="mailto:theshadowbridgesupport@gmail.com" className="hover:text-accent transition-colors break-all">
+                  theshadowbridgesupport@gmail.com
                 </a>
               </li>
             </ul>

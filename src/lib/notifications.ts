@@ -69,7 +69,7 @@ export function wrapInEmailTemplate(subject: string, bodyContentHtml: string): s
                   <td align="center" style="background-color: #F3EEF8; padding: 30px; text-align: center; color: #6A5B7C; font-size: 12px; border-top: 1px solid #E6E2EB;">
                     <p style="margin: 0 0 10px 0; font-weight: bold; color: #3B2A6B;">The Shadow Bridge Co.</p>
                     <p style="margin: 0 0 15px 0; line-height: 1.4;">
-                      Phone: +91 99743 90725 &bull; Email: <a href="mailto:aryanbeltharia1419@gmail.com" style="color: #3B2A6B; text-decoration: underline;">aryanbeltharia1419@gmail.com</a>
+                      Email: <a href="mailto:theshadowbridgesupport@gmail.com" style="color: #3B2A6B; text-decoration: underline;">theshadowbridgesupport@gmail.com</a>
                     </p>
                     <div style="margin: 15px 0;">
                       <span style="color: #C89B3C; font-weight: bold;">Delhi NCR &bull; Ahmedabad &bull; Hyderabad &bull; Bangalore</span>

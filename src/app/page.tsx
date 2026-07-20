@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
   Sparkles, CheckCircle2, Award, Users, BookOpen, Compass, 
-  MapPin, Send, HelpCircle, ArrowRight, Star, Heart, GraduationCap, ShieldCheck, Clock, Phone
+  MapPin, Send, HelpCircle, ArrowRight, Star, Heart, GraduationCap, ShieldCheck, Clock
 } from 'lucide-react';
 
 import Navbar from '@/components/Navbar';
@@ -571,23 +571,13 @@ export default function Home() {
               <div className="space-y-8">
                 <div className="flex gap-4">
                   <div className="p-3 bg-brand-light rounded-xl text-primary flex-shrink-0 flex items-center justify-center w-12 h-12">
-                    <Phone size={22} className="text-secondary" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-brand-dark text-base">Phone Support</h4>
-                    <p className="text-brand-muted text-sm font-semibold">+91 99743 90725</p>
-                  </div>
-                </div>
-
-                <div className="flex gap-4">
-                  <div className="p-3 bg-brand-light rounded-xl text-primary flex-shrink-0 flex items-center justify-center w-12 h-12">
                     <Send size={22} className="text-secondary" />
                   </div>
                   <div>
                     <h4 className="font-bold text-brand-dark text-base">Email Support</h4>
                     <p className="text-brand-muted text-sm font-semibold">
-                      <a href="mailto:aryanbeltharia1419@gmail.com" className="hover:text-accent transition-colors">
-                        aryanbeltharia1419@gmail.com
+                      <a href="mailto:theshadowbridgesupport@gmail.com" className="hover:text-accent transition-colors">
+                        theshadowbridgesupport@gmail.com
                       </a>
                     </p>
                   </div>

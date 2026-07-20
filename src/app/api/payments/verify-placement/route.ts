@@ -94,7 +94,7 @@ export async function POST(request: Request) {
         <h3 style="color: #3B2A6B; font-size: 15px; margin: 24px 0 10px 0;">What Happens Next?</h3>
         <p style="margin: 0 0 16px 0;">Our local placement coordinators will call you within 24 hours to align schedules, exchange school approvals documentation, and finalize the educator trial details. Tutors will begin posting daily progression sheets, and lead clinical panels will review monthly development metrics on your dashboard.</p>
 
-        <p style="margin: 24px 0 0 0; font-size: 14px;">If you have any questions, please reach out to our helpdesk at <strong>+91 99743 90725</strong> or email <strong>aryanbeltharia1419@gmail.com</strong>.</p>
+        <p style="margin: 24px 0 0 0; font-size: 14px;">If you have any questions, please reach out to our helpdesk at email <strong>theshadowbridgesupport@gmail.com</strong>.</p>
       `
     }).catch(err => {
       console.error('Failed to send placement fee confirmation email:', err);

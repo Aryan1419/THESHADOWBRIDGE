@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { Phone, Mail, MapPin, Clock, Send, CheckCircle2, Sparkles } from 'lucide-react';
+import { Mail, Clock, Send, CheckCircle2, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 import Navbar from '@/components/Navbar';
@@ -85,33 +85,15 @@ export default function Contact() {
               {/* Central Contacts */}
               <div className="space-y-6">
                 <div className="flex gap-4 p-4 border border-brand-border bg-brand-light/20 rounded-2xl">
-                  <Phone className="text-primary flex-shrink-0 mt-1" size={20} />
-                  <div>
-                    <h4 className="font-bold text-brand-dark">Central Helpline</h4>
-                    <p className="text-brand-muted text-sm font-semibold">+91 99743 90725</p>
-                  </div>
-                </div>
-                <div className="flex gap-4 p-4 border border-brand-border bg-brand-light/20 rounded-2xl">
                   <Mail className="text-primary flex-shrink-0 mt-1" size={20} />
                   <div>
                     <h4 className="font-bold text-brand-dark">Email Support</h4>
                     <p className="text-brand-muted text-sm font-semibold">
-                      <a href="mailto:aryanbeltharia1419@gmail.com" className="hover:text-accent transition-colors">
-                        aryanbeltharia1419@gmail.com
+                      <a href="mailto:theshadowbridgesupport@gmail.com" className="hover:text-accent transition-colors">
+                        theshadowbridgesupport@gmail.com
                       </a>
                     </p>
                   </div>
-                </div>
-              </div>
-
-              {/* Map Mockup */}
-              <div className="border border-brand-border rounded-3xl overflow-hidden h-[240px] bg-brand-light/50 relative flex items-center justify-center text-center p-6 shadow-inner">
-                <div className="space-y-2">
-                  <MapPin className="text-accent mx-auto animate-bounce" size={32} />
-                  <h4 className="font-serif font-bold text-primary">Interactive Map Grid</h4>
-                  <p className="text-xs text-brand-muted max-w-xs">
-                    Our verified shadow teachers work at primary and secondary schools across Delhi NCR, Ahmedabad, Hyderabad & Bangalore.
-                  </p>
                 </div>
               </div>
             </div>
