@@ -11,6 +11,7 @@ import Footer from '@/components/Footer';
 export default function Contact() {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -27,18 +28,23 @@ export default function Contact() {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMsg(null);
     try {
       const res = await fetch('/api/contacts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      if (res.ok) {
+      const data = await res.json();
+      if (res.ok && data.success) {
         setFormSubmitted(true);
         setFormData({ name: '', phone: '', email: '', city: '', message: '' });
+      } else {
+        setErrorMsg(data.error || 'Failed to send query. Please try again.');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      setErrorMsg(err.message || 'An unexpected error occurred while sending your query.');
     } finally {
       setLoading(false);
     }
@@ -120,6 +126,11 @@ export default function Contact() {
                 </motion.div>
               ) : (
                 <form onSubmit={handleFormSubmit} className="space-y-5">
+                  {errorMsg && (
+                    <div className="p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-xs font-bold shadow-sm">
+                      {errorMsg}
+                    </div>
+                  )}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex flex-col gap-1.5">
                       <label htmlFor="name" className="text-xs font-bold text-brand-dark uppercase tracking-wider">Full Name</label>
