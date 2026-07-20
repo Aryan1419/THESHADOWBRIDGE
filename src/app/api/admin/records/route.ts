@@ -48,7 +48,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
     }
 
-    let tutors = null, shadowTeachers = null, parentShadow = null, parentTutor = null, notifications = null;
+    let tutors = null, shadowTeachers = null, parentShadow = null, parentTutor = null, notifications = null, contacts = null;
     const isSupabaseConfigured = Boolean(
       process.env.NEXT_PUBLIC_SUPABASE_URL && 
       !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
@@ -60,12 +60,14 @@ export async function GET(request: Request) {
         const { data: st } = await supabase.from('shadow_teachers').select('*');
         const { data: ps } = await supabase.from('parent_shadow_requests').select('*');
         const { data: pt } = await supabase.from('parent_tutor_requests').select('*');
+        const { data: c } = await supabase.from('contacts').select('*').order('created_at', { ascending: false });
         const { data: n } = await supabase.from('notifications_log').select('*').order('created_at', { ascending: false });
 
         tutors = t;
         shadowTeachers = st;
         parentShadow = ps;
         parentTutor = pt;
+        contacts = c;
         notifications = n;
       } catch (err) {
         console.warn('Supabase records query failed, falling back to local DB:', err);
@@ -78,6 +80,7 @@ export async function GET(request: Request) {
       shadowTeachers = localDb.shadow_teachers || [];
       parentShadow = localDb.parent_shadow_requests || [];
       parentTutor = localDb.parent_tutor_requests || [];
+      contacts = (localDb as any).contacts || [];
       notifications = localDb.notifications || [];
     }
 
@@ -86,6 +89,7 @@ export async function GET(request: Request) {
       shadow_teachers: toCamelCase(shadowTeachers || []),
       parent_shadow_requests: toCamelCase(parentShadow || []),
       parent_tutor_requests: toCamelCase(parentTutor || []),
+      contacts: toCamelCase(contacts || []),
       notifications: toCamelCase(notifications || []),
       admin_users: [] // Excluded for client-side security
     });

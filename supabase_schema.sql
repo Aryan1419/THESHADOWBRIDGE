@@ -327,3 +327,27 @@ ALTER TABLE public.tutors ADD COLUMN IF NOT EXISTS terms_accepted_at TEXT;
 ALTER TABLE public.shadow_teachers ADD COLUMN IF NOT EXISTS terms_accepted_at TEXT;
 ALTER TABLE public.parent_shadow_requests ADD COLUMN IF NOT EXISTS terms_accepted_at TEXT;
 ALTER TABLE public.parent_tutor_requests ADD COLUMN IF NOT EXISTS terms_accepted_at TEXT;
+
+-- 12. Create Contacts Table (Contact Us Form Queries)
+CREATE TABLE IF NOT EXISTS public.contacts (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    phone TEXT NOT NULL,
+    email TEXT NOT NULL,
+    city TEXT NOT NULL,
+    message TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'new',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+);
+
+ALTER TABLE public.contacts ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow service_role full access on contacts" ON public.contacts;
+CREATE POLICY "Allow service_role full access on contacts" ON public.contacts TO service_role USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public insert on contacts" ON public.contacts;
+CREATE POLICY "Allow public insert on contacts" ON public.contacts FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow admin read on contacts" ON public.contacts;
+CREATE POLICY "Allow admin read on contacts" ON public.contacts FOR SELECT USING (true);
+

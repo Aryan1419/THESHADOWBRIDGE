@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 interface SendEmailParams {
   to: string;
   subject: string;
-  type: 'registration' | 'status_change' | 'payment_receipt' | 'match_ready' | 'placement_confirmed';
+  type: 'registration' | 'status_change' | 'payment_receipt' | 'match_ready' | 'placement_confirmed' | 'contact_alert' | 'contact_receipt';
   bodyHtml: string;
 }
 

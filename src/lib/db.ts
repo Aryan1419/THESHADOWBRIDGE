@@ -65,7 +65,9 @@ export interface ContactSubmission {
   email: string;
   city: string;
   message: string;
-  createdAt: string;
+  status?: string;
+  createdAt?: string;
+  created_at?: string;
 }
 
 // ==========================================

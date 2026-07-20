@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, User, GraduationCap, ClipboardList, Settings, LogOut,
   RefreshCw, Search, Filter, ShieldCheck, Mail, Phone, MapPin, Calendar,
   CheckCircle, X, ChevronRight, FileText, AlertCircle, Save, Info, Sparkles, CreditCard,
-  Star, CheckCircle2
+  Star, CheckCircle2, MessageSquare
 } from 'lucide-react';
 
 import { DatabaseSchema, TutorRecord, ShadowTeacherRecord, ParentShadowRequestRecord, ParentTutorRequestRecord } from '@/lib/db';
@@ -28,7 +28,7 @@ export default function AdminDashboard() {
   const [toastLog, setToastLog] = useState<string | null>(null);
 
   // Navigation tab state
-  const [activeTab, setActiveTab] = useState<'overview' | 'tutors' | 'shadows' | 'parents' | 'payments' | 'notifications' | 'settings' | 'reviews'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'tutors' | 'shadows' | 'parents' | 'contacts' | 'payments' | 'notifications' | 'settings' | 'reviews'>('overview');
   
   // Parent Requests sub-tab state
   const [parentSubTab, setParentSubTab] = useState<'shadow' | 'tutor'>('shadow');
@@ -220,13 +220,41 @@ export default function AdminDashboard() {
         // Show toast notification
         if (result.notificationLog) {
           setToastLog(result.notificationLog);
-          setTimeout(() => setToastLog(null), 8000);
+          // Hide toast log after 5 seconds
+          setTimeout(() => setToastLog(null), 5000);
         }
       }
     } catch (error) {
       console.error('Update failed:', error);
     } finally {
       setUpdating(false);
+    }
+  };
+
+  const handleQuickContactStatus = async (contactId: string, newStatus: string) => {
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const res = await fetch('/api/admin/records', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          action: 'update_record',
+          type: 'contacts',
+          id: contactId,
+          status: newStatus
+        })
+      });
+
+      if (res.ok) {
+        setToastLog(`[Contact Updated] Query status updated to "${newStatus}".`);
+        fetchDatabase();
+        setTimeout(() => setToastLog(null), 4000);
+      }
+    } catch (err) {
+      console.error('Failed to update contact status:', err);
     }
   };
 
@@ -517,6 +545,7 @@ export default function AdminDashboard() {
               { key: 'tutors', label: 'Tutors Registry', icon: Users },
               { key: 'shadows', label: 'Shadow Teachers', icon: GraduationCap },
               { key: 'parents', label: 'Parent Requests', icon: ClipboardList },
+              { key: 'contacts', label: 'Contact Messages', icon: MessageSquare },
               { key: 'payments', label: 'Payments Ledger', icon: CreditCard },
               { key: 'reviews', label: 'Parent Reviews', icon: Star },
               { key: 'notifications', label: 'Notifications Log', icon: Mail },
@@ -1432,6 +1461,176 @@ export default function AdminDashboard() {
               <div className="p-4 bg-brand-light/50 border border-brand-border rounded-xl text-xs text-brand-dark flex items-center gap-2">
                 <Info size={16} className="text-secondary shrink-0" />
                 <span className="text-left font-medium">Settings modifications will be enabled in the final deployment phase.</span>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: CONTACT MESSAGES */}
+          {activeTab === 'contacts' && (
+            <div className="space-y-6 animate-fade-in-up">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h2 className="font-serif text-2xl font-black text-primary">Contact Messages &amp; Inquiries</h2>
+                  <p className="text-xs text-brand-muted mt-1 font-medium">
+                    View and manage all inquiry messages submitted via the website contact form.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full">
+                    Total: {db?.contacts?.length || 0}
+                  </span>
+                  <span className="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">
+                    New: {db?.contacts?.filter(c => !c.status || c.status === 'new').length || 0}
+                  </span>
+                </div>
+              </div>
+
+              {/* Filters */}
+              <div className="bg-white p-4 border border-brand-border rounded-2xl shadow-sm flex flex-wrap gap-4 items-center justify-between">
+                <div className="relative flex-1 min-w-[200px]">
+                  <Search className="absolute left-3 top-2.5 text-brand-muted" size={16} />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search by name, email, phone, city or message..."
+                    className="w-full pl-9 pr-3 py-2 border border-brand-border bg-white rounded-xl text-xs text-brand-dark focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                      <Filter size={10} /> City
+                    </span>
+                    <select
+                      value={filterCity}
+                      onChange={(e) => setFilterCity(e.target.value)}
+                      className="p-2 border border-brand-border bg-white rounded-xl text-xs text-brand-dark focus:outline-none"
+                    >
+                      <option value="">All Cities</option>
+                      <option value="Delhi NCR">Delhi NCR</option>
+                      <option value="Ahmedabad">Ahmedabad</option>
+                      <option value="Hyderabad">Hyderabad</option>
+                      <option value="Bangalore">Bangalore</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                      <Filter size={10} /> Status
+                    </span>
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                      className="p-2 border border-brand-border bg-white rounded-xl text-xs text-brand-dark focus:outline-none"
+                    >
+                      <option value="">All Statuses</option>
+                      <option value="new">New</option>
+                      <option value="read">Read</option>
+                      <option value="responded">Responded</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Table */}
+              <div className="bg-white border border-brand-border rounded-2xl shadow-sm overflow-hidden">
+                {loading ? (
+                  <div className="p-12 text-center text-brand-muted">
+                    <RefreshCw className="animate-spin mx-auto mb-2 text-primary" size={24} />
+                    <span>Loading contact messages...</span>
+                  </div>
+                ) : (db?.contacts || []).length === 0 ? (
+                  <div className="p-12 text-center text-brand-muted">No contact messages received yet.</div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-brand-light/60 border-b border-brand-border text-primary font-bold">
+                          <th className="p-4">Submitted Date</th>
+                          <th className="p-4">Sender &amp; Location</th>
+                          <th className="p-4">Contact Info</th>
+                          <th className="p-4">Message</th>
+                          <th className="p-4">Status</th>
+                          <th className="p-4 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-brand-border/60">
+                        {(db?.contacts || [])
+                          .filter((c: any) => {
+                            const q = searchQuery.toLowerCase();
+                            const matchesQuery = !q || (
+                              c.name?.toLowerCase().includes(q) ||
+                              c.email?.toLowerCase().includes(q) ||
+                              c.phone?.includes(q) ||
+                              c.city?.toLowerCase().includes(q) ||
+                              c.message?.toLowerCase().includes(q)
+                            );
+                            const matchesCity = !filterCity || c.city === filterCity;
+                            const matchesStatus = !filterStatus || (c.status || 'new') === filterStatus;
+                            return matchesQuery && matchesCity && matchesStatus;
+                          })
+                          .map((contact: any) => {
+                            const dateStr = contact.created_at || contact.createdAt;
+                            const status = contact.status || 'new';
+
+                            return (
+                              <tr key={contact.id} className="hover:bg-brand-light/20 transition-colors">
+                                <td className="p-4 text-brand-muted font-medium whitespace-nowrap">
+                                  {dateStr ? new Date(dateStr).toLocaleDateString('en-IN', {
+                                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                  }) : 'N/A'}
+                                </td>
+                                <td className="p-4">
+                                  <div className="font-bold text-primary text-sm">{contact.name}</div>
+                                  <div className="text-brand-muted text-[11px] font-semibold">{contact.city}</div>
+                                </td>
+                                <td className="p-4 space-y-0.5">
+                                  <div className="font-semibold text-brand-dark">{contact.phone}</div>
+                                  <div className="text-primary hover:underline">{contact.email}</div>
+                                </td>
+                                <td className="p-4 max-w-xs">
+                                  <p className="text-brand-dark text-xs line-clamp-3 leading-relaxed">
+                                    {contact.message}
+                                  </p>
+                                </td>
+                                <td className="p-4">
+                                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                                    status === 'new' 
+                                      ? 'bg-amber-100 text-amber-800 border border-amber-200' 
+                                      : status === 'responded'
+                                      ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                      : 'bg-blue-100 text-blue-800 border border-blue-200'
+                                  }`}>
+                                    {status}
+                                  </span>
+                                </td>
+                                <td className="p-4 text-right space-x-2 whitespace-nowrap">
+                                  {status !== 'responded' && (
+                                    <button
+                                      onClick={() => handleQuickContactStatus(contact.id, 'responded')}
+                                      className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] transition-all cursor-pointer shadow-sm"
+                                    >
+                                      Mark Responded
+                                    </button>
+                                  )}
+                                  {status === 'new' && (
+                                    <button
+                                      onClick={() => handleQuickContactStatus(contact.id, 'read')}
+                                      className="px-2.5 py-1 bg-primary hover:bg-primary/80 text-white rounded-lg font-bold text-[11px] transition-all cursor-pointer shadow-sm"
+                                    >
+                                      Mark Read
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             </div>
           )}
