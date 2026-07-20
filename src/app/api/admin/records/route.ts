@@ -48,7 +48,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
     }
 
-    let tutors = null, shadowTeachers = null, parentShadow = null, parentTutor = null, notifications = null, contacts = null;
+    let tutors = null, shadowTeachers = null, parentShadow = null, parentTutor = null, notifications = null, contacts = null, reviews = null;
     const isSupabaseConfigured = Boolean(
       process.env.NEXT_PUBLIC_SUPABASE_URL && 
       !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
@@ -62,6 +62,7 @@ export async function GET(request: Request) {
         const { data: pt } = await supabase.from('parent_tutor_requests').select('*');
         const { data: c } = await supabase.from('contacts').select('*').order('created_at', { ascending: false });
         const { data: n } = await supabase.from('notifications_log').select('*').order('created_at', { ascending: false });
+        const { data: rev } = await supabase.from('reviews').select('*').order('submitted_at', { ascending: false });
 
         tutors = t;
         shadowTeachers = st;
@@ -69,6 +70,7 @@ export async function GET(request: Request) {
         parentTutor = pt;
         contacts = c;
         notifications = n;
+        reviews = rev;
       } catch (err) {
         console.warn('Supabase records query failed, falling back to local DB:', err);
       }
@@ -82,6 +84,7 @@ export async function GET(request: Request) {
       parentTutor = localDb.parent_tutor_requests || [];
       contacts = (localDb as any).contacts || [];
       notifications = localDb.notifications || [];
+      reviews = localDb.reviews || [];
     }
 
     return NextResponse.json({
@@ -91,6 +94,7 @@ export async function GET(request: Request) {
       parent_tutor_requests: toCamelCase(parentTutor || []),
       contacts: toCamelCase(contacts || []),
       notifications: toCamelCase(notifications || []),
+      reviews: toCamelCase(reviews || []),
       admin_users: [] // Excluded for client-side security
     });
   } catch (error: any) {

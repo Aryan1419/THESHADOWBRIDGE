@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { supabase } from '@/lib/supabase';
 import { readDb, writeDb } from '@/lib/db';
 
 export async function PUT(request: Request) {
@@ -19,23 +20,13 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Valid action (approve, reject, edit) is required' }, { status: 400 });
     }
 
-    // 2. Fetch databases
-    const db = readDb();
-    const reviewIdx = db.reviews.findIndex(r => r.id === reviewId);
-
-    if (reviewIdx === -1) {
-      return NextResponse.json({ error: 'Review not found' }, { status: 404 });
-    }
-
-    const review = db.reviews[reviewIdx];
-
-    // 3. Process action
+    const updates: any = {};
     if (action === 'approve') {
-      review.status = 'approved';
-      review.approved_at = new Date().toISOString();
+      updates.status = 'approved';
+      updates.approved_at = new Date().toISOString();
     } else if (action === 'reject') {
-      review.status = 'rejected';
-      review.rejection_note = rejectionNote ? rejectionNote.trim() : '';
+      updates.status = 'rejected';
+      updates.rejection_note = rejectionNote ? rejectionNote.trim() : '';
     } else if (action === 'edit') {
       if (!reviewText || reviewText.trim().length < 10) {
         return NextResponse.json({ error: 'Review text must be at least 10 characters long' }, { status: 400 });
@@ -43,16 +34,58 @@ export async function PUT(request: Request) {
       if (reviewText.trim().length > 1000) {
         return NextResponse.json({ error: 'Review text cannot exceed 1000 characters' }, { status: 400 });
       }
-      review.review_text = reviewText.trim();
+      updates.review_text = reviewText.trim();
     }
 
-    // Save changes
-    db.reviews[reviewIdx] = review;
-    writeDb(db);
+    let updatedReview: any = null;
+    const isSupabaseConfigured = Boolean(
+      process.env.NEXT_PUBLIC_SUPABASE_URL && 
+      !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
+    );
 
-    return NextResponse.json({ success: true, message: `Review successfully processed with action: ${action}`, review });
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await supabase
+          .from('reviews')
+          .update(updates)
+          .eq('id', reviewId)
+          .select()
+          .single();
+
+        if (!error && data) {
+          updatedReview = data;
+        }
+      } catch (err) {
+        console.warn('Supabase review update exception:', err);
+      }
+    }
+
+    // Always keep local DB synced / fallback
+    const db = readDb();
+    const reviewIdx = (db.reviews || []).findIndex(r => r.id === reviewId);
+    if (reviewIdx !== -1) {
+      db.reviews[reviewIdx] = {
+        ...db.reviews[reviewIdx],
+        ...updates
+      };
+      writeDb(db);
+      if (!updatedReview) {
+        updatedReview = db.reviews[reviewIdx];
+      }
+    }
+
+    if (!updatedReview) {
+      return NextResponse.json({ error: 'Review not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Review successfully processed with action: ${action}`,
+      review: updatedReview
+    });
   } catch (error: any) {
     console.error('API Admin Reviews PUT error:', error);
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }
+

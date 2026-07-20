@@ -351,3 +351,31 @@ CREATE POLICY "Allow public insert on contacts" ON public.contacts FOR INSERT WI
 DROP POLICY IF EXISTS "Allow admin read on contacts" ON public.contacts;
 CREATE POLICY "Allow admin read on contacts" ON public.contacts FOR SELECT USING (true);
 
+-- 13. Create Reviews Table (Parent Testimonials & Reviews)
+CREATE TABLE IF NOT EXISTS public.reviews (
+    id TEXT PRIMARY KEY,
+    parent_registration_id TEXT NOT NULL,
+    parent_name TEXT NOT NULL,
+    child_first_name TEXT,
+    rating INTEGER NOT NULL,
+    review_text TEXT NOT NULL,
+    city TEXT NOT NULL,
+    service_type TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    submitted_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+    approved_at TIMESTAMP WITH TIME ZONE,
+    rejection_note TEXT
+);
+
+ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow service_role full access on reviews" ON public.reviews;
+CREATE POLICY "Allow service_role full access on reviews" ON public.reviews TO service_role USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow public insert on reviews" ON public.reviews;
+CREATE POLICY "Allow public insert on reviews" ON public.reviews FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow admin read on reviews" ON public.reviews;
+CREATE POLICY "Allow admin read on reviews" ON public.reviews FOR SELECT USING (true);
+
+
