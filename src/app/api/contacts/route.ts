@@ -69,7 +69,7 @@ export async function POST(request: Request) {
 
       if (!fallbackSuccess && !isSaved) {
         return NextResponse.json(
-          { error: dbErrorMsg || 'Failed to save contact query to database' }, 
+          { error: dbErrorMsg ? `Database error: ${dbErrorMsg}` : 'Failed to save contact query. Please verify Supabase URL and Key environment variables in Vercel.' }, 
           { status: 500 }
         );
       }
