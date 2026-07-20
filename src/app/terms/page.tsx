@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { FileText, Mail, Phone } from 'lucide-react';
+import { FileText, Mail } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -24,7 +24,7 @@ export default function TermsConditions() {
           <p className="text-brand-muted text-sm sm:text-base font-medium max-w-xl mx-auto">
             <strong>The Shadow Bridge by Pratibha Mishra</strong>
             <br />
-            Last Updated: July 18, 2026
+            Last Updated: July 20, 2026
           </p>
         </div>
       </section>
@@ -83,13 +83,61 @@ export default function TermsConditions() {
             {/* Section 5 */}
             <div className="space-y-3">
               <h2 className="font-serif text-lg font-bold text-primary">5. Fees &amp; Payments</h2>
-              <ul className="list-disc pl-6 space-y-2.5 text-brand-muted text-sm leading-relaxed">
-                <li><strong>Consultation Fee:</strong> ₹99, payable at the time of registration to book an initial consultation. This fee is <strong>non-refundable</strong>, as it covers the cost of our team&apos;s time in reviewing your requirements and conducting the consultation.</li>
-                <li><strong>Placement Fee:</strong> ₹5,000 (Shadow Teacher) or ₹3,000 (Home Tutor), payable only once a match has been confirmed and accepted by the family. This is a one-time fee.</li>
-                <li>All payments are processed through our third-party payment gateway (Razorpay). We do not store your card, UPI, or banking details on our servers.</li>
-                <li><strong>Refund Policy:</strong> If a placement fails within the first 14 days due to reasons attributable to the Tutor/Shadow Teacher (e.g. unprofessional conduct, unreliability, or unsuitability that could not reasonably have been anticipated at the time of matching), the parent may choose between: (a) a free replacement match at no additional placement fee, subject to availability of a suitable alternative, or (b) a partial refund of the placement fee, the amount of which will be communicated at the time of the request based on the stage of the placement. Requests must be raised with our team within 14 days of the placement starting. Beyond this period, or where the failure is not attributable to the Tutor/Shadow Teacher, the placement fee is non-refundable.</li>
-                <li>Fees paid directly to a Tutor or Shadow Teacher for ongoing sessions (beyond our one-time placement fee) are a private arrangement between the family and the professional, and are not collected or managed by us.</li>
-              </ul>
+              
+              <div className="space-y-4 text-brand-muted text-sm leading-relaxed">
+                <div>
+                  <h3 className="font-bold text-brand-dark mb-1">Consultation Fee</h3>
+                  <p>The ₹99 consultation fee is <strong>non-refundable</strong> and covers a phone consultation with our team. Booking a consultation does <strong>not</strong> guarantee that a placement will be found or offered.</p>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-brand-dark mb-1">Shadow Teacher Placement Fee</h3>
+                  <ul className="list-disc pl-6 space-y-1.5">
+                    <li>A one-time Shadow Teacher Placement Fee of <strong>₹5,000</strong> is payable <strong>before interviews begin</strong>, once a family decides to proceed with our Shadow Teacher matching service.</li>
+                    <li>This fee covers our sourcing, screening, shortlisting, coordination, and interview arrangement efforts on the family&apos;s behalf — it is a service fee for the work involved in finding suitable candidates, not a guarantee of a specific outcome.</li>
+                    <li><strong>Full refund (₹5,000):</strong> If, despite genuine efforts, we are unable to identify any suitable Shadow Teacher option in the parent&apos;s preferred area, the full placement fee will be refunded.</li>
+                    <li><strong>Partial refund (₹2,500 — 50%):</strong> If one or more suitable candidates are shared with the parent but the parent chooses not to proceed, due to personal preference or an expectation mismatch, 50% of the placement fee (₹2,500) will be refunded. The remaining ₹2,500 covers the recruitment and screening effort already undertaken.</li>
+                    <li><strong>Non-refundable after successful placement:</strong> Once a placement is successfully made and accepted by the parent, the placement fee is non-refundable.</li>
+                    <li>Parents may interview shortlisted candidates and request a mutually convenient meeting before confirming a placement.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-brand-dark mb-1">Home Tutor Placement Fee</h3>
+                  <p>A one-time Home Tutor Placement Fee of ₹3,000 applies for Home Tutor matches, payable once a match has been confirmed and accepted by the family.</p>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-brand-dark mb-1">Notice Period</h3>
+                  <p>During the validity of a placement (i.e., while the one-time placement fee of ₹5,000 or ₹3,000 remains in effect for the current academic year), if either the Shadow Teacher wishes to leave, or the parent wishes to discontinue the Shadow Teacher, at least <strong>one month&apos;s advance notice</strong> must be given to the other party. This is to allow both sides reasonable time to make necessary arrangements.</p>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-brand-dark mb-1">Post-Placement Support &amp; Replacement (Shadow Teacher)</h3>
+                  <ul className="list-disc pl-6 space-y-1.5">
+                    <li>We will conduct initial follow-ups with the family after a Shadow Teacher placement is made.</li>
+                    <li><strong>Placement validity is one academic year.</strong> A fresh placement fee applies only if the family requests a new Shadow Teacher after that period. Continuing with the same Shadow Teacher for a subsequent year does not require another placement fee.</li>
+                    <li><strong>Replacement may be attempted, at our discretion,</strong> if the placed Shadow Teacher leaves during the validity period for genuine, unavoidable reasons.</li>
+                    <li><strong>No replacement will be offered</strong> if the Shadow Teacher leaves due to disrespect, misconduct, unsafe working conditions, unreasonable demands, or non-payment by the parent — as these circumstances are not attributable to us or to the Shadow Teacher&apos;s availability.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-brand-dark mb-1">Salary &amp; Payment Structure (Shadow Teacher Placements)</h3>
+                  <ul className="list-disc pl-6 space-y-1.5">
+                    <li>For the <strong>first month</strong> following a confirmed placement, the Shadow Teacher&apos;s salary is split as follows: 50% is retained by The Shadow Bridge as a placement commission, and 50% is paid to the Shadow Teacher.</li>
+                    <li><strong>From the second month onwards</strong>, the full salary is paid directly to the Shadow Teacher by the family, and is a private arrangement between the family and the Shadow Teacher, not collected or managed by us.</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-brand-dark mb-1">General</h3>
+                  <ul className="list-disc pl-6 space-y-1.5">
+                    <li>All payments are processed through our third-party payment gateway (Razorpay). We do not store your card, UPI, or banking details on our servers.</li>
+                    <li>We reserve the right to refuse or discontinue our services, at any stage, where false information, misconduct, or safety concerns arise — from either a parent or a Tutor/Shadow Teacher.</li>
+                  </ul>
+                </div>
+              </div>
             </div>
 
             {/* Section 6 */}
@@ -140,8 +188,8 @@ export default function TermsConditions() {
                 <li>We are not liable for any indirect, incidental, or consequential damages arising from use of our Platform or services.</li>
                 <li>Our total liability, if any, arising from your use of the Platform shall not exceed the total fees paid by you to us in the preceding three months.</li>
               </ul>
-              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 leading-relaxed">
-                <strong>Note:</strong> This clause typically needs to be reviewed and calibrated by a lawyer to be enforceable in your jurisdiction — please treat this as a placeholder reflecting common practice, not a guarantee of legal protection.
+              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 leading-relaxed italic">
+                (This clause typically needs to be reviewed and calibrated by a lawyer to be enforceable in your jurisdiction — please treat this as a placeholder reflecting common practice, not a guarantee of legal protection.)
               </div>
             </div>
 
@@ -168,7 +216,8 @@ export default function TermsConditions() {
               <h2 className="font-serif text-lg font-bold text-primary">12. Cancellations</h2>
               <ul className="list-disc pl-6 space-y-2 text-brand-muted text-sm leading-relaxed">
                 <li><strong>Consultation:</strong> Once a consultation is booked and the ₹99 fee is paid, it cannot be cancelled or refunded, in line with the non-refundable nature of this fee (see Section 5). If you are unable to attend your scheduled consultation, please contact us as soon as possible and we will do our best to reschedule at our discretion.</li>
-                <li><strong>Placement:</strong> Either the family or the Tutor/Shadow Teacher may end an ongoing placement at any time by providing reasonable notice to us and to the other party. The placement fee, once paid, is non-refundable except as described under the Refund Policy in Section 5 above.</li>
+                <li><strong>Before Placement:</strong> If a parent decides not to proceed after candidates have been shared but before a placement is confirmed, the partial refund terms in Section 5 (50% / ₹2,500) apply.</li>
+                <li><strong>After Placement:</strong> Either the family or the Shadow Teacher may end an ongoing placement, subject to the one-month advance notice requirement described in Section 5 (Notice Period). Once a placement is successfully made, the placement fee is non-refundable, and replacement eligibility (not a refund) is governed by the Post-Placement Support &amp; Replacement terms in Section 5.</li>
               </ul>
             </div>
 
@@ -184,7 +233,7 @@ export default function TermsConditions() {
             <div className="space-y-3">
               <h2 className="font-serif text-lg font-bold text-primary">14. Governing Law &amp; Dispute Resolution</h2>
               <p className="text-brand-muted text-sm leading-relaxed">
-                These Terms are governed by the laws of India. Any disputes arising from these Terms or use of the Platform shall be subject to the exclusive jurisdiction of the courts of competent jurisdiction in India.
+                These Terms are governed by the laws of India. Any disputes arising from these Terms or use of the Platform shall be subject to the exclusive jurisdiction of the courts.
               </p>
             </div>
 
@@ -197,22 +246,9 @@ export default function TermsConditions() {
               <div className="bg-brand-light border border-brand-border rounded-2xl p-5 space-y-3">
                 <div className="flex items-center gap-3 text-sm text-brand-dark font-medium">
                   <Mail size={16} className="text-accent shrink-0" />
-                  <a href="mailto:aryanbeltharia1419@gmail.com" className="hover:text-accent transition-colors">aryanbeltharia1419@gmail.com</a>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-brand-dark font-medium">
-                  <Phone size={16} className="text-accent shrink-0" />
-                  <a href="tel:+919974390725" className="hover:text-accent transition-colors">+91 99743 90725</a>
+                  <a href="mailto:theshadowbridgesupport@gmail.com" className="hover:text-accent transition-colors">theshadowbridgesupport@gmail.com</a>
                 </div>
               </div>
-            </div>
-
-            <hr className="border-brand-border" />
-
-            {/* Disclaimer */}
-            <div className="p-5 bg-brand-light border border-brand-border rounded-2xl space-y-2">
-              <p className="text-xs text-brand-muted leading-relaxed italic">
-                This document is a starting template and has not been reviewed by a licensed lawyer. Given that this Platform handles payments and sensitive information about minors, we strongly recommend having these Terms reviewed by a qualified lawyer familiar with Indian consumer protection, data protection (DPDP Act), and child safety regulations before publishing them live.
-              </p>
             </div>
 
           </article>
@@ -223,3 +259,4 @@ export default function TermsConditions() {
     </div>
   );
 }
+

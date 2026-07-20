@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { sendEmail, STATUS_EXPLANATIONS } from '@/lib/notifications';
+import { readDb } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -47,11 +48,38 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
     }
 
-    const { data: tutors } = await supabase.from('tutors').select('*');
-    const { data: shadowTeachers } = await supabase.from('shadow_teachers').select('*');
-    const { data: parentShadow } = await supabase.from('parent_shadow_requests').select('*');
-    const { data: parentTutor } = await supabase.from('parent_tutor_requests').select('*');
-    const { data: notifications } = await supabase.from('notifications_log').select('*').order('created_at', { ascending: false });
+    let tutors = null, shadowTeachers = null, parentShadow = null, parentTutor = null, notifications = null;
+    const isSupabaseConfigured = Boolean(
+      process.env.NEXT_PUBLIC_SUPABASE_URL && 
+      !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
+    );
+
+    if (isSupabaseConfigured) {
+      try {
+        const { data: t } = await supabase.from('tutors').select('*');
+        const { data: st } = await supabase.from('shadow_teachers').select('*');
+        const { data: ps } = await supabase.from('parent_shadow_requests').select('*');
+        const { data: pt } = await supabase.from('parent_tutor_requests').select('*');
+        const { data: n } = await supabase.from('notifications_log').select('*').order('created_at', { ascending: false });
+
+        tutors = t;
+        shadowTeachers = st;
+        parentShadow = ps;
+        parentTutor = pt;
+        notifications = n;
+      } catch (err) {
+        console.warn('Supabase records query failed, falling back to local DB:', err);
+      }
+    }
+
+    if (!tutors) {
+      const localDb = readDb();
+      tutors = localDb.tutors || [];
+      shadowTeachers = localDb.shadow_teachers || [];
+      parentShadow = localDb.parent_shadow_requests || [];
+      parentTutor = localDb.parent_tutor_requests || [];
+      notifications = localDb.notifications || [];
+    }
 
     return NextResponse.json({
       tutors: toCamelCase(tutors || []),
