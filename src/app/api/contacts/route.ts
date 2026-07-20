@@ -24,6 +24,8 @@ export async function POST(request: Request) {
     };
 
     let isSaved = false;
+    let dbErrorMsg: string | null = null;
+
     const isSupabaseConfigured = Boolean(
       process.env.NEXT_PUBLIC_SUPABASE_URL && 
       !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
@@ -46,14 +48,16 @@ export async function POST(request: Request) {
           isSaved = true;
         } else {
           console.error('Supabase contact insert error:', error);
+          dbErrorMsg = error.message;
         }
-      } catch (dbErr) {
+      } catch (dbErr: any) {
         console.error('Supabase contact insert exception:', dbErr);
+        dbErrorMsg = dbErr.message || 'Supabase exception';
       }
     }
 
     if (!isSaved) {
-      addRecord('contacts', {
+      const fallbackSuccess = addRecord('contacts', {
         id: newContact.id,
         name: newContact.name,
         phone: newContact.phone,
@@ -62,6 +66,13 @@ export async function POST(request: Request) {
         message: newContact.message,
         createdAt: newContact.created_at
       } as any);
+
+      if (!fallbackSuccess && !isSaved) {
+        return NextResponse.json(
+          { error: dbErrorMsg || 'Failed to save contact query to database' }, 
+          { status: 500 }
+        );
+      }
     }
 
     // 1. Send admin notification email to theshadowbridgesupport@gmail.com

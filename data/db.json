@@ -173,17 +173,7 @@
       "createdAt": "2026-07-04T10:59:45.351Z"
     }
   ],
-  "contacts": [
-    {
-      "id": "contact-mock-1",
-      "name": "Meera Rao",
-      "phone": "9888877777",
-      "email": "meera.rao@example.com",
-      "city": "Hyderabad",
-      "message": "Do you provide services in Secunderabad area?",
-      "createdAt": "2026-07-04T13:59:45.351Z"
-    }
-  ],
+  "contacts": [],
   "admin_users": [
     {
       "id": "admin-1",
