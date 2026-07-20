@@ -128,15 +128,22 @@ CREATE TABLE IF NOT EXISTS public.admin_users (
     role TEXT NOT NULL DEFAULT 'admin'
 );
 
--- 6. Seed Initial Admin Account
+-- 6. Seed Initial Admin Accounts (PBKDF2 Hashed Passwords for "ShadowBridge2026!Admin")
 INSERT INTO public.admin_users (id, email, password, role)
-VALUES (
+VALUES 
+(
     'admin-1', 
     'pratibha@theshadowbridge.com', 
-    'adminpassword', 
+    '5eac110af3de36a20c7ba019b939b507:87b28409ebbe38584aec6551b584b80873eeaa0a0312cec75e4d01e70e462bca555eeb5e52cc9c1de210e16b8e7bdbbb016807aa809ed5b544e3567fd992bc41', 
+    'admin'
+),
+(
+    'admin-2', 
+    'theshadowbridgesupport@gmail.com', 
+    '5eac110af3de36a20c7ba019b939b507:87b28409ebbe38584aec6551b584b80873eeaa0a0312cec75e4d01e70e462bca555eeb5e52cc9c1de210e16b8e7bdbbb016807aa809ed5b544e3567fd992bc41', 
     'admin'
 )
-ON CONFLICT (email) DO NOTHING;
+ON CONFLICT (email) DO UPDATE SET password = EXCLUDED.password;
 
 -- 7. Seed Demo Records for testing
 INSERT INTO public.tutors (id, name, dob, gender, phone, email, city, address, qualification, specialization, experience, subjects, grades, expected_salary, mode, registration_id, status, created_at, notes)

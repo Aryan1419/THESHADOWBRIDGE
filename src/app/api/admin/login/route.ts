@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { verifyPassword } from '@/lib/auth';
 
-// Known admin fallback credentials (used when Supabase is unconfigured or unreachable)
+// Known admin fallback accounts with PBKDF2 hashed password ("ShadowBridge2026!Admin")
+const DEFAULT_ADMIN_HASH = '5eac110af3de36a20c7ba019b939b507:87b28409ebbe38584aec6551b584b80873eeaa0a0312cec75e4d01e70e462bca555eeb5e52cc9c1de210e16b8e7bdbbb016807aa809ed5b544e3567fd992bc41';
+
 const DEFAULT_ADMINS = [
-  { email: 'theshadowbridgesupport@gmail.com', password: 'adminpassword' },
-  { email: 'pratibha@theshadowbridge.com', password: 'adminpassword' },
-  { email: 'aryanbeltharia1419@gmail.com', password: 'adminpassword' },
-  { email: 'admin@shadowbridge.in', password: 'adminpassword' }
+  { email: 'theshadowbridgesupport@gmail.com', passwordHash: DEFAULT_ADMIN_HASH },
+  { email: 'pratibha@theshadowbridge.com', passwordHash: DEFAULT_ADMIN_HASH },
+  { email: 'aryanbeltharia1419@gmail.com', passwordHash: DEFAULT_ADMIN_HASH },
+  { email: 'admin@shadowbridge.in', passwordHash: DEFAULT_ADMIN_HASH }
 ];
 
 export async function POST(request: Request) {
@@ -42,25 +45,23 @@ export async function POST(request: Request) {
       }
     }
 
-    // 2. Validate password against Supabase record or default admin list
+    // 2. Validate password against Supabase record using cryptographic PBKDF2 hash check
     let isAuthenticated = false;
 
-    if (adminRecord) {
-      if (adminRecord.password === password || password === 'admin123' || password === 'adminpassword') {
+    if (adminRecord && adminRecord.password) {
+      if (verifyPassword(password, adminRecord.password)) {
         isAuthenticated = true;
       }
-    } else {
-      // Check fallback admin list
+    }
+
+    if (!isAuthenticated) {
+      // Check fallback admin list with hash verification
       const fallback = DEFAULT_ADMINS.find(
         (a) => a.email.toLowerCase() === cleanEmail
       );
 
-      if (fallback && (fallback.password === password || password === 'admin123' || password === 'adminpassword')) {
+      if (fallback && verifyPassword(password, fallback.passwordHash)) {
         isAuthenticated = true;
-      } else if (password === 'admin123' || password === 'adminpassword') {
-        if (cleanEmail.includes('admin') || cleanEmail.includes('pratibha') || cleanEmail.includes('aryan')) {
-          isAuthenticated = true;
-        }
       }
     }
 
@@ -78,4 +79,5 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }
+
 
