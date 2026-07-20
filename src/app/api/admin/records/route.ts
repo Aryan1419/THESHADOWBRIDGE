@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { sendEmail, STATUS_EXPLANATIONS } from '@/lib/notifications';
 import { readDb } from '@/lib/db';
 
@@ -49,10 +49,6 @@ export async function GET(request: Request) {
     }
 
     let tutors = null, shadowTeachers = null, parentShadow = null, parentTutor = null, notifications = null, contacts = null, reviews = null;
-    const isSupabaseConfigured = Boolean(
-      process.env.NEXT_PUBLIC_SUPABASE_URL && 
-      !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
-    );
 
     if (isSupabaseConfigured) {
       try {

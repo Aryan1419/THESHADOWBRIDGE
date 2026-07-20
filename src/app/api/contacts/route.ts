@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { addRecord } from '@/lib/db';
 import { sendEmail } from '@/lib/notifications';
 
@@ -25,11 +25,6 @@ export async function POST(request: Request) {
 
     let isSaved = false;
     let dbErrorMsg: string | null = null;
-
-    const isSupabaseConfigured = Boolean(
-      process.env.NEXT_PUBLIC_SUPABASE_URL && 
-      !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
-    );
 
     if (isSupabaseConfigured) {
       try {
