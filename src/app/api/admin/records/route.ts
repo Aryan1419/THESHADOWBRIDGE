@@ -76,16 +76,14 @@ export async function GET(request: Request) {
       }
     }
 
-    if (!tutors) {
-      const localDb = readDb();
-      tutors = localDb.tutors || [];
-      shadowTeachers = localDb.shadow_teachers || [];
-      parentShadow = localDb.parent_shadow_requests || [];
-      parentTutor = localDb.parent_tutor_requests || [];
-      contacts = (localDb as any).contacts || [];
-      notifications = localDb.notifications || [];
-      reviews = localDb.reviews || [];
-    }
+    const localDb = readDb();
+    if (!tutors) tutors = localDb.tutors || [];
+    if (!shadowTeachers) shadowTeachers = localDb.shadow_teachers || [];
+    if (!parentShadow) parentShadow = localDb.parent_shadow_requests || [];
+    if (!parentTutor) parentTutor = localDb.parent_tutor_requests || [];
+    if (!contacts) contacts = (localDb as any).contacts || [];
+    if (!notifications) notifications = localDb.notifications || [];
+    if (!reviews) reviews = localDb.reviews || [];
 
     return NextResponse.json({
       tutors: toCamelCase(tutors || []),
