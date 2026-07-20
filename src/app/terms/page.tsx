@@ -24,7 +24,7 @@ export default function TermsConditions() {
           <p className="text-brand-muted text-sm sm:text-base font-medium max-w-xl mx-auto">
             <strong>The Shadow Bridge by Pratibha Mishra</strong>
             <br />
-            Last Updated: July 20, 2026
+            Last Updated: 21/07/2026
           </p>
         </div>
       </section>
@@ -81,62 +81,124 @@ export default function TermsConditions() {
             </div>
 
             {/* Section 5 */}
-            <div className="space-y-3">
+            <div className="space-y-6">
               <h2 className="font-serif text-lg font-bold text-primary">5. Fees &amp; Payments</h2>
               
-              <div className="space-y-4 text-brand-muted text-sm leading-relaxed">
-                <div>
-                  <h3 className="font-bold text-brand-dark mb-1">Consultation Fee</h3>
-                  <p>The ₹99 consultation fee is <strong>non-refundable</strong> and covers a phone consultation with our team. Booking a consultation does <strong>not</strong> guarantee that a placement will be found or offered.</p>
+              {/* Consultation Fee */}
+              <div className="space-y-2">
+                <h3 className="font-bold text-primary text-base">Consultation Fee</h3>
+                <ul className="list-disc pl-6 space-y-1.5 text-brand-muted text-sm leading-relaxed">
+                  <li>A consultation fee of ₹99 is mandatory before initiating either the Shadow Teacher or Home Tutor placement process. The consultation is conducted via phone call or video call to understand the child/student&apos;s requirements, learning goals, preferred timings, location, and other relevant details.</li>
+                  <li>This fee is <strong>non-refundable</strong>. Booking a consultation does <strong>not</strong> guarantee that a placement will be found or offered.</li>
+                </ul>
+              </div>
+
+              <hr className="border-brand-border/60" />
+
+              {/* 5A. Shadow Teacher Placement */}
+              <div className="space-y-4">
+                <h3 className="font-serif font-bold text-primary text-base">5A. Shadow Teacher Placement</h3>
+                
+                <div className="space-y-2 text-brand-muted text-sm leading-relaxed">
+                  <h4 className="font-bold text-brand-dark">One-Time Placement Fee</h4>
+                  <ul className="list-disc pl-6 space-y-1.5">
+                    <li>A one-time, non-recurring Shadow Teacher Placement Fee of <strong>₹5,000</strong> is payable <strong>before interviews begin</strong>, once a family decides to proceed with our Shadow Teacher matching service.</li>
+                    <li>This fee covers our sourcing, screening, shortlisting, coordination, and interview arrangement efforts — it is a service fee for the work involved, not a guarantee of a specific outcome.</li>
+                  </ul>
                 </div>
 
-                <div>
-                  <h3 className="font-bold text-brand-dark mb-1">Shadow Teacher Placement Fee</h3>
+                <div className="space-y-2 text-brand-muted text-sm leading-relaxed">
+                  <h4 className="font-bold text-brand-dark">Refund Policy — Before Placement</h4>
                   <ul className="list-disc pl-6 space-y-1.5">
-                    <li>A one-time Shadow Teacher Placement Fee of <strong>₹5,000</strong> is payable <strong>before interviews begin</strong>, once a family decides to proceed with our Shadow Teacher matching service.</li>
-                    <li>This fee covers our sourcing, screening, shortlisting, coordination, and interview arrangement efforts on the family&apos;s behalf — it is a service fee for the work involved in finding suitable candidates, not a guarantee of a specific outcome.</li>
-                    <li><strong>Full refund (₹5,000):</strong> If, despite genuine efforts, we are unable to identify any suitable Shadow Teacher option in the parent&apos;s preferred area, the full placement fee will be refunded.</li>
-                    <li><strong>Partial refund (₹2,500 — 50%):</strong> If one or more suitable candidates are shared with the parent but the parent chooses not to proceed, due to personal preference or an expectation mismatch, 50% of the placement fee (₹2,500) will be refunded. The remaining ₹2,500 covers the recruitment and screening effort already undertaken.</li>
-                    <li><strong>Non-refundable after successful placement:</strong> Once a placement is successfully made and accepted by the parent, the placement fee is non-refundable.</li>
+                    <li><strong>Full refund (₹5,000):</strong> If, despite genuine efforts, we are unable to identify even a single suitable Shadow Teacher option in the parent&apos;s preferred area or due to other operational constraints, the full placement fee will be refunded.</li>
+                    <li><strong>Partial refund (₹2,500 — 50%):</strong> If one or more suitable candidates are shared with the parent but the parent chooses not to proceed with any of them for personal reasons or an expectation mismatch, 50% of the placement fee (₹2,500) will be refunded. The remaining ₹2,500 covers the recruitment and screening effort already undertaken.</li>
+                    <li><strong>Non-refundable after placement:</strong> Once the parent confirms a Shadow Teacher and the Shadow Teacher has commenced, the placement fee is non-refundable.</li>
                     <li>Parents may interview shortlisted candidates and request a mutually convenient meeting before confirming a placement.</li>
                   </ul>
                 </div>
 
-                <div>
-                  <h3 className="font-bold text-brand-dark mb-1">Home Tutor Placement Fee</h3>
-                  <p>A one-time Home Tutor Placement Fee of ₹3,000 applies for Home Tutor matches, payable once a match has been confirmed and accepted by the family.</p>
-                </div>
-
-                <div>
-                  <h3 className="font-bold text-brand-dark mb-1">Notice Period</h3>
-                  <p>During the validity of a placement (i.e., while the one-time placement fee of ₹5,000 or ₹3,000 remains in effect for the current academic year), if either the Shadow Teacher wishes to leave, or the parent wishes to discontinue the Shadow Teacher, at least <strong>one month&apos;s advance notice</strong> must be given to the other party. This is to allow both sides reasonable time to make necessary arrangements.</p>
-                </div>
-
-                <div>
-                  <h3 className="font-bold text-brand-dark mb-1">Post-Placement Support &amp; Replacement (Shadow Teacher)</h3>
+                <div className="space-y-2 text-brand-muted text-sm leading-relaxed">
+                  <h4 className="font-bold text-brand-dark">First Month Commission</h4>
                   <ul className="list-disc pl-6 space-y-1.5">
+                    <li>The first month&apos;s agreed salary is shared as follows: 50% is payable to The Shadow Bridge as placement and recruitment commission, and 50% is paid to the Shadow Teacher.</li>
+                    <li>From the second month onwards, the full salary is paid directly to the Shadow Teacher by the family, unless otherwise agreed. This is a private arrangement between the family and the Shadow Teacher, not collected or managed by us.</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2 text-brand-muted text-sm leading-relaxed">
+                  <h4 className="font-bold text-brand-dark">Placement Validity, Notice &amp; Replacement</h4>
+                  <ul className="list-disc pl-6 space-y-1.5">
+                    <li>Placement validity is one academic year. A fresh placement fee applies only if the family requests a new Shadow Teacher after that period. Continuing with the same Shadow Teacher for a subsequent year does not require another placement fee.</li>
+                    <li><strong>Notice Period:</strong> During the validity of the placement, if either the Shadow Teacher wishes to leave, or the parent wishes to discontinue the Shadow Teacher, at least <strong>one month&apos;s advance notice</strong> must be given to the other party, to allow reasonable time for necessary arrangements.</li>
+                    <li>Replacement may be attempted, at our discretion, if the placed Shadow Teacher leaves during the validity period for genuine, unavoidable reasons.</li>
+                    <li>No replacement will be offered if the Shadow Teacher leaves due to disrespect, misconduct, unsafe working conditions, unreasonable demands, or non-payment by the parent.</li>
                     <li>We will conduct initial follow-ups with the family after a Shadow Teacher placement is made.</li>
-                    <li><strong>Placement validity is one academic year.</strong> A fresh placement fee applies only if the family requests a new Shadow Teacher after that period. Continuing with the same Shadow Teacher for a subsequent year does not require another placement fee.</li>
-                    <li><strong>Replacement may be attempted, at our discretion,</strong> if the placed Shadow Teacher leaves during the validity period for genuine, unavoidable reasons.</li>
-                    <li><strong>No replacement will be offered</strong> if the Shadow Teacher leaves due to disrespect, misconduct, unsafe working conditions, unreasonable demands, or non-payment by the parent — as these circumstances are not attributable to us or to the Shadow Teacher&apos;s availability.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <hr className="border-brand-border/60" />
+
+              {/* 5B. Home Tutor Placement */}
+              <div className="space-y-4">
+                <h3 className="font-serif font-bold text-primary text-base">5B. Home Tutor Placement</h3>
+                
+                <div className="space-y-2 text-brand-muted text-sm leading-relaxed">
+                  <h4 className="font-bold text-brand-dark">One-Time Placement Fee</h4>
+                  <p>After the consultation, if the parent decides to proceed with our tutor placement service, a one-time, non-recurring placement fee of <strong>₹3,000</strong> is payable before the tutor search process begins.</p>
+                </div>
+
+                <div className="space-y-2 text-brand-muted text-sm leading-relaxed">
+                  <h4 className="font-bold text-brand-dark">Refund Policy — Before Placement</h4>
+                  <ul className="list-disc pl-6 space-y-1.5">
+                    <li><strong>Full refund (₹3,000):</strong> If The Shadow Bridge is unable to provide even a single suitable tutor option due to non-availability in the requested location or other operational constraints, the entire placement fee will be refunded.</li>
+                    <li><strong>Partial refund (₹1,500 — 50%):</strong> If one or more suitable tutor options are shared with the parent, but the parent chooses not to proceed with any of the available options for personal reasons, 50% of the placement fee (₹1,500) will be refunded.</li>
+                    <li><strong>Non-refundable after placement:</strong> Once the parent confirms a tutor and the tutor has commenced classes, the placement fee becomes non-refundable.</li>
                   </ul>
                 </div>
 
-                <div>
-                  <h3 className="font-bold text-brand-dark mb-1">Salary &amp; Payment Structure (Shadow Teacher Placements)</h3>
+                <div className="space-y-2 text-brand-muted text-sm leading-relaxed">
+                  <h4 className="font-bold text-brand-dark">First Month Commission</h4>
                   <ul className="list-disc pl-6 space-y-1.5">
-                    <li>For the <strong>first month</strong> following a confirmed placement, the Shadow Teacher&apos;s salary is split as follows: 50% is retained by The Shadow Bridge as a placement commission, and 50% is paid to the Shadow Teacher.</li>
-                    <li><strong>From the second month onwards</strong>, the full salary is paid directly to the Shadow Teacher by the family, and is a private arrangement between the family and the Shadow Teacher, not collected or managed by us.</li>
+                    <li>The first month&apos;s tuition fee is shared as follows: 50% of the first month&apos;s agreed tuition fee is payable to The Shadow Bridge as placement and recruitment commission, and the remaining 50% is paid to the tutor.</li>
+                    <li>From the second month onwards, parents may pay the tutor directly, unless otherwise agreed.</li>
                   </ul>
                 </div>
 
-                <div>
-                  <h3 className="font-bold text-brand-dark mb-1">General</h3>
+                <div className="space-y-2 text-brand-muted text-sm leading-relaxed">
+                  <h4 className="font-bold text-brand-dark">Tutor Replacement Policy</h4>
                   <ul className="list-disc pl-6 space-y-1.5">
-                    <li>All payments are processed through our third-party payment gateway (Razorpay). We do not store your card, UPI, or banking details on our servers.</li>
-                    <li>We reserve the right to refuse or discontinue our services, at any stage, where false information, misconduct, or safety concerns arise — from either a parent or a Tutor/Shadow Teacher.</li>
+                    <li>If the assigned tutor discontinues the tuition due to personal reasons, the original placement fee remains valid for <strong>3 months</strong> from the tutor&apos;s joining date.</li>
+                    <li>During this validity period, The Shadow Bridge will make reasonable efforts to arrange a suitable replacement tutor at no additional placement fee.</li>
+                    <li>If a suitable replacement is not available in the requested location within the validity period, the parent will be eligible for a <strong>40% refund of the original placement fee (₹1,200)</strong>.</li>
+                    <li>If a replacement tutor is successfully arranged within the validity period, no refund will be applicable.</li>
                   </ul>
                 </div>
+
+                <div className="space-y-2 text-brand-muted text-sm leading-relaxed">
+                  <h4 className="font-bold text-brand-dark">Notice Period</h4>
+                  <p>During the validity of the placement, if either the tutor wishes to leave, or the parent wishes to discontinue the tutor, at least <strong>one month&apos;s advance notice</strong> must be given to the other party, to allow reasonable time for necessary arrangements.</p>
+                </div>
+
+                <div className="space-y-2 text-brand-muted text-sm leading-relaxed">
+                  <h4 className="font-bold text-brand-dark">General Conditions</h4>
+                  <ul className="list-disc pl-6 space-y-1.5">
+                    <li>Tutor selection is based on the student&apos;s requirements, tutor availability, location, qualifications, and schedule compatibility.</li>
+                    <li>While every effort is made to provide the most suitable tutor, The Shadow Bridge cannot guarantee a specific tutor, gender, qualification, or availability.</li>
+                    <li>Any changes to tuition timings, subject requirements, or location after confirmation may require a fresh tutor search and may be subject to additional charges.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <hr className="border-brand-border/60" />
+
+              {/* General (All Services) */}
+              <div className="space-y-2 text-brand-muted text-sm leading-relaxed">
+                <h3 className="font-bold text-primary text-base">General (All Services)</h3>
+                <ul className="list-disc pl-6 space-y-1.5">
+                  <li>All payments are processed through our third-party payment gateway (Razorpay). We do not store your card, UPI, or banking details on our servers.</li>
+                  <li>We reserve the right to refuse or discontinue our services, at any stage, where false information, misconduct, or safety concerns arise — from either a parent or a Tutor/Shadow Teacher.</li>
+                </ul>
               </div>
             </div>
 
@@ -188,9 +250,6 @@ export default function TermsConditions() {
                 <li>We are not liable for any indirect, incidental, or consequential damages arising from use of our Platform or services.</li>
                 <li>Our total liability, if any, arising from your use of the Platform shall not exceed the total fees paid by you to us in the preceding three months.</li>
               </ul>
-              <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 leading-relaxed italic">
-                (This clause typically needs to be reviewed and calibrated by a lawyer to be enforceable in your jurisdiction — please treat this as a placeholder reflecting common practice, not a guarantee of legal protection.)
-              </div>
             </div>
 
             {/* Section 10 */}
@@ -215,9 +274,9 @@ export default function TermsConditions() {
             <div className="space-y-3">
               <h2 className="font-serif text-lg font-bold text-primary">12. Cancellations</h2>
               <ul className="list-disc pl-6 space-y-2 text-brand-muted text-sm leading-relaxed">
-                <li><strong>Consultation:</strong> Once a consultation is booked and the ₹99 fee is paid, it cannot be cancelled or refunded, in line with the non-refundable nature of this fee (see Section 5). If you are unable to attend your scheduled consultation, please contact us as soon as possible and we will do our best to reschedule at our discretion.</li>
-                <li><strong>Before Placement:</strong> If a parent decides not to proceed after candidates have been shared but before a placement is confirmed, the partial refund terms in Section 5 (50% / ₹2,500) apply.</li>
-                <li><strong>After Placement:</strong> Either the family or the Shadow Teacher may end an ongoing placement, subject to the one-month advance notice requirement described in Section 5 (Notice Period). Once a placement is successfully made, the placement fee is non-refundable, and replacement eligibility (not a refund) is governed by the Post-Placement Support &amp; Replacement terms in Section 5.</li>
+                <li><strong>Consultation:</strong> Once a consultation is booked and the ₹99 fee is paid, it cannot be cancelled or refunded. If you are unable to attend your scheduled consultation, please contact us as soon as possible and we will do our best to reschedule at our discretion.</li>
+                <li><strong>Before Placement:</strong> If a parent decides not to proceed after candidates have been shared but before a placement is confirmed, the partial refund terms in Section 5A (Shadow Teacher) or Section 5B (Home Tutor) apply, as relevant.</li>
+                <li><strong>After Placement:</strong> Either the family or the Shadow Teacher/Tutor may end an ongoing placement, subject to the one-month advance notice requirement described in Section 5A/5B. Once a placement is successfully made, the placement fee is non-refundable, and replacement eligibility (not a refund) is governed by the Replacement Policy terms in the relevant section.</li>
               </ul>
             </div>
 
