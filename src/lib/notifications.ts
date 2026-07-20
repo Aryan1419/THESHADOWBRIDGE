@@ -147,6 +147,17 @@ export async function sendEmail({ to, subject, type, bodyHtml }: SendEmailParams
       const errorMsg = resData.message || `Resend API returned status ${response.status}`;
       console.error(`[Email Fail Log] To: ${to}, Type: ${type}. Error: ${errorMsg}`);
 
+      // Resend Sandbox Fallback: If recipient is blocked by unverified domain policy, retry to verified owner email
+      if (resData.message?.includes('testing emails to your own email address') && to !== 'aryanbeltharia1419@gmail.com') {
+        console.log(`[Resend Sandbox Retry] Re-routing alert to verified owner email (aryanbeltharia1419@gmail.com) for testing.`);
+        return sendEmail({
+          to: 'aryanbeltharia1419@gmail.com',
+          subject: `[Sandbox Alert for ${to}] ` + subject,
+          type,
+          bodyHtml
+        });
+      }
+
       await supabase.from('notifications_log').insert({
         recipient: to,
         type,
