@@ -192,6 +192,11 @@ function DashboardContent() {
             setPaymentLoading(false);
           }
         },
+        modal: {
+          ondismiss: function () {
+            setPaymentLoading(false);
+          }
+        },
         prefill: {
           name: dbRecord.parentName || '',
           email: dbRecord.email || '',
