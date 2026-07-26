@@ -124,10 +124,6 @@ export default function AdminLogin() {
               </button>
             </div>
           </form>
-
-          <p className="text-[10px] text-brand-muted text-center pt-2">
-            *Default seed credential: **pratibha@theshadowbridge.com** / **adminpassword**
-          </p>
         </div>
 
       </div>

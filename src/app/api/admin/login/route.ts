@@ -2,12 +2,12 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { verifyPassword } from '@/lib/auth';
 
-// Known admin fallback accounts with PBKDF2 hashed password ("ShadowBridge2026!Admin")
-const DEFAULT_ADMIN_HASH = '5eac110af3de36a20c7ba019b939b507:87b28409ebbe38584aec6551b584b80873eeaa0a0312cec75e4d01e70e462bca555eeb5e52cc9c1de210e16b8e7bdbbb016807aa809ed5b544e3567fd992bc41';
+// Known admin fallback accounts with bcrypt hashed password ("ShadowBridge@2026")
+const DEFAULT_ADMIN_HASH = '$2b$10$3fvCPp4VHgvDMwFQ15lEDemPQXxSM8wINxfjH.5F9D/OYG.LTyP8G';
 
 const DEFAULT_ADMINS = [
-  { email: 'theshadowbridgesupport@gmail.com', passwordHash: DEFAULT_ADMIN_HASH },
   { email: 'pratibha@theshadowbridge.com', passwordHash: DEFAULT_ADMIN_HASH },
+  { email: 'theshadowbridgesupport@gmail.com', passwordHash: DEFAULT_ADMIN_HASH },
   { email: 'aryanbeltharia1419@gmail.com', passwordHash: DEFAULT_ADMIN_HASH },
   { email: 'admin@shadowbridge.in', passwordHash: DEFAULT_ADMIN_HASH }
 ];
