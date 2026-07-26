@@ -243,10 +243,13 @@ export default function Home() {
       </section>
 
       {/* Trust Bar */}
-      <section className="py-6 bg-brand-light border-y border-brand-border text-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-6 sm:py-8 bg-brand-light border-y border-brand-border text-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-2">
           <p className="text-primary font-serif text-lg sm:text-xl font-bold flex flex-wrap items-center justify-center gap-2">
-            <span className="text-secondary font-black">✓</span> Trusted by Parents in Delhi NCR, Ahmedabad, Hyderabad & Bangalore
+            <span className="text-secondary font-black">✓</span> Trusted by Parents in Delhi NCR, Ahmedabad, Hyderabad &amp; Bangalore
+          </p>
+          <p className="text-primary font-serif text-base sm:text-lg font-bold flex flex-wrap items-center justify-center gap-2">
+            <span className="text-secondary font-black">✓</span> 1000+ Consultations &amp; Placements
           </p>
         </div>
       </section>
