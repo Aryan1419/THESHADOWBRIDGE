@@ -204,61 +204,82 @@ export default function ShadowTeacherRegister() {
     let experienceCertUrl = '';
     let profilePhotoUrl = '';
 
+    let aadharCardName = '';
+    let qualificationCertName = '';
+    let experienceCertName = '';
+    let profilePhotoName = '';
+
     try {
       // Upload attached files to Supabase Storage
       if (isSupabaseConfigured) {
-        const timestamp = Date.now();
-        
+        const sanitizeFileName = (origName: string) => origName.replace(/[^a-zA-Z0-9._-]/g, '_');
+
         if (formData.aadharCard) {
-          const fileExt = formData.aadharCard.name.split('.').pop();
-          const filePath = `shadow-teachers/${timestamp}_aadhar.${fileExt}`;
+          const cleanName = sanitizeFileName(formData.aadharCard.name);
+          aadharCardName = cleanName;
+          const filePath = `shadow-teachers/${cleanName}`;
+          
           const { error: uploadErr } = await supabase.storage
             .from('documents')
             .upload(filePath, formData.aadharCard, { upsert: true });
-          if (uploadErr) console.warn('Aadhar upload warning:', uploadErr);
-          else {
-            const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
-            aadharCardUrl = pubData.publicUrl;
+
+          if (uploadErr) {
+            console.error('Aadhar upload error:', uploadErr);
+            throw new Error(`Failed to upload ID Proof (${formData.aadharCard.name}): ${uploadErr.message}`);
           }
+          const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
+          aadharCardUrl = pubData.publicUrl;
         }
 
         if (formData.qualificationCert) {
-          const fileExt = formData.qualificationCert.name.split('.').pop();
-          const filePath = `shadow-teachers/${timestamp}_qual.${fileExt}`;
+          const cleanName = sanitizeFileName(formData.qualificationCert.name);
+          qualificationCertName = cleanName;
+          const filePath = `shadow-teachers/${cleanName}`;
+
           const { error: uploadErr } = await supabase.storage
             .from('documents')
             .upload(filePath, formData.qualificationCert, { upsert: true });
-          if (uploadErr) console.warn('Qualification cert upload warning:', uploadErr);
-          else {
-            const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
-            qualificationCertUrl = pubData.publicUrl;
+
+          if (uploadErr) {
+            console.error('Qualification cert upload error:', uploadErr);
+            throw new Error(`Failed to upload Qualification Certificate (${formData.qualificationCert.name}): ${uploadErr.message}`);
           }
+          const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
+          qualificationCertUrl = pubData.publicUrl;
         }
 
         if (formData.experienceCert) {
-          const fileExt = formData.experienceCert.name.split('.').pop();
-          const filePath = `shadow-teachers/${timestamp}_exp.${fileExt}`;
+          const cleanName = sanitizeFileName(formData.experienceCert.name);
+          experienceCertName = cleanName;
+          const filePath = `shadow-teachers/${cleanName}`;
+
           const { error: uploadErr } = await supabase.storage
             .from('documents')
             .upload(filePath, formData.experienceCert, { upsert: true });
-          if (uploadErr) console.warn('Experience cert upload warning:', uploadErr);
-          else {
-            const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
-            experienceCertUrl = pubData.publicUrl;
+
+          if (uploadErr) {
+            console.error('Experience cert upload error:', uploadErr);
+            throw new Error(`Failed to upload Experience Certificate (${formData.experienceCert.name}): ${uploadErr.message}`);
           }
+          const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
+          experienceCertUrl = pubData.publicUrl;
         }
 
         if (formData.profilePhoto) {
-          const fileExt = formData.profilePhoto.name.split('.').pop();
-          const filePath = `shadow-teachers/${timestamp}_photo.${fileExt}`;
+          const cleanName = sanitizeFileName(formData.profilePhoto.name);
+          profilePhotoName = cleanName;
+          const filePath = `shadow-teachers/${cleanName}`;
+
           const { error: uploadErr } = await supabase.storage
             .from('documents')
             .upload(filePath, formData.profilePhoto, { upsert: true });
-          if (uploadErr) console.warn('Profile photo upload warning:', uploadErr);
-          else {
-            const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
-            profilePhotoUrl = pubData.publicUrl;
+
+          if (uploadErr) {
+            console.error('Profile photo upload error:', uploadErr);
+            throw new Error(`Failed to upload Profile Photo (${formData.profilePhoto.name}): ${uploadErr.message}`);
           }
+          const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
+          profilePhotoUrl = pubData.publicUrl;
         }
       }
 
@@ -282,10 +303,10 @@ export default function ShadowTeacherRegister() {
         openToTravel: formData.openToTravel,
         preferredWorkType: formData.preferredWorkType,
         
-        aadharCardName: formData.aadharCard?.name || '',
-        qualificationCertName: formData.qualificationCert?.name || '',
-        experienceCertName: formData.experienceCert?.name || '',
-        profilePhotoName: formData.profilePhoto?.name || '',
+        aadharCardName: aadharCardName || formData.aadharCard?.name || '',
+        qualificationCertName: qualificationCertName || formData.qualificationCert?.name || '',
+        experienceCertName: experienceCertName || formData.experienceCert?.name || '',
+        profilePhotoName: profilePhotoName || formData.profilePhoto?.name || '',
 
         aadharCardUrl,
         qualificationCertUrl,
