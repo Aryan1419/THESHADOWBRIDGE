@@ -99,7 +99,7 @@ export async function POST(request: Request) {
     sendEmail({
       to: 'theshadowbridgesupport@gmail.com',
       subject: `New Consultation Booked: ${name} (₹99 Paid)`,
-      type: 'contact_notification',
+      type: 'contact_alert',
       bodyHtml: `
         <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Consultation Booking Received</h2>
         <p style="margin: 0 0 16px 0;">A new parent has successfully booked a ₹99 consultation session through The Shadow Bridge website.</p>
