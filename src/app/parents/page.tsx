@@ -195,9 +195,17 @@ export default function ForParents() {
                     </div>
                   </div>
                 </div>
-                <div className="mt-6 flex items-start gap-2 text-xs text-gray-300 border-t border-white/10 pt-4">
-                  <Info size={14} className="text-accent flex-shrink-0 mt-0.5" />
-                  <p>All monthly salaries are paid directly to the teacher/tutor as per hours. The placement fee is only charged once matched and confirmed.</p>
+                <div className="mt-6 flex flex-col gap-2.5 text-xs text-gray-300 border-t border-white/10 pt-4">
+                  <div className="flex items-start gap-2">
+                    <Info size={14} className="text-accent flex-shrink-0 mt-0.5" />
+                    <p>*Placement fees are separate from the initial ₹99 consultation and are only applicable after we gain a clear understanding of your child's needs, learning goals, and your expectations.</p>
+                  </div>
+                  <p className="text-[11px] text-gray-300 pl-5 font-medium">
+                    For full details on fees, refunds, and payment terms, please see our{' '}
+                    <Link href="/terms" className="text-accent font-bold underline hover:text-white transition-colors">
+                      Terms &amp; Conditions
+                    </Link>.
+                  </p>
                 </div>
               </div>
 

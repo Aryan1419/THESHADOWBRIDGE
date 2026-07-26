@@ -1224,8 +1224,8 @@ export default function ParentRegister() {
                       <span className="text-lg font-black text-accent">₹3,000</span>
                     </div>
                   </div>
-                  <p className="text-[10px] text-gray-300 mt-5 leading-relaxed">
-                    *Placement fees are separate from the initial ₹99 consultation and are **only** charged after a final match and successful trials.
+                  <p className="text-[10px] sm:text-xs text-gray-300 mt-5 leading-relaxed">
+                    *Placement fees are separate from the initial ₹99 consultation and are only applicable after we gain a clear understanding of your child's needs, learning goals, and your expectations.
                   </p>
                 </div>
 
@@ -1233,10 +1233,17 @@ export default function ParentRegister() {
                 <div className="bg-white border border-brand-border p-6 sm:p-8 rounded-3xl shadow-sm space-y-4 text-left">
                   <h3 className="font-serif text-base font-bold text-primary border-b border-brand-border pb-2">Important Notes</h3>
                   <ul className="space-y-3 text-xs text-brand-muted list-disc pl-4 leading-relaxed font-semibold">
-                    <li>The initial ₹99 consultation fee is required to schedule the detailed child assessment and is non-refundable.</li>
-                    <li>Placement fees apply only after final candidate trials and parent confirmation.</li>
-                    <li>Salaries are negotiated hourly or monthly and paid directly to the tutor/shadow.</li>
+                    <li>The ₹99 consultation fee is mandatory and non-refundable.</li>
+                    <li>The placement fee is payable after the consultation to initiate the candidate search.</li>
+                    <li>We shortlist suitable candidates based on your child's individual requirements.</li>
+                    <li>Salary is mutually decided and paid directly to the selected Shadow Teacher/Home Tutor.</li>
                   </ul>
+                  <p className="text-[11px] text-brand-muted pt-3 border-t border-brand-border/60 leading-relaxed font-medium">
+                    For full details on fees, refunds, and payment terms, please see our{' '}
+                    <Link href="/terms" className="text-primary font-bold underline hover:text-secondary transition-colors">
+                      Terms &amp; Conditions
+                    </Link>.
+                  </p>
                 </div>
               </div>
 
