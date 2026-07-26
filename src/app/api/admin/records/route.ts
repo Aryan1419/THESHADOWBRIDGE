@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { sendEmail, STATUS_EXPLANATIONS } from '@/lib/notifications';
-import { readDb } from '@/lib/db';
+import { readDb, writeDb } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -108,8 +108,51 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { action, type, id, status, notes, suggestedMatchId } = body;
 
-    if (!action) {
-      return NextResponse.json({ error: 'Missing action parameter' }, { status: 400 });
+    if (action === 'delete_record') {
+      if (!type || !id) {
+        return NextResponse.json({ error: 'Missing required parameters for deletion (type, id)' }, { status: 400 });
+      }
+
+      const allowedTypes = [
+        'contacts',
+        'tutors',
+        'shadow_teachers',
+        'parent_shadow_requests',
+        'parent_tutor_requests',
+        'reviews'
+      ];
+
+      if (!allowedTypes.includes(type)) {
+        return NextResponse.json({ error: 'Invalid record type for deletion' }, { status: 400 });
+      }
+
+      if (isSupabaseConfigured) {
+        const { error: delErr } = await supabase
+          .from(type)
+          .delete()
+          .eq('id', id);
+
+        if (delErr) {
+          console.error(`Supabase deletion error on table ${type} (ID: ${id}):`, delErr);
+          return NextResponse.json({ error: `Database deletion failed: ${delErr.message}` }, { status: 500 });
+        }
+      }
+
+      // Also clean up local db file if present
+      try {
+        const localDb = readDb();
+        if ((localDb as any)[type]) {
+          (localDb as any)[type] = (localDb as any)[type].filter((item: any) => item.id !== id);
+          writeDb(localDb);
+        }
+      } catch (fileErr) {
+        console.warn('Local file DB sync on delete skipped:', fileErr);
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `Record ${id} successfully deleted from ${type}`
+      });
     }
 
     if (action === 'reply_contact') {

@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, User, GraduationCap, ClipboardList, Settings, LogOut,
   RefreshCw, Search, Filter, ShieldCheck, Mail, Phone, MapPin, Calendar,
   CheckCircle, X, ChevronRight, FileText, AlertCircle, Save, Info, Sparkles, CreditCard,
-  Star, CheckCircle2, MessageSquare, Reply, Send, MailCheck, MessageSquareQuote, CornerDownRight
+  Star, CheckCircle2, MessageSquare, Reply, Send, MailCheck, MessageSquareQuote, CornerDownRight, Trash2, AlertTriangle
 } from 'lucide-react';
 
 import { DatabaseSchema, TutorRecord, ShadowTeacherRecord, ParentShadowRequestRecord, ParentTutorRequestRecord } from '@/lib/db';
@@ -235,6 +235,46 @@ export default function AdminDashboard() {
   const [replyModalContact, setReplyModalContact] = useState<any | null>(null);
   const [replyMessageText, setReplyMessageText] = useState('');
   const [sendingReply, setSendingReply] = useState(false);
+
+  // Delete Record States
+  const [deleteTarget, setDeleteTarget] = useState<{ type: string; id: string; name: string; label?: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteRecord = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const res = await fetch('/api/admin/records', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          action: 'delete_record',
+          type: deleteTarget.type,
+          id: deleteTarget.id
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setToastLog(`[Record Deleted] ${deleteTarget.name} has been permanently deleted.`);
+        setDeleteTarget(null);
+        fetchDatabase();
+        if (deleteTarget.type === 'reviews') fetchReviews();
+        setTimeout(() => setToastLog(null), 4000);
+      } else {
+        alert(data.error || 'Failed to delete record.');
+      }
+    } catch (err: any) {
+      console.error('Failed to delete record:', err);
+      alert(err.message || 'Network error deleting record.');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const handleQuickContactStatus = async (contactId: string, newStatus: string) => {
     try {
@@ -1687,6 +1727,14 @@ export default function AdminDashboard() {
                                       Mark Read
                                     </button>
                                   )}
+                                  <button
+                                    onClick={() => setDeleteTarget({ type: 'contacts', id: contact.id, name: contact.name, label: 'Contact Message' })}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1.5 border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl font-bold text-xs transition-all cursor-pointer shadow-sm"
+                                    title="Permanently Delete Message"
+                                  >
+                                    <Trash2 size={13} />
+                                    <span>Delete</span>
+                                  </button>
                                 </td>
                               </tr>
                             );
@@ -2287,6 +2335,53 @@ export default function AdminDashboard() {
                   <>
                     <Send size={14} />
                     <span>Send Reply &amp; Mark Responded</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* DELETE CONFIRMATION MODAL */}
+      {deleteTarget && (
+        <div className="fixed inset-0 bg-primary/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full border border-brand-border shadow-2xl text-left animate-fade-in-up space-y-5">
+            <div className="flex items-center gap-3 text-rose-600">
+              <div className="p-3 bg-rose-100 rounded-2xl">
+                <AlertTriangle size={24} className="text-rose-600" />
+              </div>
+              <div>
+                <h3 className="font-serif text-xl font-bold text-primary">Confirm Permanent Deletion</h3>
+                <p className="text-xs text-brand-muted font-medium">{deleteTarget.label || 'Record'} ID: {deleteTarget.id}</p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl text-xs text-rose-900 leading-relaxed font-medium">
+              Are you sure you want to permanently delete this {deleteTarget.label?.toLowerCase() || 'entry'} from <strong className="font-bold">{deleteTarget.name}</strong>? This action cannot be undone and will permanently erase the record from Supabase.
+            </div>
+
+            <div className="flex justify-end items-center gap-3 pt-2">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+                className="px-4 py-2.5 border border-brand-border rounded-xl text-xs font-bold text-brand-muted hover:bg-brand-light cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteRecord}
+                disabled={deleting}
+                className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-xs shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {deleting ? (
+                  <>
+                    <RefreshCw size={14} className="animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 size={14} />
+                    <span>Delete Permanently</span>
                   </>
                 )}
               </button>
