@@ -12,6 +12,7 @@ import {
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { CITY_LOCALITIES } from '@/lib/constants';
 
 export default function ShadowTeacherRegister() {
   const [step, setStep] = useState(1);
@@ -23,6 +24,8 @@ export default function ShadowTeacherRegister() {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
   const [tagInput, setTagInput] = useState('');
+  const [selectedLocality, setSelectedLocality] = useState('');
+  const [customLocalityInput, setCustomLocalityInput] = useState('');
 
   const [formData, setFormData] = useState({
     // Step 1: Personal Details
@@ -479,33 +482,72 @@ export default function ShadowTeacherRegister() {
                           </select>
                         </div>
 
-                        {/* Preferred Work Locations - Multi-tag input */}
+                        {/* Preferred Work Locations - Dependent Dropdown */}
                         <div className="flex flex-col gap-1.5 pt-1">
-                          <label className="text-xs font-bold text-brand-dark uppercase tracking-wider">Preferred Work Locations *</label>
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              value={tagInput}
-                              onChange={(e) => setTagInput(e.target.value)}
-                              onKeyDown={handleAddTag}
-                              placeholder="Type and press Enter (e.g. Gachibowli)"
-                              className="p-3 flex-grow border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
-                            />
-                            <button
-                              type="button"
-                              onClick={handleAddTag}
-                              className="p-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/95 flex items-center justify-center cursor-pointer"
-                            >
-                              <Plus size={18} />
-                            </button>
-                          </div>
+                          <label className="text-xs font-bold text-brand-dark uppercase tracking-wider">Preferred Work Location(s) *</label>
+                          
+                          <select
+                            disabled={!formData.city}
+                            value={selectedLocality}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              setSelectedLocality(val);
+                              if (val !== 'Other (please specify)' && val !== '') {
+                                if (!formData.preferredLocations.includes(val)) {
+                                  setFormData(prev => ({
+                                    ...prev,
+                                    preferredLocations: [...prev.preferredLocations, val]
+                                  }));
+                                }
+                                setSelectedLocality('');
+                              }
+                            }}
+                            className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark disabled:bg-gray-100 disabled:text-gray-400"
+                          >
+                            <option value="">{formData.city ? `Select Preferred Area in ${formData.city}` : 'Select City first'}</option>
+                            {formData.city && CITY_LOCALITIES[formData.city]?.map((loc) => (
+                              <option key={loc} value={loc}>{loc}</option>
+                            ))}
+                          </select>
+
+                          {/* Free-text input revealed when "Other (please specify)" is selected */}
+                          {selectedLocality === 'Other (please specify)' && (
+                            <div className="flex gap-2 mt-2 animate-fade-in-up">
+                              <input
+                                type="text"
+                                value={customLocalityInput}
+                                onChange={(e) => setCustomLocalityInput(e.target.value)}
+                                placeholder="Specify your exact area / locality"
+                                className="p-3 flex-grow border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (customLocalityInput.trim()) {
+                                    const val = customLocalityInput.trim();
+                                    if (!formData.preferredLocations.includes(val)) {
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        preferredLocations: [...prev.preferredLocations, val]
+                                      }));
+                                    }
+                                    setCustomLocalityInput('');
+                                    setSelectedLocality('');
+                                  }
+                                }}
+                                className="px-4 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/95 text-xs flex items-center justify-center cursor-pointer"
+                              >
+                                Add Area
+                              </button>
+                            </div>
+                          )}
 
                           {formData.preferredLocations.length > 0 ? (
-                            <div className="flex flex-wrap gap-2 mt-2 p-2 border border-brand-border bg-brand-light/20 rounded-xl">
+                            <div className="flex flex-wrap gap-2 mt-2 p-2.5 border border-brand-border bg-brand-light/30 rounded-xl">
                               {formData.preferredLocations.map((tag) => (
                                 <span 
                                   key={tag} 
-                                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-white border border-brand-border text-primary text-xs font-bold rounded-full shadow-sm"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-brand-border text-primary text-xs font-bold rounded-full shadow-sm"
                                 >
                                   {tag}
                                   <button
@@ -513,13 +555,13 @@ export default function ShadowTeacherRegister() {
                                     onClick={() => handleRemoveTag(tag)}
                                     className="text-brand-muted hover:text-rose-600 focus:outline-none cursor-pointer"
                                   >
-                                    <X size={12} />
+                                    <X size={13} />
                                   </button>
                                 </span>
                               ))}
                             </div>
                           ) : (
-                            <p className="text-[10px] text-brand-muted italic mt-1">*At least one preferred area is required (e.g. Kondapur, Satellite).</p>
+                            <p className="text-[11px] text-brand-muted italic mt-1">*Select one or more localities from the city dropdown above.</p>
                           )}
                         </div>
 

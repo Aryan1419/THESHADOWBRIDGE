@@ -12,6 +12,7 @@ import {
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { CITY_LOCALITIES } from '@/lib/constants';
 
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
@@ -33,6 +34,8 @@ export default function ParentRegister() {
   const [showErrors, setShowErrors] = useState(false);
   const [confirmSubmit, setConfirmSubmit] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const [customSchoolLoc, setCustomSchoolLoc] = useState('');
+  const [customHomeLoc, setCustomHomeLoc] = useState('');
 
   const [formData, setFormData] = useState({
     // Step 1: Parent Info
@@ -883,29 +886,81 @@ export default function ParentRegister() {
                             {path === 'shadow' && (
                               <div className="flex flex-col gap-1.5 animate-fade-in-up">
                                 <label className="text-xs font-bold text-brand-dark uppercase tracking-wider">Child's School Location *</label>
-                                <input
-                                  type="text"
-                                  name="schoolLocation"
+                                <select
+                                  disabled={!formData.city}
                                   required
-                                  value={formData.schoolLocation}
-                                  onChange={handleInputChange}
-                                  placeholder="e.g. Satellite, Ahmedabad (School Area)"
-                                  className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
-                                />
+                                  value={CITY_LOCALITIES[formData.city]?.includes(formData.schoolLocation) ? formData.schoolLocation : (formData.schoolLocation ? 'Other (please specify)' : '')}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    if (val === 'Other (please specify)') {
+                                      setFormData(prev => ({ ...prev, schoolLocation: customSchoolLoc || 'Other' }));
+                                    } else {
+                                      setFormData(prev => ({ ...prev, schoolLocation: val }));
+                                    }
+                                  }}
+                                  className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark disabled:bg-gray-100 disabled:text-gray-400"
+                                >
+                                  <option value="">{formData.city ? `Select School Area in ${formData.city}` : 'Select City first'}</option>
+                                  {formData.city && CITY_LOCALITIES[formData.city]?.map((loc) => (
+                                    <option key={loc} value={loc}>{loc}</option>
+                                  ))}
+                                </select>
+
+                                {(!CITY_LOCALITIES[formData.city]?.includes(formData.schoolLocation) && formData.schoolLocation) || (formData.schoolLocation === 'Other') ? (
+                                  <div className="mt-1 animate-fade-in-up">
+                                    <input
+                                      type="text"
+                                      required
+                                      value={formData.schoolLocation === 'Other' ? customSchoolLoc : formData.schoolLocation}
+                                      onChange={(e) => {
+                                        setCustomSchoolLoc(e.target.value);
+                                        setFormData(prev => ({ ...prev, schoolLocation: e.target.value }));
+                                      }}
+                                      placeholder="Specify your child's exact school area / locality"
+                                      className="p-3 w-full border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
+                                    />
+                                  </div>
+                                ) : null}
                               </div>
                             )}
 
                             <div className="flex flex-col gap-1.5">
                               <label className="text-xs font-bold text-brand-dark uppercase tracking-wider">Child's Home Location *</label>
-                              <input
-                                type="text"
-                                name="homeLocation"
+                              <select
+                                disabled={!formData.city}
                                 required
-                                value={formData.homeLocation}
-                                onChange={handleInputChange}
-                                placeholder="e.g. Green Heights, Sector 120 (Home Locality)"
-                                className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
-                              />
+                                value={CITY_LOCALITIES[formData.city]?.includes(formData.homeLocation) ? formData.homeLocation : (formData.homeLocation ? 'Other (please specify)' : '')}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  if (val === 'Other (please specify)') {
+                                    setFormData(prev => ({ ...prev, homeLocation: customHomeLoc || 'Other' }));
+                                  } else {
+                                    setFormData(prev => ({ ...prev, homeLocation: val }));
+                                  }
+                                }}
+                                className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark disabled:bg-gray-100 disabled:text-gray-400"
+                              >
+                                <option value="">{formData.city ? `Select Home Area in ${formData.city}` : 'Select City first'}</option>
+                                {formData.city && CITY_LOCALITIES[formData.city]?.map((loc) => (
+                                  <option key={loc} value={loc}>{loc}</option>
+                                ))}
+                              </select>
+
+                              {(!CITY_LOCALITIES[formData.city]?.includes(formData.homeLocation) && formData.homeLocation) || (formData.homeLocation === 'Other') ? (
+                                <div className="mt-1 animate-fade-in-up">
+                                  <input
+                                    type="text"
+                                    required
+                                    value={formData.homeLocation === 'Other' ? customHomeLoc : formData.homeLocation}
+                                    onChange={(e) => {
+                                      setCustomHomeLoc(e.target.value);
+                                      setFormData(prev => ({ ...prev, homeLocation: e.target.value }));
+                                    }}
+                                    placeholder="Specify your child's exact home area / locality"
+                                    className="p-3 w-full border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
+                                  />
+                                </div>
+                              ) : null}
                             </div>
                           </motion.div>
                         )}
