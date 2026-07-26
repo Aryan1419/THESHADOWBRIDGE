@@ -60,6 +60,16 @@ export default function ShadowTeacherRegister() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    if (name === 'city') {
+      setSelectedLocality('');
+      setCustomLocalityInput('');
+      setFormData(prev => ({
+        ...prev,
+        city: value,
+        preferredLocations: []
+      }));
+      return;
+    }
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 

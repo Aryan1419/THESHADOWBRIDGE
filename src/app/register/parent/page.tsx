@@ -74,6 +74,17 @@ export default function ParentRegister() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
+    if (name === 'city') {
+      setCustomSchoolLoc('');
+      setCustomHomeLoc('');
+      setFormData(prev => ({
+        ...prev,
+        city: value,
+        schoolLocation: '',
+        homeLocation: ''
+      }));
+      return;
+    }
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
