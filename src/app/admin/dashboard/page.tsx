@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, User, GraduationCap, ClipboardList, Settings, LogOut,
   RefreshCw, Search, Filter, ShieldCheck, Mail, Phone, MapPin, Calendar,
   CheckCircle, X, ChevronRight, FileText, AlertCircle, Save, Info, Sparkles, CreditCard,
-  Star, CheckCircle2, MessageSquare, Reply, Send, MailCheck, MessageSquareQuote, CornerDownRight, Trash2, AlertTriangle
+  Star, CheckCircle2, MessageSquare, Reply, Send, MailCheck, MessageSquareQuote, CornerDownRight, Trash2, AlertTriangle, ExternalLink
 } from 'lucide-react';
 
 import { DatabaseSchema, TutorRecord, ShadowTeacherRecord, ParentShadowRequestRecord, ParentTutorRequestRecord } from '@/lib/db';
@@ -2035,46 +2035,85 @@ export default function AdminDashboard() {
                       Uploaded Documents Vetting
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                      {selectedRecord.data.aadharCardName && (
-                        <a 
-                          href="#" 
-                          onClick={(e) => { e.preventDefault(); alert(`Vetting document: ${selectedRecord.data.aadharCardName}`); }}
-                          className="flex items-center gap-2 p-2 bg-white border border-brand-border rounded-xl hover:bg-brand-light transition-all"
-                        >
-                          <FileText size={14} className="text-primary" />
-                          <span className="font-bold truncate">Aadhar: {selectedRecord.data.aadharCardName}</span>
-                        </a>
-                      )}
-                      {selectedRecord.data.qualificationCertName && (
-                        <a 
-                          href="#" 
-                          onClick={(e) => { e.preventDefault(); alert(`Vetting document: ${selectedRecord.data.qualificationCertName}`); }}
-                          className="flex items-center gap-2 p-2 bg-white border border-brand-border rounded-xl hover:bg-brand-light transition-all"
-                        >
-                          <FileText size={14} className="text-primary" />
-                          <span className="font-bold truncate">Degree: {selectedRecord.data.qualificationCertName}</span>
-                        </a>
-                      )}
-                      {selectedRecord.data.experienceCertName && (
-                        <a 
-                          href="#" 
-                          onClick={(e) => { e.preventDefault(); alert(`Vetting document: ${selectedRecord.data.experienceCertName}`); }}
-                          className="flex items-center gap-2 p-2 bg-white border border-brand-border rounded-xl hover:bg-brand-light transition-all"
-                        >
-                          <FileText size={14} className="text-primary" />
-                          <span className="font-bold truncate">Exp Cert: {selectedRecord.data.experienceCertName}</span>
-                        </a>
-                      )}
-                      {selectedRecord.data.profilePhotoName && (
-                        <a 
-                          href="#" 
-                          onClick={(e) => { e.preventDefault(); alert(`Vetting photo: ${selectedRecord.data.profilePhotoName}`); }}
-                          className="flex items-center gap-2 p-2 bg-white border border-brand-border rounded-xl hover:bg-brand-light transition-all"
-                        >
-                          <FileText size={14} className="text-primary" />
-                          <span className="font-bold truncate">Photo: {selectedRecord.data.profilePhotoName}</span>
-                        </a>
-                      )}
+                      {selectedRecord.data.aadharCardName && (() => {
+                        const notes = (selectedRecord.data as any).notes || '';
+                        const match = notes.match(/Aadhar[^:]*:\s*(https:\/\/[^\s|]+)/i);
+                        const url = match ? match[1] : (selectedRecord.data.aadharCardName.startsWith('http') ? selectedRecord.data.aadharCardName : `https://oggzposjudhbpnasymzn.supabase.co/storage/v1/object/public/documents/shadow-teachers/${selectedRecord.data.aadharCardName}`);
+                        return (
+                          <a 
+                            href={url} 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-between p-2.5 bg-white border border-brand-border rounded-xl hover:border-accent hover:shadow-sm transition-all group"
+                          >
+                            <div className="flex items-center gap-2 overflow-hidden mr-1">
+                              <FileText size={15} className="text-primary flex-shrink-0 group-hover:text-accent" />
+                              <span className="font-bold truncate text-brand-dark">Aadhar: {selectedRecord.data.aadharCardName}</span>
+                            </div>
+                            <ExternalLink size={13} className="text-brand-muted group-hover:text-accent flex-shrink-0" />
+                          </a>
+                        );
+                      })()}
+
+                      {selectedRecord.data.qualificationCertName && (() => {
+                        const notes = (selectedRecord.data as any).notes || '';
+                        const match = notes.match(/Qualificat[^\s|:]*:\s*(https:\/\/[^\s|]+)/i) || notes.match(/Degree[^\s|:]*:\s*(https:\/\/[^\s|]+)/i);
+                        const url = match ? match[1] : (selectedRecord.data.qualificationCertName.startsWith('http') ? selectedRecord.data.qualificationCertName : `https://oggzposjudhbpnasymzn.supabase.co/storage/v1/object/public/documents/shadow-teachers/${selectedRecord.data.qualificationCertName}`);
+                        return (
+                          <a 
+                            href={url} 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-between p-2.5 bg-white border border-brand-border rounded-xl hover:border-accent hover:shadow-sm transition-all group"
+                          >
+                            <div className="flex items-center gap-2 overflow-hidden mr-1">
+                              <FileText size={15} className="text-primary flex-shrink-0 group-hover:text-accent" />
+                              <span className="font-bold truncate text-brand-dark">Degree: {selectedRecord.data.qualificationCertName}</span>
+                            </div>
+                            <ExternalLink size={13} className="text-brand-muted group-hover:text-accent flex-shrink-0" />
+                          </a>
+                        );
+                      })()}
+
+                      {selectedRecord.data.experienceCertName && (() => {
+                        const notes = (selectedRecord.data as any).notes || '';
+                        const match = notes.match(/Experience[^:]*:\s*(https:\/\/[^\s|]+)/i);
+                        const url = match ? match[1] : (selectedRecord.data.experienceCertName.startsWith('http') ? selectedRecord.data.experienceCertName : `https://oggzposjudhbpnasymzn.supabase.co/storage/v1/object/public/documents/shadow-teachers/${selectedRecord.data.experienceCertName}`);
+                        return (
+                          <a 
+                            href={url} 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-between p-2.5 bg-white border border-brand-border rounded-xl hover:border-accent hover:shadow-sm transition-all group"
+                          >
+                            <div className="flex items-center gap-2 overflow-hidden mr-1">
+                              <FileText size={15} className="text-primary flex-shrink-0 group-hover:text-accent" />
+                              <span className="font-bold truncate text-brand-dark">Exp Cert: {selectedRecord.data.experienceCertName}</span>
+                            </div>
+                            <ExternalLink size={13} className="text-brand-muted group-hover:text-accent flex-shrink-0" />
+                          </a>
+                        );
+                      })()}
+
+                      {selectedRecord.data.profilePhotoName && (() => {
+                        const notes = (selectedRecord.data as any).notes || '';
+                        const match = notes.match(/Profile Photo[^:]*:\s*(https:\/\/[^\s|]+)/i) || notes.match(/Photo[^:]*:\s*(https:\/\/[^\s|]+)/i);
+                        const url = match ? match[1] : (selectedRecord.data.profilePhotoName.startsWith('http') ? selectedRecord.data.profilePhotoName : `https://oggzposjudhbpnasymzn.supabase.co/storage/v1/object/public/documents/shadow-teachers/${selectedRecord.data.profilePhotoName}`);
+                        return (
+                          <a 
+                            href={url} 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center justify-between p-2.5 bg-white border border-brand-border rounded-xl hover:border-accent hover:shadow-sm transition-all group"
+                          >
+                            <div className="flex items-center gap-2 overflow-hidden mr-1">
+                              <FileText size={15} className="text-primary flex-shrink-0 group-hover:text-accent" />
+                              <span className="font-bold truncate text-brand-dark">Photo: {selectedRecord.data.profilePhotoName}</span>
+                            </div>
+                            <ExternalLink size={13} className="text-brand-muted group-hover:text-accent flex-shrink-0" />
+                          </a>
+                        );
+                      })()}
                     </div>
                   </div>
                 )}
