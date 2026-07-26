@@ -202,8 +202,7 @@ export async function POST(request: Request) {
           notes: '',
           razorpayPaymentId,
           razorpayOrderId,
-          razorpaySignature,
-          termsAcceptedAt: createdAt
+          razorpaySignature
         };
 
         const { error } = await supabase
@@ -289,8 +288,7 @@ export async function POST(request: Request) {
           notes: '',
           razorpayPaymentId,
           razorpayOrderId,
-          razorpaySignature,
-          termsAcceptedAt: createdAt
+          razorpaySignature
         };
 
         const { error } = await supabase
@@ -360,14 +358,21 @@ export async function POST(request: Request) {
       const { 
         name, dob, gender, phone, email, city, address, preferredLocations, qualification, 
         specialization, experience, certificates, specialNeedsExp, comfortableAreas, otherComfortable,
-        openToTravel, preferredWorkType, aadharCardName, qualificationCertName, experienceCertName, profilePhotoName
+        openToTravel, preferredWorkType, aadharCardName, qualificationCertName, experienceCertName, profilePhotoName,
+        aadharCardUrl, qualificationCertUrl, experienceCertUrl, profilePhotoUrl
       } = data;
 
       if (!name || !phone || !email || !city || !qualification || !experience) {
-        return NextResponse.json({ error: 'Missing shadow teacher fields' }, { status: 400 });
+        return NextResponse.json({ error: 'Missing shadow teacher required fields (Name, Phone, Email, City, Qualification, Experience).' }, { status: 400 });
       }
 
       const generatedId = `TSB-${year}-${randomNumericId()}`;
+
+      let docNotes = [];
+      if (aadharCardUrl) docNotes.push(`Aadhar Proof: ${aadharCardUrl}`);
+      if (qualificationCertUrl) docNotes.push(`Qualification Cert: ${qualificationCertUrl}`);
+      if (experienceCertUrl) docNotes.push(`Experience Cert: ${experienceCertUrl}`);
+      if (profilePhotoUrl) docNotes.push(`Profile Photo: ${profilePhotoUrl}`);
 
       const record = {
         id: 'shadow-' + randomId(),
@@ -395,8 +400,7 @@ export async function POST(request: Request) {
         profilePhotoName: profilePhotoName || '',
         registration_id: generatedId,
         created_at: createdAt,
-        notes: '',
-        termsAcceptedAt: createdAt
+        notes: docNotes.join(' | ')
       };
 
       const { error } = await supabase
@@ -461,8 +465,7 @@ export async function POST(request: Request) {
         registration_id: generatedId,
         status: 'Interview Awaiting',
         created_at: createdAt,
-        notes: '',
-        termsAcceptedAt: createdAt
+        notes: ''
       };
 
       const { error } = await supabase

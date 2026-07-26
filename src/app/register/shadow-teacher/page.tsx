@@ -13,6 +13,7 @@ import {
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { CITY_LOCALITIES } from '@/lib/constants';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 export default function ShadowTeacherRegister() {
   const [step, setStep] = useState(1);
@@ -23,6 +24,7 @@ export default function ShadowTeacherRegister() {
   const [confirmSubmit, setConfirmSubmit] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [tagInput, setTagInput] = useState('');
   const [selectedLocality, setSelectedLocality] = useState('');
   const [customLocalityInput, setCustomLocalityInput] = useState('');
@@ -181,50 +183,125 @@ export default function ShadowTeacherRegister() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
+
     if (!confirmSubmit || !agreeTerms) {
+      setShowErrors(true);
+      return;
+    }
+
+    // Required fields check
+    if (!formData.name || !formData.phone || !formData.email || !formData.city || !formData.qualification || !formData.experience) {
+      setSubmitError('Please fill out all required fields (Name, Phone, Email, City, Qualification, Experience) before submitting.');
       setShowErrors(true);
       return;
     }
 
     setLoading(true);
 
-    const payload = {
-      type: 'shadow',
-      name: formData.name,
-      phone: formData.phone,
-      email: formData.email,
-      city: formData.city,
-      qualification: formData.qualification,
-      experience: formData.experience,
-      skills: formData.comfortableAreas.join(', ') + (formData.comfortableAreas.includes('Others') ? ` (${formData.otherComfortable})` : ''),
-      
-      // Additional fields saved in JSON
-      dob: formData.dob,
-      gender: formData.gender,
-      address: formData.address,
-      preferredLocations: formData.preferredLocations.join(', '),
-      specialization: formData.specialization,
-      certificates: formData.certificates,
-      specialNeedsExp: formData.specialNeedsExp,
-      openToTravel: formData.openToTravel,
-      preferredWorkType: formData.preferredWorkType,
-      
-      // Save file names for metadata representation
-      aadharCardName: formData.aadharCard?.name || '',
-      qualificationCertName: formData.qualificationCert?.name || '',
-      experienceCertName: formData.experienceCert?.name || '',
-      profilePhotoName: formData.profilePhoto?.name || ''
-    };
+    let aadharCardUrl = '';
+    let qualificationCertUrl = '';
+    let experienceCertUrl = '';
+    let profilePhotoUrl = '';
 
     try {
+      // Upload attached files to Supabase Storage
+      if (isSupabaseConfigured) {
+        const timestamp = Date.now();
+        
+        if (formData.aadharCard) {
+          const fileExt = formData.aadharCard.name.split('.').pop();
+          const filePath = `shadow-teachers/${timestamp}_aadhar.${fileExt}`;
+          const { error: uploadErr } = await supabase.storage
+            .from('documents')
+            .upload(filePath, formData.aadharCard, { upsert: true });
+          if (uploadErr) console.warn('Aadhar upload warning:', uploadErr);
+          else {
+            const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
+            aadharCardUrl = pubData.publicUrl;
+          }
+        }
+
+        if (formData.qualificationCert) {
+          const fileExt = formData.qualificationCert.name.split('.').pop();
+          const filePath = `shadow-teachers/${timestamp}_qual.${fileExt}`;
+          const { error: uploadErr } = await supabase.storage
+            .from('documents')
+            .upload(filePath, formData.qualificationCert, { upsert: true });
+          if (uploadErr) console.warn('Qualification cert upload warning:', uploadErr);
+          else {
+            const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
+            qualificationCertUrl = pubData.publicUrl;
+          }
+        }
+
+        if (formData.experienceCert) {
+          const fileExt = formData.experienceCert.name.split('.').pop();
+          const filePath = `shadow-teachers/${timestamp}_exp.${fileExt}`;
+          const { error: uploadErr } = await supabase.storage
+            .from('documents')
+            .upload(filePath, formData.experienceCert, { upsert: true });
+          if (uploadErr) console.warn('Experience cert upload warning:', uploadErr);
+          else {
+            const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
+            experienceCertUrl = pubData.publicUrl;
+          }
+        }
+
+        if (formData.profilePhoto) {
+          const fileExt = formData.profilePhoto.name.split('.').pop();
+          const filePath = `shadow-teachers/${timestamp}_photo.${fileExt}`;
+          const { error: uploadErr } = await supabase.storage
+            .from('documents')
+            .upload(filePath, formData.profilePhoto, { upsert: true });
+          if (uploadErr) console.warn('Profile photo upload warning:', uploadErr);
+          else {
+            const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
+            profilePhotoUrl = pubData.publicUrl;
+          }
+        }
+      }
+
+      const payload = {
+        type: 'shadow',
+        name: formData.name,
+        phone: formData.phone,
+        email: formData.email,
+        city: formData.city,
+        qualification: formData.qualification,
+        experience: formData.experience,
+        skills: formData.comfortableAreas.join(', ') + (formData.comfortableAreas.includes('Others') ? ` (${formData.otherComfortable})` : ''),
+        
+        dob: formData.dob,
+        gender: formData.gender,
+        address: formData.address,
+        preferredLocations: formData.preferredLocations.join(', '),
+        specialization: formData.specialization,
+        certificates: formData.certificates,
+        specialNeedsExp: formData.specialNeedsExp,
+        openToTravel: formData.openToTravel,
+        preferredWorkType: formData.preferredWorkType,
+        
+        aadharCardName: formData.aadharCard?.name || '',
+        qualificationCertName: formData.qualificationCert?.name || '',
+        experienceCertName: formData.experienceCert?.name || '',
+        profilePhotoName: formData.profilePhoto?.name || '',
+
+        aadharCardUrl,
+        qualificationCertUrl,
+        experienceCertUrl,
+        profilePhotoUrl
+      };
+
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
-      if (res.ok) {
-        const result = await res.json();
+      const result = await res.json();
+
+      if (res.ok && result.success) {
         const generatedId = result.registration_id;
         
         setRegId(generatedId);
@@ -240,9 +317,13 @@ export default function ShadowTeacherRegister() {
           spread: 80,
           origin: { y: 0.5 }
         });
+      } else {
+        const errMsg = result.error || 'Server error submitting registration. Please try again.';
+        setSubmitError(errMsg);
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error('Submit exception:', err);
+      setSubmitError(err.message || 'Network error submitting registration. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -1067,6 +1148,16 @@ export default function ShadowTeacherRegister() {
                           </div>
 
                         </div>
+
+                        {submitError && (
+                          <div className="p-4 bg-rose-50 border border-rose-200 rounded-2xl flex items-start gap-2.5 text-xs text-rose-900 leading-relaxed font-semibold animate-fade-in-up mb-4">
+                            <ShieldAlert size={18} className="text-rose-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <strong className="block text-rose-900 font-bold mb-0.5">Submission Failed</strong>
+                              <span>{submitError}</span>
+                            </div>
+                          </div>
+                        )}
 
                         <div className="border-t border-brand-border/60 pt-4 space-y-3">
                           <label className="flex items-start gap-2.5 text-xs sm:text-sm text-brand-dark font-semibold cursor-pointer select-none">
