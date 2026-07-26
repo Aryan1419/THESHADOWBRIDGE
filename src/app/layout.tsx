@@ -15,16 +15,48 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "The Shadow Bridge | Trained Shadow Teachers & Home Tutors",
+  metadataBase: new URL("https://theshadowbridge.com"),
+  title: {
+    default: "The Shadow Bridge | Trained Shadow Teachers & Home Tutors",
+    template: "%s | The Shadow Bridge"
+  },
   description: "Connecting families with professionally trained Shadow Teachers and Home Tutors in Delhi NCR, Ahmedabad, Hyderabad & Bangalore. Special education, behavior support, and inclusive learning assistance.",
-  keywords: "shadow teacher, home tutor, special education, child support, inclusive learning, Delhi NCR, Ahmedabad, Hyderabad, Bangalore, autism tutor, ADHD support",
+  keywords: ["shadow teacher", "home tutor", "special education", "child support", "inclusive learning", "Delhi NCR", "Ahmedabad", "Hyderabad", "Bangalore", "autism tutor", "ADHD support", "special needs mentor"],
+  alternates: {
+    canonical: "https://theshadowbridge.com"
+  },
   openGraph: {
-    title: "The Shadow Bridge | Shadow Teachers & Tutors",
-    description: "Empowering children with academic, behavioral, and inclusive support. Delhi NCR, Ahmedabad, Hyderabad & Bangalore.",
+    title: "The Shadow Bridge | Shadow Teachers & Special Education Tutors",
+    description: "Empowering children with academic, behavioral, and inclusive support. Serving families across Delhi NCR, Ahmedabad, Hyderabad & Bangalore.",
     url: "https://theshadowbridge.com",
     siteName: "The Shadow Bridge",
     locale: "en_IN",
     type: "website",
+    images: [
+      {
+        url: "/favicon-512.png",
+        width: 512,
+        height: 512,
+        alt: "The Shadow Bridge - Shadow Teachers & Special Education Tutors"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "The Shadow Bridge | Shadow Teachers & Tutors",
+    description: "Connecting families with verified Shadow Teachers & Special Education Tutors in Delhi NCR, Ahmedabad, Hyderabad & Bangalore.",
+    images: ["/favicon-512.png"]
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1
+    }
   },
   icons: {
     icon: [
