@@ -96,8 +96,13 @@ export function wrapInEmailTemplate(subject: string, bodyContentHtml: string): s
  */
 export async function sendEmail({ to, subject, type, bodyHtml }: SendEmailParams): Promise<{ success: boolean; id?: string; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
-  const senderEmail = process.env.SENDER_EMAIL || 'onboarding@resend.dev';
+  const senderEmail = process.env.SENDER_EMAIL || 'noreply@theshadowbridge.com';
   const fullHtml = wrapInEmailTemplate(subject, bodyHtml);
+
+  // Format sender header cleanly: "The Shadow Bridge <noreply@theshadowbridge.com>"
+  const fromHeader = senderEmail.includes('<') 
+    ? senderEmail 
+    : `The Shadow Bridge <${senderEmail}>`;
 
   // If API key is missing, log failure in database but do NOT crash execution
   if (!apiKey) {
@@ -123,7 +128,7 @@ export async function sendEmail({ to, subject, type, bodyHtml }: SendEmailParams
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        from: `The Shadow Bridge <${senderEmail}>`,
+        from: fromHeader,
         to: [to],
         subject,
         html: fullHtml
