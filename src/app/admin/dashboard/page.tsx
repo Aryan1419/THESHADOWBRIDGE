@@ -2036,9 +2036,10 @@ export default function AdminDashboard() {
                     </h4>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                       {selectedRecord.data.aadharCardName && (() => {
+                        const name = selectedRecord.data.aadharCardName;
                         const notes = (selectedRecord.data as any).notes || '';
                         const match = notes.match(/Aadhar[^:]*:\s*(https:\/\/[^\s|]+)/i);
-                        const url = match ? match[1] : (selectedRecord.data.aadharCardName.startsWith('http') ? selectedRecord.data.aadharCardName : `https://oggzposjudhbpnasymzn.supabase.co/storage/v1/object/public/documents/shadow-teachers/${selectedRecord.data.aadharCardName}`);
+                        const url = name.startsWith('http') ? name : `https://oggzposjudhbpnasymzn.supabase.co/storage/v1/object/public/documents/shadow-teachers/${name}`;
                         return (
                           <a 
                             href={url} 
@@ -2048,7 +2049,7 @@ export default function AdminDashboard() {
                           >
                             <div className="flex items-center gap-2 overflow-hidden mr-1">
                               <FileText size={15} className="text-primary flex-shrink-0 group-hover:text-accent" />
-                              <span className="font-bold truncate text-brand-dark">Aadhar: {selectedRecord.data.aadharCardName}</span>
+                              <span className="font-bold truncate text-brand-dark">Aadhar: {name}</span>
                             </div>
                             <ExternalLink size={13} className="text-brand-muted group-hover:text-accent flex-shrink-0" />
                           </a>
@@ -2056,9 +2057,10 @@ export default function AdminDashboard() {
                       })()}
 
                       {selectedRecord.data.qualificationCertName && (() => {
+                        const name = selectedRecord.data.qualificationCertName;
                         const notes = (selectedRecord.data as any).notes || '';
                         const match = notes.match(/Qualificat[^\s|:]*:\s*(https:\/\/[^\s|]+)/i) || notes.match(/Degree[^\s|:]*:\s*(https:\/\/[^\s|]+)/i);
-                        const url = match ? match[1] : (selectedRecord.data.qualificationCertName.startsWith('http') ? selectedRecord.data.qualificationCertName : `https://oggzposjudhbpnasymzn.supabase.co/storage/v1/object/public/documents/shadow-teachers/${selectedRecord.data.qualificationCertName}`);
+                        const url = name.startsWith('http') ? name : `https://oggzposjudhbpnasymzn.supabase.co/storage/v1/object/public/documents/shadow-teachers/${name}`;
                         return (
                           <a 
                             href={url} 
@@ -2068,7 +2070,7 @@ export default function AdminDashboard() {
                           >
                             <div className="flex items-center gap-2 overflow-hidden mr-1">
                               <FileText size={15} className="text-primary flex-shrink-0 group-hover:text-accent" />
-                              <span className="font-bold truncate text-brand-dark">Degree: {selectedRecord.data.qualificationCertName}</span>
+                              <span className="font-bold truncate text-brand-dark">Degree: {name}</span>
                             </div>
                             <ExternalLink size={13} className="text-brand-muted group-hover:text-accent flex-shrink-0" />
                           </a>
@@ -2076,9 +2078,10 @@ export default function AdminDashboard() {
                       })()}
 
                       {selectedRecord.data.experienceCertName && (() => {
+                        const name = selectedRecord.data.experienceCertName;
                         const notes = (selectedRecord.data as any).notes || '';
                         const match = notes.match(/Experience[^:]*:\s*(https:\/\/[^\s|]+)/i);
-                        const url = match ? match[1] : (selectedRecord.data.experienceCertName.startsWith('http') ? selectedRecord.data.experienceCertName : `https://oggzposjudhbpnasymzn.supabase.co/storage/v1/object/public/documents/shadow-teachers/${selectedRecord.data.experienceCertName}`);
+                        const url = name.startsWith('http') ? name : `https://oggzposjudhbpnasymzn.supabase.co/storage/v1/object/public/documents/shadow-teachers/${name}`;
                         return (
                           <a 
                             href={url} 
@@ -2088,7 +2091,7 @@ export default function AdminDashboard() {
                           >
                             <div className="flex items-center gap-2 overflow-hidden mr-1">
                               <FileText size={15} className="text-primary flex-shrink-0 group-hover:text-accent" />
-                              <span className="font-bold truncate text-brand-dark">Exp Cert: {selectedRecord.data.experienceCertName}</span>
+                              <span className="font-bold truncate text-brand-dark">Exp Cert: {name}</span>
                             </div>
                             <ExternalLink size={13} className="text-brand-muted group-hover:text-accent flex-shrink-0" />
                           </a>
@@ -2096,9 +2099,10 @@ export default function AdminDashboard() {
                       })()}
 
                       {selectedRecord.data.profilePhotoName && (() => {
+                        const name = selectedRecord.data.profilePhotoName;
                         const notes = (selectedRecord.data as any).notes || '';
                         const match = notes.match(/Profile Photo[^:]*:\s*(https:\/\/[^\s|]+)/i) || notes.match(/Photo[^:]*:\s*(https:\/\/[^\s|]+)/i);
-                        const url = match ? match[1] : (selectedRecord.data.profilePhotoName.startsWith('http') ? selectedRecord.data.profilePhotoName : `https://oggzposjudhbpnasymzn.supabase.co/storage/v1/object/public/documents/shadow-teachers/${selectedRecord.data.profilePhotoName}`);
+                        const url = name.startsWith('http') ? name : `https://oggzposjudhbpnasymzn.supabase.co/storage/v1/object/public/documents/shadow-teachers/${name}`;
                         return (
                           <a 
                             href={url} 
@@ -2108,7 +2112,7 @@ export default function AdminDashboard() {
                           >
                             <div className="flex items-center gap-2 overflow-hidden mr-1">
                               <FileText size={15} className="text-primary flex-shrink-0 group-hover:text-accent" />
-                              <span className="font-bold truncate text-brand-dark">Photo: {selectedRecord.data.profilePhotoName}</span>
+                              <span className="font-bold truncate text-brand-dark">Photo: {name}</span>
                             </div>
                             <ExternalLink size={13} className="text-brand-muted group-hover:text-accent flex-shrink-0" />
                           </a>
