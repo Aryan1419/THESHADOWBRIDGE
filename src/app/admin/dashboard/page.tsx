@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, User, GraduationCap, ClipboardList, Settings, LogOut,
   RefreshCw, Search, Filter, ShieldCheck, Mail, Phone, MapPin, Calendar,
   CheckCircle, X, ChevronRight, FileText, AlertCircle, Save, Info, Sparkles, CreditCard,
-  Star, CheckCircle2, MessageSquare
+  Star, CheckCircle2, MessageSquare, Reply, Send, MailCheck, MessageSquareQuote, CornerDownRight
 } from 'lucide-react';
 
 import { DatabaseSchema, TutorRecord, ShadowTeacherRecord, ParentShadowRequestRecord, ParentTutorRequestRecord } from '@/lib/db';
@@ -231,6 +231,11 @@ export default function AdminDashboard() {
     }
   };
 
+  // Contact Reply States
+  const [replyModalContact, setReplyModalContact] = useState<any | null>(null);
+  const [replyMessageText, setReplyMessageText] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
+
   const handleQuickContactStatus = async (contactId: string, newStatus: string) => {
     try {
       const token = localStorage.getItem('admin_token') || '';
@@ -255,6 +260,42 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error('Failed to update contact status:', err);
+    }
+  };
+
+  const handleSendContactReply = async () => {
+    if (!replyModalContact || !replyMessageText.trim()) return;
+    setSendingReply(true);
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const res = await fetch('/api/admin/records', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          action: 'reply_contact',
+          id: replyModalContact.id,
+          adminReply: replyMessageText.trim()
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setToastLog(`[Reply Sent] Email sent to ${replyModalContact.email} & query status marked Responded.`);
+        setReplyModalContact(null);
+        setReplyMessageText('');
+        fetchDatabase();
+        setTimeout(() => setToastLog(null), 5000);
+      } else {
+        alert(data.error || 'Failed to send reply email.');
+      }
+    } catch (err: any) {
+      console.error('Failed to send contact reply:', err);
+      alert(err.message || 'Network error sending reply email.');
+    } finally {
+      setSendingReply(false);
     }
   };
 
@@ -1590,10 +1631,31 @@ export default function AdminDashboard() {
                                   <div className="font-semibold text-brand-dark">{contact.phone}</div>
                                   <div className="text-primary hover:underline">{contact.email}</div>
                                 </td>
-                                <td className="p-4 max-w-xs">
-                                  <p className="text-brand-dark text-xs line-clamp-3 leading-relaxed">
+                                <td className="p-4 max-w-md">
+                                  <p className="text-brand-dark text-xs leading-relaxed whitespace-pre-wrap">
                                     {contact.message}
                                   </p>
+
+                                  {(contact.adminReply || contact.admin_reply) && (
+                                    <div className="mt-3 p-3 bg-emerald-50/90 border border-emerald-200/90 rounded-xl text-left shadow-sm">
+                                      <div className="flex items-center justify-between gap-2 text-[11px] font-bold text-emerald-900 mb-1">
+                                        <span className="flex items-center gap-1.5">
+                                          <MailCheck size={13} className="text-emerald-700" />
+                                          <span>Admin Response Sent</span>
+                                        </span>
+                                        <span className="text-emerald-800/80 text-[10px] font-medium">
+                                          {contact.repliedAt || contact.replied_at
+                                            ? new Date(contact.repliedAt || contact.replied_at).toLocaleDateString('en-IN', {
+                                                day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                              })
+                                            : ''}
+                                        </span>
+                                      </div>
+                                      <p className="text-emerald-950 text-xs leading-relaxed whitespace-pre-wrap font-medium">
+                                        {contact.adminReply || contact.admin_reply}
+                                      </p>
+                                    </div>
+                                  )}
                                 </td>
                                 <td className="p-4">
                                   <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
@@ -1607,18 +1669,20 @@ export default function AdminDashboard() {
                                   </span>
                                 </td>
                                 <td className="p-4 text-right space-x-2 whitespace-nowrap">
-                                  {status !== 'responded' && (
-                                    <button
-                                      onClick={() => handleQuickContactStatus(contact.id, 'responded')}
-                                      className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] transition-all cursor-pointer shadow-sm"
-                                    >
-                                      Mark Responded
-                                    </button>
-                                  )}
+                                  <button
+                                    onClick={() => {
+                                      setReplyModalContact(contact);
+                                      setReplyMessageText('');
+                                    }}
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold text-xs transition-all cursor-pointer shadow-sm"
+                                  >
+                                    <Reply size={13} />
+                                    <span>{(contact.adminReply || contact.admin_reply) ? 'Reply Again' : 'Reply'}</span>
+                                  </button>
                                   {status === 'new' && (
                                     <button
                                       onClick={() => handleQuickContactStatus(contact.id, 'read')}
-                                      className="px-2.5 py-1 bg-primary hover:bg-primary/80 text-white rounded-lg font-bold text-[11px] transition-all cursor-pointer shadow-sm"
+                                      className="px-2.5 py-1.5 border border-brand-border bg-white hover:bg-brand-light text-brand-dark rounded-xl font-bold text-xs transition-all cursor-pointer shadow-sm"
                                     >
                                       Mark Read
                                     </button>
@@ -2150,6 +2214,81 @@ export default function AdminDashboard() {
                 className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold hover:bg-rose-700 cursor-pointer"
               >
                 Confirm Rejection
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* CONTACT REPLY MODAL */}
+      {replyModalContact && (
+        <div className="fixed inset-0 bg-primary/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-brand-border shadow-2xl text-left animate-fade-in-up space-y-5">
+            <div className="flex justify-between items-start">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold uppercase tracking-wider mb-1">
+                  <Reply size={10} /> Contact Response Email
+                </div>
+                <h3 className="font-serif text-xl font-bold text-primary">Reply to {replyModalContact.name}</h3>
+                <p className="text-xs text-brand-muted font-medium">To: <span className="font-bold text-brand-dark">{replyModalContact.email}</span></p>
+              </div>
+              <button
+                onClick={() => setReplyModalContact(null)}
+                className="p-1 text-brand-muted hover:text-brand-dark rounded-full cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Quoted Original Message */}
+            <div className="p-3.5 bg-brand-light/60 border border-brand-border rounded-2xl text-xs space-y-1">
+              <div className="text-[10px] font-bold uppercase text-brand-muted tracking-wider flex items-center gap-1">
+                <MessageSquareQuote size={11} className="text-secondary" /> Original Inquiry ({replyModalContact.city}):
+              </div>
+              <p className="text-brand-dark italic line-clamp-4 leading-relaxed font-medium">
+                "{replyModalContact.message}"
+              </p>
+            </div>
+
+            {/* Reply Text Area */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-brand-dark uppercase tracking-wider flex items-center gap-1">
+                <Send size={11} className="text-secondary" /> Admin Reply Message
+              </label>
+              <textarea
+                required
+                rows={5}
+                value={replyMessageText}
+                onChange={(e) => setReplyMessageText(e.target.value)}
+                placeholder={`Type your reply to ${replyModalContact.name}... (This will be emailed to ${replyModalContact.email} from noreply@theshadowbridge.com)`}
+                className="w-full bg-white border border-brand-border rounded-2xl p-3.5 text-xs text-brand-dark focus:outline-none focus:ring-2 focus:ring-primary/40 leading-relaxed"
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end items-center gap-3 pt-2">
+              <button
+                onClick={() => setReplyModalContact(null)}
+                disabled={sendingReply}
+                className="px-4 py-2.5 border border-brand-border rounded-xl text-xs font-bold text-brand-muted hover:bg-brand-light cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSendContactReply}
+                disabled={sendingReply || !replyMessageText.trim()}
+                className="btn-gradient px-5 py-2.5 rounded-xl font-bold text-xs text-white shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {sendingReply ? (
+                  <>
+                    <RefreshCw size={14} className="animate-spin" />
+                    <span>Sending Email...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send size={14} />
+                    <span>Send Reply &amp; Mark Responded</span>
+                  </>
+                )}
               </button>
             </div>
           </div>

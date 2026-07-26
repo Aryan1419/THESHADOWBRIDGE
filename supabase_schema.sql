@@ -344,8 +344,13 @@ CREATE TABLE IF NOT EXISTS public.contacts (
     city TEXT NOT NULL,
     message TEXT NOT NULL,
     status TEXT NOT NULL DEFAULT 'new',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL,
+    admin_reply TEXT,
+    replied_at TIMESTAMP WITH TIME ZONE
 );
+
+ALTER TABLE public.contacts ADD COLUMN IF NOT EXISTS admin_reply TEXT;
+ALTER TABLE public.contacts ADD COLUMN IF NOT EXISTS replied_at TIMESTAMP WITH TIME ZONE;
 
 ALTER TABLE public.contacts ENABLE ROW LEVEL SECURITY;
 

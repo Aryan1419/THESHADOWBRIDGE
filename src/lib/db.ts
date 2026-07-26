@@ -68,6 +68,10 @@ export interface ContactSubmission {
   status?: string;
   createdAt?: string;
   created_at?: string;
+  adminReply?: string;
+  admin_reply?: string;
+  repliedAt?: string;
+  replied_at?: string;
 }
 
 // ==========================================

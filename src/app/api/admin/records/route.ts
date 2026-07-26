@@ -108,8 +108,99 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { action, type, id, status, notes, suggestedMatchId } = body;
 
-    if (!action || !type || !id) {
-      return NextResponse.json({ error: 'Missing required update parameters (action, type, id)' }, { status: 400 });
+    if (!action) {
+      return NextResponse.json({ error: 'Missing action parameter' }, { status: 400 });
+    }
+
+    if (action === 'reply_contact') {
+      const { id, adminReply } = body;
+      if (!id || !adminReply || !adminReply.trim()) {
+        return NextResponse.json({ error: 'Missing contact ID or reply message' }, { status: 400 });
+      }
+
+      const cleanReply = adminReply.trim();
+      const nowIso = new Date().toISOString();
+
+      // 1. Fetch target contact record
+      let contactRecord: any = null;
+      if (isSupabaseConfigured) {
+        const { data } = await supabase.from('contacts').select('*').eq('id', id).maybeSingle();
+        if (data) contactRecord = toCamelCase(data);
+      }
+
+      if (!contactRecord) {
+        const localDb = readDb();
+        const found = (localDb as any).contacts?.find((c: any) => c.id === id);
+        if (found) contactRecord = found;
+      }
+
+      if (!contactRecord) {
+        return NextResponse.json({ error: 'Contact record not found' }, { status: 404 });
+      }
+
+      // 2. Send response email to person's submitted email address via Resend
+      const emailResult = await sendEmail({
+        to: contactRecord.email,
+        subject: 'Re: Your inquiry to The Shadow Bridge',
+        type: 'contact_receipt',
+        bodyHtml: `
+          <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${contactRecord.name},</h2>
+          <div style="color: #2D253A; font-size: 15px; line-height: 1.6; margin: 0 0 24px 0;">
+            ${cleanReply.replace(/\n/g, '<br />')}
+          </div>
+
+          <div style="background-color: #F8F5FB; border-left: 4px solid #C89B3C; padding: 16px; margin: 24px 0; border-radius: 4px 12px 12px 4px;">
+            <h4 style="margin: 0 0 8px 0; color: #3B2A6B; font-size: 13px; text-transform: uppercase; letter-spacing: 1px;">Your Original Inquiry</h4>
+            <p style="margin: 0; font-size: 13px; color: #555555; font-style: italic; line-height: 1.5;">"${contactRecord.message}"</p>
+          </div>
+
+          <div style="border-top: 1px solid #E6E2EB; padding-top: 16px; margin-top: 24px;">
+            <p style="margin: 0 0 4px 0; font-weight: bold; color: #3B2A6B; font-size: 14px;">The Shadow Bridge Team</p>
+            <p style="margin: 0; font-size: 12px; color: #6A5B7C;">Email: theshadowbridgesupport@gmail.com | Web: https://theshadowbridge.com</p>
+          </div>
+        `
+      });
+
+      if (!emailResult.success) {
+        console.error('Failed to send contact reply email:', emailResult.error);
+        return NextResponse.json({ error: `Email delivery failed: ${emailResult.error}` }, { status: 500 });
+      }
+
+      // 3. Save reply text, timestamp, and update status to 'responded' in Supabase
+      let updatedRecord: any = null;
+      if (isSupabaseConfigured) {
+        const { data: up, error: upErr } = await supabase
+          .from('contacts')
+          .update({
+            status: 'responded',
+            admin_reply: cleanReply,
+            replied_at: nowIso
+          })
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (!upErr && up) {
+          updatedRecord = toCamelCase(up);
+        } else if (upErr) {
+          console.warn('Supabase contact reply update warning:', upErr);
+        }
+      }
+
+      if (!updatedRecord) {
+        updatedRecord = {
+          ...contactRecord,
+          status: 'responded',
+          adminReply: cleanReply,
+          repliedAt: nowIso
+        };
+      }
+
+      return NextResponse.json({
+        success: true,
+        record: updatedRecord,
+        notificationLog: `Response email sent to ${contactRecord.email} and status set to Responded.`
+      });
     }
 
     if (action === 'update_record') {
