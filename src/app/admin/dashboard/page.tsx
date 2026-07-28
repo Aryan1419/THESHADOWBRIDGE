@@ -597,7 +597,7 @@ export default function AdminDashboard() {
     if (!db) return [];
     const list: any[] = [];
     db.parent_shadow_requests.forEach(r => {
-      if (r.consultation_paid) {
+      if ((r as any).consultationPaid || (r as any).consultation_paid) {
         list.push({
           id: r.id,
           date: r.created_at,
@@ -615,7 +615,7 @@ export default function AdminDashboard() {
       }
     });
     db.parent_tutor_requests.forEach(r => {
-      if (r.consultation_paid) {
+      if ((r as any).consultationPaid || (r as any).consultation_paid) {
         list.push({
           id: r.id,
           date: r.created_at,
@@ -1419,9 +1419,9 @@ export default function AdminDashboard() {
 
                             <td className="p-4 text-center">
                               <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                r.consultation_paid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700'
+                                ((r as any).consultationPaid || (r as any).consultation_paid) ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700'
                               }`}>
-                                {r.consultation_paid ? 'Yes (₹99)' : 'No'}
+                                {((r as any).consultationPaid || (r as any).consultation_paid) ? 'Yes (₹99)' : 'No'}
                               </span>
                             </td>
 
