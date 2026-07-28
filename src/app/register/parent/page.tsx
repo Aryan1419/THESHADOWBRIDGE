@@ -63,14 +63,22 @@ export default function ParentConsultationStep1() {
       }
 
       // 3. Launch Razorpay Checkout
+      const razorpayKey = orderData.keyId || orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_live_TGX30c7BZKYQ6t';
+      const orderAmount = orderData.order?.amount || orderData.amount;
+      const orderId = orderData.order?.id || orderData.orderId;
+
+      if (!razorpayKey || !orderAmount || !orderId) {
+        throw new Error('Incomplete Razorpay order parameters returned by server.');
+      }
+
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
-        amount: orderData.order.amount,
+        key: razorpayKey,
+        amount: orderAmount,
         currency: 'INR',
         name: 'The Shadow Bridge',
         description: `₹99 Consultation Booking (${serviceNeeded})`,
         image: '/favicon-192.png',
-        order_id: orderData.order.id,
+        order_id: orderId,
         handler: async function (response: any) {
           try {
             // Save consultation booking to database
