@@ -93,8 +93,12 @@ function GatedRegistrationContent() {
     e.preventDefault();
     if (!gatedStatus || !gatedStatus.record) return;
 
-    if (!childName.trim() || !childGrade.trim()) {
-      setFormError('Please fill in Child Name and Grade.');
+    const missing: string[] = [];
+    if (!childName.trim()) missing.push("Child's Name");
+    if (!childGrade.trim()) missing.push("Class / Grade");
+
+    if (missing.length > 0) {
+      setFormError(`Please fill in required fields: ${missing.join(', ')}.`);
       return;
     }
 
@@ -102,13 +106,17 @@ function GatedRegistrationContent() {
     setFormError(null);
 
     try {
-      const regId = gatedStatus.record.registrationId || gatedStatus.record.registration_id;
+      const rec = gatedStatus.record;
+      const regId = rec.registrationId || rec.registration_id || rec.bookingId || rec.booking_id;
+      
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           type: 'parent_registration_submit',
           regId,
+          email: rec.email,
+          phone: rec.phone,
           childName: childName.trim(),
           childAge: childAge.trim(),
           childGender,
@@ -128,7 +136,8 @@ function GatedRegistrationContent() {
       }
 
       // Route to Step 5 Placement Fee Payment
-      router.push(`/register/parent/placement-fee?regId=${encodeURIComponent(regId)}`);
+      const finalRegId = data.registration_id || regId;
+      router.push(`/register/parent/placement-fee?regId=${encodeURIComponent(finalRegId)}`);
     } catch (err: any) {
       console.error(err);
       setFormError(err.message);

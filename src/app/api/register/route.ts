@@ -297,32 +297,109 @@ export async function POST(request: Request) {
     // STEP 4: GATED PARENT REGISTRATION FORM SUBMISSION
     // =========================================================
     if (type === 'parent_registration_submit') {
-      const { regId, childName, childAge, childGender, childGrade, schoolLocation, homeLocation, hasDiagnosis, diagnosis, difficulties, tutorType, subjects, additionalNotes } = data;
+      const { regId, email, phone, childName, childAge, childGender, childGrade, schoolLocation, homeLocation, hasDiagnosis, diagnosis, difficulties, tutorType, subjects, additionalNotes } = data;
 
-      if (!regId || !childName || !childGrade) {
-        return NextResponse.json({ error: 'Missing child registration details.' }, { status: 400 });
+      const missing: string[] = [];
+      if (!regId) missing.push('Registration ID or Booking ID');
+      if (!childName || !childName.trim()) missing.push("Child's Name");
+      if (!childGrade || !childGrade.trim()) missing.push("Class / Grade");
+
+      if (missing.length > 0) {
+        return NextResponse.json({ error: `Please fill in required details: ${missing.join(', ')}.` }, { status: 400 });
       }
 
       const cleanRegId = regId.trim().toUpperCase();
+      const cleanEmail = email ? email.trim().toLowerCase() : '';
+      const cleanPhoneDigits = phone ? phone.replace(/\D/g, '') : '';
 
       // Find record in parent_shadow_requests or parent_tutor_requests
-      const { data: ps } = await supabase
+      let ps: any = null;
+      let pt: any = null;
+
+      const { data: psData } = await supabase
         .from('parent_shadow_requests')
         .select('*')
-        .eq('registration_id', cleanRegId)
+        .or(`registration_id.ilike.%${cleanRegId}%,notes.ilike.%${cleanRegId}%`)
         .maybeSingle();
+      ps = psData;
 
-      const { data: pt } = await supabase
-        .from('parent_tutor_requests')
-        .select('*')
-        .eq('registration_id', cleanRegId)
-        .maybeSingle();
+      if (!ps) {
+        const { data: ptData } = await supabase
+          .from('parent_tutor_requests')
+          .select('*')
+          .or(`registration_id.ilike.%${cleanRegId}%,notes.ilike.%${cleanRegId}%`)
+          .maybeSingle();
+        pt = ptData;
+      }
 
-      const parentRecord = ps || pt;
-      const targetTable = ps ? 'parent_shadow_requests' : 'parent_tutor_requests';
+      // Fallback by email/phone
+      if (!ps && !pt && cleanEmail) {
+        const { data: psE } = await supabase.from('parent_shadow_requests').select('*').eq('email', cleanEmail).maybeSingle();
+        ps = psE;
+        if (!ps) {
+          const { data: ptE } = await supabase.from('parent_tutor_requests').select('*').eq('email', cleanEmail).maybeSingle();
+          pt = ptE;
+        }
+      }
 
+      let parentRecord = ps || pt;
+      let targetTable = ps ? 'parent_shadow_requests' : (pt ? 'parent_tutor_requests' : '');
+
+      // If missing, check bookings table and auto-create parent_shadow_requests row
       if (!parentRecord) {
-        return NextResponse.json({ error: 'Parent registration record not found.' }, { status: 404 });
+        const { data: bk } = await supabase
+          .from('bookings')
+          .select('*')
+          .or(`booking_id.ilike.%${cleanRegId}%,email.ilike.${cleanEmail}`)
+          .maybeSingle();
+
+        if (bk) {
+          const isTutor = bk.requirement?.toLowerCase().includes('tutor');
+          targetTable = isTutor ? 'parent_tutor_requests' : 'parent_shadow_requests';
+          const generatedRegId = `SB-${year}-${randomNumericId()}`;
+
+          const newRecord: any = {
+            id: (isTutor ? 'parent-tutor-' : 'parent-shadow-') + randomId(),
+            parent_name: bk.name || 'Parent',
+            phone: bk.phone,
+            email: bk.email,
+            city: bk.city || 'Delhi NCR',
+            child_name: childName.trim(),
+            child_dob: childAge || '',
+            child_gender: childGender || 'Boy',
+            child_grade: childGrade.trim(),
+            home_location: homeLocation || bk.city || '',
+            status: 'Registration Submitted',
+            consultation_paid: true,
+            registration_id: generatedRegId,
+            created_at: createdAt,
+            notes: additionalNotes || `Linked Booking ID: ${bk.booking_id}`
+          };
+
+          if (isTutor) {
+            newRecord.tutor_type = tutorType || 'Academic Tuition/Subjects';
+            newRecord.subjects = Array.isArray(subjects) ? subjects.join(', ') : (subjects || '');
+          } else {
+            newRecord.relationship = 'Mother';
+            newRecord.school_location = schoolLocation || '';
+            newRecord.has_diagnosis = hasDiagnosis || 'No';
+            newRecord.diagnosis = diagnosis || '';
+            newRecord.difficulties = Array.isArray(difficulties) ? difficulties.join(', ') : (difficulties || '');
+          }
+
+          const { data: created, error: cErr } = await supabase.from(targetTable).insert([newRecord]).select().single();
+          if (cErr) throw cErr;
+
+          return NextResponse.json({
+            success: true,
+            registration_id: generatedRegId,
+            status: 'Registration Submitted',
+            nextStep: 'placement_fee',
+            record: toCamelCase(created)
+          });
+        }
+
+        return NextResponse.json({ error: 'Parent registration record not found for the provided ID.' }, { status: 404 });
       }
 
       // Check if consultation is completed
