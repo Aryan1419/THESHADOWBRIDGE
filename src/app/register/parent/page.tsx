@@ -109,9 +109,7 @@ export default function ParentRegister() {
           return !!(formData.childName && formData.childDob && formData.childGender && formData.childGrade);
         case 3:
           return !!(
-            formData.hasDiagnosis && 
             formData.difficulties.length > 0 &&
-            (formData.hasDiagnosis !== 'Yes' || formData.diagnosis) &&
             (!formData.difficulties.includes('Others') || formData.otherDifficulty)
           );
         case 4:
@@ -200,7 +198,7 @@ export default function ParentRegister() {
     // Map challenges text
     let challengesText = '';
     if (path === 'shadow') {
-      challengesText = `Diagnosis: ${formData.hasDiagnosis === 'Yes' ? formData.diagnosis : 'None'} | Difficulty Areas: ${formData.difficulties.join(', ')}`;
+      challengesText = `Diagnosis: ${formData.diagnosis || 'None'} | Difficulty Areas: ${formData.difficulties.join(', ')}`;
       if (formData.difficulties.includes('Others')) {
         challengesText += ` (${formData.otherDifficulty})`;
       }
@@ -1115,10 +1113,9 @@ export default function ParentRegister() {
                                 </button>
                                 {path === 'shadow' ? (
                                   <>
-                                    <h4 className="text-xs uppercase tracking-wider font-bold text-primary mb-2">3. Child's Needs & Diagnosis</h4>
+                                    <h4 className="text-xs uppercase tracking-wider font-bold text-primary mb-2">3. Child's Needs</h4>
                                     <div className="space-y-1 text-xs text-brand-dark">
-                                      <div><strong>Has Diagnosis:</strong> {formData.hasDiagnosis}</div>
-                                      {formData.hasDiagnosis === 'Yes' && <div><strong>Diagnosis:</strong> {formData.diagnosis}</div>}
+                                      {formData.diagnosis && <div><strong>Diagnosis:</strong> {formData.diagnosis}</div>}
                                       <div><strong>Areas of Difficulty:</strong> {formData.difficulties.join(', ')}</div>
                                       {formData.difficulties.includes('Others') && <div><strong>Other Difficulty:</strong> {formData.otherDifficulty}</div>}
                                     </div>
