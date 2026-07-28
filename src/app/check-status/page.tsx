@@ -279,6 +279,33 @@ export default function CheckStatusPage() {
                 </div>
               </div>
 
+              {/* UNLOCKED REGISTRATION FORM CTA (FOR PARENTS WITH COMPLETED CONSULTATION) */}
+              {(currentStatus.toLowerCase().includes('completed') || currentStatus.toLowerCase().includes('unlocked') || recordData.isCompleted) && (
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-2xl p-6 mb-8 shadow-md">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                      <span className="px-3 py-1 bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold uppercase rounded-full tracking-wider">
+                        ✓ Consultation Completed • Form Unlocked
+                      </span>
+                      <h3 className="font-serif text-lg font-bold text-emerald-950 mt-2">
+                        Child Registration Form Unlocked!
+                      </h3>
+                      <p className="text-xs text-emerald-900 mt-1 leading-relaxed">
+                        Your 1-on-1 consultation call is complete. Please provide your child's specific developmental and school details to proceed with matching.
+                      </p>
+                    </div>
+
+                    <a
+                      href={`/register/parent/form?regId=${encodeURIComponent(record.registrationId || record.registration_id || record.bookingId || record.booking_id || '')}`}
+                      className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-2 whitespace-nowrap"
+                    >
+                      <span>Open Registration Form</span>
+                      <ArrowRight size={16} />
+                    </a>
+                  </div>
+                </div>
+              )}
+
               {/* CANDIDATE CUSTOM MESSAGE FROM ADMIN (IF PROVIDED) */}
               {record.candidateMessage && (
                 <div className="bg-secondary/10 border-2 border-secondary/30 rounded-2xl p-6 mb-8 shadow-sm">

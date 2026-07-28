@@ -246,24 +246,29 @@ export async function POST(request: Request) {
       // Send Parent Receipt Email
       sendEmail({
         to: cleanEmail,
-        subject: `Consultation Booked - The Shadow Bridge [${generatedId}]`,
+        subject: `Consultation Booked - The Shadow Bridge [${bookingId}]`,
         type: 'registration',
         bodyHtml: `
           <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
           <p style="margin: 0 0 16px 0;">Thank you for booking a 1-on-1 consultation session for <strong>${serviceNeeded}</strong> support with Founder Pratibha Mishra.</p>
-          <p style="margin: 0 0 16px 0;">We have received your consultation fee of <strong>₹99</strong>.</p>
+          <p style="margin: 0 0 16px 0;">We have received your consultation fee payment of <strong>₹99</strong>.</p>
           
           <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+            <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: bold; color: #3B2A6B;">Your Booking ID: <span style="font-family: monospace; color: #B0206B; font-size: 16px;">${bookingId}</span></p>
             <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Booking ID:</strong> ${bookingId}</p>
             <p style="margin: 0 0 8px 0;"><strong>Service Selected:</strong> ${serviceNeeded}</p>
             <p style="margin: 0;"><strong>Status:</strong> Consultation Booked (Pending Call)</p>
           </div>
 
+          <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 14px 18px; border-radius: 4px; font-size: 13px; color: #5C4300; leading-relaxed: true;">
+            <strong>Important Instruction:</strong> Please save this <strong>Booking ID (${bookingId})</strong> or <strong>Registration ID (${generatedId})</strong> — you will need it, along with your registered phone or email, to check your consultation status or access your registration form once your consultation call is complete.
+          </div>
+
           <p style="margin: 0 0 20px 0;">Founder Pratibha Mishra will call you directly within 24 hours to conduct your assessment consultation.</p>
-          <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
-            You can track your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using Registration ID: <strong>${generatedId}</strong>.
-          </p>
+
+          <div style="margin: 24px 0;">
+            <a href="${protocol}://${host}/check-status?regId=${bookingId}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Check Consultation Status & Open Form</a>
+          </div>
         `
       }).catch(err => console.error('Parent consultation email fail:', err));
 

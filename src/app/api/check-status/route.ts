@@ -72,11 +72,11 @@ export async function POST(request: Request) {
       });
     }
 
-    // 3. Check Parent Shadow Requests table
+    // 3. Check Parent Shadow Requests table (by registration_id or notes)
     const { data: parentShadow } = await supabase
       .from('parent_shadow_requests')
       .select('*')
-      .ilike('registration_id', cleanRegId)
+      .or(`registration_id.ilike.%${cleanRegId}%,notes.ilike.%${cleanRegId}%`)
       .maybeSingle();
 
     if (parentShadow && isContactMatch(parentShadow.email, parentShadow.phone)) {
@@ -99,11 +99,11 @@ export async function POST(request: Request) {
       });
     }
 
-    // 4. Check Parent Tutor Requests table
+    // 4. Check Parent Tutor Requests table (by registration_id or notes)
     const { data: parentTutor } = await supabase
       .from('parent_tutor_requests')
       .select('*')
-      .ilike('registration_id', cleanRegId)
+      .or(`registration_id.ilike.%${cleanRegId}%,notes.ilike.%${cleanRegId}%`)
       .maybeSingle();
 
     if (parentTutor && isContactMatch(parentTutor.email, parentTutor.phone)) {
@@ -126,8 +126,44 @@ export async function POST(request: Request) {
       });
     }
 
+    // 5. Check Bookings table (for standalone consultation bookings)
+    const { data: booking } = await supabase
+      .from('bookings')
+      .select('*')
+      .ilike('booking_id', `%${cleanRegId}%`)
+      .maybeSingle();
+
+    if (booking && isContactMatch(booking.email, booking.phone)) {
+      const isTutor = booking.requirement?.toLowerCase().includes('tutor');
+      const msg = (booking.message || '').toLowerCase();
+      const isCompleted = msg.includes('completed') || msg.includes('analysis') || msg.includes('unlocked');
+      
+      const record = {
+        id: booking.id,
+        bookingId: booking.booking_id,
+        registrationId: booking.booking_id,
+        parentName: booking.name,
+        name: booking.name,
+        email: booking.email,
+        phone: booking.phone,
+        city: booking.city,
+        serviceNeeded: booking.requirement,
+        status: isCompleted ? 'Consultation Completed' : 'Consultation Booked',
+        createdAt: booking.created_at
+      };
+
+      return NextResponse.json({
+        success: true,
+        role: 'parent',
+        subType: isTutor ? 'tutor' : 'shadow',
+        isConsultationBookingOnly: true,
+        isCompleted,
+        record
+      });
+    }
+
     return NextResponse.json(
-      { error: "We couldn't find a matching registration. Please check your Registration ID and contact details, or reach out to us at theshadowbridgesupport@gmail.com." },
+      { error: "We couldn't find a matching record. Please verify your Registration ID or Booking ID and registered phone/email." },
       { status: 404 }
     );
   } catch (error: any) {
