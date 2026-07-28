@@ -41,7 +41,7 @@ export async function GET(request: Request) {
       const { data: ps } = await supabase
         .from('parent_shadow_requests')
         .select('*')
-        .or(`registration_id.ilike.${cleanRegId},id.ilike.${cleanRegId}`)
+        .ilike('registration_id', `%${cleanRegId}%`)
         .maybeSingle();
       if (ps) {
         record = ps;
@@ -55,7 +55,7 @@ export async function GET(request: Request) {
       const { data: pt } = await supabase
         .from('parent_tutor_requests')
         .select('*')
-        .or(`registration_id.ilike.${cleanRegId},id.ilike.${cleanRegId}`)
+        .ilike('registration_id', `%${cleanRegId}%`)
         .maybeSingle();
       if (pt) {
         record = pt;
@@ -69,7 +69,7 @@ export async function GET(request: Request) {
       const { data: bk } = await supabase
         .from('bookings')
         .select('*')
-        .or(`booking_id.ilike.${cleanRegId},id.ilike.${cleanRegId}`)
+        .ilike('booking_id', `%${cleanRegId}%`)
         .maybeSingle();
       if (bk) {
         record = bk;
@@ -127,7 +127,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ success: false, status: 'Not Found' }, { status: 404 });
     }
 
-    const currentStatus = record.status || 'Consultation Booked';
+    const currentStatus = record.status || record.message || 'Consultation Booked';
     const isConsultationPaid = Boolean(record.consultation_paid || record.payment_status === 'paid');
     
     // Status flags
@@ -145,13 +145,13 @@ export async function GET(request: Request) {
     ];
 
     const getStatusIndex = (st: string) => {
-      const sLower = st.toLowerCase();
-      if (sLower.includes('booked')) return 0;
-      if (sLower.includes('completed') || sLower.includes('analysis')) return 1;
+      const sLower = (st || '').toLowerCase();
+      if (sLower.includes('completed') || sLower.includes('analysis') || sLower.includes('unlocked')) return 1;
       if (sLower.includes('submitted')) return 2;
       if (sLower.includes('paid') || sLower.includes('matching')) return 3;
       if (sLower.includes('proposed')) return 4;
-      return 1;
+      if (sLower.includes('booked')) return 0;
+      return 0;
     };
 
     const statusIdx = getStatusIndex(currentStatus);

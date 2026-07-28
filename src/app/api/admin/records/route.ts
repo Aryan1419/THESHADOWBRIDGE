@@ -293,6 +293,33 @@ export async function POST(request: Request) {
         await supabase.from('bookings').update({ message: 'Consultation Completed' }).eq('booking_id', bookingId);
       }
 
+      // If targetRecord is still missing, create a linked parent_shadow_requests record for legacy bookings
+      if (!targetRecord && bookingId) {
+        const { data: bk } = await supabase.from('bookings').select('*').eq('booking_id', bookingId).maybeSingle();
+        if (bk) {
+          const genRegId = `SB-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+          const isTutor = bk.requirement?.toLowerCase().includes('tutor');
+          const targetTab = isTutor ? 'parent_tutor_requests' : 'parent_shadow_requests';
+          
+          const newParent: any = {
+            id: (isTutor ? 'parent-tutor-' : 'parent-shadow-') + Math.random().toString(36).substring(2, 9),
+            parent_name: bk.name || 'Parent',
+            phone: bk.phone,
+            email: bk.email,
+            city: bk.city || 'Delhi NCR',
+            child_name: 'Pending Consultation',
+            child_grade: 'Pending Consultation',
+            status: 'Consultation Completed',
+            consultation_paid: true,
+            registration_id: genRegId,
+            notes: `Linked Booking ID: ${bookingId}`
+          };
+
+          const { data: createdP } = await supabase.from(targetTab).insert([newParent]).select().single();
+          if (createdP) targetRecord = createdP;
+        }
+      }
+
       // Send Email to Parent notifying them their form is unlocked
       const recipientEmail = email || targetRecord?.email;
       const parentName = targetRecord?.parent_name || targetRecord?.parentName || 'Parent';
