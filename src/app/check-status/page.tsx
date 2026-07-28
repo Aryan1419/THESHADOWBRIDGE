@@ -151,11 +151,11 @@ export default function CheckStatusPage() {
                     required
                     value={registrationId}
                     onChange={(e) => setRegistrationId(e.target.value)}
-                    placeholder="e.g. TSB-2026-9942 or TUT-2026-5541 or SB-2026-4491"
+                    placeholder="e.g. SB-2026-8714 or TSB-2026-9942 or TUT-2026-5541"
                     className="w-full pl-9 pr-4 py-3 bg-brand-light/50 border border-brand-border rounded-xl text-sm font-semibold text-brand-dark placeholder-brand-muted focus:outline-none focus:ring-2 focus:ring-primary/30 uppercase"
                   />
                 </div>
-                <p className="text-[11px] text-brand-muted mt-1.5">Found in your registration confirmation email.</p>
+                <p className="text-[11px] text-brand-muted mt-1.5">Found in your consultation or registration confirmation email.</p>
               </div>
 
               <div>
