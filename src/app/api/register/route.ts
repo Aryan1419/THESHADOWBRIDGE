@@ -264,6 +264,31 @@ export async function POST(request: Request) {
           `
         }).catch(err => console.error('Parent shadow payment email fail:', err));
 
+        // Admin alert email for Parent Shadow Teacher Request
+        sendEmail({
+          to: 'theshadowbridgesupport@gmail.com',
+          subject: `New Parent Inquiry (Shadow Teacher): ${parentName} [${generatedId}]`,
+          type: 'contact_alert',
+          bodyHtml: `
+            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Parent Inquiry (Shadow Teacher Support)</h2>
+            <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new parent has registered and paid the ₹99 consultation fee for Shadow Teacher support.</p>
+            
+            <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+              <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Parent Name:</strong> ${parentName} (${relationship || 'Parent'})</p>
+              <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${email}</p>
+              <p style="margin: 0 0 8px 0;"><strong>City / Location:</strong> ${city} (${homeLocation || 'N/A'})</p>
+              <p style="margin: 0 0 8px 0;"><strong>Child Name / Grade:</strong> ${childName} (${childGrade})</p>
+              <p style="margin: 0 0 8px 0;"><strong>Diagnosis:</strong> ${hasDiagnosis === 'Yes' ? diagnosis || 'Yes' : 'No'}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Difficulties:</strong> ${Array.isArray(difficulties) ? difficulties.join(', ') : (difficulties || 'None')}</p>
+              <p style="margin: 0;"><strong>Consultation Status:</strong> Paid ₹99 (Payment ID: ${razorpayPaymentId})</p>
+            </div>
+
+            <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to review this inquiry and schedule the consultation.</p>
+          `
+        }).catch(err => console.error('Admin parent shadow alert email fail:', err));
+
         return NextResponse.json({ success: true, type, registration_id: generatedId, record });
       } else {
         const record = {
@@ -350,6 +375,31 @@ export async function POST(request: Request) {
           `
         }).catch(err => console.error('Parent tutor payment email fail:', err));
 
+        // Admin alert email for Parent Home Tutor Request
+        sendEmail({
+          to: 'theshadowbridgesupport@gmail.com',
+          subject: `New Parent Inquiry (Home Tutor): ${parentName} [${generatedId}]`,
+          type: 'contact_alert',
+          bodyHtml: `
+            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Parent Inquiry (Home Tutor Support)</h2>
+            <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new parent has registered and paid the ₹99 consultation fee for Home Tutor support.</p>
+            
+            <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+              <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Parent Name:</strong> ${parentName} (${relationship || 'Parent'})</p>
+              <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${email}</p>
+              <p style="margin: 0 0 8px 0;"><strong>City / Location:</strong> ${city} (${homeLocation || 'N/A'})</p>
+              <p style="margin: 0 0 8px 0;"><strong>Child Name / Grade:</strong> ${childName} (${childGrade})</p>
+              <p style="margin: 0 0 8px 0;"><strong>Tutor Type Needed:</strong> ${tutorType || 'Academic Tuition'}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Subjects Required:</strong> ${Array.isArray(subjects) ? subjects.join(', ') : (subjects || 'All Subjects')}</p>
+              <p style="margin: 0;"><strong>Consultation Status:</strong> Paid ₹99 (Payment ID: ${razorpayPaymentId})</p>
+            </div>
+
+            <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to review this inquiry and begin tutor matchmaking.</p>
+          `
+        }).catch(err => console.error('Admin parent tutor alert email fail:', err));
+
         return NextResponse.json({ success: true, type, registration_id: generatedId, record });
       }
     } 
@@ -430,6 +480,32 @@ export async function POST(request: Request) {
         `
       }).catch(err => console.error('Shadow teacher registration email fail:', err));
 
+      // Admin alert email for Shadow Teacher Candidate Registration
+      sendEmail({
+        to: 'theshadowbridgesupport@gmail.com',
+        subject: `New Shadow Teacher Registration: ${name} [${generatedId}]`,
+        type: 'contact_alert',
+        bodyHtml: `
+          <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Shadow Teacher Candidate Registration</h2>
+          <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new educator has registered as a Shadow Teacher.</p>
+          
+          <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+            <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Candidate Name:</strong> ${name}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${email}</p>
+            <p style="margin: 0 0 8px 0;"><strong>City / Address:</strong> ${city} (${address || 'N/A'})</p>
+            <p style="margin: 0 0 8px 0;"><strong>Preferred Locations:</strong> ${preferredLocations || city}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Qualification:</strong> ${qualification} (${specialization || 'General'})</p>
+            <p style="margin: 0 0 8px 0;"><strong>Teaching Experience:</strong> ${experience}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Special Needs Experience:</strong> ${specialNeedsExp}</p>
+            <p style="margin: 0;"><strong>Work Preference:</strong> ${preferredWorkType} | Open to Travel: ${openToTravel}</p>
+          </div>
+
+          <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to review this candidate profile and schedule an interview assessment.</p>
+        `
+      }).catch(err => console.error('Admin shadow alert email fail:', err));
+
       return NextResponse.json({ success: true, type, registration_id: generatedId, record });
     }
 
@@ -494,6 +570,32 @@ export async function POST(request: Request) {
           <a href="${dashboardLink}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15); margin-bottom: 10px;">Go to Educator Dashboard</a>
         `
       }).catch(err => console.error('Tutor registration email fail:', err));
+
+      // Admin alert email for Home Tutor Candidate Registration
+      sendEmail({
+        to: 'theshadowbridgesupport@gmail.com',
+        subject: `New Tutor Registration: ${name} [${generatedId}]`,
+        type: 'contact_alert',
+        bodyHtml: `
+          <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Home Tutor Candidate Registration</h2>
+          <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new educator has registered as an Academic Home Tutor.</p>
+          
+          <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+            <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Candidate Name:</strong> ${name}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${email}</p>
+            <p style="margin: 0 0 8px 0;"><strong>City / Address:</strong> ${city} (${address || 'N/A'})</p>
+            <p style="margin: 0 0 8px 0;"><strong>Qualification:</strong> ${qualification} (${specialization || 'General'})</p>
+            <p style="margin: 0 0 8px 0;"><strong>Teaching Experience:</strong> ${experience}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Subjects Taught:</strong> ${Array.isArray(subjects) ? subjects.join(', ') : subjects}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Grades Taught:</strong> ${Array.isArray(grades) ? grades.join(', ') : grades}</p>
+            <p style="margin: 0;"><strong>Expected Salary / Mode:</strong> ${expectedSalary || 'N/A'} | ${mode || 'Offline'}</p>
+          </div>
+
+          <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to review this tutor profile and schedule an interview assessment.</p>
+        `
+      }).catch(err => console.error('Admin tutor alert email fail:', err));
 
       return NextResponse.json({ success: true, type, registration_id: generatedId, record });
     }
