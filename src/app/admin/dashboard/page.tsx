@@ -52,6 +52,15 @@ export default function AdminDashboard() {
   const [editStatus, setEditStatus] = useState('');
   const [editNotes, setEditNotes] = useState('');
   const [editMatchId, setEditMatchId] = useState('');
+  const [modalSuccessMsg, setModalSuccessMsg] = useState<string | null>(null);
+  const [modalErrorMsg, setModalErrorMsg] = useState<string | null>(null);
+
+  // Contact Reply States
+  const [replyModalContact, setReplyModalContact] = useState<any | null>(null);
+  const [replyMessageText, setReplyMessageText] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
+  const [replySuccessMsg, setReplySuccessMsg] = useState<string | null>(null);
+  const [replyErrorMsg, setReplyErrorMsg] = useState<string | null>(null);
 
   // Reviews moderation states
   const [reviews, setReviews] = useState<any[]>([]);
@@ -174,6 +183,8 @@ export default function AdminDashboard() {
     
     setUpdating(true);
     setToastLog(null);
+    setModalSuccessMsg(null);
+    setModalErrorMsg(null);
 
     const payload = {
       action: 'update_record',
@@ -195,9 +206,9 @@ export default function AdminDashboard() {
         body: JSON.stringify(payload)
       });
 
-      if (res.ok) {
-        const result = await res.json();
-        
+      const result = await res.json();
+
+      if (res.ok && result.success) {
         // Update local database state
         if (db) {
           const updatedCollection = [...(db[selectedRecord.type as keyof DatabaseSchema] as any[])];
@@ -217,24 +228,21 @@ export default function AdminDashboard() {
           }));
         }
 
-        // Show toast notification
+        setModalSuccessMsg('Changes saved successfully!');
         if (result.notificationLog) {
           setToastLog(result.notificationLog);
-          // Hide toast log after 5 seconds
-          setTimeout(() => setToastLog(null), 5000);
         }
+        setTimeout(() => setModalSuccessMsg(null), 4000);
+      } else {
+        setModalErrorMsg(result.error || 'Failed to save changes.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Update failed:', error);
+      setModalErrorMsg(error.message || 'Network error updating record.');
     } finally {
       setUpdating(false);
     }
   };
-
-  // Contact Reply States
-  const [replyModalContact, setReplyModalContact] = useState<any | null>(null);
-  const [replyMessageText, setReplyMessageText] = useState('');
-  const [sendingReply, setSendingReply] = useState(false);
 
   // Delete Record States
   const [deleteTarget, setDeleteTarget] = useState<{ type: string; id: string; name: string; label?: string } | null>(null);
@@ -306,6 +314,9 @@ export default function AdminDashboard() {
   const handleSendContactReply = async () => {
     if (!replyModalContact || !replyMessageText.trim()) return;
     setSendingReply(true);
+    setReplySuccessMsg(null);
+    setReplyErrorMsg(null);
+
     try {
       const token = localStorage.getItem('admin_token') || '';
       const res = await fetch('/api/admin/records', {
@@ -323,17 +334,29 @@ export default function AdminDashboard() {
 
       const data = await res.json();
       if (res.ok && data.success) {
+        setReplySuccessMsg(`Reply email sent successfully to ${replyModalContact.email}!`);
+        
+        if (db && db.contacts) {
+          const updatedContacts = db.contacts.map((c: any) => 
+            c.id === replyModalContact.id ? data.record : c
+          );
+          setDb(prev => ({ ...prev!, contacts: updatedContacts }));
+        }
+
         setToastLog(`[Reply Sent] Email sent to ${replyModalContact.email} & query status marked Responded.`);
-        setReplyModalContact(null);
-        setReplyMessageText('');
-        fetchDatabase();
-        setTimeout(() => setToastLog(null), 5000);
+        
+        setTimeout(() => {
+          setReplyModalContact(null);
+          setReplyMessageText('');
+          setReplySuccessMsg(null);
+          fetchDatabase();
+        }, 1800);
       } else {
-        alert(data.error || 'Failed to send reply email.');
+        setReplyErrorMsg(data.error || 'Failed to send reply email.');
       }
     } catch (err: any) {
       console.error('Failed to send contact reply:', err);
-      alert(err.message || 'Network error sending reply email.');
+      setReplyErrorMsg(err.message || 'Network error sending reply email.');
     } finally {
       setSendingReply(false);
     }
@@ -2130,6 +2153,20 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
+                {modalSuccessMsg && (
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl text-xs font-bold flex items-center gap-2 animate-fade-in-up">
+                    <CheckCircle size={16} className="text-emerald-600 flex-shrink-0" />
+                    <span>{modalSuccessMsg}</span>
+                  </div>
+                )}
+
+                {modalErrorMsg && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 text-rose-900 rounded-xl text-xs font-bold flex items-center gap-2 animate-fade-in-up">
+                    <AlertCircle size={16} className="text-rose-600 flex-shrink-0" />
+                    <span>{modalErrorMsg}</span>
+                  </div>
+                )}
+
                 <div className="flex gap-3 justify-end pt-2">
                   <button
                     type="button"
@@ -2261,6 +2298,20 @@ export default function AdminDashboard() {
                 className="w-full bg-white border border-brand-border rounded-2xl p-3.5 text-xs text-brand-dark focus:outline-none focus:ring-2 focus:ring-primary/40 leading-relaxed"
               />
             </div>
+
+            {replySuccessMsg && (
+              <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-900 rounded-xl text-xs font-bold flex items-center gap-2 animate-fade-in-up">
+                <CheckCircle size={16} className="text-emerald-600 flex-shrink-0" />
+                <span>{replySuccessMsg}</span>
+              </div>
+            )}
+
+            {replyErrorMsg && (
+              <div className="p-3 bg-rose-50 border border-rose-200 text-rose-900 rounded-xl text-xs font-bold flex items-center gap-2 animate-fade-in-up">
+                <AlertCircle size={16} className="text-rose-600 flex-shrink-0" />
+                <span>{replyErrorMsg}</span>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="flex justify-end items-center gap-3 pt-2">
