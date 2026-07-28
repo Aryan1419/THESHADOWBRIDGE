@@ -1486,19 +1486,33 @@ export default function AdminDashboard() {
                                 </span>
                               </td>
                               <td className="p-4 text-center">
-                                {isCompleted ? (
-                                  <span className="text-[10px] font-bold text-emerald-600 flex items-center justify-center gap-1">
-                                    <CheckCircle size={12} /> Form Unlocked
-                                  </span>
-                                ) : (
+                                <div className="flex items-center justify-center gap-2">
+                                  {isCompleted ? (
+                                    <span className="text-[10px] font-bold text-emerald-600 flex items-center justify-center gap-1">
+                                      <CheckCircle size={12} /> Form Unlocked
+                                    </span>
+                                  ) : (
+                                    <button
+                                      onClick={() => handleMarkConsultationCompleted(bk)}
+                                      disabled={updating}
+                                      className="px-3 py-1.5 bg-primary text-white hover:bg-primary/95 rounded-xl font-bold text-[10px] transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                                    >
+                                      Mark Consultation Completed
+                                    </button>
+                                  )}
                                   <button
-                                    onClick={() => handleMarkConsultationCompleted(bk)}
-                                    disabled={updating}
-                                    className="px-3 py-1.5 bg-primary text-white hover:bg-primary/95 rounded-xl font-bold text-[10px] transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                                    onClick={() => setDeleteTarget({
+                                      type: 'bookings',
+                                      id: bk.id,
+                                      name: bk.bookingId || bk.booking_id || 'Booking',
+                                      label: `Booking ${bk.bookingId || bk.booking_id} (${bk.name})`
+                                    })}
+                                    className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 border border-rose-200 rounded-lg transition-all cursor-pointer"
+                                    title="Delete Booking Record"
                                   >
-                                    Mark Consultation Completed
+                                    <Trash2 size={13} />
                                   </button>
-                                )}
+                                </div>
                               </td>
                             </tr>
                           );

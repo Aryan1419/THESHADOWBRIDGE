@@ -126,7 +126,8 @@ export async function POST(request: Request) {
         'shadow_teachers',
         'parent_shadow_requests',
         'parent_tutor_requests',
-        'reviews'
+        'reviews',
+        'bookings'
       ];
 
       if (!allowedTypes.includes(type)) {
