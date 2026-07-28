@@ -279,31 +279,63 @@ export default function CheckStatusPage() {
                 </div>
               </div>
 
-              {/* UNLOCKED REGISTRATION FORM CTA (FOR PARENTS WITH COMPLETED CONSULTATION) */}
-              {(currentStatus.toLowerCase().includes('completed') || currentStatus.toLowerCase().includes('unlocked') || recordData.isCompleted) && (
-                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-2xl p-6 mb-8 shadow-md">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div>
-                      <span className="px-3 py-1 bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold uppercase rounded-full tracking-wider">
-                        ✓ Consultation Completed • Form Unlocked
-                      </span>
-                      <h3 className="font-serif text-lg font-bold text-emerald-950 mt-2">
-                        Child Registration Form Unlocked!
-                      </h3>
-                      <p className="text-xs text-emerald-900 mt-1 leading-relaxed">
-                        Your 1-on-1 consultation call is complete. Please provide your child's specific developmental and school details to proceed with matching.
-                      </p>
-                    </div>
+              {/* DYNAMIC NEXT ACTION BANNER FOR PARENT FLOW */}
+              {role === 'parent' && (
+                <>
+                  {/* 1. Status: Consultation Completed -> Continue to Registration Form */}
+                  {(currentStatus.toLowerCase().includes('consultation completed') || (currentStatus.toLowerCase().includes('completed') && !currentStatus.toLowerCase().includes('submitted'))) && (
+                    <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-2xl p-6 mb-8 shadow-md">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                          <span className="px-3 py-1 bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold uppercase rounded-full tracking-wider">
+                            ✓ Step 4 • Consultation Completed
+                          </span>
+                          <h3 className="font-serif text-lg font-bold text-emerald-950 mt-2">
+                            Child Registration Form Unlocked!
+                          </h3>
+                          <p className="text-xs text-emerald-900 mt-1 leading-relaxed">
+                            Your 1-on-1 consultation call is complete. Please provide your child's specific developmental and school details to proceed with matching.
+                          </p>
+                        </div>
 
-                    <a
-                      href={`/register/parent/form?regId=${encodeURIComponent(record.registrationId || record.registration_id || record.bookingId || record.booking_id || '')}`}
-                      className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-2 whitespace-nowrap"
-                    >
-                      <span>Open Registration Form</span>
-                      <ArrowRight size={16} />
-                    </a>
-                  </div>
-                </div>
+                        <a
+                          href={`/register/parent/form?regId=${encodeURIComponent(record.registrationId || record.registration_id || record.bookingId || record.booking_id || '')}`}
+                          className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-2 whitespace-nowrap"
+                        >
+                          <span>Continue to Registration Form</span>
+                          <ArrowRight size={16} />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 2. Status: Registration Submitted -> Continue to Placement Fee Payment */}
+                  {currentStatus.toLowerCase().includes('registration submitted') && (
+                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-6 mb-8 shadow-md">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                          <span className="px-3 py-1 bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-extrabold uppercase rounded-full tracking-wider">
+                            ⚡ Step 5 • Form Received
+                          </span>
+                          <h3 className="font-serif text-lg font-bold text-amber-950 mt-2">
+                            Ready for Educator Matching!
+                          </h3>
+                          <p className="text-xs text-amber-900 mt-1 leading-relaxed">
+                            Your child details have been saved. Pay the placement fee to lock your requirement and initiate educator shortlisting.
+                          </p>
+                        </div>
+
+                        <a
+                          href={`/register/parent/placement-fee?regId=${encodeURIComponent(record.registrationId || record.registration_id || record.bookingId || record.booking_id || '')}`}
+                          className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-2 whitespace-nowrap"
+                        >
+                          <span>Continue to Placement Fee Payment</span>
+                          <ArrowRight size={16} />
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
 
               {/* CANDIDATE CUSTOM MESSAGE FROM ADMIN (IF PROVIDED) */}
