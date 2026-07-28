@@ -458,12 +458,42 @@ export default function TutorRegister() {
                             className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
                           >
                             <option value="">Select Qualification</option>
-                            <option value="B.Ed">B.Ed / M.Ed</option>
-                            <option value="Graduate (B.Sc / B.A / B.Com)">Graduate (B.Sc / B.A / B.Com)</option>
-                            <option value="Post Graduate (M.Sc / M.A)">Post Graduate (M.Sc / M.A)</option>
-                            <option value="B.Ed Special Education">B.Ed Special Education</option>
-                            <option value="Diploma in Special Education">Diploma in Special Education</option>
-                            <option value="Other Degree">Other Degree</option>
+                            
+                            <optgroup label="Higher Secondary">
+                              <option value="12th Pass / Higher Secondary">12th Pass / Higher Secondary</option>
+                            </optgroup>
+
+                            <optgroup label="Special Education &amp; Psychology">
+                              <option value="B.Ed Special Education">B.Ed Special Education</option>
+                              <option value="M.Ed Special Education">M.Ed Special Education</option>
+                              <option value="Diploma in Special Education">Diploma in Special Education</option>
+                              <option value="B.A. / M.A. in Psychology">B.A. / M.A. in Psychology</option>
+                              <option value="Graduate with Special Needs Certifications">Graduate with Special Needs Certifications</option>
+                            </optgroup>
+
+                            <optgroup label="Graduation Degrees">
+                              <option value="B.A. (Bachelor of Arts)">B.A. (Bachelor of Arts)</option>
+                              <option value="B.Sc. (Bachelor of Science)">B.Sc. (Bachelor of Science)</option>
+                              <option value="B.Com. (Bachelor of Commerce)">B.Com. (Bachelor of Commerce)</option>
+                              <option value="BBA (Bachelor of Business Administration)">BBA (Bachelor of Business Administration)</option>
+                              <option value="BCA (Bachelor of Computer Applications)">BCA (Bachelor of Computer Applications)</option>
+                              <option value="B.Tech (Bachelor of Technology)">B.Tech (Bachelor of Technology)</option>
+                              <option value="B.Ed (General)">B.Ed (General)</option>
+                            </optgroup>
+
+                            <optgroup label="Post Graduation Degrees">
+                              <option value="M.A. (Master of Arts)">M.A. (Master of Arts)</option>
+                              <option value="M.Sc. (Master of Science)">M.Sc. (Master of Science)</option>
+                              <option value="M.Com. (Master of Commerce)">M.Com. (Master of Commerce)</option>
+                              <option value="MBA (Master of Business Administration)">MBA (Master of Business Administration)</option>
+                              <option value="MCA (Master of Computer Applications)">MCA (Master of Computer Applications)</option>
+                              <option value="M.Tech (Master of Technology)">M.Tech (Master of Technology)</option>
+                              <option value="M.Ed (General)">M.Ed (General)</option>
+                            </optgroup>
+
+                            <optgroup label="Others">
+                              <option value="Other Qualification">Other Qualification</option>
+                            </optgroup>
                           </select>
                         </div>
 
