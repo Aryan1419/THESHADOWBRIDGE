@@ -302,8 +302,6 @@ export default function BookConsultation() {
                           <option value="">Select Option</option>
                           <option value="Classroom Shadow Teacher">Classroom Shadow Teacher</option>
                           <option value="Academic Home Tutor">Academic Home Tutor</option>
-                          <option value="Special Education Remedial Support">Special Education Remedial Support</option>
-                          <option value="Behavioral Consultation Only">Behavioral Consultation Only</option>
                         </select>
                       </div>
                     </div>
