@@ -51,6 +51,7 @@ export default function AdminDashboard() {
   // Edit states inside details modal
   const [editStatus, setEditStatus] = useState('');
   const [editNotes, setEditNotes] = useState('');
+  const [editCandidateMessage, setEditCandidateMessage] = useState('');
   const [editMatchId, setEditMatchId] = useState('');
   const [modalSuccessMsg, setModalSuccessMsg] = useState<string | null>(null);
   const [modalErrorMsg, setModalErrorMsg] = useState<string | null>(null);
@@ -198,6 +199,7 @@ export default function AdminDashboard() {
       id: selectedRecord.data.id,
       status: editStatus,
       notes: editNotes,
+      candidateMessage: editCandidateMessage,
       suggestedMatchId: editMatchId
     };
 
@@ -2148,15 +2150,38 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider">Internal Notes / Comments</label>
+                    <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider flex items-center justify-between">
+                      <span>Internal Notes / Comments</span>
+                      <span className="text-[9px] text-rose-500 font-bold lowercase">(private - admin eyes only)</span>
+                    </label>
                     <textarea
                       rows={1}
                       value={editNotes}
                       onChange={(e) => setEditNotes(e.target.value)}
-                      placeholder="Add administrative review notes..."
+                      placeholder="Private administrative notes..."
                       className="p-2 border border-brand-border bg-white rounded-xl text-xs text-brand-dark focus:outline-none"
                     />
                   </div>
+                </div>
+
+                {/* Candidate Message (Emailed directly to recipient) */}
+                <div className="flex flex-col gap-1 border-t border-brand-border/40 pt-3">
+                  <label className="text-[10px] font-bold text-primary uppercase tracking-wider flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <Mail size={12} className="text-secondary" />
+                      Message to Candidate / User
+                    </span>
+                    <span className="text-[9px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      emailed to recipient on save
+                    </span>
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={editCandidateMessage}
+                    onChange={(e) => setEditCandidateMessage(e.target.value)}
+                    placeholder="Type custom details to include in email (e.g. 'Your interview is scheduled for July 30th at 4 PM via Google Meet: https://meet.google.com/abc-xyz')..."
+                    className="p-2.5 border border-primary/20 bg-white rounded-xl text-xs text-brand-dark focus:outline-none focus:ring-2 focus:ring-primary/30 leading-relaxed font-medium"
+                  />
                 </div>
 
                 {modalSuccessMsg && (

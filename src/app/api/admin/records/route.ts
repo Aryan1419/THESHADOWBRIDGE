@@ -109,7 +109,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { action, type, id, status, notes, suggestedMatchId } = body;
+    const { action, type, id, status, notes, candidateMessage, suggestedMatchId } = body;
 
     if (action === 'delete_record') {
       if (!type || !id) {
@@ -273,49 +273,71 @@ export async function POST(request: Request) {
       }
 
       const record = toCamelCase(updatedRecord);
+      const regId = updatedRecord.registration_id || record.registrationId || record.id || '';
       const notificationUser = record.name || record.parentName || 'User';
-      const notificationContact = record.phone || record.email || '';
       
-      // Send Email Notification asynchronously if status is updated
+      let notificationLog = '';
+
+      // Send Email Notification synchronously via Resend if status is updated
       if (status && record.email) {
         const host = request.headers.get('host') || 'localhost:3000';
         const protocol = host.includes('localhost') ? 'http' : 'https';
-        const dashboardLink = `${protocol}://${host}/dashboard?regId=${record.registrationId}`;
+        const dashboardLink = `${protocol}://${host}/dashboard?regId=${regId}`;
 
         if (status === 'Match Proposed') {
           // Trigger Match Ready Payment Request Email
           const amountDue = type === 'parent_shadow_requests' ? 5000 : 3000;
           const childName = record.childName || 'your child';
           
-          sendEmail({
+          const emailRes = await sendEmail({
             to: record.email,
-            subject: 'Your Match is Ready! - The Shadow Bridge',
+            subject: `Your Match is Ready! - The Shadow Bridge [${regId}]`,
             type: 'match_ready',
             bodyHtml: `
               <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${notificationUser},</h2>
               <p style="margin: 0 0 16px 0;">We are excited to share that we have successfully proposed a background-verified educational candidate matching trial run for <strong>${childName}</strong>!</p>
-              <p style="margin: 0 0 16px 0;">A detailed profile guideline is now available on your parent dashboard. To lock in this match placement and begin educator trials sessions, please review the profile and complete the program onboarding fee of <strong>₹${amountDue.toLocaleString('en-IN')}</strong>.</p>
+              <p style="margin: 0 0 16px 0;">A detailed profile guideline is now available on your parent dashboard. To lock in this match placement and begin educator trial sessions, please review the profile and complete the program onboarding fee of <strong>₹${amountDue.toLocaleString('en-IN')}</strong>.</p>
               
               <div style="background-color: #F3EEF8; padding: 20px; border-radius: 12px; margin: 24px 0; border: 1px solid #E6E2EB; text-align: center;">
                 <h3 style="margin: 0 0 8px 0; color: #3B2A6B; font-size: 16px;">Program Placement Details</h3>
                 <p style="margin: 0 0 16px 0; font-size: 13px; color: #6A5B7C;">
                   <strong>Onboarding Fee:</strong> ₹${amountDue.toLocaleString('en-IN')}<br />
-                  <strong>Registration ID:</strong> ${record.registrationId}
+                  <strong>Registration ID:</strong> ${regId}
                 </p>
                 <a href="${dashboardLink}" style="display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Pay Placement Fee & Review Match</a>
               </div>
             `
-          }).catch(err => console.error('Match proposed email trigger fail:', err));
+          });
+
+          if (emailRes.success) {
+            notificationLog = `[Email Sent via Resend] Match notification email delivered to ${notificationUser} (${record.email}).`;
+          } else {
+            notificationLog = `[Email Delivery Warning] Record updated, but email delivery to ${record.email} failed: ${emailRes.error}`;
+          }
         } else {
-          // Trigger Generic Status Change Email
-          const explanation = STATUS_EXPLANATIONS[status] || `We have updated your record status to "${status}".`;
-          sendEmail({
+          // Trigger Generic Status Change Email with plain-English explanation & optional Candidate Message
+          const explanation = STATUS_EXPLANATIONS[status] || `We have updated your application status to "${status}".`;
+          const cleanCandidateMsg = candidateMessage ? candidateMessage.trim() : '';
+
+          let customMessageBlock = '';
+          if (cleanCandidateMsg) {
+            customMessageBlock = `
+              <div style="background-color: #F3EEF8; border-left: 4px solid #B0206B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+                <p style="margin: 0 0 8px 0; font-size: 13px; color: #B0206B; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Message from Administration</p>
+                <div style="margin: 0; font-size: 14px; line-height: 1.6; color: #2D253A; font-weight: 500;">
+                  ${cleanCandidateMsg.replace(/\n/g, '<br />')}
+                </div>
+              </div>
+            `;
+          }
+
+          const emailRes = await sendEmail({
             to: record.email,
-            subject: 'Update on Your Application - The Shadow Bridge',
+            subject: `Update on Your Application - The Shadow Bridge [${regId}]`,
             type: 'status_change',
             bodyHtml: `
               <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${notificationUser},</h2>
-              <p style="margin: 0 0 16px 0;">This is an update regarding your request or application under Registration ID <strong>${record.registrationId}</strong>.</p>
+              <p style="margin: 0 0 16px 0;">This is an update regarding your request or application under Registration ID <strong>${regId}</strong>.</p>
               
               <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
                 <p style="margin: 0 0 8px 0; font-size: 13px; color: #6A5B7C; font-weight: bold;">New Application Status</p>
@@ -323,19 +345,27 @@ export async function POST(request: Request) {
                 <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #2D253A;">${explanation}</p>
               </div>
 
+              ${customMessageBlock}
+
               <p style="margin: 20px 0 0 0;">You can track real-time program updates and view next steps guidelines directly on your user dashboard:</p>
               <a href="${dashboardLink}" style="display: inline-block; padding: 10px 20px; background: #3B2A6B; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 13px; margin-top: 12px;">View Dashboard Details</a>
             `
-          }).catch(err => console.error('Status change email trigger fail:', err));
-        }
-      }
+          });
 
-      const statusLog = `[Email/SMS Notification] A notification has been triggered to ${notificationUser} (${notificationContact}) regarding status change to "${status || record.status}".`;
+          if (emailRes.success) {
+            notificationLog = `[Email Sent via Resend] Status notification email ${cleanCandidateMsg ? 'with custom message ' : ''}delivered to ${notificationUser} (${record.email}) for status "${status}".`;
+          } else {
+            notificationLog = `[Email Delivery Warning] Record updated, but status email to ${record.email} failed: ${emailRes.error}`;
+          }
+        }
+      } else {
+        notificationLog = `Record status set to "${status || record.status}".`;
+      }
 
       return NextResponse.json({ 
         success: true, 
         record,
-        notificationLog: statusLog
+        notificationLog
       });
     }
 
