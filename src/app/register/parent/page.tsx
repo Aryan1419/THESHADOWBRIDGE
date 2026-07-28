@@ -1217,7 +1217,7 @@ export default function ParentRegister() {
                               </div>
                               <p className="text-[10px] text-brand-muted mt-2 leading-relaxed flex gap-1">
                                 <Info size={12} className="text-secondary flex-shrink-0 mt-0.5" />
-                                <span>The placement fee of {path === 'shadow' ? '₹5,000' : '₹3,000'} applies only after a match is successfully made.</span>
+                                <span>Placement fees of {path === 'shadow' ? '₹5,000' : '₹3,000'} is separate from the initial ₹99 consultation and are payable after the consultation, before the candidate search process begins.</span>
                               </p>
                               {process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.startsWith('rzp_test') && (
                                 <div className="mt-3.5 bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-[10px] font-bold text-center flex items-center justify-center gap-1.5">
