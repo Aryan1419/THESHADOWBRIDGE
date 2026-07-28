@@ -51,13 +51,7 @@ export default function ShadowTeacherRegister() {
     comfortableAreas: [] as string[], // ASD, ADHD, Learning Disabilities, Down Syndrome, Physical Disabilities, Others
     otherComfortable: '',
     openToTravel: '', // Yes/No
-    preferredWorkType: '', // Full-time, Part-time, Flexible
-
-    // Step 4: Documents
-    aadharCard: null as File | null,
-    qualificationCert: null as File | null,
-    experienceCert: null as File | null,
-    profilePhoto: null as File | null
+    preferredWorkType: '' // Full-time, Part-time, Flexible
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -107,40 +101,6 @@ export default function ShadowTeacherRegister() {
     }));
   };
 
-  // File Upload Handlers & Validations
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fieldName: 'aadharCard' | 'qualificationCert' | 'experienceCert' | 'profilePhoto') => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Check size limit: 2MB = 2 * 1024 * 1024 bytes
-    if (file.size > 2 * 1024 * 1024) {
-      alert(`${file.name} exceeds the 2MB size limit.`);
-      e.target.value = '';
-      return;
-    }
-
-    // Check extensions
-    const fileExt = file.name.split('.').pop()?.toLowerCase();
-    const allowedExts = fieldName === 'profilePhoto' ? ['jpg', 'jpeg', 'png'] : ['jpg', 'jpeg', 'png', 'pdf'];
-    if (!fileExt || !allowedExts.includes(fileExt)) {
-      alert(`${file.name} has an invalid extension. Allowed: ${allowedExts.join(', ')}`);
-      e.target.value = '';
-      return;
-    }
-
-    setFormData(prev => ({
-      ...prev,
-      [fieldName]: file
-    }));
-  };
-
-  const handleRemoveFile = (fieldName: 'aadharCard' | 'qualificationCert' | 'experienceCert' | 'profilePhoto') => {
-    setFormData(prev => ({
-      ...prev,
-      [fieldName]: null
-    }));
-  };
-
   // Step Validation Check
   const isStepValid = (stepIndex: number) => {
     switch (stepIndex) {
@@ -151,8 +111,6 @@ export default function ShadowTeacherRegister() {
       case 3:
         return !!(formData.specialNeedsExp && formData.comfortableAreas.length > 0 && formData.openToTravel && formData.preferredWorkType && (!formData.comfortableAreas.includes('Others') || formData.otherComfortable));
       case 4:
-        return !!(formData.aadharCard && formData.qualificationCert && formData.profilePhoto);
-      case 5:
         return confirmSubmit && agreeTerms;
       default:
         return true;
@@ -199,90 +157,7 @@ export default function ShadowTeacherRegister() {
 
     setLoading(true);
 
-    let aadharCardUrl = '';
-    let qualificationCertUrl = '';
-    let experienceCertUrl = '';
-    let profilePhotoUrl = '';
-
-    let aadharCardName = '';
-    let qualificationCertName = '';
-    let experienceCertName = '';
-    let profilePhotoName = '';
-
     try {
-      // Upload attached files to Supabase Storage
-      if (isSupabaseConfigured) {
-        const sanitizeFileName = (origName: string) => origName.replace(/[^a-zA-Z0-9._-]/g, '_');
-
-        if (formData.aadharCard) {
-          const cleanName = sanitizeFileName(formData.aadharCard.name);
-          aadharCardName = cleanName;
-          const filePath = `shadow-teachers/${cleanName}`;
-          
-          const { error: uploadErr } = await supabase.storage
-            .from('documents')
-            .upload(filePath, formData.aadharCard, { upsert: true });
-
-          if (uploadErr) {
-            console.error('Aadhar upload error:', uploadErr);
-            throw new Error(`Failed to upload ID Proof (${formData.aadharCard.name}): ${uploadErr.message}`);
-          }
-          const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
-          aadharCardUrl = pubData.publicUrl;
-        }
-
-        if (formData.qualificationCert) {
-          const cleanName = sanitizeFileName(formData.qualificationCert.name);
-          qualificationCertName = cleanName;
-          const filePath = `shadow-teachers/${cleanName}`;
-
-          const { error: uploadErr } = await supabase.storage
-            .from('documents')
-            .upload(filePath, formData.qualificationCert, { upsert: true });
-
-          if (uploadErr) {
-            console.error('Qualification cert upload error:', uploadErr);
-            throw new Error(`Failed to upload Qualification Certificate (${formData.qualificationCert.name}): ${uploadErr.message}`);
-          }
-          const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
-          qualificationCertUrl = pubData.publicUrl;
-        }
-
-        if (formData.experienceCert) {
-          const cleanName = sanitizeFileName(formData.experienceCert.name);
-          experienceCertName = cleanName;
-          const filePath = `shadow-teachers/${cleanName}`;
-
-          const { error: uploadErr } = await supabase.storage
-            .from('documents')
-            .upload(filePath, formData.experienceCert, { upsert: true });
-
-          if (uploadErr) {
-            console.error('Experience cert upload error:', uploadErr);
-            throw new Error(`Failed to upload Experience Certificate (${formData.experienceCert.name}): ${uploadErr.message}`);
-          }
-          const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
-          experienceCertUrl = pubData.publicUrl;
-        }
-
-        if (formData.profilePhoto) {
-          const cleanName = sanitizeFileName(formData.profilePhoto.name);
-          profilePhotoName = cleanName;
-          const filePath = `shadow-teachers/${cleanName}`;
-
-          const { error: uploadErr } = await supabase.storage
-            .from('documents')
-            .upload(filePath, formData.profilePhoto, { upsert: true });
-
-          if (uploadErr) {
-            console.error('Profile photo upload error:', uploadErr);
-            throw new Error(`Failed to upload Profile Photo (${formData.profilePhoto.name}): ${uploadErr.message}`);
-          }
-          const { data: pubData } = supabase.storage.from('documents').getPublicUrl(filePath);
-          profilePhotoUrl = pubData.publicUrl;
-        }
-      }
-
       const payload = {
         type: 'shadow',
         name: formData.name,
@@ -303,15 +178,15 @@ export default function ShadowTeacherRegister() {
         openToTravel: formData.openToTravel,
         preferredWorkType: formData.preferredWorkType,
         
-        aadharCardName: aadharCardName || formData.aadharCard?.name || '',
-        qualificationCertName: qualificationCertName || formData.qualificationCert?.name || '',
-        experienceCertName: experienceCertName || formData.experienceCert?.name || '',
-        profilePhotoName: profilePhotoName || formData.profilePhoto?.name || '',
+        aadharCardName: '',
+        qualificationCertName: '',
+        experienceCertName: '',
+        profilePhotoName: '',
 
-        aadharCardUrl,
-        qualificationCertUrl,
-        experienceCertUrl,
-        profilePhotoUrl
+        aadharCardUrl: '',
+        qualificationCertUrl: '',
+        experienceCertUrl: '',
+        profilePhotoUrl: ''
       };
 
       const res = await fetch('/api/register', {
@@ -350,19 +225,10 @@ export default function ShadowTeacherRegister() {
     }
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
   const stepsList = [
     "Personal Details",
     "Education & Experience",
     "Professional Details",
-    "Documents Upload",
     "Review & Submit"
   ];
 
@@ -383,7 +249,7 @@ export default function ShadowTeacherRegister() {
                 Register as Shadow Teacher
               </h1>
               <p className="text-brand-muted text-sm sm:text-base max-w-md mx-auto">
-                Join our premium special education placement pool. Complete the 5-step registration.
+                Join our premium special education placement pool. Complete the 4-step registration.
               </p>
             </div>
           )}
@@ -915,209 +781,16 @@ export default function ShadowTeacherRegister() {
                       </motion.div>
                     )}
 
-                    {/* STEP 4: Documents Upload */}
+                    {/* STEP 4: Review & Submit */}
                     {step === 4 && (
                       <motion.div
                         key="step-4"
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
-                        className="space-y-5"
-                      >
-                        <h3 className="font-serif font-bold text-primary text-lg border-b border-brand-border pb-2 mb-4">Documents Upload</h3>
-                        
-                        <p className="text-xs text-brand-muted">
-                          Please attach scanned copies of credentials below. Allowed types: **PDF, JPG, PNG** (Max size: **2MB** each). For Profile Photo: **JPG, PNG** only.
-                        </p>
-
-                        {/* File Input 1: Aadhar Card */}
-                        <div className="space-y-2 border border-brand-border bg-brand-light/20 p-4 rounded-2xl">
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs font-bold text-brand-dark uppercase tracking-wider">Aadhar Card / ID Proof *</span>
-                            {formData.aadharCard && (
-                              <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
-                                Attached
-                              </span>
-                            )}
-                          </div>
-                          
-                          {formData.aadharCard ? (
-                            <div className="flex items-center justify-between bg-white border border-brand-border p-3 rounded-xl">
-                              <div className="flex items-center gap-2 overflow-hidden mr-2">
-                                <FileText size={18} className="text-primary flex-shrink-0" />
-                                <div className="text-left overflow-hidden">
-                                  <p className="text-xs font-bold text-brand-dark truncate">{formData.aadharCard.name}</p>
-                                  <p className="text-[10px] text-brand-muted">{formatFileSize(formData.aadharCard.size)}</p>
-                                </div>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveFile('aadharCard')}
-                                className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg cursor-pointer"
-                                title="Remove File"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="relative border border-dashed border-brand-border bg-white rounded-xl p-4 flex flex-col items-center justify-center hover:bg-brand-light/30 transition-all cursor-pointer">
-                              <input
-                                type="file"
-                                accept=".pdf,.jpg,.jpeg,.png"
-                                onChange={(e) => handleFileChange(e, 'aadharCard')}
-                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                              />
-                              <Upload className="text-brand-muted mb-1.5" size={20} />
-                              <span className="text-xs font-bold text-primary">Click to upload ID Proof</span>
-                              <span className="text-[10px] text-brand-muted mt-0.5">PDF, JPG, PNG (Max 2MB)</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* File Input 2: Qualification Certificate */}
-                        <div className="space-y-2 border border-brand-border bg-brand-light/20 p-4 rounded-2xl">
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs font-bold text-brand-dark uppercase tracking-wider">Highest Qualification Certificate *</span>
-                            {formData.qualificationCert && (
-                              <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
-                                Attached
-                              </span>
-                            )}
-                          </div>
-                          
-                          {formData.qualificationCert ? (
-                            <div className="flex items-center justify-between bg-white border border-brand-border p-3 rounded-xl">
-                              <div className="flex items-center gap-2 overflow-hidden mr-2">
-                                <FileText size={18} className="text-primary flex-shrink-0" />
-                                <div className="text-left overflow-hidden">
-                                  <p className="text-xs font-bold text-brand-dark truncate">{formData.qualificationCert.name}</p>
-                                  <p className="text-[10px] text-brand-muted">{formatFileSize(formData.qualificationCert.size)}</p>
-                                </div>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveFile('qualificationCert')}
-                                className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg cursor-pointer"
-                                title="Remove File"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="relative border border-dashed border-brand-border bg-white rounded-xl p-4 flex flex-col items-center justify-center hover:bg-brand-light/30 transition-all cursor-pointer">
-                              <input
-                                type="file"
-                                accept=".pdf,.jpg,.jpeg,.png"
-                                onChange={(e) => handleFileChange(e, 'qualificationCert')}
-                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                              />
-                              <Upload className="text-brand-muted mb-1.5" size={20} />
-                              <span className="text-xs font-bold text-primary">Click to upload Qualification Certificate</span>
-                              <span className="text-[10px] text-brand-muted mt-0.5">PDF, JPG, PNG (Max 2MB)</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* File Input 3: Experience Certificate */}
-                        <div className="space-y-2 border border-brand-border bg-brand-light/20 p-4 rounded-2xl">
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs font-bold text-brand-dark uppercase tracking-wider">Experience Certificate (Optional)</span>
-                            {formData.experienceCert && (
-                              <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
-                                Attached
-                              </span>
-                            )}
-                          </div>
-                          
-                          {formData.experienceCert ? (
-                            <div className="flex items-center justify-between bg-white border border-brand-border p-3 rounded-xl">
-                              <div className="flex items-center gap-2 overflow-hidden mr-2">
-                                <FileText size={18} className="text-primary flex-shrink-0" />
-                                <div className="text-left overflow-hidden">
-                                  <p className="text-xs font-bold text-brand-dark truncate">{formData.experienceCert.name}</p>
-                                  <p className="text-[10px] text-brand-muted">{formatFileSize(formData.experienceCert.size)}</p>
-                                </div>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveFile('experienceCert')}
-                                className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg cursor-pointer"
-                                title="Remove File"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="relative border border-dashed border-brand-border bg-white rounded-xl p-4 flex flex-col items-center justify-center hover:bg-brand-light/30 transition-all cursor-pointer">
-                              <input
-                                type="file"
-                                accept=".pdf,.jpg,.jpeg,.png"
-                                onChange={(e) => handleFileChange(e, 'experienceCert')}
-                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                              />
-                              <Upload className="text-brand-muted mb-1.5" size={20} />
-                              <span className="text-xs font-bold text-primary">Click to upload Experience Certificate</span>
-                              <span className="text-[10px] text-brand-muted mt-0.5">PDF, JPG, PNG (Max 2MB)</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* File Input 4: Profile Photo */}
-                        <div className="space-y-2 border border-brand-border bg-brand-light/20 p-4 rounded-2xl">
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs font-bold text-brand-dark uppercase tracking-wider">Profile Photo *</span>
-                            {formData.profilePhoto && (
-                              <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
-                                Attached
-                              </span>
-                            )}
-                          </div>
-                          
-                          {formData.profilePhoto ? (
-                            <div className="flex items-center justify-between bg-white border border-brand-border p-3 rounded-xl">
-                              <div className="flex items-center gap-2 overflow-hidden mr-2">
-                                <FileText size={18} className="text-primary flex-shrink-0" />
-                                <div className="text-left overflow-hidden">
-                                  <p className="text-xs font-bold text-brand-dark truncate">{formData.profilePhoto.name}</p>
-                                  <p className="text-[10px] text-brand-muted">{formatFileSize(formData.profilePhoto.size)}</p>
-                                </div>
-                              </div>
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveFile('profilePhoto')}
-                                className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg cursor-pointer"
-                                title="Remove File"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </div>
-                          ) : (
-                            <div className="relative border border-dashed border-brand-border bg-white rounded-xl p-4 flex flex-col items-center justify-center hover:bg-brand-light/30 transition-all cursor-pointer">
-                              <input
-                                type="file"
-                                accept=".jpg,.jpeg,.png"
-                                onChange={(e) => handleFileChange(e, 'profilePhoto')}
-                                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                              />
-                              <Upload className="text-brand-muted mb-1.5" size={20} />
-                              <span className="text-xs font-bold text-primary">Click to upload Profile Photo</span>
-                              <span className="text-[10px] text-brand-muted mt-0.5">JPG, PNG only (Max 2MB)</span>
-                            </div>
-                          )}
-                        </div>
-                      </motion.div>
-                    )}
-
-                    {/* STEP 5: Review & Submit */}
-                    {step === 5 && (
-                      <motion.div
-                        key="step-5"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: -20 }}
                         className="space-y-6"
                       >
-                        <h3 className="font-serif font-bold text-primary text-lg border-b border-brand-border pb-2">Review & Submit</h3>
+                        <h3 className="font-serif font-bold text-primary text-lg border-b border-brand-border pb-2">Review &amp; Submit</h3>
                         
                         <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-2">
                           
@@ -1152,7 +825,7 @@ export default function ShadowTeacherRegister() {
                             >
                               <Edit3 size={12} /> Edit
                             </button>
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-primary mb-2">2. Education & Experience</h4>
+                            <h4 className="text-xs uppercase tracking-wider font-bold text-primary mb-2">2. Education &amp; Experience</h4>
                             <div className="space-y-1.5 text-xs text-brand-dark">
                               <div><strong>Highest Qualification:</strong> {formData.qualification}</div>
                               {formData.specialization && <div><strong>Specialization:</strong> {formData.specialization}</div>}
@@ -1180,24 +853,6 @@ export default function ShadowTeacherRegister() {
                             </div>
                           </div>
 
-                          {/* Summary Card 4: Documents */}
-                          <div className="border border-brand-border rounded-2xl p-4 bg-brand-light/30 relative">
-                            <button 
-                              type="button" 
-                              onClick={() => handleJumpToStep(4)}
-                              className="absolute top-4 right-4 text-xs font-bold text-secondary flex items-center gap-1 hover:underline cursor-pointer"
-                            >
-                              <Edit3 size={12} /> Edit
-                            </button>
-                            <h4 className="text-xs uppercase tracking-wider font-bold text-primary mb-2">4. Attached Documents</h4>
-                            <div className="space-y-1.5 text-xs text-brand-dark">
-                              <div><strong>ID Proof:</strong> {formData.aadharCard?.name}</div>
-                              <div><strong>Qualification Certificate:</strong> {formData.qualificationCert?.name}</div>
-                              {formData.experienceCert && <div><strong>Experience Certificate:</strong> {formData.experienceCert.name}</div>}
-                              <div><strong>Profile Photo:</strong> {formData.profilePhoto?.name}</div>
-                            </div>
-                          </div>
-
                         </div>
 
                         {submitError && (
@@ -1219,7 +874,8 @@ export default function ShadowTeacherRegister() {
                               className="accent-primary rounded w-4 h-4 mt-0.5 flex-shrink-0"
                             />
                             <span>I confirm that all the information provided by me is true and correct *</span>
-                          </label>                          <label className="flex items-start gap-2.5 text-xs sm:text-sm text-brand-dark font-semibold cursor-pointer select-none">
+                          </label>                          
+                          <label className="flex items-start gap-2.5 text-xs sm:text-sm text-brand-dark font-semibold cursor-pointer select-none">
                             <input
                               type="checkbox"
                               checked={agreeTerms}
@@ -1257,7 +913,7 @@ export default function ShadowTeacherRegister() {
                       <div></div>
                     )}
 
-                    {step < 5 ? (
+                    {step < 4 ? (
                       <button
                         type="button"
                         onClick={handleNext}
