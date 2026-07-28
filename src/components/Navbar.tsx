@@ -49,6 +49,7 @@ export default function Navbar() {
       ]
     },
     { name: 'Services', path: '/services' },
+    { name: 'Check Status', path: '/check-status' },
     { name: 'Testimonials', path: '/testimonials' },
     { name: 'FAQs', path: '/faqs' },
     { name: 'Contact Us', path: '/contact' },

@@ -234,6 +234,9 @@ export async function POST(request: Request) {
             </ul>
 
             <p style="margin: 0 0 20px 0;">Our team will contact you within 24 hours to schedule the consultation.</p>
+            <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
+              You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
+            </p>
             <p style="margin: 0 0 20px 0;">Thank you for choosing The Shadow Bridge.</p>
             
             <p style="margin: 20px 0 0 0; font-weight: bold; color: #3B2A6B;">Team The Shadow Bridge</p>
@@ -345,6 +348,9 @@ export async function POST(request: Request) {
             </ul>
 
             <p style="margin: 0 0 20px 0;">Our team will contact you within 24 hours to begin the matching process.</p>
+            <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
+              You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
+            </p>
             <p style="margin: 0 0 20px 0;">Thank you for choosing The Shadow Bridge.</p>
             
             <p style="margin: 20px 0 0 0; font-weight: bold; color: #3B2A6B;">Team The Shadow Bridge</p>
@@ -474,7 +480,10 @@ export async function POST(request: Request) {
           <p style="margin: 0 0 16px 0;">Your registration has been logged successfully under Registration ID <strong>${generatedId}</strong>.</p>
           
           <h3 style="color: #3B2A6B; font-size: 15px; margin: 24px 0 10px 0;">What Happens Next?</h3>
-          <p style="margin: 0 0 20px 0;">Our clinical screening panel is vetting your credentials, qualifications, and special-needs experience. Pratibha Mishra's team will call you shortly to schedule a video panel assessment call. You can track your status live on your educator dashboard.</p>
+          <p style="margin: 0 0 20px 0;">Our clinical screening panel is vetting your credentials, qualifications, and special-needs experience. Pratibha Mishra's team will call you shortly to schedule a video panel assessment call.</p>
+          <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
+            You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
+          </p>
 
           <a href="${dashboardLink}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15); margin-bottom: 10px;">Go to Educator Dashboard</a>
         `
@@ -565,7 +574,10 @@ export async function POST(request: Request) {
           <p style="margin: 0 0 16px 0;">Your registration has been logged successfully under Registration ID <strong>${generatedId}</strong>.</p>
           
           <h3 style="color: #3B2A6B; font-size: 15px; margin: 24px 0 10px 0;">What Happens Next?</h3>
-          <p style="margin: 0 0 20px 0;">Our clinical screening panel is screening your academic credentials, teaching experience, and subject matching. Pratibha Mishra's team will call you shortly to schedule a video panel assessment call. You can track your status live on your educator dashboard.</p>
+          <p style="margin: 0 0 20px 0;">Our clinical screening panel is screening your academic credentials, teaching experience, and subject matching. Pratibha Mishra's team will call you shortly to schedule a video panel assessment call.</p>
+          <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
+            You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
+          </p>
 
           <a href="${dashboardLink}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15); margin-bottom: 10px;">Go to Educator Dashboard</a>
         `
