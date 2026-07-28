@@ -75,7 +75,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const token = localStorage.getItem('admin_token');
     const email = localStorage.getItem('admin_email');
-    if (token !== 'mock-admin-token-sb-2026') {
+    if (!token) {
       router.replace('/admin/login');
     } else {
       setAdminEmail(email || 'pratibha@theshadowbridge.com');
@@ -94,6 +94,12 @@ export default function AdminDashboard() {
         },
         cache: 'no-store'
       });
+      if (res.status === 401) {
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('admin_email');
+        router.replace('/admin/login');
+        return;
+      }
       if (res.ok) {
         const data = await res.json();
         setDb(data);

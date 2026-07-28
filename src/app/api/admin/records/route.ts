@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { sendEmail, STATUS_EXPLANATIONS } from '@/lib/notifications';
 import { readDb, writeDb } from '@/lib/db';
+import { verifyAdminToken } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +45,8 @@ export async function GET(request: Request) {
   try {
     const authHeader = request.headers.get('Authorization') || '';
     const token = authHeader.replace('Bearer ', '');
-    if (token !== 'mock-admin-token-sb-2026') {
+    const adminUser = verifyAdminToken(token);
+    if (!adminUser) {
       return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
     }
 
@@ -101,7 +103,8 @@ export async function POST(request: Request) {
   try {
     const authHeader = request.headers.get('Authorization') || '';
     const token = authHeader.replace('Bearer ', '');
-    if (token !== 'mock-admin-token-sb-2026') {
+    const adminUser = verifyAdminToken(token);
+    if (!adminUser) {
       return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
     }
 
@@ -254,7 +257,7 @@ export async function POST(request: Request) {
       if (notes !== undefined) {
         updates.notes = notes;
       }
-      if (suggestedMatchId !== undefined) {
+      if (suggestedMatchId !== undefined && (type === 'parent_shadow_requests' || type === 'parent_tutor_requests')) {
         updates.suggested_match_id = suggestedMatchId;
       }
 

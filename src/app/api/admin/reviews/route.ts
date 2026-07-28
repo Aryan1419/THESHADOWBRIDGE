@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { readDb, writeDb } from '@/lib/db';
+import { verifyAdminToken } from '@/lib/auth';
 
 export async function PUT(request: Request) {
   try {
     // 1. Verify Authentication
-    const authHeader = request.headers.get('Authorization');
-    if (authHeader !== 'Bearer mock-admin-token-sb-2026') {
+    const authHeader = request.headers.get('Authorization') || '';
+    const token = authHeader.replace('Bearer ', '');
+    const adminUser = verifyAdminToken(token);
+    if (!adminUser) {
       return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
     }
 

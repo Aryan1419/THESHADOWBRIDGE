@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { verifyPassword } from '@/lib/auth';
+import { verifyPassword, signAdminToken } from '@/lib/auth';
 
 // Known admin fallback accounts with bcrypt hashed password ("ShadowBridge@2026")
 const DEFAULT_ADMIN_HASH = '$2b$10$3fvCPp4VHgvDMwFQ15lEDemPQXxSM8wINxfjH.5F9D/OYG.LTyP8G';
@@ -66,9 +66,11 @@ export async function POST(request: Request) {
     }
 
     if (isAuthenticated) {
+      const realJwtToken = signAdminToken(cleanEmail);
+
       return NextResponse.json({ 
         success: true, 
-        token: 'mock-admin-token-sb-2026', 
+        token: realJwtToken, 
         email: cleanEmail 
       });
     }
