@@ -86,8 +86,6 @@ export default function About() {
                   <div className="grid grid-cols-2 gap-4 text-xs font-semibold text-brand-dark pt-2">
                     <div className="p-3 bg-white border border-brand-border rounded-xl shadow-sm">🏫 School Shadowing</div>
                     <div className="p-3 bg-white border border-brand-border rounded-xl shadow-sm">🏠 Academic Tutors</div>
-                    <div className="p-3 bg-white border border-brand-border rounded-xl shadow-sm">🧠 Special Education</div>
-                    <div className="p-3 bg-white border border-brand-border rounded-xl shadow-sm">💬 Behavioral Guidance</div>
                   </div>
                 </div>
               </div>
