@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, Users, User, GraduationCap, ClipboardList, Settings, LogOut,
   RefreshCw, Search, Filter, ShieldCheck, Mail, Phone, MapPin, Calendar,
-  CheckCircle, X, ChevronRight, FileText, AlertCircle, Save, Info, Sparkles, CreditCard,
+  CheckCircle, X, XCircle, ChevronRight, FileText, AlertCircle, Save, Info, Sparkles, CreditCard,
   Star, CheckCircle2, MessageSquare, Reply, Send, MailCheck, MessageSquareQuote, CornerDownRight, Trash2, AlertTriangle, ExternalLink
 } from 'lucide-react';
 
@@ -282,6 +282,47 @@ export default function AdminDashboard() {
       setToastLog(`❌ Error: ${err.message}`);
     } finally {
       setUpdating(false);
+    }
+  };
+
+  // Reject Consultation States
+  const [rejectModalBooking, setRejectModalBooking] = useState<any | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
+  const [rejecting, setRejecting] = useState(false);
+
+  const handleConfirmRejectConsultation = async () => {
+    if (!rejectModalBooking) return;
+    setRejecting(true);
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const res = await fetch('/api/admin/records', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          action: 'reject_consultation',
+          bookingId: rejectModalBooking.bookingId || rejectModalBooking.booking_id,
+          regId: rejectModalBooking.registrationId || rejectModalBooking.registration_id,
+          email: rejectModalBooking.email,
+          phone: rejectModalBooking.phone,
+          reason: rejectReason
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setToastLog(`❌ Consultation marked as Declined. Polite update email sent to ${rejectModalBooking.email}.`);
+        setRejectModalBooking(null);
+        setRejectReason('');
+        fetchDatabase();
+      } else {
+        setToastLog(`❌ Error: ${data.error || 'Failed to decline consultation'}`);
+      }
+    } catch (err: any) {
+      setToastLog(`❌ Error: ${err.message}`);
+    } finally {
+      setRejecting(false);
     }
   };
 
@@ -1452,7 +1493,10 @@ export default function AdminDashboard() {
                       </thead>
                       <tbody className="divide-y divide-brand-border/60">
                         {db.bookings.map((bk: any) => {
-                          const isCompleted = (bk.message || bk.status || '').toLowerCase().includes('completed');
+                          const msgLower = (bk.message || bk.status || '').toLowerCase();
+                          const isCompleted = msgLower.includes('completed');
+                          const isDeclined = msgLower.includes('declined') || msgLower.includes('rejected');
+                          
                           return (
                             <tr key={bk.id || bk.bookingId || bk.booking_id} className="hover:bg-brand-light/30 transition-all">
                               <td className="p-4 font-mono font-bold text-primary">
@@ -1480,9 +1524,11 @@ export default function AdminDashboard() {
                               </td>
                               <td className="p-4 text-center">
                                 <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                                  isCompleted ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
+                                  isCompleted ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
+                                  isDeclined ? 'bg-amber-50 text-amber-800 border border-amber-300' :
+                                  'bg-yellow-50 text-yellow-800 border border-yellow-200'
                                 }`}>
-                                  {isCompleted ? 'Consultation Completed' : 'Consultation Booked (Call Pending)'}
+                                  {isCompleted ? 'Consultation Completed' : isDeclined ? 'Consultation Declined' : 'Consultation Booked (Call Pending)'}
                                 </span>
                               </td>
                               <td className="p-4 text-center">
@@ -1491,14 +1537,32 @@ export default function AdminDashboard() {
                                     <span className="text-[10px] font-bold text-emerald-600 flex items-center justify-center gap-1">
                                       <CheckCircle size={12} /> Form Unlocked
                                     </span>
+                                  ) : isDeclined ? (
+                                    <span className="text-[10px] font-bold text-amber-700 flex items-center justify-center gap-1">
+                                      <XCircle size={12} /> Declined
+                                    </span>
                                   ) : (
-                                    <button
-                                      onClick={() => handleMarkConsultationCompleted(bk)}
-                                      disabled={updating}
-                                      className="px-3 py-1.5 bg-primary text-white hover:bg-primary/95 rounded-xl font-bold text-[10px] transition-all cursor-pointer shadow-sm disabled:opacity-50"
-                                    >
-                                      Mark Consultation Completed
-                                    </button>
+                                    <>
+                                      <button
+                                        onClick={() => handleMarkConsultationCompleted(bk)}
+                                        disabled={updating}
+                                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-[10px] transition-all cursor-pointer shadow-sm disabled:opacity-50 flex items-center gap-1"
+                                        title="Mark Consultation Completed (Unlocks Form)"
+                                      >
+                                        <CheckCircle size={12} /> Mark Completed
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          setRejectModalBooking(bk);
+                                          setRejectReason('');
+                                        }}
+                                        disabled={updating}
+                                        className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-[10px] transition-all cursor-pointer shadow-sm disabled:opacity-50 flex items-center gap-1"
+                                        title="Reject / Decline Consultation"
+                                      >
+                                        <XCircle size={12} /> Decline
+                                      </button>
+                                    </>
                                   )}
                                   <button
                                     onClick={() => setDeleteTarget({
@@ -1508,7 +1572,7 @@ export default function AdminDashboard() {
                                       label: `Booking ${bk.bookingId || bk.booking_id} (${bk.name})`
                                     })}
                                     className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 border border-rose-200 rounded-lg transition-all cursor-pointer"
-                                    title="Delete Booking Record"
+                                    title="Delete Booking Record Permanently"
                                   >
                                     <Trash2 size={13} />
                                   </button>
@@ -2564,7 +2628,67 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+      {/* CONSULTATION REJECTION MODAL */}
+      {rejectModalBooking && (
+        <div className="fixed inset-0 bg-primary/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full border border-brand-border shadow-2xl text-left animate-fade-in-up space-y-5">
+            <div className="flex items-center gap-3 text-amber-600">
+              <div className="p-3 bg-amber-100 rounded-2xl">
+                <XCircle size={24} className="text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-serif text-xl font-bold text-primary">Decline Consultation Request</h3>
+                <p className="text-xs text-brand-muted font-medium">Booking ID: {rejectModalBooking.bookingId || rejectModalBooking.booking_id}</p>
+              </div>
+            </div>
 
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-2xl text-xs text-amber-900 leading-relaxed font-medium">
+              You are marking consultation <strong>{rejectModalBooking.bookingId || rejectModalBooking.booking_id}</strong> for <strong>{rejectModalBooking.name}</strong> as <strong>Consultation Declined</strong>.
+              This will <strong>NOT</strong> unlock their registration form. A polite update email will be sent to <strong>{rejectModalBooking.email}</strong>.
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-brand-dark uppercase tracking-wider">
+                Reason for Rejection / Context (Internal &amp; Optional Email Note)
+              </label>
+              <textarea
+                rows={3}
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="e.g. Location unserviceable, specific specialized therapy required outside our scope, etc."
+                className="w-full bg-white border border-brand-border rounded-2xl p-3 text-xs text-brand-dark focus:outline-none focus:ring-2 focus:ring-amber-500/40 leading-relaxed"
+              />
+            </div>
+
+            <div className="flex justify-end items-center gap-3 pt-2">
+              <button
+                onClick={() => setRejectModalBooking(null)}
+                disabled={rejecting}
+                className="px-4 py-2.5 border border-brand-border rounded-xl text-xs font-bold text-brand-muted hover:bg-brand-light cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmRejectConsultation}
+                disabled={rejecting}
+                className="px-5 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {rejecting ? (
+                  <>
+                    <RefreshCw size={14} className="animate-spin" />
+                    <span>Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <XCircle size={14} />
+                    <span>Confirm Decline &amp; Send Email</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

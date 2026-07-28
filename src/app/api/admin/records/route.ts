@@ -354,6 +354,74 @@ export async function POST(request: Request) {
       });
     }
 
+    if (action === 'reject_consultation') {
+      const { bookingId, regId, email, phone, reason } = body;
+
+      let targetRecord: any = null;
+      let targetTable = '';
+
+      if (regId) {
+        const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('registration_id', regId).maybeSingle();
+        if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+        else {
+          const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('registration_id', regId).maybeSingle();
+          if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+        }
+      }
+
+      if (!targetRecord && bookingId) {
+        const { data: bk } = await supabase.from('bookings').select('*').eq('booking_id', bookingId).maybeSingle();
+        if (bk) {
+          const cleanEmail = bk.email ? bk.email.trim().toLowerCase() : '';
+          const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('email', cleanEmail).maybeSingle();
+          if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+          else {
+            const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('email', cleanEmail).maybeSingle();
+            if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+          }
+        }
+      }
+
+      if (targetRecord && targetTable) {
+        await supabase.from(targetTable).update({
+          status: 'Consultation Declined',
+          candidate_message: reason ? `Reason: ${reason}` : undefined
+        }).eq('id', targetRecord.id);
+      }
+
+      if (bookingId) {
+        await supabase.from('bookings').update({ message: 'Consultation Declined' }).eq('booking_id', bookingId);
+      }
+
+      // Send polite rejection email
+      const recipientEmail = email || targetRecord?.email;
+      const parentName = targetRecord?.parent_name || targetRecord?.parentName || 'Parent';
+
+      if (recipientEmail) {
+        const reasonSnippet = reason && reason.trim()
+          ? `<div style="background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 12px 16px; margin: 20px 0; border-radius: 4px; font-size: 13px; color: #5C4300;"><strong>Context:</strong> ${reason.trim()}</div>`
+          : '';
+
+        sendEmail({
+          to: recipientEmail,
+          subject: `Consultation Update - The Shadow Bridge`,
+          type: 'status_change',
+          bodyHtml: `
+            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
+            <p style="margin: 0 0 16px 0;">Thank you for taking the time to speak with Founder Pratibha Mishra for your 1-on-1 assessment consultation call.</p>
+            <p style="margin: 0 0 16px 0;">After evaluating our current educator availability and specific scope of service, we have determined that we are unable to move forward with a match at this time.</p>
+            ${reasonSnippet}
+            <p style="margin: 0 0 16px 0;">We sincerely appreciate your interest in The Shadow Bridge and wish your child the absolute best in their educational journey.</p>
+          `
+        }).catch(err => console.error('Parent consultation decline email fail:', err));
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: 'Consultation marked as declined and notification email sent.'
+      });
+    }
+
     if (action === 'update_record') {
       const updates: any = {};
       if (status !== undefined) {
