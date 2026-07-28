@@ -14,15 +14,19 @@ import Footer from '@/components/Footer';
 const STATUS_EXPLANATIONS: Record<string, string> = {
   // Tutor / Shadow Teacher statuses
   'Interview Awaiting': 'We are currently screening your application credentials and verifying qualifications.',
-  'Interview Scheduled': 'We have scheduled your panel assessment interview with Founder Pratibha Mishra. Meeting link guidelines are active below.',
+  'Interview Scheduled': 'We have scheduled your panel assessment interview with Founder Pratibha Mishra.',
   'Shortlisted': 'Congratulations, you have been shortlisted and inducted into our active matching candidate pool.',
   'Onboarding': 'We are completing your reference checks, address validation, and standard onboarding credentials verification.',
   'Active': 'Your profile is now active! Our matchmaking system will pair you with parent requests.',
-  'Rejected': 'Thank you for applying. We are unable to proceed with your onboarding at this time. Your profile will be retained for future openings.',
+  'Rejected': 'Thank you for applying. We are unable to proceed with your onboarding at this time.',
 
-  // Parent statuses
-  'Consultation Scheduled': 'We have scheduled your 45-minute parent-educator video assessment session with Lead Mentor Pratibha Mishra.',
-  'Requirement Analysis': 'Our lead clinical mentors are analyzing your requirements and formulating developmental targets.',
+  // Gated Parent Flow Statuses
+  'Consultation Booked': 'We have received your ₹99 consultation booking. Founder Pratibha Mishra will call you directly within 24 hours to conduct your assessment consultation.',
+  'Consultation Completed': 'Your 1-on-1 consultation has been completed! Your detailed Child Registration Form (Step 4) is now unlocked.',
+  'Registration Submitted': 'Your child registration details have been submitted successfully. Please complete the placement onboarding fee to activate educator matching.',
+  'Placement Fee Paid': 'Placement fee payment received. Clinical matchmaking is now active.',
+  'Shadow Teacher Matching in Progress': 'Our clinical team is actively matching background-verified shadow teachers for your child.',
+  'Home Tutor Matching in Progress': 'Our academic team is matching background-verified home tutors based on your subject requirements.',
   'Match Proposed': 'We have proposed an educator candidate match! You can review their verified profile directly below.',
   'Introduction Call': 'We are scheduling a trial introduction call between the proposed educator, yourself, and your child.',
   'Support Started': 'Congratulations, your educational placement is active and regular learning support sessions have commenced.',
@@ -38,11 +42,11 @@ const TEACHER_TIMELINE = [
 ];
 
 const PARENT_TIMELINE = [
-  { name: 'Consultation Scheduled', desc: 'Parent Onboarding & Needs Assessment' },
-  { name: 'Requirement Analysis', desc: 'Formulating Support Strategy' },
-  { name: 'Match Proposed', desc: 'Educator Profile Review' },
-  { name: 'Introduction Call', desc: 'Trial Interaction Session' },
-  { name: 'Support Started', desc: 'Active Educational Support' }
+  { name: 'Consultation Booked', desc: '₹99 Paid • Assessment Call Scheduled' },
+  { name: 'Consultation Completed', desc: 'Consultation Call Done • Form Unlocked' },
+  { name: 'Registration Submitted', desc: 'Child Details Provided • Ready for Placement Fee' },
+  { name: 'Placement Fee Paid', desc: 'Placement Onboarded • Educator Matching Active' },
+  { name: 'Matching in Progress', desc: 'Background-Verified Candidate Trial Match' }
 ];
 
 export default function CheckStatusPage() {

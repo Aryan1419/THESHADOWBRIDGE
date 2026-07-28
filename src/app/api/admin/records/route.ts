@@ -50,7 +50,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
     }
 
-    let tutors = null, shadowTeachers = null, parentShadow = null, parentTutor = null, notifications = null, contacts = null, reviews = null;
+    let tutors = null, shadowTeachers = null, parentShadow = null, parentTutor = null, notifications = null, contacts = null, reviews = null, bookings = null;
 
     if (isSupabaseConfigured) {
       try {
@@ -61,6 +61,7 @@ export async function GET(request: Request) {
         const { data: c } = await supabase.from('contacts').select('*').order('created_at', { ascending: false });
         const { data: n } = await supabase.from('notifications_log').select('*').order('created_at', { ascending: false });
         const { data: rev } = await supabase.from('reviews').select('*').order('submitted_at', { ascending: false });
+        const { data: bk } = await supabase.from('bookings').select('*').order('created_at', { ascending: false });
 
         tutors = t;
         shadowTeachers = st;
@@ -69,6 +70,7 @@ export async function GET(request: Request) {
         contacts = c;
         notifications = n;
         reviews = rev;
+        bookings = bk;
       } catch (err) {
         console.warn('Supabase records query failed, falling back to local DB:', err);
       }
@@ -82,6 +84,7 @@ export async function GET(request: Request) {
     if (!contacts) contacts = (localDb as any).contacts || [];
     if (!notifications) notifications = localDb.notifications || [];
     if (!reviews) reviews = localDb.reviews || [];
+    if (!bookings) bookings = (localDb as any).bookings || [];
 
     return NextResponse.json({
       tutors: toCamelCase(tutors || []),
@@ -91,6 +94,7 @@ export async function GET(request: Request) {
       contacts: toCamelCase(contacts || []),
       notifications: toCamelCase(notifications || []),
       reviews: toCamelCase(reviews || []),
+      bookings: toCamelCase(bookings || []),
       admin_users: [] // Excluded for client-side security
     });
   } catch (error: any) {
@@ -246,6 +250,79 @@ export async function POST(request: Request) {
         success: true,
         record: updatedRecord,
         notificationLog: `Response email sent to ${contactRecord.email} and status set to Responded.`
+      });
+    }
+
+    if (action === 'mark_consultation_completed') {
+      const { bookingId, regId, email, phone } = body;
+
+      // Find in parent_shadow_requests, parent_tutor_requests, and bookings
+      let targetRecord: any = null;
+      let targetTable = '';
+
+      if (regId) {
+        const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('registration_id', regId).maybeSingle();
+        if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+        else {
+          const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('registration_id', regId).maybeSingle();
+          if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+        }
+      }
+
+      if (!targetRecord && bookingId) {
+        const { data: bk } = await supabase.from('bookings').select('*').eq('booking_id', bookingId).maybeSingle();
+        if (bk) {
+          // find linked parent record by email or phone
+          const cleanEmail = bk.email ? bk.email.trim().toLowerCase() : '';
+          const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('email', cleanEmail).maybeSingle();
+          if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+          else {
+            const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('email', cleanEmail).maybeSingle();
+            if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+          }
+        }
+      }
+
+      if (targetRecord && targetTable) {
+        await supabase.from(targetTable).update({ status: 'Consultation Completed' }).eq('id', targetRecord.id);
+      }
+
+      // Also update status in bookings table if present
+      if (bookingId) {
+        await supabase.from('bookings').update({ message: 'Consultation Completed' }).eq('booking_id', bookingId);
+      }
+
+      // Send Email to Parent notifying them their form is unlocked
+      const recipientEmail = email || targetRecord?.email;
+      const parentName = targetRecord?.parent_name || targetRecord?.parentName || 'Parent';
+      const actualRegId = regId || targetRecord?.registration_id || '';
+
+      if (recipientEmail) {
+        const host = request.headers.get('host') || 'localhost:3000';
+        const protocol = host.includes('localhost') ? 'http' : 'https';
+        const formLink = `${protocol}://${host}/register/parent/form?regId=${actualRegId}`;
+
+        sendEmail({
+          to: recipientEmail,
+          subject: `Consultation Completed - Registration Form Unlocked [${actualRegId}]`,
+          type: 'status_change',
+          bodyHtml: `
+            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
+            <p style="margin: 0 0 16px 0;">Thank you for taking the time to complete your 1-on-1 assessment consultation call with Founder Pratibha Mishra!</p>
+            <p style="margin: 0 0 16px 0;">We have marked your consultation as <strong>Completed</strong>. Your detailed Child Registration Form is now fully unlocked.</p>
+            
+            <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 20px; margin: 24px 0; border-radius: 4px 12px 12px 4px; text-align: center;">
+              <h3 style="margin: 0 0 8px 0; color: #3B2A6B; font-size: 16px;">Next Step: Fill Registration Details</h3>
+              <p style="margin: 0 0 16px 0; font-size: 13px; color: #6A5B7C;">Please provide your child's specific developmental and school details to proceed with educator matching.</p>
+              <a href="${formLink}" style="display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Open Child Registration Form</a>
+            </div>
+          `
+        }).catch(err => console.error('Consultation completed email fail:', err));
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `Consultation marked completed for ${actualRegId || bookingId}. Registration form unlocked!`
       });
     }
 

@@ -28,7 +28,7 @@ export default function AdminDashboard() {
   const [toastLog, setToastLog] = useState<string | null>(null);
 
   // Navigation tab state
-  const [activeTab, setActiveTab] = useState<'overview' | 'tutors' | 'shadows' | 'parents' | 'contacts' | 'payments' | 'notifications' | 'settings' | 'reviews'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'tutors' | 'shadows' | 'parents' | 'bookings' | 'contacts' | 'payments' | 'notifications' | 'settings' | 'reviews'>('overview');
   
   // Parent Requests sub-tab state
   const [parentSubTab, setParentSubTab] = useState<'shadow' | 'tutor'>('shadow');
@@ -247,6 +247,39 @@ export default function AdminDashboard() {
     } catch (error: any) {
       console.error('Update failed:', error);
       setModalErrorMsg(error.message || 'Network error updating record.');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const handleMarkConsultationCompleted = async (booking: any) => {
+    setUpdating(true);
+    setToastLog(null);
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const res = await fetch('/api/admin/records', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          action: 'mark_consultation_completed',
+          bookingId: booking.bookingId || booking.booking_id,
+          regId: booking.registrationId || booking.registration_id,
+          email: booking.email,
+          phone: booking.phone
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setToastLog(`✅ Consultation for ${booking.name || 'Parent'} marked Completed! Registration form link sent to parent email.`);
+        fetchDatabase();
+      } else {
+        setToastLog(`❌ Error: ${data.error || 'Failed to update consultation status'}`);
+      }
+    } catch (err: any) {
+      setToastLog(`❌ Error: ${err.message}`);
     } finally {
       setUpdating(false);
     }
@@ -657,6 +690,7 @@ export default function AdminDashboard() {
               { key: 'tutors', label: 'Tutors Registry', icon: Users },
               { key: 'shadows', label: 'Shadow Teachers', icon: GraduationCap },
               { key: 'parents', label: 'Parent Requests', icon: ClipboardList },
+              { key: 'bookings', label: 'Consultations (₹99)', icon: Calendar },
               { key: 'contacts', label: 'Contact Messages', icon: MessageSquare },
               { key: 'payments', label: 'Payments Ledger', icon: CreditCard },
               { key: 'reviews', label: 'Parent Reviews', icon: Star },
@@ -1374,6 +1408,101 @@ export default function AdminDashboard() {
                             </td>
                           </tr>
                         ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4B: BOOKINGS & CONSULTATIONS TAB */}
+          {activeTab === 'bookings' && (
+            <div className="space-y-6 animate-fade-in-up">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h3 className="font-serif text-xl font-bold text-primary">Booked Parent Consultations (₹99)</h3>
+                  <p className="text-xs text-brand-muted mt-1">Review booked 1-on-1 consultation requests and mark them completed after calling the parent to unlock their registration form.</p>
+                </div>
+              </div>
+
+              <div className="bg-white border border-brand-border rounded-2xl shadow-sm overflow-hidden">
+                {loading ? (
+                  <div className="p-12 text-center text-brand-muted">
+                    <RefreshCw className="animate-spin mx-auto mb-2 text-primary" size={24} />
+                    <span>Loading consultation bookings...</span>
+                  </div>
+                ) : (!db?.bookings || db.bookings.length === 0) ? (
+                  <div className="p-12 text-center text-brand-muted">No consultation bookings logged yet.</div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs border-collapse">
+                      <thead>
+                        <tr className="bg-brand-light/60 border-b border-brand-border text-primary font-bold">
+                          <th className="p-4">Booking ID</th>
+                          <th className="p-4">Parent Name</th>
+                          <th className="p-4">Phone</th>
+                          <th className="p-4">Email</th>
+                          <th className="p-4">City</th>
+                          <th className="p-4">Service Needed</th>
+                          <th className="p-4 text-center">Fee Paid</th>
+                          <th className="p-4 text-center">Status</th>
+                          <th className="p-4 text-center">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-brand-border/60">
+                        {db.bookings.map((bk: any) => {
+                          const isCompleted = (bk.message || bk.status || '').toLowerCase().includes('completed');
+                          return (
+                            <tr key={bk.id || bk.bookingId || bk.booking_id} className="hover:bg-brand-light/30 transition-all">
+                              <td className="p-4 font-mono font-bold text-primary">
+                                {bk.bookingId || bk.booking_id}
+                              </td>
+                              <td className="p-4 font-bold text-brand-dark">
+                                {bk.name}
+                              </td>
+                              <td className="p-4 text-brand-dark">
+                                {bk.phone}
+                              </td>
+                              <td className="p-4 text-brand-dark">
+                                {bk.email}
+                              </td>
+                              <td className="p-4 text-brand-dark">
+                                {bk.city}
+                              </td>
+                              <td className="p-4 font-semibold text-primary">
+                                {bk.requirement || 'Shadow Teacher'}
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                  ₹99 Paid
+                                </span>
+                              </td>
+                              <td className="p-4 text-center">
+                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                  isCompleted ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-amber-50 text-amber-700 border border-amber-200'
+                                }`}>
+                                  {isCompleted ? 'Consultation Completed' : 'Consultation Booked (Call Pending)'}
+                                </span>
+                              </td>
+                              <td className="p-4 text-center">
+                                {isCompleted ? (
+                                  <span className="text-[10px] font-bold text-emerald-600 flex items-center justify-center gap-1">
+                                    <CheckCircle size={12} /> Form Unlocked
+                                  </span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleMarkConsultationCompleted(bk)}
+                                    disabled={updating}
+                                    className="px-3 py-1.5 bg-primary text-white hover:bg-primary/95 rounded-xl font-bold text-[10px] transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                                  >
+                                    Mark Consultation Completed
+                                  </button>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>

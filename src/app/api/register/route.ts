@@ -145,6 +145,311 @@ export async function POST(request: Request) {
     const year = new Date().getFullYear();
     const createdAt = new Date().toISOString();
 
+    // =========================================================
+    // STEP 1: BOOK CONSULTATION (₹99)
+    // =========================================================
+    if (type === 'parent_consultation') {
+      const { parentName, phone, email, city, serviceNeeded, razorpayPaymentId, razorpayOrderId, razorpaySignature } = data;
+
+      if (!parentName || !phone || !email || !city || !serviceNeeded) {
+        return NextResponse.json({ error: 'Missing required consultation fields (Name, Phone, Email, City, Service Needed).' }, { status: 400 });
+      }
+
+      const cleanEmail = email.trim().toLowerCase();
+      const cleanPhoneDigits = phone.replace(/\D/g, '');
+
+      // Check if parent already paid ₹99 (One-Time Payment Enforcement)
+      const { data: existingShadow } = await supabase
+        .from('parent_shadow_requests')
+        .select('*')
+        .or(`email.ilike.${cleanEmail},phone.ilike.%${cleanPhoneDigits}%`)
+        .maybeSingle();
+
+      const { data: existingTutor } = await supabase
+        .from('parent_tutor_requests')
+        .select('*')
+        .or(`email.ilike.${cleanEmail},phone.ilike.%${cleanPhoneDigits}%`)
+        .maybeSingle();
+
+      const existingRecord = existingShadow || existingTutor;
+      if (existingRecord && (existingRecord.consultation_paid || existingRecord.status !== 'Consultation Booked')) {
+        return NextResponse.json({
+          success: true,
+          alreadyPaid: true,
+          registration_id: existingRecord.registration_id,
+          status: existingRecord.status,
+          message: 'Consultation fee has already been paid for this parent account.'
+        });
+      }
+
+      // Verify Razorpay payment
+      if (!razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
+        return NextResponse.json({ error: 'Missing payment verification credentials.' }, { status: 400 });
+      }
+
+      const keySecret = process.env.RAZORPAY_KEY_SECRET || '';
+      const shasum = crypto.createHmac('sha256', keySecret);
+      shasum.update(razorpayOrderId + '|' + razorpayPaymentId);
+      if (shasum.digest('hex') !== razorpaySignature) {
+        return NextResponse.json({ error: 'Payment signature verification failed.' }, { status: 400 });
+      }
+
+      const generatedId = `SB-${year}-${randomNumericId()}`;
+      const bookingId = `TSB-BK-${year}-${randomNumericId()}`;
+      const isShadow = serviceNeeded.toLowerCase().includes('shadow');
+
+      // Insert into bookings table
+      const bookingData = {
+        booking_id: bookingId,
+        name: parentName,
+        phone,
+        email: cleanEmail,
+        city,
+        child_age: 'Pending Consultation',
+        requirement: isShadow ? 'Shadow Teacher' : 'Home Tutor',
+        message: 'Step 1 Consultation Booked',
+        payment_status: 'paid',
+        amount: 99,
+        razorpay_payment_id: razorpayPaymentId,
+        razorpay_order_id: razorpayOrderId,
+        razorpay_signature: razorpaySignature
+      };
+
+      await supabase.from('bookings').insert([bookingData]);
+
+      // Insert into parent request table
+      const parentTable = isShadow ? 'parent_shadow_requests' : 'parent_tutor_requests';
+      const parentRecord: any = {
+        id: (isShadow ? 'parent-shadow-' : 'parent-tutor-') + randomId(),
+        parent_name: parentName,
+        phone,
+        email: cleanEmail,
+        city,
+        child_name: 'Pending Consultation',
+        child_grade: 'Pending Consultation',
+        status: 'Consultation Booked',
+        consultation_paid: true,
+        registration_id: generatedId,
+        created_at: createdAt,
+        notes: `Booking ID: ${bookingId}`
+      };
+
+      if (isShadow) parentRecord.relationship = 'Mother';
+      else parentRecord.tutor_type = 'Academic Tuition/Subjects';
+
+      const { error: pErr } = await supabase.from(parentTable).insert([parentRecord]);
+      if (pErr) throw pErr;
+
+      const host = request.headers.get('host') || 'localhost:3000';
+      const protocol = host.includes('localhost') ? 'http' : 'https';
+
+      // Send Parent Receipt Email
+      sendEmail({
+        to: cleanEmail,
+        subject: `Consultation Booked - The Shadow Bridge [${generatedId}]`,
+        type: 'registration',
+        bodyHtml: `
+          <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
+          <p style="margin: 0 0 16px 0;">Thank you for booking a 1-on-1 consultation session for <strong>${serviceNeeded}</strong> support with Founder Pratibha Mishra.</p>
+          <p style="margin: 0 0 16px 0;">We have received your consultation fee of <strong>₹99</strong>.</p>
+          
+          <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+            <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Booking ID:</strong> ${bookingId}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Service Selected:</strong> ${serviceNeeded}</p>
+            <p style="margin: 0;"><strong>Status:</strong> Consultation Booked (Pending Call)</p>
+          </div>
+
+          <p style="margin: 0 0 20px 0;">Founder Pratibha Mishra will call you directly within 24 hours to conduct your assessment consultation.</p>
+          <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
+            You can track your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using Registration ID: <strong>${generatedId}</strong>.
+          </p>
+        `
+      }).catch(err => console.error('Parent consultation email fail:', err));
+
+      // Send Admin Alert Email
+      sendEmail({
+        to: 'theshadowbridgesupport@gmail.com',
+        subject: `New Parent Consultation Booked: ${parentName} [${generatedId}]`,
+        type: 'contact_alert',
+        bodyHtml: `
+          <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Parent Consultation Booked</h2>
+          <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new parent has booked and paid the ₹99 consultation fee.</p>
+          
+          <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+            <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Booking ID:</strong> ${bookingId}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Parent Name:</strong> ${parentName}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${cleanEmail}</p>
+            <p style="margin: 0 0 8px 0;"><strong>City:</strong> ${city}</p>
+            <p style="margin: 0;"><strong>Service Requested:</strong> ${serviceNeeded}</p>
+          </div>
+
+          <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to mark this consultation as completed after calling the parent.</p>
+        `
+      }).catch(err => console.error('Admin consultation alert fail:', err));
+
+      return NextResponse.json({ success: true, registration_id: generatedId, booking_id: bookingId, record: toCamelCase(parentRecord) });
+    }
+
+    // =========================================================
+    // STEP 4: GATED PARENT REGISTRATION FORM SUBMISSION
+    // =========================================================
+    if (type === 'parent_registration_submit') {
+      const { regId, childName, childAge, childGender, childGrade, schoolLocation, homeLocation, hasDiagnosis, diagnosis, difficulties, tutorType, subjects, additionalNotes } = data;
+
+      if (!regId || !childName || !childGrade) {
+        return NextResponse.json({ error: 'Missing child registration details.' }, { status: 400 });
+      }
+
+      const cleanRegId = regId.trim().toUpperCase();
+
+      // Find record in parent_shadow_requests or parent_tutor_requests
+      const { data: ps } = await supabase
+        .from('parent_shadow_requests')
+        .select('*')
+        .eq('registration_id', cleanRegId)
+        .maybeSingle();
+
+      const { data: pt } = await supabase
+        .from('parent_tutor_requests')
+        .select('*')
+        .eq('registration_id', cleanRegId)
+        .maybeSingle();
+
+      const parentRecord = ps || pt;
+      const targetTable = ps ? 'parent_shadow_requests' : 'parent_tutor_requests';
+
+      if (!parentRecord) {
+        return NextResponse.json({ error: 'Parent registration record not found.' }, { status: 404 });
+      }
+
+      // Check if consultation is completed
+      const curStatus = (parentRecord.status || '').toLowerCase();
+      if (!curStatus.includes('completed') && !curStatus.includes('submitted') && !curStatus.includes('paid') && !curStatus.includes('matching')) {
+        return NextResponse.json({ error: 'Please complete your consultation call first before submitting this form.' }, { status: 403 });
+      }
+
+      const updates: any = {
+        child_name: childName,
+        child_dob: childAge || '',
+        child_gender: childGender || 'Boy',
+        child_grade: childGrade,
+        home_location: homeLocation || parentRecord.city || '',
+        status: 'Registration Submitted'
+      };
+
+      if (ps) {
+        updates.school_location = schoolLocation || '';
+        updates.has_diagnosis = hasDiagnosis || 'No';
+        updates.diagnosis = diagnosis || '';
+        updates.difficulties = Array.isArray(difficulties) ? difficulties.join(', ') : (difficulties || '');
+      } else if (pt) {
+        updates.tutor_type = tutorType || 'Academic Tuition/Subjects';
+        updates.subjects = Array.isArray(subjects) ? subjects.join(', ') : (subjects || '');
+      }
+
+      if (additionalNotes) {
+        updates.notes = additionalNotes;
+      }
+
+      const { data: updated, error: uErr } = await supabase
+        .from(targetTable)
+        .update(updates)
+        .eq('id', parentRecord.id)
+        .select()
+        .single();
+
+      if (uErr) throw uErr;
+
+      return NextResponse.json({
+        success: true,
+        registration_id: cleanRegId,
+        status: 'Registration Submitted',
+        nextStep: 'placement_fee',
+        record: toCamelCase(updated)
+      });
+    }
+
+    // =========================================================
+    // STEP 5: PLACEMENT FEE PAYMENT SUBMISSION
+    // =========================================================
+    if (type === 'parent_placement_payment') {
+      const { regId, razorpayPaymentId, razorpayOrderId, razorpaySignature } = data;
+
+      if (!regId || !razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
+        return NextResponse.json({ error: 'Missing placement payment parameters.' }, { status: 400 });
+      }
+
+      const cleanRegId = regId.trim().toUpperCase();
+
+      const keySecret = process.env.RAZORPAY_KEY_SECRET || '';
+      const shasum = crypto.createHmac('sha256', keySecret);
+      shasum.update(razorpayOrderId + '|' + razorpayPaymentId);
+      if (shasum.digest('hex') !== razorpaySignature) {
+        return NextResponse.json({ error: 'Payment signature verification failed.' }, { status: 400 });
+      }
+
+      // Check shadow vs tutor
+      const { data: ps } = await supabase
+        .from('parent_shadow_requests')
+        .select('*')
+        .eq('registration_id', cleanRegId)
+        .maybeSingle();
+
+      const { data: pt } = await supabase
+        .from('parent_tutor_requests')
+        .select('*')
+        .eq('registration_id', cleanRegId)
+        .maybeSingle();
+
+      const parentRecord = ps || pt;
+      const targetTable = ps ? 'parent_shadow_requests' : 'parent_tutor_requests';
+
+      if (!parentRecord) {
+        return NextResponse.json({ error: 'Parent record not found.' }, { status: 404 });
+      }
+
+      const newStatus = ps ? 'Shadow Teacher Matching in Progress' : 'Home Tutor Matching in Progress';
+
+      const { data: updated, error: uErr } = await supabase
+        .from(targetTable)
+        .update({
+          status: newStatus,
+          notes: (parentRecord.notes || '') + ` | Placement Fee Paid (Payment ID: ${razorpayPaymentId})`
+        })
+        .eq('id', parentRecord.id)
+        .select()
+        .single();
+
+      if (uErr) throw uErr;
+
+      // Send Placement Confirmation Email
+      sendEmail({
+        to: parentRecord.email,
+        subject: `Placement Fee Received - ${newStatus} [${cleanRegId}]`,
+        type: 'placement_confirmed',
+        bodyHtml: `
+          <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentRecord.parent_name},</h2>
+          <p style="margin: 0 0 16px 0;">We have received your placement fee payment. Our clinical matchmaking team is now actively matching background-verified educators for <strong>${parentRecord.child_name || 'your child'}</strong>!</p>
+          
+          <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+            <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${cleanRegId}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Status:</strong> ${newStatus}</p>
+            <p style="margin: 0;"><strong>Payment ID:</strong> ${razorpayPaymentId}</p>
+          </div>
+        `
+      }).catch(err => console.error('Placement payment email fail:', err));
+
+      return NextResponse.json({
+        success: true,
+        registration_id: cleanRegId,
+        status: newStatus,
+        record: toCamelCase(updated)
+      });
+    }
+
     if (type === 'parent') {
       const { 
         parentName, relationship, phone, email, city, childName, childAge, childGrade, 
