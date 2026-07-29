@@ -105,13 +105,6 @@ export default function Testimonials() {
                 </Link>
               </div>
             </div>
-                  className="inline-flex items-center gap-1.5 px-6 py-3 bg-primary text-white hover:bg-secondary font-bold text-xs rounded-full transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95"
-                >
-                  <span>Share Your Experience</span>
-                  <ChevronRight size={14} />
-                </Link>
-              </div>
-            </div>
           ) : (
             <>
               {/* Filters */}
