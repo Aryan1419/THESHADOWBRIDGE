@@ -362,7 +362,7 @@ export async function POST(request: Request) {
         if (bk) {
           const isTutor = bk.requirement?.toLowerCase().includes('tutor');
           targetTable = isTutor ? 'parent_tutor_requests' : 'parent_shadow_requests';
-          const generatedRegId = `SB-${year}-${randomNumericId()}`;
+          const generatedRegId = bk.booking_id || cleanRegId || `SB-${year}-${randomNumericId()}`;
 
           const newRecord: any = {
             id: (isTutor ? 'parent-tutor-' : 'parent-shadow-') + randomId(),
