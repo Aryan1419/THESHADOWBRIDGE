@@ -225,7 +225,7 @@ export default function Home() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5, duration: 0.6 }}
-                  className="absolute -bottom-6 -left-6 sm:left-[-30px] bg-white p-5 rounded-2xl border border-brand-border shadow-xl flex items-center gap-3.5 max-w-[280px]"
+                  className="absolute -bottom-4 left-2 sm:-bottom-6 sm:left-[-30px] bg-white p-4 sm:p-5 rounded-2xl border border-brand-border shadow-xl flex items-center gap-3 sm:gap-3.5 max-w-[250px] sm:max-w-[280px]"
                 >
                   <div className="p-3 bg-gradient-to-br from-primary to-secondary rounded-xl text-white">
                     <Award size={24} className="text-accent" />
