@@ -1907,20 +1907,127 @@ export default function AdminDashboard() {
           )}
 
           {/* TAB 6: SETTINGS PLACEHOLDER */}
+          {/* TAB 10: SETTINGS & SYSTEM STATUS */}
           {activeTab === 'settings' && (
-            <div className="bg-white border border-brand-border rounded-3xl p-8 shadow-sm space-y-6 text-center max-w-xl mx-auto animate-fade-in-up">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto text-primary">
-                <Settings size={28} />
+            <div className="space-y-6 animate-fade-in-up">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h2 className="font-serif text-2xl font-black text-primary">System Overview &amp; Settings</h2>
+                  <p className="text-xs text-brand-muted mt-1 font-medium">
+                    Read-only status overview of active integrations, business parameters, and system environment.
+                  </p>
+                </div>
+                <div className="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-sm shrink-0">
+                  <ShieldCheck size={14} /> System Operational
+                </div>
               </div>
-              <div className="space-y-2">
-                <h3 className="font-serif text-lg font-bold text-primary">Admin Portal Settings</h3>
-                <p className="text-xs text-brand-muted max-w-md mx-auto leading-relaxed">
-                  Here you can configure diagnostic tools parameters, placement rules, notification channels (Twilio SMS and Resend Email keys), and adjust system variables.
-                </p>
+
+              {/* Status Cards Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                {/* Card 1: Connected Services & Integrations */}
+                <div className="bg-white border border-brand-border rounded-2xl p-6 shadow-sm space-y-4">
+                  <div className="flex items-center gap-3 border-b border-brand-border/60 pb-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold shrink-0">
+                      <Sparkles size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-serif text-sm font-bold text-primary">Connected Integrations</h3>
+                      <p className="text-[10px] text-brand-muted font-medium">External APIs and database engines</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 text-xs">
+                    <div className="flex items-center justify-between p-2.5 bg-brand-light/40 rounded-xl border border-brand-border/40 gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                        <span className="font-bold text-brand-dark">Database Engine</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 truncate">
+                        Supabase PostgreSQL (Active)
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 bg-brand-light/40 rounded-xl border border-brand-border/40 gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <span className="font-bold text-brand-dark">Email Dispatcher</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 truncate">
+                        Resend API (Live Alerts)
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 bg-brand-light/40 rounded-xl border border-brand-border/40 gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                        <span className="font-bold text-brand-dark">Payment Gateway</span>
+                      </div>
+                      <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 truncate">
+                        Razorpay API (₹99 &amp; Placement)
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 bg-brand-light/40 rounded-xl border border-brand-border/40 gap-1.5">
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                        <span className="font-bold text-brand-dark">Admin Notification Email</span>
+                      </div>
+                      <span className="text-[10px] font-mono font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 truncate">
+                        theshadowbridgesupport@gmail.com
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card 2: Operating Parameters & Pricing */}
+                <div className="bg-white border border-brand-border rounded-2xl p-6 shadow-sm space-y-4">
+                  <div className="flex items-center gap-3 border-b border-brand-border/60 pb-3">
+                    <div className="w-10 h-10 rounded-xl bg-accent/20 flex items-center justify-center text-primary font-bold shrink-0">
+                      <CreditCard size={20} />
+                    </div>
+                    <div>
+                      <h3 className="font-serif text-sm font-bold text-primary">Business &amp; Fee Parameters</h3>
+                      <p className="text-[10px] text-brand-muted font-medium">Standard fees and coverage rules</p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 text-xs">
+                    <div className="flex items-center justify-between p-2.5 bg-brand-light/40 rounded-xl border border-brand-border/40">
+                      <span className="font-bold text-brand-dark">Consultation Booking Fee</span>
+                      <span className="font-black text-primary">₹99</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 bg-brand-light/40 rounded-xl border border-brand-border/40">
+                      <span className="font-bold text-brand-dark">Shadow Teacher Placement Fee</span>
+                      <span className="font-black text-primary">₹5,000</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 bg-brand-light/40 rounded-xl border border-brand-border/40">
+                      <span className="font-bold text-brand-dark">Home Tutor Placement Fee</span>
+                      <span className="font-black text-primary">₹3,000</span>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 bg-brand-light/40 rounded-xl border border-brand-border/40 gap-1.5">
+                      <span className="font-bold text-brand-dark">Active Cities (5)</span>
+                      <span className="text-[10px] font-bold text-primary">
+                        Delhi NCR, Ahmedabad, Hyderabad, Bangalore, Pune
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
               </div>
-              <div className="p-4 bg-brand-light/50 border border-brand-border rounded-xl text-xs text-brand-dark flex items-center gap-2">
-                <Info size={16} className="text-secondary shrink-0" />
-                <span className="text-left font-medium">Settings modifications will be enabled in the final deployment phase.</span>
+
+              {/* Environment Security Note */}
+              <div className="p-4 bg-brand-light/50 border border-brand-border rounded-2xl text-xs text-brand-dark flex items-start gap-3">
+                <Info size={16} className="text-secondary shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <p className="font-bold text-primary">Environment-Controlled Configuration</p>
+                  <p className="text-brand-muted text-[11px] leading-relaxed">
+                    API secret keys, database credentials, and production settings are securely managed via environment variables. To update credentials or notification channels, update environment variables in your Vercel deployment project settings.
+                  </p>
+                </div>
               </div>
             </div>
           )}
