@@ -65,6 +65,7 @@ export default function Footer() {
               <li><Link href="/services" className="hover:text-accent transition-colors">Services</Link></li>
               <li><Link href="/check-status" className="hover:text-accent transition-colors font-bold text-accent">Check Application Status</Link></li>
               <li><Link href="/testimonials" className="hover:text-accent transition-colors">Testimonials</Link></li>
+              <li><Link href="/leave-review" className="hover:text-accent transition-colors text-amber-300 font-semibold flex items-center gap-1">⭐ Leave a Review</Link></li>
               <li><Link href="/faqs" className="hover:text-accent transition-colors">FAQs</Link></li>
               <li><Link href="/contact" className="hover:text-accent transition-colors">Contact Us</Link></li>
             </ul>
@@ -79,6 +80,7 @@ export default function Footer() {
               <li><Link href="/parents#home-tutor" className="hover:text-accent transition-colors">Searching for a Home Tutor?</Link></li>
               <li><Link href="/register/parent" className="hover:text-accent transition-colors">Register as Parent</Link></li>
               <li><Link href="/book" className="hover:text-accent transition-colors">Book Consultation (₹99)</Link></li>
+              <li><Link href="/leave-review" className="hover:text-accent transition-colors text-amber-300 font-semibold">Share Your Experience</Link></li>
             </ul>
           </div>
 

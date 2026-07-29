@@ -58,9 +58,19 @@ export default function Testimonials() {
           <h1 className="font-serif text-4xl sm:text-5xl font-bold tracking-tight text-primary mb-4">
             Real Stories. Real Impact.
           </h1>
-          <p className="text-brand-muted text-base sm:text-lg max-w-2xl mx-auto font-medium">
+          <p className="text-brand-muted text-base sm:text-lg max-w-2xl mx-auto font-medium mb-6">
             Read comprehensive feedback and testimonials from parents about their child's developmental breakthroughs.
           </p>
+
+          <div className="pt-2">
+            <Link
+              href="/leave-review"
+              className="btn-gradient px-6 py-3 rounded-full text-xs sm:text-sm font-bold inline-flex items-center gap-2 shadow-md hover:scale-105 active:scale-95 transition-all cursor-pointer"
+            >
+              <Quote size={16} />
+              <span>Leave a Review / Share Your Experience →</span>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -82,12 +92,19 @@ export default function Testimonials() {
               <div className="space-y-2">
                 <h3 className="font-serif text-xl font-bold text-primary">Be Among Our First Reviews</h3>
                 <p className="text-xs sm:text-sm text-brand-muted leading-relaxed max-w-sm mx-auto font-medium">
-                  We're just getting started — if The Shadow Bridge has supported your family, we'd love to hear about your experience.
+                  We'd love to hear about your experience with The Shadow Bridge. Submit your honest review for administration approval.
                 </p>
               </div>
               <div className="pt-2">
                 <Link
-                  href="/contact"
+                  href="/leave-review"
+                  className="btn-gradient px-6 py-3 rounded-full font-bold text-xs inline-flex items-center gap-2 shadow hover:scale-105 transition-all cursor-pointer"
+                >
+                  <Quote size={14} />
+                  <span>Share Your Experience &amp; Leave a Review →</span>
+                </Link>
+              </div>
+            </div>
                   className="inline-flex items-center gap-1.5 px-6 py-3 bg-primary text-white hover:bg-secondary font-bold text-xs rounded-full transition-all cursor-pointer shadow-sm hover:scale-105 active:scale-95"
                 >
                   <span>Share Your Experience</span>

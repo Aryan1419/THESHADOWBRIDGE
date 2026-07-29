@@ -349,6 +349,19 @@ export default function Navbar() {
                         </Link>
 
                         <Link
+                          href="/leave-review"
+                          onClick={() => setIsOpen(false)}
+                          className={`flex items-center justify-between px-4 py-2.5 rounded-2xl font-bold text-sm transition-all ${
+                            pathname === '/leave-review'
+                              ? 'bg-brand-light text-secondary border border-brand-border/60 font-bold'
+                              : 'text-secondary hover:bg-brand-light/60 font-bold'
+                          }`}
+                        >
+                          <span className="flex items-center gap-1.5">⭐ Leave a Review</span>
+                          <ArrowRight size={14} className="text-secondary opacity-60" />
+                        </Link>
+
+                        <Link
                           href="/faqs"
                           onClick={() => setIsOpen(false)}
                           className={`flex items-center justify-between px-4 py-2.5 rounded-2xl font-bold text-sm transition-all ${

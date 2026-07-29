@@ -523,12 +523,18 @@ export default function Home() {
 
           <TestimonialCarousel />
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/testimonials"
               className="px-8 py-3.5 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold transition-all shadow-sm"
             >
               Read More Reviews
+            </Link>
+            <Link
+              href="/leave-review"
+              className="px-8 py-3.5 rounded-full bg-brand-light border-2 border-brand-border text-secondary hover:border-secondary font-bold transition-all shadow-sm flex items-center gap-2"
+            >
+              <span>⭐ Leave a Review</span>
             </Link>
           </div>
         </div>
