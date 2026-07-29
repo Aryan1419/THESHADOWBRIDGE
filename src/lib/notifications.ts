@@ -72,7 +72,7 @@ export function wrapInEmailTemplate(subject: string, bodyContentHtml: string): s
                       Email: <a href="mailto:theshadowbridgesupport@gmail.com" style="color: #3B2A6B; text-decoration: underline;">theshadowbridgesupport@gmail.com</a>
                     </p>
                     <div style="margin: 15px 0;">
-                      <span style="color: #C89B3C; font-weight: bold;">Delhi NCR &bull; Ahmedabad &bull; Hyderabad &bull; Bangalore</span>
+                      <span style="color: #C89B3C; font-weight: bold;">Delhi NCR &bull; Ahmedabad &bull; Hyderabad &bull; Bangalore &bull; Pune</span>
                     </div>
                     <p style="margin: 15px 0 0 0; font-size: 11px; color: #9B8EA9; line-height: 1.4;">
                       This is an automated operational notification regarding your application or account.<br>

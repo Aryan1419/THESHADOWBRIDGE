@@ -208,7 +208,7 @@ export default function TutorRegister() {
                 Register as Home Tutor
               </h1>
               <p className="text-brand-muted text-sm sm:text-base max-w-md mx-auto">
-                Join our premium inclusive coaching team and teach in Delhi NCR, Ahmedabad, Hyderabad or Bangalore.
+                Join our premium inclusive coaching team and teach in Delhi NCR, Ahmedabad, Hyderabad, Bangalore or Pune.
               </p>
             </div>
           )}
@@ -419,6 +419,7 @@ export default function TutorRegister() {
                             <option value="Ahmedabad">Ahmedabad</option>
                             <option value="Hyderabad">Hyderabad</option>
                             <option value="Bangalore">Bangalore</option>
+                            <option value="Pune">Pune</option>
                           </select>
                         </div>
 

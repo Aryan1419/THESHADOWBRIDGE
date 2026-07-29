@@ -73,5 +73,23 @@ export const CITY_LOCALITIES: Record<string, string[]> = {
     'Motera',
     'Ambawadi',
     'Other (please specify)'
+  ],
+  'Pune': [
+    'Kothrud',
+    'Baner',
+    'Viman Nagar',
+    'Koregaon Park',
+    'Aundh',
+    'Hinjewadi',
+    'Wakad',
+    'Pimple Saudagar',
+    'Kalyani Nagar',
+    'Hadapsar',
+    'Magarpatta',
+    'Kharadi',
+    'Bavdhan',
+    'Pashan',
+    'Shivajinagar',
+    'Other (please specify)'
   ]
 };

@@ -20,14 +20,14 @@ export const metadata: Metadata = {
     default: "The Shadow Bridge | Trained Shadow Teachers & Home Tutors",
     template: "%s | The Shadow Bridge"
   },
-  description: "Connecting families with professionally trained Shadow Teachers and Home Tutors in Delhi NCR, Ahmedabad, Hyderabad & Bangalore. Special education, behavior support, and inclusive learning assistance.",
-  keywords: ["shadow teacher", "home tutor", "special education", "child support", "inclusive learning", "Delhi NCR", "Ahmedabad", "Hyderabad", "Bangalore", "autism tutor", "ADHD support", "special needs mentor"],
+  description: "Connecting families with professionally trained Shadow Teachers and Home Tutors in Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune. Special education, behavior support, and inclusive learning assistance.",
+  keywords: ["shadow teacher", "home tutor", "special education", "child support", "inclusive learning", "Delhi NCR", "Ahmedabad", "Hyderabad", "Bangalore", "Pune", "autism tutor", "ADHD support", "special needs mentor"],
   alternates: {
     canonical: "https://theshadowbridge.com"
   },
   openGraph: {
     title: "The Shadow Bridge | Shadow Teachers & Special Education Tutors",
-    description: "Empowering children with academic, behavioral, and inclusive support. Serving families across Delhi NCR, Ahmedabad, Hyderabad & Bangalore.",
+    description: "Empowering children with academic, behavioral, and inclusive support. Serving families across Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune.",
     url: "https://theshadowbridge.com",
     siteName: "The Shadow Bridge",
     locale: "en_IN",
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "The Shadow Bridge | Shadow Teachers & Tutors",
-    description: "Connecting families with verified Shadow Teachers & Special Education Tutors in Delhi NCR, Ahmedabad, Hyderabad & Bangalore.",
+    description: "Connecting families with verified Shadow Teachers & Special Education Tutors in Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune.",
     images: ["/favicon-512.png"]
   },
   robots: {

@@ -189,6 +189,7 @@ export default function Contact() {
                         <option value="Ahmedabad">Ahmedabad</option>
                         <option value="Hyderabad">Hyderabad</option>
                         <option value="Bangalore">Bangalore</option>
+                        <option value="Pune">Pune</option>
                       </select>
                     </div>
                   </div>

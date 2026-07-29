@@ -104,6 +104,12 @@ export default function Home() {
       skyline: "🌳🏢🏫",
       desc: "Experienced & Verified Shadow Teachers and Tutors in Bangalore.",
       color: "from-accent/10 to-accent/30"
+    },
+    {
+      name: "Pune",
+      skyline: "🏰🏢🌳",
+      desc: "Trusted Support for Your Child's Growth in Pune.",
+      color: "from-secondary/10 to-secondary/30"
     }
   ];
 
@@ -246,7 +252,7 @@ export default function Home() {
       <section className="py-6 sm:py-8 bg-brand-light border-y border-brand-border text-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-2">
           <p className="text-primary font-serif text-lg sm:text-xl font-bold flex flex-wrap items-center justify-center gap-2">
-            <span className="text-secondary font-black">✓</span> Trusted by Parents in Delhi NCR, Ahmedabad, Hyderabad &amp; Bangalore
+            <span className="text-secondary font-black">✓</span> Trusted by Parents in Delhi NCR, Ahmedabad, Hyderabad, Bangalore &amp; Pune
           </p>
           <p className="text-primary font-serif text-base sm:text-lg font-bold flex flex-wrap items-center justify-center gap-2">
             <span className="text-secondary font-black">✓</span> 1000+ Consultations &amp; Placements
@@ -674,6 +680,7 @@ export default function Home() {
                         <option value="Ahmedabad">Ahmedabad</option>
                         <option value="Hyderabad">Hyderabad</option>
                         <option value="Bangalore">Bangalore</option>
+                        <option value="Pune">Pune</option>
                       </select>
                     </div>
                   </div>
