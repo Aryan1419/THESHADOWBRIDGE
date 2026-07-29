@@ -677,13 +677,13 @@ export default function AdminDashboard() {
   const getFilteredTutors = () => {
     if (!db) return [];
     return db.tutors.filter(r => {
-      const matchSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          r.registration_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          r.phone.includes(searchQuery);
+      const matchSearch = (r.name ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (r.registration_id ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (r.phone ?? '').includes(searchQuery);
       const matchCity = filterCity ? r.city === filterCity : true;
       const matchStatus = filterStatus ? r.status === filterStatus : true;
       const matchExp = filterExperience ? r.experience === filterExperience : true;
-      const matchSub = filterSubject ? r.subjects.toLowerCase().includes(filterSubject.toLowerCase()) : true;
+      const matchSub = filterSubject ? (r.subjects ?? '').toLowerCase().includes(filterSubject.toLowerCase()) : true;
 
       return matchSearch && matchCity && matchStatus && matchExp && matchSub;
     });
@@ -692,14 +692,14 @@ export default function AdminDashboard() {
   const getFilteredShadows = () => {
     if (!db) return [];
     return db.shadow_teachers.filter(r => {
-      const matchSearch = r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          r.registration_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          r.phone.includes(searchQuery);
+      const matchSearch = (r.name ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (r.registration_id ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (r.phone ?? '').includes(searchQuery);
       const matchCity = filterCity ? r.city === filterCity : true;
       const matchStatus = filterStatus ? r.status === filterStatus : true;
       const matchExp = filterExperience ? r.experience === filterExperience : true;
       const matchSpecial = filterSpecialNeeds ? r.specialNeedsExp === filterSpecialNeeds : true;
-      const matchComfort = filterComfortableArea ? r.comfortableAreas.toLowerCase().includes(filterComfortableArea.toLowerCase()) : true;
+      const matchComfort = filterComfortableArea ? (r.comfortableAreas ?? '').toLowerCase().includes(filterComfortableArea.toLowerCase()) : true;
 
       return matchSearch && matchCity && matchStatus && matchExp && matchSpecial && matchComfort;
     });
@@ -709,10 +709,10 @@ export default function AdminDashboard() {
     if (!db) return [];
     const collection = parentSubTab === 'shadow' ? db.parent_shadow_requests : db.parent_tutor_requests;
     return collection.filter(r => {
-      const matchSearch = r.parentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          r.childName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          r.registration_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          r.phone.includes(searchQuery);
+      const matchSearch = (r.parentName ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (r.childName ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (r.registration_id ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (r.phone ?? '').includes(searchQuery);
       const matchCity = filterCity ? r.city === filterCity : true;
       const matchStatus = filterStatus ? r.status === filterStatus : true;
 
@@ -2400,10 +2400,10 @@ export default function AdminDashboard() {
                         <div><strong>Has Diagnosis?</strong> {selectedRecord.data.hasDiagnosis}</div>
                         {selectedRecord.data.hasDiagnosis === 'Yes' && <div><strong>Diagnosis:</strong> {selectedRecord.data.diagnosis}</div>}
                         <div className="col-span-2"><strong>Difficulties:</strong> {selectedRecord.data.difficulties}</div>
-                        {selectedRecord.data.difficulties.includes('Others') && <div className="col-span-2"><strong>Other difficulty notes:</strong> {selectedRecord.data.otherDifficulty}</div>}
+                        {(selectedRecord.data.difficulties ?? '').includes('Others') && <div className="col-span-2"><strong>Other difficulty notes:</strong> {selectedRecord.data.otherDifficulty}</div>}
                         <div><strong>Takes Therapy?</strong> {selectedRecord.data.takesTherapy}</div>
                         {selectedRecord.data.takesTherapy === 'Yes' && <div className="col-span-2"><strong>Therapies:</strong> {selectedRecord.data.therapies}</div>}
-                        {selectedRecord.data.therapies.includes('Others') && <div className="col-span-2"><strong>Other therapies:</strong> {selectedRecord.data.otherTherapy}</div>}
+                        {(selectedRecord.data.therapies ?? '').includes('Others') && <div className="col-span-2"><strong>Other therapies:</strong> {selectedRecord.data.otherTherapy}</div>}
                       </>
                     )}
 
