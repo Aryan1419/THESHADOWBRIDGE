@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin as supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { sendEmail, STATUS_EXPLANATIONS } from '@/lib/notifications';
 import { readDb, writeDb } from '@/lib/db';
 import { verifyAdminToken } from '@/lib/auth';

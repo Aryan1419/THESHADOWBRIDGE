@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { readDb, writeDb, ReviewRecord } from '@/lib/db';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 
 export async function POST(request: Request) {
   try {
@@ -36,11 +36,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'You must check the agreement box to display your review publicly' }, { status: 400 });
     }
 
-    const isSupabaseConfigured = Boolean(
-      process.env.NEXT_PUBLIC_SUPABASE_URL && 
-      !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
-    );
-
     const regIdToSave = (registrationId || '').trim() || 'PUBLIC-VISITOR';
 
     // 2. Build review record
@@ -58,32 +53,36 @@ export async function POST(request: Request) {
     };
 
     let isSaved = false;
-    if (isSupabaseConfigured) {
-      try {
-        const { error } = await supabase.from('reviews').insert([{
-          id: newReview.id,
-          parent_registration_id: newReview.parent_registration_id,
-          parent_name: newReview.parent_name,
-          child_first_name: newReview.child_first_name || null,
-          rating: newReview.rating,
-          review_text: newReview.review_text,
-          city: newReview.city,
-          service_type: newReview.service_type,
-          status: newReview.status,
-          submitted_at: newReview.submitted_at
-        }]);
+    let insertError = null;
 
-        if (!error) {
-          isSaved = true;
-        } else {
-          console.error('Supabase review insert error:', error);
-        }
-      } catch (dbErr) {
-        console.error('Supabase review insert exception:', dbErr);
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabaseAdmin.from('reviews').insert([{
+        id: newReview.id,
+        parent_registration_id: newReview.parent_registration_id,
+        parent_name: newReview.parent_name,
+        child_first_name: newReview.child_first_name || null,
+        rating: newReview.rating,
+        review_text: newReview.review_text,
+        city: newReview.city,
+        service_type: newReview.service_type,
+        status: newReview.status,
+        submitted_at: newReview.submitted_at
+      }]).select();
+
+      if (error) {
+        console.error('❌ Supabase review insert error:', error);
+        insertError = error.message;
+      } else {
+        console.log('✅ Supabase review inserted successfully! ID:', data?.[0]?.id || newReview.id);
+        isSaved = true;
       }
     }
 
+    // Fallback to local DB if Supabase isn't configured, but if configured and failed, throw explicit error!
     if (!isSaved) {
+      if (isSupabaseConfigured && insertError) {
+        return NextResponse.json({ error: `Database insert failed: ${insertError}` }, { status: 500 });
+      }
       const db = readDb();
       if (!db.reviews) db.reviews = [];
       db.reviews.push(newReview);
@@ -108,16 +107,11 @@ export async function GET(request: Request) {
     const authHeader = request.headers.get('Authorization');
     const isAdmin = authHeader === 'Bearer mock-admin-token-sb-2026';
 
-    const isSupabaseConfigured = Boolean(
-      process.env.NEXT_PUBLIC_SUPABASE_URL && 
-      !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
-    );
-
     let reviews: ReviewRecord[] | null = null;
 
     if (isSupabaseConfigured) {
       try {
-        let query = supabase.from('reviews').select('*');
+        let query = supabaseAdmin.from('reviews').select('*');
         if (searchRegId) {
           query = query.eq('parent_registration_id', searchRegId);
         } else if (!isAdmin) {
@@ -127,6 +121,8 @@ export async function GET(request: Request) {
         const { data, error } = await query.order('submitted_at', { ascending: false });
         if (!error && data) {
           reviews = data as ReviewRecord[];
+        } else if (error) {
+          console.error('Supabase fetch reviews error:', error);
         }
       } catch (err) {
         console.warn('Supabase fetch reviews exception, falling back to local DB:', err);

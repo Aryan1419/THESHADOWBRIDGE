@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
 import { addRecord } from '@/lib/db';
 import { sendEmail } from '@/lib/notifications';
 
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
 
     if (isSupabaseConfigured) {
       try {
-        const { error } = await supabase.from('contacts').insert([{
+        const { data, error } = await supabaseAdmin.from('contacts').insert([{
           id: newContact.id,
           name: newContact.name,
           phone: newContact.phone,
@@ -37,12 +37,13 @@ export async function POST(request: Request) {
           message: newContact.message,
           status: newContact.status,
           created_at: newContact.created_at
-        }]);
+        }]).select();
 
         if (!error) {
+          console.log('✅ Contacts row created in Supabase:', data?.[0]?.id || newContact.id);
           isSaved = true;
         } else {
-          console.error('Supabase contact insert error:', error);
+          console.error('❌ Supabase contact insert error:', error);
           dbErrorMsg = error.message;
         }
       } catch (dbErr: any) {
@@ -52,6 +53,9 @@ export async function POST(request: Request) {
     }
 
     if (!isSaved) {
+      if (isSupabaseConfigured && dbErrorMsg) {
+        return NextResponse.json({ error: `Database error: ${dbErrorMsg}` }, { status: 500 });
+      }
       const fallbackSuccess = addRecord('contacts', {
         id: newContact.id,
         name: newContact.name,
@@ -62,15 +66,12 @@ export async function POST(request: Request) {
         createdAt: newContact.created_at
       } as any);
 
-      if (!fallbackSuccess && !isSaved) {
-        return NextResponse.json(
-          { error: dbErrorMsg ? `Database error: ${dbErrorMsg}` : 'Failed to save contact query. Please verify Supabase URL and Key environment variables in Vercel.' }, 
-          { status: 500 }
-        );
+      if (!fallbackSuccess) {
+        return NextResponse.json({ error: 'Failed to save contact message.' }, { status: 500 });
       }
     }
 
-    // 1. Send admin notification email to theshadowbridgesupport@gmail.com
+    // 1. Send admin notification email
     sendEmail({
       to: 'theshadowbridgesupport@gmail.com',
       subject: `New Website Inquiry: ${newContact.name}`,
@@ -120,4 +121,3 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }
-
