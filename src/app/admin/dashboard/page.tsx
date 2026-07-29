@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, User, GraduationCap, ClipboardList, Settings, LogOut,
   RefreshCw, Search, Filter, ShieldCheck, Mail, Phone, MapPin, Calendar,
   CheckCircle, X, XCircle, ChevronRight, FileText, AlertCircle, Save, Info, Sparkles, CreditCard,
-  Star, CheckCircle2, MessageSquare, Reply, Send, MailCheck, MessageSquareQuote, CornerDownRight, Trash2, AlertTriangle, ExternalLink
+  Star, CheckCircle2, MessageSquare, Reply, Send, MailCheck, MessageSquareQuote, CornerDownRight, Trash2, AlertTriangle, ExternalLink, Menu
 } from 'lucide-react';
 
 import { DatabaseSchema, TutorRecord, ShadowTeacherRecord, ParentShadowRequestRecord, ParentTutorRequestRecord } from '@/lib/db';
@@ -29,6 +29,9 @@ export default function AdminDashboard() {
 
   // Navigation tab state
   const [activeTab, setActiveTab] = useState<'overview' | 'tutors' | 'shadows' | 'parents' | 'bookings' | 'contacts' | 'payments' | 'notifications' | 'settings' | 'reviews'>('overview');
+
+  // Mobile sidebar collapse state
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Parent Requests sub-tab state
   const [parentSubTab, setParentSubTab] = useState<'shadow' | 'tutor'>('shadow');
@@ -744,18 +747,43 @@ export default function AdminDashboard() {
 
   return (
     <div className="flex h-screen bg-[#F8F9FA] overflow-hidden text-left font-sans">
-      
-      {/* 1. LEFT SIDEBAR */}
-      <aside className="w-64 bg-primary text-white flex flex-col justify-between shrink-0">
-        <div className="space-y-6">
-          <div className="p-6 border-b border-white/10 flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-primary font-black shadow-md">
-              SB
+
+      {/* MOBILE BACKDROP — closes sidebar when tapped outside */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/50 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* 1. LEFT SIDEBAR — fixed drawer on mobile, static column on md+ */}
+      <aside
+        className={`
+          fixed inset-y-0 left-0 z-40 w-72 bg-primary text-white flex flex-col justify-between shrink-0
+          transform transition-transform duration-300 ease-in-out
+          md:static md:w-64 md:translate-x-0
+          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        <div className="space-y-6 overflow-y-auto">
+          {/* Brand header row — includes close button on mobile */}
+          <div className="p-5 border-b border-white/10 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-primary font-black shadow-md shrink-0">
+                SB
+              </div>
+              <div className="text-left">
+                <h2 className="font-serif font-black text-sm tracking-wide">The Shadow Bridge</h2>
+                <p className="text-[10px] text-white/50 font-bold uppercase tracking-wider">by Pratibha Mishra</p>
+              </div>
             </div>
-            <div className="text-left">
-              <h2 className="font-serif font-black text-sm tracking-wide">The Shadow Bridge</h2>
-              <p className="text-[10px] text-white/50 font-bold uppercase tracking-wider">by Pratibha Mishra</p>
-            </div>
+            <button
+              className="md:hidden text-white/60 hover:text-white p-1.5 rounded-lg transition-colors cursor-pointer"
+              onClick={() => setSidebarOpen(false)}
+              aria-label="Close menu"
+            >
+              <X size={18} />
+            </button>
           </div>
 
           <nav className="px-4 space-y-1">
@@ -784,6 +812,7 @@ export default function AdminDashboard() {
                     setFilterSubject('');
                     setFilterSpecialNeeds('');
                     setFilterComfortableArea('');
+                    setSidebarOpen(false); // auto-close on mobile after navigation
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-xs transition-all cursor-pointer ${
                     activeTab === item.key
@@ -799,7 +828,7 @@ export default function AdminDashboard() {
           </nav>
         </div>
 
-        <div className="p-6 border-t border-white/10 space-y-4">
+        <div className="p-5 border-t border-white/10 space-y-4">
           <div className="flex items-center gap-2 text-xs text-white/70 overflow-hidden">
             <div className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center shrink-0">
               <User size={12} />
@@ -817,19 +846,31 @@ export default function AdminDashboard() {
       </aside>
 
       {/* 2. MAIN CONTAINER AREA */}
-      <main className="flex-grow flex flex-col overflow-hidden">
-        
+      <main className="flex-grow flex flex-col overflow-hidden min-w-0">
+
         {/* TOP STATUS BAR & TOAST LOGGER */}
-        <header className="h-16 bg-white border-b border-brand-border/60 px-8 flex justify-between items-center shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-brand-muted uppercase tracking-wider">Console Mode:</span>
-            <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 rounded-full text-[10px] uppercase flex items-center gap-1">
-              <ShieldCheck size={10} /> Active Database Connected
+        <header className="h-14 md:h-16 bg-white border-b border-brand-border/60 px-4 md:px-8 flex justify-between items-center shrink-0 gap-3">
+          {/* Hamburger button — visible only on mobile */}
+          <button
+            className="md:hidden p-2 rounded-lg border border-brand-border text-primary hover:bg-brand-light transition-colors cursor-pointer shrink-0"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open navigation menu"
+          >
+            <Menu size={18} />
+          </button>
+
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <span className="text-xs font-bold text-brand-muted uppercase tracking-wider hidden sm:inline">Console Mode:</span>
+            <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 rounded-full text-[10px] uppercase flex items-center gap-1 shrink-0">
+              <ShieldCheck size={10} />
+              <span className="hidden sm:inline">Active Database Connected</span>
+              <span className="sm:hidden">Live DB</span>
             </span>
           </div>
+
           <button
             onClick={fetchDatabase}
-            className="p-2 border border-brand-border hover:bg-brand-light rounded-lg text-primary flex items-center justify-center cursor-pointer transition-all shadow-sm"
+            className="p-2 border border-brand-border hover:bg-brand-light rounded-lg text-primary flex items-center justify-center cursor-pointer transition-all shadow-sm shrink-0"
             title="Refresh Database Records"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
@@ -838,18 +879,19 @@ export default function AdminDashboard() {
 
         {/* NOTIFICATION LOG TOAST */}
         {toastLog && (
-          <div className="bg-[#502C6E] text-accent p-3.5 px-8 text-xs font-bold font-sans flex items-center gap-2 border-b border-accent/20 animate-fade-in-down shadow-md shrink-0">
+          <div className="bg-[#502C6E] text-accent p-3 px-4 md:px-8 text-xs font-bold font-sans flex items-center gap-2 border-b border-accent/20 animate-fade-in-down shadow-md shrink-0">
             <Info size={14} className="animate-bounce shrink-0" />
-            <span className="flex-grow text-left text-white">{toastLog}</span>
-            <button onClick={() => setToastLog(null)} className="text-white/60 hover:text-white cursor-pointer ml-4">
+            <span className="flex-grow text-left text-white line-clamp-2">{toastLog}</span>
+            <button onClick={() => setToastLog(null)} className="text-white/60 hover:text-white cursor-pointer ml-2 shrink-0">
               <X size={14} />
             </button>
           </div>
         )}
 
         {/* WORKSPACE AREA */}
-        <div className="flex-grow p-8 overflow-y-auto">
+        <div className="flex-grow p-4 sm:p-6 md:p-8 overflow-y-auto min-w-0">
           
+
           {/* TAB 1: OVERVIEW PAGE */}
           {activeTab === 'overview' && (
             <div className="space-y-8 animate-fade-in-up">
