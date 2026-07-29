@@ -1,9 +1,19 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin as supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { readDb, writeDb } from '@/lib/db';
 import { verifyAdminToken } from '@/lib/auth';
 
+export const dynamic = 'force-dynamic';
+
 export async function PUT(request: Request) {
+  return handleReviewModeration(request);
+}
+
+export async function POST(request: Request) {
+  return handleReviewModeration(request);
+}
+
+async function handleReviewModeration(request: Request) {
   try {
     // 1. Verify Authentication
     const authHeader = request.headers.get('Authorization') || '';
@@ -29,7 +39,7 @@ export async function PUT(request: Request) {
       updates.approved_at = new Date().toISOString();
     } else if (action === 'reject') {
       updates.status = 'rejected';
-      updates.rejection_note = rejectionNote ? rejectionNote.trim() : '';
+      updates.rejection_note = rejectionNote ? rejectionNote.trim() : 'Rejected by administrator';
     } else if (action === 'edit') {
       if (!reviewText || reviewText.trim().length < 10) {
         return NextResponse.json({ error: 'Review text must be at least 10 characters long' }, { status: 400 });
@@ -41,10 +51,7 @@ export async function PUT(request: Request) {
     }
 
     let updatedReview: any = null;
-    const isSupabaseConfigured = Boolean(
-      process.env.NEXT_PUBLIC_SUPABASE_URL && 
-      !process.env.NEXT_PUBLIC_SUPABASE_URL.includes('placeholder')
-    );
+    let dbErrorMsg: string | null = null;
 
     if (isSupabaseConfigured) {
       try {
@@ -56,10 +63,15 @@ export async function PUT(request: Request) {
           .single();
 
         if (!error && data) {
+          console.log(`✅ Supabase review ${reviewId} updated action: ${action}`);
           updatedReview = data;
+        } else if (error) {
+          console.error(`❌ Supabase review update error for ${reviewId}:`, error);
+          dbErrorMsg = error.message;
         }
-      } catch (err) {
-        console.warn('Supabase review update exception:', err);
+      } catch (err: any) {
+        console.error('Supabase review update exception:', err);
+        dbErrorMsg = err.message;
       }
     }
 
@@ -78,7 +90,10 @@ export async function PUT(request: Request) {
     }
 
     if (!updatedReview) {
-      return NextResponse.json({ error: 'Review not found' }, { status: 404 });
+      if (isSupabaseConfigured && dbErrorMsg) {
+        return NextResponse.json({ error: `Database error updating review: ${dbErrorMsg}` }, { status: 500 });
+      }
+      return NextResponse.json({ error: 'Review record not found' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -87,8 +102,7 @@ export async function PUT(request: Request) {
       review: updatedReview
     });
   } catch (error: any) {
-    console.error('API Admin Reviews PUT error:', error);
+    console.error('API Admin Reviews PUT/POST error:', error);
     return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
   }
 }
-

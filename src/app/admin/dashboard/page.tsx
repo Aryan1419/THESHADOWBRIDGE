@@ -2213,20 +2213,20 @@ export default function AdminDashboard() {
                                       className="px-2.5 py-1.5 bg-rose-600 text-white rounded-lg text-[10px] font-bold hover:bg-rose-700 transition-all cursor-pointer shadow-sm"
                                     >
                                       Reject
-                                   <button
-                                     onClick={() => setDeleteTarget({
-                                       type: 'reviews',
-                                       id: rev.id,
-                                       name: rev.parent_name || rev.parent_registration_id || 'Review',
-                                       label: `Review by ${rev.parent_name} (${rev.parent_registration_id})`
-                                     })}
-                                     className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 border border-rose-200 rounded-lg transition-all cursor-pointer ml-1"
-                                     title="Delete Review Permanently"
-                                   >
-                                     <Trash2 size={13} />
-                                   </button>
                                     </button>
                                   )}
+                                  <button
+                                    onClick={() => setDeleteTarget({
+                                      type: 'reviews',
+                                      id: rev.id,
+                                      name: rev.parent_name || rev.parent_registration_id || 'Review',
+                                      label: `Review by ${rev.parent_name} (${rev.parent_registration_id})`
+                                    })}
+                                    className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 border border-rose-200 rounded-lg transition-all cursor-pointer"
+                                    title="Delete Review Permanently"
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
                                 </div>
                               </td>
                             </tr>
