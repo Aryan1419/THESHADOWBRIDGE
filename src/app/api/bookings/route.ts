@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { supabaseAdmin as supabase, isSupabaseConfigured } from '@/lib/supabase';
 import crypto from 'crypto';
 import { sendEmail } from '@/lib/notifications';
 
@@ -7,7 +7,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { 
-      name, phone, email, city, childAge, requirement, message,
+      name, phone, email, city, preferredLocation, childAge, requirement, message,
       razorpayPaymentId, razorpayOrderId, razorpaySignature 
     } = body;
 
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
     const randomSuffix = Math.floor(Math.random() * 89999 + 10000);
     const bookingId = `TSB-BK-2026-${randomSuffix}`;
 
-    const newBooking = {
+    const newBooking: any = {
       booking_id: bookingId,
       name,
       phone,
@@ -60,12 +60,27 @@ export async function POST(request: Request) {
       razorpay_signature: razorpaySignature
     };
 
-    const { error } = await supabase
-      .from('bookings')
-      .insert(newBooking);
+    if (preferredLocation) {
+      newBooking.preferred_location = preferredLocation;
+    }
 
-    if (error) {
-      throw error;
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabase
+        .from('bookings')
+        .insert(newBooking)
+        .select();
+
+      if (error) {
+        console.error('❌ Supabase booking insert error:', error);
+        // Try inserting without preferred_location if schema column doesn't exist yet
+        delete newBooking.preferred_location;
+        const { error: retryErr } = await supabase.from('bookings').insert(newBooking);
+        if (retryErr) {
+          throw retryErr;
+        }
+      } else {
+        console.log('✅ Supabase booking created successfully! ID:', data?.[0]?.booking_id || bookingId);
+      }
     }
 
     const bookingDateStr = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
@@ -86,7 +101,7 @@ export async function POST(request: Request) {
             <strong>Amount Paid:</strong> ₹99.00 (Non-refundable)<br />
             <strong>Payment Transaction ID:</strong> ${razorpayPaymentId}<br />
             <strong>Date & Time:</strong> ${bookingDateStr} IST<br />
-            <strong>City:</strong> ${city}
+            <strong>City:</strong> ${city}${preferredLocation ? ` (${preferredLocation})` : ''}
           </p>
         </div>
 
@@ -109,6 +124,7 @@ export async function POST(request: Request) {
           <p style="margin: 0 0 8px 0; font-size: 14px; color: #3B2A6B;"><strong>Phone:</strong> ${phone}</p>
           <p style="margin: 0 0 8px 0; font-size: 14px; color: #3B2A6B;"><strong>Email:</strong> ${email}</p>
           <p style="margin: 0 0 8px 0; font-size: 14px; color: #3B2A6B;"><strong>City:</strong> ${city}</p>
+          ${preferredLocation ? `<p style="margin: 0 0 8px 0; font-size: 14px; color: #3B2A6B;"><strong>Preferred Locality:</strong> ${preferredLocation}</p>` : ''}
           <p style="margin: 0 0 8px 0; font-size: 14px; color: #3B2A6B;"><strong>Child's Age:</strong> ${childAge}</p>
           <p style="margin: 0 0 8px 0; font-size: 14px; color: #3B2A6B;"><strong>Requirement:</strong> ${requirement}</p>
           ${message ? `<p style="margin: 0 0 8px 0; font-size: 14px; color: #3B2A6B;"><strong>Message / Notes:</strong> ${message}</p>` : ''}

@@ -8,6 +8,7 @@ import confetti from 'canvas-confetti';
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { CITY_LOCALITIES } from '@/lib/constants';
 
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
@@ -27,6 +28,8 @@ export default function BookConsultation() {
     phone: '',
     email: '',
     city: '',
+    preferredLocation: '',
+    otherLocation: '',
     childAge: '',
     requirement: '',
     message: ''
@@ -37,7 +40,17 @@ export default function BookConsultation() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'city') {
+      // Reset dependent location fields when city changes
+      setFormData(prev => ({
+        ...prev,
+        city: value,
+        preferredLocation: '',
+        otherLocation: ''
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleDetailsSubmit = (e: React.FormEvent) => {
@@ -70,6 +83,10 @@ export default function BookConsultation() {
       }
     }());
   };
+
+  const finalLocation = formData.preferredLocation === 'Other (please specify)'
+    ? (formData.otherLocation.trim() ? `Other: ${formData.otherLocation.trim()}` : 'Other')
+    : formData.preferredLocation;
 
   const handlePaymentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,6 +130,7 @@ export default function BookConsultation() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 ...formData,
+                preferredLocation: finalLocation,
                 razorpayPaymentId: response.razorpay_payment_id,
                 razorpayOrderId: response.razorpay_order_id,
                 razorpaySignature: response.razorpay_signature
@@ -147,7 +165,7 @@ export default function BookConsultation() {
           contact: formData.phone
         },
         theme: {
-          color: '#4B1363' // Purple primary theme color
+          color: '#4B1363'
         }
       };
 
@@ -201,7 +219,7 @@ export default function BookConsultation() {
                   <div className="flex items-center justify-between border-b border-brand-border/60 pb-4 mb-6">
                     <span className="font-serif font-black text-primary text-xl flex items-center gap-2">
                       <Calendar className="text-accent animate-pulse" size={22} />
-                      1. Child & Parent Details
+                      1. Child &amp; Parent Details
                     </span>
                     <span className="text-sm font-bold text-accent px-3 py-1 bg-accent/10 rounded-full">₹99 Only</span>
                   </div>
@@ -272,6 +290,57 @@ export default function BookConsultation() {
                         </select>
                       </div>
                     </div>
+
+                    {/* DEPENDENT LOCATION DROPDOWN (Appears after City is selected) */}
+                    {formData.city && CITY_LOCALITIES[formData.city] && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="space-y-4 pt-1"
+                      >
+                        <div className="flex flex-col gap-1.5">
+                          <label className="text-xs font-bold text-brand-dark uppercase tracking-wider flex items-center gap-1">
+                            <MapPin size={12} className="text-secondary" /> Preferred Locality / Area in {formData.city}
+                          </label>
+                          <select
+                            name="preferredLocation"
+                            required
+                            value={formData.preferredLocation}
+                            onChange={handleInputChange}
+                            className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
+                          >
+                            <option value="">Select Preferred Location in {formData.city}</option>
+                            {CITY_LOCALITIES[formData.city].map((loc) => (
+                              <option key={loc} value={loc}>
+                                {loc}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Fallback custom location input when "Other" is selected */}
+                        {formData.preferredLocation === 'Other (please specify)' && (
+                          <motion.div
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex flex-col gap-1.5"
+                          >
+                            <label className="text-xs font-bold text-brand-dark uppercase tracking-wider">
+                              Specify Locality / Sector Name
+                            </label>
+                            <input
+                              type="text"
+                              name="otherLocation"
+                              required
+                              value={formData.otherLocation}
+                              onChange={handleInputChange}
+                              placeholder="e.g. Hitec City Extension, Sector 50"
+                              className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
+                            />
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="flex flex-col gap-1.5">
@@ -348,7 +417,7 @@ export default function BookConsultation() {
                     </span>
                     <button
                       onClick={() => setStep(1)}
-                      className="text-xs text-brand-muted hover:text-primary font-bold underline"
+                      className="text-xs text-brand-muted hover:text-primary font-bold underline cursor-pointer"
                     >
                       Edit details
                     </button>
@@ -367,6 +436,7 @@ export default function BookConsultation() {
                         <p><strong>Contact:</strong> {formData.phone} • {formData.email}</p>
                         <p><strong>Requirement:</strong> {formData.requirement}</p>
                         <p><strong>City Branch:</strong> {formData.city}</p>
+                        {finalLocation && <p><strong>Preferred Area:</strong> {finalLocation}</p>}
                       </div>
                       <span className="font-black text-secondary text-lg shrink-0">₹99</span>
                     </div>
@@ -426,6 +496,7 @@ export default function BookConsultation() {
                     <p className="text-brand-dark"><strong>Parent Name:</strong> {formData.name}</p>
                     <p className="text-brand-dark"><strong>Phone Number:</strong> {formData.phone}</p>
                     <p className="text-brand-dark"><strong>City Branch:</strong> {formData.city}</p>
+                    {finalLocation && <p className="text-brand-dark"><strong>Preferred Area:</strong> {finalLocation}</p>}
                     <p className="text-brand-dark"><strong>Requirement:</strong> {formData.requirement}</p>
                   </div>
 
