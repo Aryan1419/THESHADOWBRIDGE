@@ -37,6 +37,7 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCity, setFilterCity] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const [filterPlacementPaid, setFilterPlacementPaid] = useState('');
   const [filterExperience, setFilterExperience] = useState('');
   const [filterSubject, setFilterSubject] = useState('');
   const [filterSpecialNeeds, setFilterSpecialNeeds] = useState('');
@@ -599,17 +600,33 @@ export default function AdminDashboard() {
     db.parent_shadow_requests.forEach(r => {
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
         list.push({
-          id: r.id,
+          id: r.id + '-cons',
           date: r.created_at,
           regId: r.registration_id,
           parentName: r.parentName,
           childName: r.childName,
           phone: r.phone,
           email: r.email,
-          type: 'Shadow Teacher Request',
+          type: 'Consultation Fee (Shadow Teacher)',
           amount: '₹99',
           paymentId: (r as any).razorpayPaymentId || 'Demo (Simulated)',
           orderId: (r as any).razorpayOrderId || 'Demo (Simulated)',
+          status: 'Success'
+        });
+      }
+      if ((r as any).placementPaid || (r as any).placement_paid) {
+        list.push({
+          id: r.id + '-place',
+          date: (r as any).placementPaidAt || r.created_at,
+          regId: r.registration_id,
+          parentName: r.parentName,
+          childName: r.childName,
+          phone: r.phone,
+          email: r.email,
+          type: 'Placement Fee (Shadow Teacher)',
+          amount: `₹${((r as any).placementAmount || 5000).toLocaleString()}`,
+          paymentId: (r as any).placementPaymentId || (r as any).placement_payment_id || 'Demo (Simulated)',
+          orderId: (r as any).placementOrderId || (r as any).placement_order_id || 'Demo (Simulated)',
           status: 'Success'
         });
       }
@@ -617,17 +634,33 @@ export default function AdminDashboard() {
     db.parent_tutor_requests.forEach(r => {
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
         list.push({
-          id: r.id,
+          id: r.id + '-cons',
           date: r.created_at,
           regId: r.registration_id,
           parentName: r.parentName,
           childName: r.childName,
           phone: r.phone,
           email: r.email,
-          type: 'Home Tutor Request',
+          type: 'Consultation Fee (Home Tutor)',
           amount: '₹99',
           paymentId: (r as any).razorpayPaymentId || 'Demo (Simulated)',
           orderId: (r as any).razorpayOrderId || 'Demo (Simulated)',
+          status: 'Success'
+        });
+      }
+      if ((r as any).placementPaid || (r as any).placement_paid) {
+        list.push({
+          id: r.id + '-place',
+          date: (r as any).placementPaidAt || r.created_at,
+          regId: r.registration_id,
+          parentName: r.parentName,
+          childName: r.childName,
+          phone: r.phone,
+          email: r.email,
+          type: 'Placement Fee (Home Tutor)',
+          amount: `₹${((r as any).placementAmount || 3000).toLocaleString()}`,
+          paymentId: (r as any).placementPaymentId || (r as any).placement_payment_id || 'Demo (Simulated)',
+          orderId: (r as any).placementOrderId || (r as any).placement_order_id || 'Demo (Simulated)',
           status: 'Success'
         });
       }
@@ -680,7 +713,7 @@ export default function AdminDashboard() {
       const matchCity = filterCity ? r.city === filterCity : true;
       const matchStatus = filterStatus ? r.status === filterStatus : true;
 
-      return matchSearch && matchCity && matchStatus;
+      return matchSearch && matchCity && matchStatus && (filterPlacementPaid === '' ? true : filterPlacementPaid === 'yes' ? ((r as any).placementPaid || (r as any).placement_paid || false) : !((r as any).placementPaid || (r as any).placement_paid || false));
     });
   };
 
@@ -1313,7 +1346,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Filters Panel */}
-              <div className="bg-white border border-brand-border p-4 rounded-2xl shadow-sm grid grid-cols-2 gap-4 max-w-md">
+              <div className="bg-white border border-brand-border p-4 rounded-2xl shadow-sm grid grid-cols-3 gap-4 max-w-xl">
                 <div className="flex flex-col gap-1">
                   <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
                     <Filter size={10} /> Filter City
@@ -1349,6 +1382,21 @@ export default function AdminDashboard() {
                     <option value="Closed">Closed</option>
                   </select>
                 </div>
+
+                <div className="flex flex-col gap-1">
+                  <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                    <CreditCard size={10} /> Placement Fee
+                  </span>
+                  <select
+                    value={filterPlacementPaid}
+                    onChange={(e) => setFilterPlacementPaid(e.target.value)}
+                    className="p-2 border border-brand-border bg-white rounded-xl text-xs text-brand-dark focus:outline-none"
+                  >
+                    <option value="">All</option>
+                    <option value="yes">Paid</option>
+                    <option value="no">Not Paid</option>
+                  </select>
+                </div>
               </div>
 
               {/* Parent Table */}
@@ -1380,7 +1428,7 @@ export default function AdminDashboard() {
                               <th className="p-4">Subjects</th>
                             </>
                           )}
-                          <th className="p-4 text-center">Consultation Paid?</th>
+                          <th className="p-4 text-center">Placement Fee?</th>
                           <th className="p-4 text-center">Status</th>
                           <th className="p-4 text-center">Actions</th>
                         </tr>
@@ -1418,11 +1466,17 @@ export default function AdminDashboard() {
                             )}
 
                             <td className="p-4 text-center">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                ((r as any).consultationPaid || (r as any).consultation_paid) ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700'
-                              }`}>
-                                {((r as any).consultationPaid || (r as any).consultation_paid) ? 'Yes (₹99)' : 'No'}
-                              </span>
+                              {(() => {
+                                const isPaid = Boolean((r as any).placementPaid || (r as any).placement_paid);
+                                const amount = (r as any).placementAmount || (r as any).placement_amount || (parentSubTab === 'shadow' ? 5000 : 3000);
+                                return (
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                    isPaid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                                  }`}>
+                                    {isPaid ? `Yes (₹${amount.toLocaleString()})` : 'No'}
+                                  </span>
+                                );
+                              })()}
                             </td>
 
                             <td className="p-4 text-center">
