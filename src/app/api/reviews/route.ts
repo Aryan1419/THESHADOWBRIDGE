@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { readDb, writeDb, ReviewRecord } from '@/lib/db';
 import { supabaseAdmin, isSupabaseConfigured } from '@/lib/supabase';
+import { verifyAdminToken } from '@/lib/auth';
 
 export async function POST(request: Request) {
   try {
@@ -104,8 +105,9 @@ export async function GET(request: Request) {
   try {
     const url = new URL(request.url);
     const searchRegId = url.searchParams.get('regId');
-    const authHeader = request.headers.get('Authorization');
-    const isAdmin = authHeader === 'Bearer mock-admin-token-sb-2026';
+    const authHeader = request.headers.get('Authorization') || '';
+    const token = authHeader.replace('Bearer ', '');
+    const isAdmin = !!verifyAdminToken(token);
 
     let reviews: ReviewRecord[] | null = null;
 

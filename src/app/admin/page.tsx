@@ -8,7 +8,7 @@ export default function AdminIndexRedirect() {
 
   useEffect(() => {
     const token = localStorage.getItem('admin_token');
-    if (token === 'mock-admin-token-sb-2026') {
+    if (token) {
       router.replace('/admin/dashboard');
     } else {
       router.replace('/admin/login');

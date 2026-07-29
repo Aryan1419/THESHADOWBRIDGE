@@ -15,7 +15,7 @@ export default function AdminLogin() {
   useEffect(() => {
     // If already logged in, redirect to dashboard
     const token = localStorage.getItem('admin_token');
-    if (token === 'mock-admin-token-sb-2026') {
+    if (token) {
       router.replace('/admin/dashboard');
     }
   }, [router]);

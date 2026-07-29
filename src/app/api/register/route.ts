@@ -243,58 +243,59 @@ export async function POST(request: Request) {
       const host = request.headers.get('host') || 'localhost:3000';
       const protocol = host.includes('localhost') ? 'http' : 'https';
 
-      // Send Parent Receipt Email
-      sendEmail({
-        to: cleanEmail,
-        subject: `Consultation Booked - The Shadow Bridge [${generatedId}]`,
-        type: 'registration',
-        bodyHtml: `
-          <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
-          <p style="margin: 0 0 16px 0;">Thank you for booking a 1-on-1 consultation session for <strong>${serviceNeeded}</strong> support with Founder Pratibha Mishra.</p>
-          <p style="margin: 0 0 16px 0;">We have received your consultation fee payment of <strong>₹99</strong>.</p>
-          
-          <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 20px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
-            <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: bold; color: #3B2A6B; font-family: Georgia, serif;">Your Login &amp; Consultation Details</h3>
-            <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: bold; color: #3B2A6B;">Your Unique ID: <span style="font-family: monospace; color: #B0206B; font-size: 16px;">${generatedId}</span></p>
-            <p style="margin: 0 0 8px 0;"><strong>Service Selected:</strong> ${serviceNeeded}</p>
-            <p style="margin: 0;"><strong>Status:</strong> Consultation Booked (Call Pending)</p>
-          </div>
+      // Send Parent Receipt & Admin Alert Emails concurrently and await completion
+      await Promise.allSettled([
+        sendEmail({
+          to: cleanEmail,
+          subject: `Consultation Booked - The Shadow Bridge [${generatedId}]`,
+          type: 'registration',
+          bodyHtml: `
+            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
+            <p style="margin: 0 0 16px 0;">Thank you for booking a 1-on-1 consultation session for <strong>${serviceNeeded}</strong> support with Founder Pratibha Mishra.</p>
+            <p style="margin: 0 0 16px 0;">We have received your consultation fee payment of <strong>₹99</strong>.</p>
+            
+            <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 20px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+              <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: bold; color: #3B2A6B; font-family: Georgia, serif;">Your Login &amp; Consultation Details</h3>
+              <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: bold; color: #3B2A6B;">Your Unique ID: <span style="font-family: monospace; color: #B0206B; font-size: 16px;">${generatedId}</span></p>
+              <p style="margin: 0 0 8px 0;"><strong>Service Selected:</strong> ${serviceNeeded}</p>
+              <p style="margin: 0;"><strong>Status:</strong> Consultation Booked (Call Pending)</p>
+            </div>
 
-          <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 16px 20px; border-radius: 4px; font-size: 13px; color: #5C4300; line-height: 1.6;">
-            <strong>How to Check Your Status:</strong><br />
-            To check your consultation status or access your child registration form anytime, visit <a href="${protocol}://${host}/check-status" style="color: #B0206B; font-weight: bold; text-decoration: underline;">theshadowbridge.com/check-status</a> and enter your <strong>ID (${generatedId})</strong> along with the phone number (<strong>${phone}</strong>) or email (<strong>${cleanEmail}</strong>) you registered with.
-          </div>
+            <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 16px 20px; border-radius: 4px; font-size: 13px; color: #5C4300; line-height: 1.6;">
+              <strong>How to Check Your Status:</strong><br />
+              To check your consultation status or access your child registration form anytime, visit <a href="${protocol}://${host}/check-status" style="color: #B0206B; font-weight: bold; text-decoration: underline;">theshadowbridge.com/check-status</a> and enter your <strong>ID (${generatedId})</strong> along with the phone number (<strong>${phone}</strong>) or email (<strong>${cleanEmail}</strong>) you registered with.
+            </div>
 
-          <p style="margin: 0 0 20px 0;">Founder Pratibha Mishra will call you directly within 24 hours to conduct your assessment consultation.</p>
+            <p style="margin: 0 0 20px 0;">Founder Pratibha Mishra will call you directly within 24 hours to conduct your assessment consultation.</p>
 
-          <div style="margin: 24px 0;">
-            <a href="${protocol}://${host}/check-status?regId=${generatedId}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Check Status &amp; Access Registration Form →</a>
-          </div>
-        `
-      }).catch(err => console.error('Parent consultation email fail:', err));
+            <div style="margin: 24px 0;">
+              <a href="${protocol}://${host}/check-status?regId=${generatedId}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Check Status &amp; Access Registration Form →</a>
+            </div>
+          `
+        }).catch(err => console.error('Parent consultation email fail:', err)),
 
-      // Send Admin Alert Email
-      sendEmail({
-        to: 'theshadowbridgesupport@gmail.com',
-        subject: `New Parent Consultation Booked: ${parentName} [${generatedId}]`,
-        type: 'contact_alert',
-        bodyHtml: `
-          <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Parent Consultation Booked</h2>
-          <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new parent has booked and paid the ₹99 consultation fee.</p>
-          
-          <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
-            <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Booking ID:</strong> ${bookingId}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Parent Name:</strong> ${parentName}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${cleanEmail}</p>
-            <p style="margin: 0 0 8px 0;"><strong>City:</strong> ${city}</p>
-            <p style="margin: 0;"><strong>Service Requested:</strong> ${serviceNeeded}</p>
-          </div>
+        sendEmail({
+          to: 'theshadowbridgesupport@gmail.com',
+          subject: `New Parent Consultation Booked: ${parentName} [${generatedId}]`,
+          type: 'contact_alert',
+          bodyHtml: `
+            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Parent Consultation Booked</h2>
+            <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new parent has booked and paid the ₹99 consultation fee.</p>
+            
+            <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+              <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Booking ID:</strong> ${bookingId}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Parent Name:</strong> ${parentName}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${cleanEmail}</p>
+              <p style="margin: 0 0 8px 0;"><strong>City:</strong> ${city}</p>
+              <p style="margin: 0;"><strong>Service Requested:</strong> ${serviceNeeded}</p>
+            </div>
 
-          <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to mark this consultation as completed after calling the parent.</p>
-        `
-      }).catch(err => console.error('Admin consultation alert fail:', err));
+            <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to mark this consultation as completed after calling the parent.</p>
+          `
+        }).catch(err => console.error('Admin consultation alert fail:', err))
+      ]);
 
       return NextResponse.json({ success: true, registration_id: generatedId, booking_id: bookingId, record: toCamelCase(parentRecord) });
     }
@@ -509,21 +510,23 @@ export async function POST(request: Request) {
       if (uErr) throw uErr;
 
       // Send Placement Confirmation Email
-      sendEmail({
-        to: parentRecord.email,
-        subject: `Placement Fee Received - ${newStatus} [${cleanRegId}]`,
-        type: 'placement_confirmed',
-        bodyHtml: `
-          <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentRecord.parent_name},</h2>
-          <p style="margin: 0 0 16px 0;">We have received your placement fee payment. Our clinical matchmaking team is now actively matching background-verified educators for <strong>${parentRecord.child_name || 'your child'}</strong>!</p>
-          
-          <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
-            <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${cleanRegId}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Status:</strong> ${newStatus}</p>
-            <p style="margin: 0;"><strong>Payment ID:</strong> ${razorpayPaymentId}</p>
-          </div>
-        `
-      }).catch(err => console.error('Placement payment email fail:', err));
+      await Promise.allSettled([
+        sendEmail({
+          to: parentRecord.email,
+          subject: `Placement Fee Received - ${newStatus} [${cleanRegId}]`,
+          type: 'placement_confirmed',
+          bodyHtml: `
+            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentRecord.parent_name},</h2>
+            <p style="margin: 0 0 16px 0;">We have received your placement fee payment. Our clinical matchmaking team is now actively matching background-verified educators for <strong>${parentRecord.child_name || 'your child'}</strong>!</p>
+            
+            <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+              <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${cleanRegId}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Status:</strong> ${newStatus}</p>
+              <p style="margin: 0;"><strong>Payment ID:</strong> ${razorpayPaymentId}</p>
+            </div>
+          `
+        }).catch(err => console.error('Placement payment email fail:', err))
+      ]);
 
       return NextResponse.json({
         success: true,
@@ -602,83 +605,84 @@ export async function POST(request: Request) {
         // Trigger notifications
         const host = request.headers.get('host') || 'localhost:3000';
         const protocol = host.includes('localhost') ? 'http' : 'https';
-        const dashboardLink = `${protocol}://${host}/dashboard?regId=${generatedId}`;
+        const statusLink = `${protocol}://${host}/check-status?regId=${generatedId}`;
 
-        sendEmail({
-          to: email,
-          subject: 'Welcome to The Shadow Bridge – Shadow Teacher Registration Received',
-          type: 'registration',
-          bodyHtml: `
-            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
-            <p style="margin: 0 0 16px 0;">Thank you for registering with The Shadow Bridge.</p>
-            <p style="margin: 0 0 16px 0;">We have successfully received your request for a Shadow Teacher for your child.</p>
-            
-            <h3 style="color: #3B2A6B; font-size: 15px; margin: 24px 0 10px 0;">What Happens Next?</h3>
-            <ul style="margin: 0 0 20px 0; padding-left: 20px; line-height: 1.6;">
-              <li style="margin-bottom: 8px;">Our team will review your requirements.</li>
-              <li style="margin-bottom: 8px;">Pratibha Mishra, Founder & Lead Mentor, will personally conduct an assessment consultation to understand your child's strengths and support needs.</li>
-              <li style="margin-bottom: 8px;">Based on the consultation, we will identify a suitable shadow teacher.</li>
-              <li style="margin-bottom: 8px;">Once the profile is finalized, we will share the details with you before placement.</li>
-            </ul>
+        await Promise.allSettled([
+          sendEmail({
+            to: email,
+            subject: 'Welcome to The Shadow Bridge – Shadow Teacher Registration Received',
+            type: 'registration',
+            bodyHtml: `
+              <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
+              <p style="margin: 0 0 16px 0;">Thank you for registering with The Shadow Bridge.</p>
+              <p style="margin: 0 0 16px 0;">We have successfully received your request for a Shadow Teacher for your child.</p>
+              
+              <h3 style="color: #3B2A6B; font-size: 15px; margin: 24px 0 10px 0;">What Happens Next?</h3>
+              <ul style="margin: 0 0 20px 0; padding-left: 20px; line-height: 1.6;">
+                <li style="margin-bottom: 8px;">Our team will review your requirements.</li>
+                <li style="margin-bottom: 8px;">Pratibha Mishra, Founder & Lead Mentor, will personally conduct an assessment consultation to understand your child's strengths and support needs.</li>
+                <li style="margin-bottom: 8px;">Based on the consultation, we will identify a suitable shadow teacher.</li>
+                <li style="margin-bottom: 8px;">Once the profile is finalized, we will share the details with you before placement.</li>
+              </ul>
 
-            <p style="margin: 0 0 20px 0;">Our team will contact you within 24 hours to schedule the consultation.</p>
-            <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
-              You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
-            </p>
-            <p style="margin: 0 0 20px 0;">Thank you for choosing The Shadow Bridge.</p>
-            
-            <p style="margin: 20px 0 0 0; font-weight: bold; color: #3B2A6B;">Team The Shadow Bridge</p>
-            
-            <div style="margin-top: 24px;">
-              <a href="${dashboardLink}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15); margin-bottom: 10px;">Go to Parent Dashboard</a>
-            </div>
-          `
-        }).catch(err => console.error('Parent shadow registration email fail:', err));
-
-        sendEmail({
-          to: email,
-          subject: 'Payment Confirmation - The Shadow Bridge',
-          type: 'payment_receipt',
-          bodyHtml: `
-            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Payment Confirmation</h2>
-            <p style="margin: 0 0 16px 0;">Thank you for your payment of <strong>₹99</strong> toward the diagnostic consultation assessment fee.</p>
-            
-            <div style="background-color: #F8F5FB; border-left: 4px solid #C89B3C; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
-              <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #6A5B7C;">
-                <strong>Amount Paid:</strong> ₹99.00<br />
-                <strong>Payment ID:</strong> ${razorpayPaymentId}<br />
-                <strong>Registration ID:</strong> ${generatedId}<br />
-                <strong>Date:</strong> ${new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}<br />
-                <strong>Policy:</strong> This fee is non-refundable
+              <p style="margin: 0 0 20px 0;">Our team will contact you within 24 hours to schedule the consultation.</p>
+              <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
+                You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
               </p>
-            </div>
-          `
-        }).catch(err => console.error('Parent shadow payment email fail:', err));
+              <p style="margin: 0 0 20px 0;">Thank you for choosing The Shadow Bridge.</p>
+              
+              <p style="margin: 20px 0 0 0; font-weight: bold; color: #3B2A6B;">Team The Shadow Bridge</p>
+              
+              <div style="margin-top: 24px;">
+                <a href="${statusLink}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15); margin-bottom: 10px;">Check Status &amp; Access Portal</a>
+              </div>
+            `
+          }).catch(err => console.error('Parent shadow registration email fail:', err)),
 
-        // Admin alert email for Parent Shadow Teacher Request
-        sendEmail({
-          to: 'theshadowbridgesupport@gmail.com',
-          subject: `New Parent Inquiry (Shadow Teacher): ${parentName} [${generatedId}]`,
-          type: 'contact_alert',
-          bodyHtml: `
-            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Parent Inquiry (Shadow Teacher Support)</h2>
-            <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new parent has registered and paid the ₹99 consultation fee for Shadow Teacher support.</p>
-            
-            <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
-              <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
-              <p style="margin: 0 0 8px 0;"><strong>Parent Name:</strong> ${parentName} (${relationship || 'Parent'})</p>
-              <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
-              <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${email}</p>
-              <p style="margin: 0 0 8px 0;"><strong>City / Location:</strong> ${city} (${homeLocation || 'N/A'})</p>
-              <p style="margin: 0 0 8px 0;"><strong>Child Name / Grade:</strong> ${childName} (${childGrade})</p>
-              <p style="margin: 0 0 8px 0;"><strong>Diagnosis:</strong> ${hasDiagnosis === 'Yes' ? diagnosis || 'Yes' : 'No'}</p>
-              <p style="margin: 0 0 8px 0;"><strong>Difficulties:</strong> ${Array.isArray(difficulties) ? difficulties.join(', ') : (difficulties || 'None')}</p>
-              <p style="margin: 0;"><strong>Consultation Status:</strong> Paid ₹99 (Payment ID: ${razorpayPaymentId})</p>
-            </div>
+          sendEmail({
+            to: email,
+            subject: 'Payment Confirmation - The Shadow Bridge',
+            type: 'payment_receipt',
+            bodyHtml: `
+              <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Payment Confirmation</h2>
+              <p style="margin: 0 0 16px 0;">Thank you for your payment of <strong>₹99</strong> toward the diagnostic consultation assessment fee.</p>
+              
+              <div style="background-color: #F8F5FB; border-left: 4px solid #C89B3C; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+                <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #6A5B7C;">
+                  <strong>Amount Paid:</strong> ₹99.00<br />
+                  <strong>Payment ID:</strong> ${razorpayPaymentId}<br />
+                  <strong>Registration ID:</strong> ${generatedId}<br />
+                  <strong>Date:</strong> ${new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}<br />
+                  <strong>Policy:</strong> This fee is non-refundable
+                </p>
+              </div>
+            `
+          }).catch(err => console.error('Parent shadow payment email fail:', err)),
 
-            <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to review this inquiry and schedule the consultation.</p>
-          `
-        }).catch(err => console.error('Admin parent shadow alert email fail:', err));
+          sendEmail({
+            to: 'theshadowbridgesupport@gmail.com',
+            subject: `New Parent Inquiry (Shadow Teacher): ${parentName} [${generatedId}]`,
+            type: 'contact_alert',
+            bodyHtml: `
+              <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Parent Inquiry (Shadow Teacher Support)</h2>
+              <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new parent has registered and paid the ₹99 consultation fee for Shadow Teacher support.</p>
+              
+              <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+                <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
+                <p style="margin: 0 0 8px 0;"><strong>Parent Name:</strong> ${parentName} (${relationship || 'Parent'})</p>
+                <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
+                <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${email}</p>
+                <p style="margin: 0 0 8px 0;"><strong>City / Location:</strong> ${city} (${homeLocation || 'N/A'})</p>
+                <p style="margin: 0 0 8px 0;"><strong>Child Name / Grade:</strong> ${childName} (${childGrade})</p>
+                <p style="margin: 0 0 8px 0;"><strong>Diagnosis:</strong> ${hasDiagnosis === 'Yes' ? diagnosis || 'Yes' : 'No'}</p>
+                <p style="margin: 0 0 8px 0;"><strong>Difficulties:</strong> ${Array.isArray(difficulties) ? difficulties.join(', ') : (difficulties || 'None')}</p>
+                <p style="margin: 0;"><strong>Consultation Status:</strong> Paid ₹99 (Payment ID: ${razorpayPaymentId})</p>
+              </div>
+
+              <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to review this inquiry and schedule the consultation.</p>
+            `
+          }).catch(err => console.error('Admin parent shadow alert email fail:', err))
+        ]);
 
         return NextResponse.json({ success: true, type, registration_id: generatedId, record });
       } else {
@@ -716,83 +720,84 @@ export async function POST(request: Request) {
         // Trigger notifications
         const host = request.headers.get('host') || 'localhost:3000';
         const protocol = host.includes('localhost') ? 'http' : 'https';
-        const dashboardLink = `${protocol}://${host}/dashboard?regId=${generatedId}`;
+        const statusLink = `${protocol}://${host}/check-status?regId=${generatedId}`;
 
-        sendEmail({
-          to: email,
-          subject: 'Welcome to The Shadow Bridge – Tutor Registration Received',
-          type: 'registration',
-          bodyHtml: `
-            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
-            <p style="margin: 0 0 16px 0;">Thank you for registering with The Shadow Bridge.</p>
-            <p style="margin: 0 0 16px 0;">We have successfully received your request for a Home Tutor.</p>
-            
-            <h3 style="color: #3B2A6B; font-size: 15px; margin: 24px 0 10px 0;">What Happens Next?</h3>
-            <ul style="margin: 0 0 20px 0; padding-left: 20px; line-height: 1.6;">
-              <li style="margin-bottom: 8px;">Our team will review your child's academic requirements.</li>
-              <li style="margin-bottom: 8px;">We will shortlist suitable tutors based on your preferences.</li>
-              <li style="margin-bottom: 8px;">Tutor profiles will be shared for your approval.</li>
-              <li style="margin-bottom: 8px;">Once confirmed, we will coordinate the tutoring schedule.</li>
-            </ul>
+        await Promise.allSettled([
+          sendEmail({
+            to: email,
+            subject: 'Welcome to The Shadow Bridge – Tutor Registration Received',
+            type: 'registration',
+            bodyHtml: `
+              <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
+              <p style="margin: 0 0 16px 0;">Thank you for registering with The Shadow Bridge.</p>
+              <p style="margin: 0 0 16px 0;">We have successfully received your request for a Home Tutor.</p>
+              
+              <h3 style="color: #3B2A6B; font-size: 15px; margin: 24px 0 10px 0;">What Happens Next?</h3>
+              <ul style="margin: 0 0 20px 0; padding-left: 20px; line-height: 1.6;">
+                <li style="margin-bottom: 8px;">Our team will review your child's academic requirements.</li>
+                <li style="margin-bottom: 8px;">We will shortlist suitable tutors based on your preferences.</li>
+                <li style="margin-bottom: 8px;">Tutor profiles will be shared for your approval.</li>
+                <li style="margin-bottom: 8px;">Once confirmed, we will coordinate the tutoring schedule.</li>
+              </ul>
 
-            <p style="margin: 0 0 20px 0;">Our team will contact you within 24 hours to begin the matching process.</p>
-            <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
-              You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
-            </p>
-            <p style="margin: 0 0 20px 0;">Thank you for choosing The Shadow Bridge.</p>
-            
-            <p style="margin: 20px 0 0 0; font-weight: bold; color: #3B2A6B;">Team The Shadow Bridge</p>
-            
-            <div style="margin-top: 24px;">
-              <a href="${dashboardLink}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15); margin-bottom: 10px;">Go to Parent Dashboard</a>
-            </div>
-          `
-        }).catch(err => console.error('Parent tutor registration email fail:', err));
-
-        sendEmail({
-          to: email,
-          subject: 'Payment Confirmation - The Shadow Bridge',
-          type: 'payment_receipt',
-          bodyHtml: `
-            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Payment Confirmation</h2>
-            <p style="margin: 0 0 16px 0;">Thank you for your payment of <strong>₹99</strong> toward the diagnostic consultation assessment fee.</p>
-            
-            <div style="background-color: #F8F5FB; border-left: 4px solid #C89B3C; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
-              <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #6A5B7C;">
-                <strong>Amount Paid:</strong> ₹99.00<br />
-                <strong>Payment ID:</strong> ${razorpayPaymentId}<br />
-                <strong>Registration ID:</strong> ${generatedId}<br />
-                <strong>Date:</strong> ${new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}<br />
-                <strong>Policy:</strong> This fee is non-refundable
+              <p style="margin: 0 0 20px 0;">Our team will contact you within 24 hours to begin the matching process.</p>
+              <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
+                You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
               </p>
-            </div>
-          `
-        }).catch(err => console.error('Parent tutor payment email fail:', err));
+              <p style="margin: 0 0 20px 0;">Thank you for choosing The Shadow Bridge.</p>
+              
+              <p style="margin: 20px 0 0 0; font-weight: bold; color: #3B2A6B;">Team The Shadow Bridge</p>
+              
+              <div style="margin-top: 24px;">
+                <a href="${statusLink}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15); margin-bottom: 10px;">Check Status &amp; Access Portal</a>
+              </div>
+            `
+          }).catch(err => console.error('Parent tutor registration email fail:', err)),
 
-        // Admin alert email for Parent Home Tutor Request
-        sendEmail({
-          to: 'theshadowbridgesupport@gmail.com',
-          subject: `New Parent Inquiry (Home Tutor): ${parentName} [${generatedId}]`,
-          type: 'contact_alert',
-          bodyHtml: `
-            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Parent Inquiry (Home Tutor Support)</h2>
-            <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new parent has registered and paid the ₹99 consultation fee for Home Tutor support.</p>
-            
-            <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
-              <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
-              <p style="margin: 0 0 8px 0;"><strong>Parent Name:</strong> ${parentName} (${relationship || 'Parent'})</p>
-              <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
-              <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${email}</p>
-              <p style="margin: 0 0 8px 0;"><strong>City / Location:</strong> ${city} (${homeLocation || 'N/A'})</p>
-              <p style="margin: 0 0 8px 0;"><strong>Child Name / Grade:</strong> ${childName} (${childGrade})</p>
-              <p style="margin: 0 0 8px 0;"><strong>Tutor Type Needed:</strong> ${tutorType || 'Academic Tuition'}</p>
-              <p style="margin: 0 0 8px 0;"><strong>Subjects Required:</strong> ${Array.isArray(subjects) ? subjects.join(', ') : (subjects || 'All Subjects')}</p>
-              <p style="margin: 0;"><strong>Consultation Status:</strong> Paid ₹99 (Payment ID: ${razorpayPaymentId})</p>
-            </div>
+          sendEmail({
+            to: email,
+            subject: 'Payment Confirmation - The Shadow Bridge',
+            type: 'payment_receipt',
+            bodyHtml: `
+              <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Payment Confirmation</h2>
+              <p style="margin: 0 0 16px 0;">Thank you for your payment of <strong>₹99</strong> toward the diagnostic consultation assessment fee.</p>
+              
+              <div style="background-color: #F8F5FB; border-left: 4px solid #C89B3C; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+                <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #6A5B7C;">
+                  <strong>Amount Paid:</strong> ₹99.00<br />
+                  <strong>Payment ID:</strong> ${razorpayPaymentId}<br />
+                  <strong>Registration ID:</strong> ${generatedId}<br />
+                  <strong>Date:</strong> ${new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}<br />
+                  <strong>Policy:</strong> This fee is non-refundable
+                </p>
+              </div>
+            `
+          }).catch(err => console.error('Parent tutor payment email fail:', err)),
 
-            <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to review this inquiry and begin tutor matchmaking.</p>
-          `
-        }).catch(err => console.error('Admin parent tutor alert email fail:', err));
+          sendEmail({
+            to: 'theshadowbridgesupport@gmail.com',
+            subject: `New Parent Inquiry (Home Tutor): ${parentName} [${generatedId}]`,
+            type: 'contact_alert',
+            bodyHtml: `
+              <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Parent Inquiry (Home Tutor Support)</h2>
+              <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new parent has registered and paid the ₹99 consultation fee for Home Tutor support.</p>
+              
+              <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+                <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
+                <p style="margin: 0 0 8px 0;"><strong>Parent Name:</strong> ${parentName} (${relationship || 'Parent'})</p>
+                <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
+                <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${email}</p>
+                <p style="margin: 0 0 8px 0;"><strong>City / Location:</strong> ${city} (${homeLocation || 'N/A'})</p>
+                <p style="margin: 0 0 8px 0;"><strong>Child Name / Grade:</strong> ${childName} (${childGrade})</p>
+                <p style="margin: 0 0 8px 0;"><strong>Tutor Type Needed:</strong> ${tutorType || 'Academic Tuition'}</p>
+                <p style="margin: 0 0 8px 0;"><strong>Subjects Required:</strong> ${Array.isArray(subjects) ? subjects.join(', ') : (subjects || 'All Subjects')}</p>
+                <p style="margin: 0;"><strong>Consultation Status:</strong> Paid ₹99 (Payment ID: ${razorpayPaymentId})</p>
+              </div>
+
+              <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to review this inquiry and begin tutor matchmaking.</p>
+            `
+          }).catch(err => console.error('Admin parent tutor alert email fail:', err))
+        ]);
 
         return NextResponse.json({ success: true, type, registration_id: generatedId, record });
       }
@@ -856,52 +861,53 @@ export async function POST(request: Request) {
       // Trigger notification
       const host = request.headers.get('host') || 'localhost:3000';
       const protocol = host.includes('localhost') ? 'http' : 'https';
-      const dashboardLink = `${protocol}://${host}/dashboard?regId=${generatedId}`;
+      const statusLink = `${protocol}://${host}/check-status?regId=${generatedId}`;
 
-      sendEmail({
-        to: email,
-        subject: `Registration Received - The Shadow Bridge [${generatedId}]`,
-        type: 'registration',
-        bodyHtml: `
-          <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${name},</h2>
-          <p style="margin: 0 0 16px 0;">Thank you for applying as a Special Education Shadow Teacher with The Shadow Bridge.</p>
-          <p style="margin: 0 0 16px 0;">Your registration has been logged successfully under Registration ID <strong>${generatedId}</strong>.</p>
-          
-          <h3 style="color: #3B2A6B; font-size: 15px; margin: 24px 0 10px 0;">What Happens Next?</h3>
-          <p style="margin: 0 0 20px 0;">Our clinical screening panel is vetting your credentials, qualifications, and special-needs experience. Pratibha Mishra's team will call you shortly to schedule a video panel assessment call.</p>
-          <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
-            You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
-          </p>
+      await Promise.allSettled([
+        sendEmail({
+          to: email,
+          subject: `Registration Received - The Shadow Bridge [${generatedId}]`,
+          type: 'registration',
+          bodyHtml: `
+            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${name},</h2>
+            <p style="margin: 0 0 16px 0;">Thank you for applying as a Special Education Shadow Teacher with The Shadow Bridge.</p>
+            <p style="margin: 0 0 16px 0;">Your registration has been logged successfully under Registration ID <strong>${generatedId}</strong>.</p>
+            
+            <h3 style="color: #3B2A6B; font-size: 15px; margin: 24px 0 10px 0;">What Happens Next?</h3>
+            <p style="margin: 0 0 20px 0;">Our clinical screening panel is vetting your credentials, qualifications, and special-needs experience. Pratibha Mishra's team will call you shortly to schedule a video panel assessment call.</p>
+            <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
+              You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
+            </p>
 
-          <a href="${dashboardLink}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15); margin-bottom: 10px;">Go to Educator Dashboard</a>
-        `
-      }).catch(err => console.error('Shadow teacher registration email fail:', err));
+            <a href="${statusLink}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15); margin-bottom: 10px;">Check Status &amp; Access Portal</a>
+          `
+        }).catch(err => console.error('Shadow teacher registration email fail:', err)),
 
-      // Admin alert email for Shadow Teacher Candidate Registration
-      sendEmail({
-        to: 'theshadowbridgesupport@gmail.com',
-        subject: `New Shadow Teacher Registration: ${name} [${generatedId}]`,
-        type: 'contact_alert',
-        bodyHtml: `
-          <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Shadow Teacher Candidate Registration</h2>
-          <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new educator has registered as a Shadow Teacher.</p>
-          
-          <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
-            <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Candidate Name:</strong> ${name}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${email}</p>
-            <p style="margin: 0 0 8px 0;"><strong>City / Address:</strong> ${city} (${address || 'N/A'})</p>
-            <p style="margin: 0 0 8px 0;"><strong>Preferred Locations:</strong> ${preferredLocations || city}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Qualification:</strong> ${qualification} (${specialization || 'General'})</p>
-            <p style="margin: 0 0 8px 0;"><strong>Teaching Experience:</strong> ${experience}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Special Needs Experience:</strong> ${specialNeedsExp}</p>
-            <p style="margin: 0;"><strong>Work Preference:</strong> ${preferredWorkType} | Open to Travel: ${openToTravel}</p>
-          </div>
+        sendEmail({
+          to: 'theshadowbridgesupport@gmail.com',
+          subject: `New Shadow Teacher Registration: ${name} [${generatedId}]`,
+          type: 'contact_alert',
+          bodyHtml: `
+            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Shadow Teacher Candidate Registration</h2>
+            <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new educator has registered as a Shadow Teacher.</p>
+            
+            <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+              <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Candidate Name:</strong> ${name}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${email}</p>
+              <p style="margin: 0 0 8px 0;"><strong>City / Address:</strong> ${city} (${address || 'N/A'})</p>
+              <p style="margin: 0 0 8px 0;"><strong>Preferred Locations:</strong> ${preferredLocations || city}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Qualification:</strong> ${qualification} (${specialization || 'General'})</p>
+              <p style="margin: 0 0 8px 0;"><strong>Teaching Experience:</strong> ${experience}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Special Needs Experience:</strong> ${specialNeedsExp}</p>
+              <p style="margin: 0;"><strong>Work Preference:</strong> ${preferredWorkType} | Open to Travel: ${openToTravel}</p>
+            </div>
 
-          <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to review this candidate profile and schedule an interview assessment.</p>
-        `
-      }).catch(err => console.error('Admin shadow alert email fail:', err));
+            <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to review this candidate profile and schedule an interview assessment.</p>
+          `
+        }).catch(err => console.error('Admin shadow alert email fail:', err))
+      ]);
 
       return NextResponse.json({ success: true, type, registration_id: generatedId, record });
     }
@@ -950,52 +956,53 @@ export async function POST(request: Request) {
       // Trigger notification
       const host = request.headers.get('host') || 'localhost:3000';
       const protocol = host.includes('localhost') ? 'http' : 'https';
-      const dashboardLink = `${protocol}://${host}/dashboard?regId=${generatedId}`;
+      const statusLink = `${protocol}://${host}/check-status?regId=${generatedId}`;
 
-      sendEmail({
-        to: email,
-        subject: `Registration Received - The Shadow Bridge [${generatedId}]`,
-        type: 'registration',
-        bodyHtml: `
-          <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${name},</h2>
-          <p style="margin: 0 0 16px 0;">Thank you for applying to join our academic home tutor team with The Shadow Bridge.</p>
-          <p style="margin: 0 0 16px 0;">Your registration has been logged successfully under Registration ID <strong>${generatedId}</strong>.</p>
-          
-          <h3 style="color: #3B2A6B; font-size: 15px; margin: 24px 0 10px 0;">What Happens Next?</h3>
-          <p style="margin: 0 0 20px 0;">Our clinical screening panel is screening your academic credentials, teaching experience, and subject matching. Pratibha Mishra's team will call you shortly to schedule a video panel assessment call.</p>
-          <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
-            You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
-          </p>
+      await Promise.allSettled([
+        sendEmail({
+          to: email,
+          subject: `Registration Received - The Shadow Bridge [${generatedId}]`,
+          type: 'registration',
+          bodyHtml: `
+            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${name},</h2>
+            <p style="margin: 0 0 16px 0;">Thank you for applying to join our academic home tutor team with The Shadow Bridge.</p>
+            <p style="margin: 0 0 16px 0;">Your registration has been logged successfully under Registration ID <strong>${generatedId}</strong>.</p>
+            
+            <h3 style="color: #3B2A6B; font-size: 15px; margin: 24px 0 10px 0;">What Happens Next?</h3>
+            <p style="margin: 0 0 20px 0;">Our clinical screening panel is screening your academic credentials, teaching experience, and subject matching. Pratibha Mishra's team will call you shortly to schedule a video panel assessment call.</p>
+            <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
+              You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
+            </p>
 
-          <a href="${dashboardLink}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15); margin-bottom: 10px;">Go to Educator Dashboard</a>
-        `
-      }).catch(err => console.error('Tutor registration email fail:', err));
+            <a href="${statusLink}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15); margin-bottom: 10px;">Check Status &amp; Access Portal</a>
+          `
+        }).catch(err => console.error('Tutor registration email fail:', err)),
 
-      // Admin alert email for Home Tutor Candidate Registration
-      sendEmail({
-        to: 'theshadowbridgesupport@gmail.com',
-        subject: `New Tutor Registration: ${name} [${generatedId}]`,
-        type: 'contact_alert',
-        bodyHtml: `
-          <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Home Tutor Candidate Registration</h2>
-          <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new educator has registered as an Academic Home Tutor.</p>
-          
-          <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
-            <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Candidate Name:</strong> ${name}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${email}</p>
-            <p style="margin: 0 0 8px 0;"><strong>City / Address:</strong> ${city} (${address || 'N/A'})</p>
-            <p style="margin: 0 0 8px 0;"><strong>Qualification:</strong> ${qualification} (${specialization || 'General'})</p>
-            <p style="margin: 0 0 8px 0;"><strong>Teaching Experience:</strong> ${experience}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Subjects Taught:</strong> ${Array.isArray(subjects) ? subjects.join(', ') : subjects}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Grades Taught:</strong> ${Array.isArray(grades) ? grades.join(', ') : grades}</p>
-            <p style="margin: 0;"><strong>Expected Salary / Mode:</strong> ${expectedSalary || 'N/A'} | ${mode || 'Offline'}</p>
-          </div>
+        sendEmail({
+          to: 'theshadowbridgesupport@gmail.com',
+          subject: `New Tutor Registration: ${name} [${generatedId}]`,
+          type: 'contact_alert',
+          bodyHtml: `
+            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Home Tutor Candidate Registration</h2>
+            <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new educator has registered as an Academic Home Tutor.</p>
+            
+            <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+              <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Candidate Name:</strong> ${name}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${email}</p>
+              <p style="margin: 0 0 8px 0;"><strong>City / Address:</strong> ${city} (${address || 'N/A'})</p>
+              <p style="margin: 0 0 8px 0;"><strong>Qualification:</strong> ${qualification} (${specialization || 'General'})</p>
+              <p style="margin: 0 0 8px 0;"><strong>Teaching Experience:</strong> ${experience}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Subjects Taught:</strong> ${Array.isArray(subjects) ? subjects.join(', ') : subjects}</p>
+              <p style="margin: 0 0 8px 0;"><strong>Grades Taught:</strong> ${Array.isArray(grades) ? grades.join(', ') : grades}</p>
+              <p style="margin: 0;"><strong>Expected Salary / Mode:</strong> ${expectedSalary || 'N/A'} | ${mode || 'Offline'}</p>
+            </div>
 
-          <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to review this tutor profile and schedule an interview assessment.</p>
-        `
-      }).catch(err => console.error('Admin tutor alert email fail:', err));
+            <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to review this tutor profile and schedule an interview assessment.</p>
+          `
+        }).catch(err => console.error('Admin tutor alert email fail:', err))
+      ]);
 
       return NextResponse.json({ success: true, type, registration_id: generatedId, record });
     }

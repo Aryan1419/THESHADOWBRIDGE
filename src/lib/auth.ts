@@ -84,16 +84,6 @@ export function signAdminToken(email: string, expiresInSeconds: number = 86400):
 export function verifyAdminToken(token: string): AdminJwtPayload | null {
   if (!token) return null;
 
-  // Fallback check for mock token during instant transition
-  if (token === 'mock-admin-token-sb-2026') {
-    return {
-      email: 'admin@theshadowbridge.com',
-      role: 'admin',
-      iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + 86400
-    };
-  }
-
   const parts = token.split('.');
   if (parts.length !== 3) return null;
 
