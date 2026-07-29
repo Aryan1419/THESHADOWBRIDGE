@@ -219,7 +219,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-white rounded-3xl overflow-hidden shadow-2xl border border-brand-border">
                   <Image
                     src="/images/teacher_child.png"
-                    alt="Parent/child studying together"
+                    alt="Special Needs Home Tutor assisting student with inclusive learning in home setting"
                     fill
                     className="object-cover"
                     priority
@@ -347,7 +347,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-brand-light rounded-3xl overflow-hidden shadow-xl">
                   <Image
                     src="/images/founder_pratibha.jpg"
-                    alt="Pratibha Mishra - Founder"
+                    alt="Pratibha Mishra - Founder & Lead Educational Mentor at The Shadow Bridge"
                     fill
                     className="object-cover"
                   />

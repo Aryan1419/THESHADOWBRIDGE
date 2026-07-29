@@ -76,8 +76,50 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": ["EducationalOrganization", "LocalBusiness"],
+        "@id": "https://theshadowbridge.com/#organization",
+        "name": "The Shadow Bridge",
+        "url": "https://theshadowbridge.com",
+        "logo": "https://theshadowbridge.com/favicon-512.png",
+        "image": "https://theshadowbridge.com/favicon-512.png",
+        "description": "Connecting families with professionally trained Shadow Teachers and Special Education Home Tutors across Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune.",
+        "founder": {
+          "@type": "Person",
+          "name": "Pratibha Mishra",
+          "jobTitle": "Founder & Lead Educational Mentor"
+        },
+        "email": "theshadowbridgesupport@gmail.com",
+        "priceRange": "₹99 - ₹5000",
+        "areaServed": [
+          { "@type": "City", "name": "Delhi NCR" },
+          { "@type": "City", "name": "Ahmedabad" },
+          { "@type": "City", "name": "Hyderabad" },
+          { "@type": "City", "name": "Bangalore" },
+          { "@type": "City", "name": "Pune" }
+        ],
+        "knowsAbout": [
+          "Shadow Teacher Support",
+          "Special Education Home Tutoring",
+          "Inclusive Classroom Assistance",
+          "Behavioral Management & Autism/ADHD Support",
+          "Individualized Education Program (IEP)"
+        ]
+      }
+    ]
+  };
+
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable} scroll-smooth`} suppressHydrationWarning>
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="font-sans antialiased text-brand-dark bg-white">
         {children}
       </body>

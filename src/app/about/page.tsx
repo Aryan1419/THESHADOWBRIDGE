@@ -107,7 +107,7 @@ export default function About() {
                 <div className="absolute inset-0 bg-white rounded-2xl overflow-hidden shadow-md">
                   <Image
                     src="/images/founder_pratibha.jpg"
-                    alt="Pratibha Mishra"
+                    alt="Pratibha Mishra - Founder & Lead Educational Mentor at The Shadow Bridge"
                     fill
                     className="object-cover"
                   />
