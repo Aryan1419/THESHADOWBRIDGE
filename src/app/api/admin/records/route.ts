@@ -339,10 +339,16 @@ export async function POST(request: Request) {
             <p style="margin: 0 0 16px 0;">Thank you for taking the time to complete your 1-on-1 assessment consultation call with Founder Pratibha Mishra!</p>
             <p style="margin: 0 0 16px 0;">We have marked your consultation as <strong>Completed</strong>. Your detailed Child Registration Form is now fully unlocked.</p>
             
-            <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 20px; margin: 24px 0; border-radius: 4px 12px 12px 4px; text-align: center;">
-              <h3 style="margin: 0 0 8px 0; color: #3B2A6B; font-size: 16px;">Next Step: Fill Registration Details</h3>
+            <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 20px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+              <h3 style="margin: 0 0 8px 0; color: #3B2A6B; font-size: 16px; font-family: Georgia, serif;">Next Step: Fill Child Registration Form</h3>
+              <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: bold; color: #3B2A6B;">Your Unique ID: <span style="font-family: monospace; color: #B0206B; font-size: 16px;">${actualRegId}</span></p>
               <p style="margin: 0 0 16px 0; font-size: 13px; color: #6A5B7C;">Please provide your child's specific developmental and school details to proceed with educator matching.</p>
-              <a href="${formLink}" style="display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Open Child Registration Form</a>
+              <a href="${formLink}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Open Child Registration Form →</a>
+            </div>
+
+            <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 16px 20px; border-radius: 4px; font-size: 13px; color: #5C4300; line-height: 1.6;">
+              <strong>How to Access or Check Status Anytime:</strong><br />
+              You can access your registration form or check application progress anytime at <a href="${protocol}://${host}/check-status" style="color: #B0206B; font-weight: bold; text-decoration: underline;">theshadowbridge.com/check-status</a> by entering your <strong>ID (${actualRegId})</strong> along with your registered phone number or email address.
             </div>
           `
         }).catch(err => console.error('Consultation completed email fail:', err));
@@ -520,8 +526,13 @@ export async function POST(request: Request) {
 
               ${customMessageBlock}
 
-              <p style="margin: 20px 0 0 0;">You can track real-time program updates and view next steps guidelines directly on your user dashboard:</p>
-              <a href="${dashboardLink}" style="display: inline-block; padding: 10px 20px; background: #3B2A6B; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 13px; margin-top: 12px;">View Dashboard Details</a>
+              <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 14px 18px; border-radius: 4px; font-size: 13px; color: #5C4300; line-height: 1.6;">
+                <strong>Check Status Reminder:</strong> You can view real-time program updates anytime by visiting <a href="${dashboardLink}" style="color: #B0206B; font-weight: bold; text-decoration: underline;">theshadowbridge.com/check-status</a> and entering your <strong>ID (${regId})</strong> along with your registered phone number or email address.
+              </div>
+
+              <div style="margin: 20px 0;">
+                <a href="${dashboardLink}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 13px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">View Status Dashboard →</a>
+              </div>
             `
           });
 

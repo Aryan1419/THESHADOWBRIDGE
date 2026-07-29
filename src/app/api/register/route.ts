@@ -253,20 +253,22 @@ export async function POST(request: Request) {
           <p style="margin: 0 0 16px 0;">Thank you for booking a 1-on-1 consultation session for <strong>${serviceNeeded}</strong> support with Founder Pratibha Mishra.</p>
           <p style="margin: 0 0 16px 0;">We have received your consultation fee payment of <strong>₹99</strong>.</p>
           
-          <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
-            <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: bold; color: #3B2A6B;">Your Registration &amp; Consultation ID: <span style="font-family: monospace; color: #B0206B; font-size: 16px;">${generatedId}</span></p>
+          <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 20px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+            <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: bold; color: #3B2A6B; font-family: Georgia, serif;">Your Login &amp; Consultation Details</h3>
+            <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: bold; color: #3B2A6B;">Your Unique ID: <span style="font-family: monospace; color: #B0206B; font-size: 16px;">${generatedId}</span></p>
             <p style="margin: 0 0 8px 0;"><strong>Service Selected:</strong> ${serviceNeeded}</p>
-            <p style="margin: 0;"><strong>Status:</strong> Consultation Booked (Pending Call)</p>
+            <p style="margin: 0;"><strong>Status:</strong> Consultation Booked (Call Pending)</p>
           </div>
 
-          <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 14px 18px; border-radius: 4px; font-size: 13px; color: #5C4300; leading-relaxed: true;">
-            <strong>Important Instruction:</strong> Please save this <strong>ID (${generatedId})</strong> — you will need it, along with your registered phone or email, to check your consultation status or access your child registration form once your consultation call is complete.
+          <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 16px 20px; border-radius: 4px; font-size: 13px; color: #5C4300; line-height: 1.6;">
+            <strong>How to Check Your Status:</strong><br />
+            To check your consultation status or access your child registration form anytime, visit <a href="${protocol}://${host}/check-status" style="color: #B0206B; font-weight: bold; text-decoration: underline;">theshadowbridge.com/check-status</a> and enter your <strong>ID (${generatedId})</strong> along with the phone number (<strong>${phone}</strong>) or email (<strong>${cleanEmail}</strong>) you registered with.
           </div>
 
           <p style="margin: 0 0 20px 0;">Founder Pratibha Mishra will call you directly within 24 hours to conduct your assessment consultation.</p>
 
           <div style="margin: 24px 0;">
-            <a href="${protocol}://${host}/check-status?regId=${generatedId}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Check Status &amp; Access Registration Form</a>
+            <a href="${protocol}://${host}/check-status?regId=${generatedId}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Check Status &amp; Access Registration Form →</a>
           </div>
         `
       }).catch(err => console.error('Parent consultation email fail:', err));
