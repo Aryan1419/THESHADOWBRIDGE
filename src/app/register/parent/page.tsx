@@ -37,7 +37,7 @@ export default function ParentConsultationStep1() {
   const [bookingSuccess, setBookingSuccess] = useState<any | null>(null);
 
   const cleanPromoCode = promoCode.trim().toUpperCase();
-  const isVipCode = cleanPromoCode === 'SHADOW100' || cleanPromoCode === 'PRATI100';
+  const isVipCode = cleanPromoCode === 'SHADOW100';
 
   const handleConsultationPayment = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     const { regId, contact, promoCode } = body;
 
     const cleanPromoCode = (promoCode || '').trim().toUpperCase();
-    if (cleanPromoCode !== 'SHADOW100' && cleanPromoCode !== 'PRATI100') {
+    if (cleanPromoCode !== 'SHADOW100') {
       return NextResponse.json({ error: 'Invalid VIP Access Code. Please check and try again.' }, { status: 400 });
     }
 

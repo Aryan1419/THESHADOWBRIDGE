@@ -158,7 +158,7 @@ export async function POST(request: Request) {
       const cleanEmail = email.trim().toLowerCase();
       const cleanPhoneDigits = phone.replace(/\D/g, '');
       const cleanPromoCode = (promoCode || code || '').trim().toUpperCase();
-      const isVipCode = cleanPromoCode === 'SHADOW100' || cleanPromoCode === 'PRATI100';
+      const isVipCode = cleanPromoCode === 'SHADOW100';
 
       // Check if parent already registered
       const { data: existingShadow } = await supabase

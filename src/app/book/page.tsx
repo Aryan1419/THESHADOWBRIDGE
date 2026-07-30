@@ -41,7 +41,7 @@ export default function BookConsultation() {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [receiptCode, setReceiptCode] = useState('');
 
-  const isVipCode = formData.promoCode.trim().toUpperCase() === 'SHADOW100' || formData.promoCode.trim().toUpperCase() === 'PRATI100';
+  const isVipCode = formData.promoCode.trim().toUpperCase() === 'SHADOW100';
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

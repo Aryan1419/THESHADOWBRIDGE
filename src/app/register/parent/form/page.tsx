@@ -149,8 +149,8 @@ function GatedRegistrationContent() {
     gatedStatus && (
       gatedStatus.isConsultationCompleted ||
       gatedStatus.isVip ||
-      (gatedStatus.record?.notes || '').toUpperCase().includes('PRATI100') ||
-      (gatedStatus.record?.message || '').toUpperCase().includes('PRATI100') ||
+      (gatedStatus.record?.notes || '').toUpperCase().includes('SHADOW100') ||
+      (gatedStatus.record?.message || '').toUpperCase().includes('SHADOW100') ||
       gatedStatus.record?.status === 'Consultation Completed' ||
       gatedStatus.record
     )
