@@ -2,8 +2,9 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Calendar, CreditCard, ShieldCheck, CheckCircle, ArrowRight, User, Phone, Mail, MapPin, Smile, MessageCircle, ShieldAlert, Info } from 'lucide-react';
+import { Sparkles, Calendar, CreditCard, ShieldCheck, CheckCircle, ArrowRight, User, Phone, Mail, MapPin, Smile, MessageCircle, ShieldAlert, Info, Ticket } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 import Navbar from '@/components/Navbar';
@@ -21,6 +22,7 @@ const loadRazorpayScript = () => {
 };
 
 export default function BookConsultation() {
+  const router = useRouter();
   const [step, setStep] = useState(1); // 1: Details, 2: Payment, 3: Success
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -32,11 +34,14 @@ export default function BookConsultation() {
     otherLocation: '',
     childAge: '',
     requirement: '',
-    message: ''
+    message: '',
+    promoCode: ''
   });
 
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [receiptCode, setReceiptCode] = useState('');
+
+  const isVipCode = formData.promoCode.trim().toUpperCase() === 'PRATI100';
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -53,8 +58,44 @@ export default function BookConsultation() {
     }
   };
 
-  const handleDetailsSubmit = (e: React.FormEvent) => {
+  const handleDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isVipCode) {
+      setLoading(true);
+      setPaymentError(null);
+      try {
+        const res = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'parent_consultation',
+            parentName: formData.name.trim(),
+            phone: formData.phone.trim(),
+            email: formData.email.trim().toLowerCase(),
+            city: formData.city.trim() || 'Delhi NCR',
+            serviceNeeded: formData.requirement || 'Shadow Teacher',
+            promoCode: 'PRATI100'
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'Failed to apply VIP Access Code.');
+        }
+
+        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+        const redirectTarget = data.redirectUrl || `/register/parent/form?regId=${encodeURIComponent(data.registration_id)}`;
+        setTimeout(() => {
+          router.push(redirectTarget);
+        }, 1000);
+      } catch (err: any) {
+        console.error(err);
+        setPaymentError(err.message || 'Error processing VIP Access Code.');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
     setStep(2);
   };
 
@@ -390,12 +431,56 @@ export default function BookConsultation() {
                       />
                     </div>
 
+                    {/* VIP Access / Referral Code */}
+                    <div className="flex flex-col gap-1.5 pt-2">
+                      <label className="text-xs font-bold text-primary uppercase tracking-wider flex items-center justify-between">
+                        <span className="flex items-center gap-1">
+                          <Ticket size={14} className="text-accent" /> Have a VIP Access Code / Referral Code?
+                        </span>
+                        <span className="text-[10px] text-brand-muted font-normal">Optional</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="promoCode"
+                        value={formData.promoCode}
+                        onChange={handleInputChange}
+                        placeholder="Enter code (e.g. PRATI100)"
+                        className="p-3 border border-brand-border bg-white rounded-xl text-sm font-mono font-bold text-primary focus:outline-none focus:ring-2 focus:ring-accent/40 uppercase"
+                      />
+                      {isVipCode && (
+                        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2 mt-1">
+                          <Sparkles size={16} className="text-emerald-600 shrink-0" />
+                          <span>✨ VIP Code "PRATI100" Applied! ₹99 Consultation Fee Waived (100% OFF).</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {paymentError && (
+                      <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2">
+                        <ShieldAlert size={16} className="text-rose-600 shrink-0" />
+                        <span>{paymentError}</span>
+                      </div>
+                    )}
+
                     <button
                       type="submit"
-                      className="btn-gradient w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 cursor-pointer"
+                      disabled={loading}
+                      className="btn-gradient w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                     >
-                      Proceed to Secure Checkout
-                      <ArrowRight size={16} />
+                      {loading ? (
+                        <span>Processing VIP Access...</span>
+                      ) : isVipCode ? (
+                        <>
+                          <Sparkles size={16} />
+                          <span>Unlock &amp; Go to Child Registration Form</span>
+                          <ArrowRight size={16} />
+                        </>
+                      ) : (
+                        <>
+                          <span>Proceed to Secure Checkout</span>
+                          <ArrowRight size={16} />
+                        </>
+                      )}
                     </button>
                   </form>
                 </motion.div>

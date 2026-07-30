@@ -4,29 +4,26 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Search, CheckCircle, ShieldCheck, Mail, Phone, Calendar, Clock, 
-  ArrowRight, AlertCircle, Sparkles, User, Briefcase, Info, HelpCircle
+  Search, CheckCircle2, Clock, AlertCircle, ArrowRight, 
+  User, Phone, Mail, MapPin, Sparkles, ShieldCheck, Info, FileText, ExternalLink, RefreshCw, Ticket
 } from 'lucide-react';
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 const STATUS_EXPLANATIONS: Record<string, string> = {
-  // Tutor / Shadow Teacher statuses
-  'Interview Awaiting': 'We are currently screening your application credentials and verifying qualifications.',
-  'Interview Scheduled': 'We have scheduled your panel assessment interview with Founder Pratibha Mishra.',
-  'Shortlisted': 'Congratulations, you have been shortlisted and inducted into our active matching candidate pool.',
-  'Onboarding': 'We are completing your reference checks, address validation, and standard onboarding credentials verification.',
-  'Active': 'Your profile is now active! Our matchmaking system will pair you with parent requests.',
-  'Rejected': 'Thank you for applying. We are unable to proceed with your onboarding at this time.',
-
-  // Gated Parent Flow Statuses
-  'Consultation Booked': 'We have received your ₹99 consultation booking. Founder Pratibha Mishra will call you directly within 24 hours to conduct your assessment consultation.',
-  'Consultation Completed': 'Your 1-on-1 consultation has been completed! Your detailed Child Registration Form (Step 4) is now unlocked.',
-  'Registration Submitted': 'Your child registration details have been submitted successfully. Please complete the placement onboarding fee to activate educator matching.',
-  'Placement Fee Paid': 'Placement fee payment received. Clinical matchmaking is now active.',
-  'Shadow Teacher Matching in Progress': 'Our clinical team is actively matching background-verified shadow teachers for your child.',
-  'Home Tutor Matching in Progress': 'Our academic team is matching background-verified home tutors based on your subject requirements.',
+  'Interview Awaiting': 'Your educator application has been received. Our clinical team is currently reviewing your resume.',
+  'Interview Scheduled': 'Congratulations! You have been invited for a 1-on-1 video screening call with Founder Pratibha Mishra.',
+  'Shortlisted': 'You have successfully passed the screening and are now part of our active educator pool for matching.',
+  'Onboarding': 'We are performing address, ID, and reference background verification prior to your school placement.',
+  'Active': 'You are currently active and matched with a student family.',
+  
+  'Consultation Booked': 'Your ₹99 consultation fee is received. Founder Pratibha Mishra will call you to assess your child\'s requirements.',
+  'Consultation Completed': 'Your 1-on-1 consultation is complete! Your Child Registration Form is now unlocked below.',
+  'Registration Submitted': 'Your detailed child profile has been submitted. Please complete the placement fee to initiate educator matching.',
+  'Placement Fee Paid': 'Your requirement is locked! Our placement team is actively shortlisting verified educators for your location.',
+  'Shadow Teacher Matching in Progress': 'Our team is shortlisting and interviewing shadow teacher candidates tailored to your child\'s needs.',
+  'Home Tutor Matching in Progress': 'We are selecting specialized academic tutors suited for your child\'s grade and location.',
   'Match Proposed': 'We have proposed an educator candidate match! You can review their verified profile directly below.',
   'Introduction Call': 'We are scheduling a trial introduction call between the proposed educator, yourself, and your child.',
   'Support Started': 'Congratulations, your educational placement is active and regular learning support sessions have commenced.',
@@ -54,6 +51,12 @@ export default function CheckStatusPage() {
   const [contactInfo, setContactInfo] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // VIP Code Redeem State
+  const [vipCode, setVipCode] = useState('');
+  const [vipLoading, setVipLoading] = useState(false);
+  const [vipError, setVipError] = useState<string | null>(null);
+  const [vipSuccessMsg, setVipSuccessMsg] = useState<string | null>(null);
 
   // Loaded Record Data
   const [recordData, setRecordData] = useState<any | null>(null);
@@ -93,6 +96,53 @@ export default function CheckStatusPage() {
   const handleResetSearch = () => {
     setRecordData(null);
     setErrorMsg(null);
+    setVipCode('');
+    setVipError(null);
+    setVipSuccessMsg(null);
+  };
+
+  const handleApplyVipCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!vipCode.trim()) return;
+
+    setVipLoading(true);
+    setVipError(null);
+    setVipSuccessMsg(null);
+
+    try {
+      const res = await fetch('/api/parent/unlock-vip', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          regId: record?.registrationId || record?.registration_id || record?.bookingId || record?.booking_id || registrationId,
+          contact: contactInfo || record?.phone || record?.email,
+          promoCode: vipCode.trim().toUpperCase()
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to apply VIP Access Code.');
+      }
+
+      setVipSuccessMsg('✨ VIP Code PRATI100 applied successfully! Your Child Registration Form is unlocked below.');
+      
+      // Update local record status
+      setRecordData((prev: any) => ({
+        ...prev,
+        currentStatus: 'Consultation Completed',
+        isConsultationCompleted: true,
+        record: {
+          ...prev.record,
+          status: 'Consultation Completed'
+        }
+      }));
+    } catch (err: any) {
+      console.error(err);
+      setVipError(err.message || 'Invalid VIP Code.');
+    } finally {
+      setVipLoading(false);
+    }
   };
 
   const record = recordData?.record;
@@ -282,6 +332,56 @@ export default function CheckStatusPage() {
               {/* DYNAMIC NEXT ACTION BANNER FOR PARENT FLOW */}
               {role === 'parent' && (
                 <>
+                  {/* VIP ACCESS CODE REDEEM BOX (If status is Consultation Booked) */}
+                  {currentStatus.toLowerCase().includes('booked') && (
+                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-6 mb-8 shadow-sm">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div>
+                          <span className="px-3 py-1 bg-purple-100 text-purple-900 border border-purple-300 text-[10px] font-extrabold uppercase rounded-full tracking-wider flex items-center gap-1.5 w-max mb-2">
+                            <Ticket size={12} className="text-secondary" />
+                            Have a VIP Access Code?
+                          </span>
+                          <h3 className="font-serif text-lg font-bold text-primary">
+                            Redeem Access Code (e.g. PRATI100)
+                          </h3>
+                          <p className="text-xs text-brand-muted mt-1 leading-relaxed">
+                            If our team provided you with an access code, enter it below to bypass consultation wait time and unlock your registration form instantly.
+                          </p>
+                        </div>
+
+                        <form onSubmit={handleApplyVipCode} className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
+                          <input
+                            type="text"
+                            value={vipCode}
+                            onChange={(e) => setVipCode(e.target.value)}
+                            placeholder="Enter PRATI100"
+                            className="px-4 py-2.5 bg-white border border-purple-300 rounded-xl text-xs font-mono font-bold text-primary uppercase focus:outline-none focus:ring-2 focus:ring-secondary/40"
+                          />
+                          <button
+                            type="submit"
+                            disabled={vipLoading || !vipCode.trim()}
+                            className="px-5 py-2.5 bg-secondary hover:bg-secondary/90 text-white rounded-xl font-bold text-xs shadow-md transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                          >
+                            {vipLoading ? 'Applying...' : 'Unlock Form'}
+                          </button>
+                        </form>
+                      </div>
+
+                      {vipError && (
+                        <div className="mt-3 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2">
+                          <AlertCircle size={14} className="text-rose-600 shrink-0" />
+                          <span>{vipError}</span>
+                        </div>
+                      )}
+
+                      {vipSuccessMsg && (
+                        <div className="mt-3 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2">
+                          <Sparkles size={14} className="text-emerald-600 shrink-0" />
+                          <span>{vipSuccessMsg}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {/* 1. Status: Consultation Completed -> Continue to Registration Form */}
                   {(currentStatus.toLowerCase().includes('consultation completed') || (currentStatus.toLowerCase().includes('completed') && !currentStatus.toLowerCase().includes('submitted'))) && (
                     <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-2xl p-6 mb-8 shadow-md">
@@ -382,7 +482,7 @@ export default function CheckStatusPage() {
                             Step {idx + 1}
                           </span>
                           {isCompleted && (
-                            <CheckCircle size={16} className={isCurrent ? 'text-white' : 'text-emerald-600'} />
+                            <CheckCircle2 size={16} className={isCurrent ? 'text-white' : 'text-emerald-600'} />
                           )}
                         </div>
 

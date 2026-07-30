@@ -1,0 +1,103 @@
+import { NextResponse } from 'next/server';
+import { supabaseAdmin as supabase } from '@/lib/supabase';
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { regId, contact, promoCode } = body;
+
+    const cleanPromoCode = (promoCode || '').trim().toUpperCase();
+    if (cleanPromoCode !== 'PRATI100') {
+      return NextResponse.json({ error: 'Invalid VIP Access Code. Please check and try again.' }, { status: 400 });
+    }
+
+    if (!regId && !contact) {
+      return NextResponse.json({ error: 'Missing Registration ID or contact details.' }, { status: 400 });
+    }
+
+    const cleanRegId = regId ? regId.trim().toUpperCase() : '';
+    const cleanContact = contact ? contact.trim().toLowerCase() : '';
+    const cleanPhoneDigits = contact ? contact.replace(/\D/g, '') : '';
+
+    let record: any = null;
+    let table = 'parent_shadow_requests';
+
+    // Search parent_shadow_requests
+    if (cleanRegId) {
+      const { data: ps } = await supabase
+        .from('parent_shadow_requests')
+        .select('*')
+        .ilike('registration_id', `%${cleanRegId}%`)
+        .maybeSingle();
+      if (ps) {
+        record = ps;
+        table = 'parent_shadow_requests';
+      }
+    }
+
+    // Search parent_tutor_requests
+    if (!record && cleanRegId) {
+      const { data: pt } = await supabase
+        .from('parent_tutor_requests')
+        .select('*')
+        .ilike('registration_id', `%${cleanRegId}%`)
+        .maybeSingle();
+      if (pt) {
+        record = pt;
+        table = 'parent_tutor_requests';
+      }
+    }
+
+    // Search by contact if regId not provided
+    if (!record && cleanContact) {
+      const { data: ps } = await supabase
+        .from('parent_shadow_requests')
+        .select('*')
+        .or(`email.ilike.${cleanContact},phone.ilike.%${cleanPhoneDigits}%`)
+        .maybeSingle();
+      if (ps) {
+        record = ps;
+        table = 'parent_shadow_requests';
+      } else {
+        const { data: pt } = await supabase
+          .from('parent_tutor_requests')
+          .select('*')
+          .or(`email.ilike.${cleanContact},phone.ilike.%${cleanPhoneDigits}%`)
+          .maybeSingle();
+        if (pt) {
+          record = pt;
+          table = 'parent_tutor_requests';
+        }
+      }
+    }
+
+    if (!record) {
+      return NextResponse.json({ error: 'No matching parent record found.' }, { status: 404 });
+    }
+
+    const targetRegId = record.registration_id || record.booking_id;
+
+    // Update status to Consultation Completed
+    const { error: updateErr } = await supabase
+      .from(table)
+      .update({
+        status: 'Consultation Completed',
+        consultation_paid: true,
+        notes: (record.notes || '') + ' | Unlocked via VIP Code PRATI100'
+      })
+      .eq('id', record.id);
+
+    if (updateErr) throw updateErr;
+
+    return NextResponse.json({
+      success: true,
+      registration_id: targetRegId,
+      redirectUrl: `/register/parent/form?regId=${encodeURIComponent(targetRegId)}`,
+      message: 'VIP Code PRATI100 applied successfully! Child registration form unlocked.'
+    });
+
+  } catch (error: any) {
+    console.error('Unlock VIP API Error:', error);
+    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+  }
+}

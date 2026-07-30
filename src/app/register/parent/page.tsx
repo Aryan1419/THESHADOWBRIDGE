@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { 
   CheckCircle, ArrowRight, User, Phone, Mail, MapPin, 
-  Sparkles, CreditCard, ShieldCheck, Heart, Info, AlertCircle, HelpCircle
+  Sparkles, CreditCard, ShieldCheck, Heart, Info, AlertCircle, HelpCircle, Ticket
 } from 'lucide-react';
 
 import Navbar from '@/components/Navbar';
@@ -23,15 +24,20 @@ const loadRazorpayScript = () => {
 };
 
 export default function ParentConsultationStep1() {
+  const router = useRouter();
   const [serviceNeeded, setServiceNeeded] = useState<'Shadow Teacher' | 'Home Tutor'>('Shadow Teacher');
   const [parentName, setParentName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [city, setCity] = useState('Delhi NCR');
+  const [promoCode, setPromoCode] = useState('');
 
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [bookingSuccess, setBookingSuccess] = useState<any | null>(null);
+
+  const cleanPromoCode = promoCode.trim().toUpperCase();
+  const isVipCode = cleanPromoCode === 'PRATI100';
 
   const handleConsultationPayment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +50,38 @@ export default function ParentConsultationStep1() {
     setErrorMsg(null);
 
     try {
+      // IF VIP PROMO CODE PRATI100 IS APPLIED -> BYPASS RAZORPAY & REDIRECT DIRECTLY
+      if (isVipCode) {
+        const registerRes = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'parent_consultation',
+            parentName: parentName.trim(),
+            phone: phone.trim(),
+            email: email.trim().toLowerCase(),
+            city: city.trim(),
+            serviceNeeded,
+            promoCode: 'PRATI100'
+          })
+        });
+
+        const regData = await registerRes.json();
+        if (!registerRes.ok || !regData.success) {
+          throw new Error(regData.error || 'Failed to apply VIP Access Code.');
+        }
+
+        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+        const redirectTarget = regData.redirectUrl || `/register/parent/form?regId=${encodeURIComponent(regData.registration_id)}`;
+        
+        setTimeout(() => {
+          router.push(redirectTarget);
+        }, 1200);
+
+        setBookingSuccess({ ...regData, isVipRedirect: true });
+        return;
+      }
+
       // 1. Create Razorpay order for ₹99
       const orderRes = await fetch('/api/payments/create-order', {
         method: 'POST',
@@ -335,8 +373,8 @@ export default function ParentConsultationStep1() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider mb-1.5">
-                    City / Location <span className="text-rose-500">*</span>
+                  <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span>City / Location <span className="text-rose-500">*</span></span>
                   </label>
                   <div className="relative">
                     <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-brand-muted">
@@ -352,17 +390,64 @@ export default function ParentConsultationStep1() {
                     />
                   </div>
                 </div>
+
+                {/* VIP Access Code / Referral Code Field */}
+                <div>
+                  <label className="block text-xs font-bold text-primary uppercase tracking-wider mb-1.5 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5">
+                      <Ticket size={14} className="text-accent" />
+                      Have a VIP Access Code / Referral Code?
+                    </span>
+                    <span className="text-[10px] text-brand-muted font-normal">Optional</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={promoCode}
+                      onChange={(e) => setPromoCode(e.target.value)}
+                      placeholder="Enter access code (e.g. PRATI100)"
+                      className="w-full px-4 py-3 bg-brand-light/50 border border-brand-border rounded-xl text-sm font-mono font-bold text-primary placeholder-brand-muted focus:outline-none focus:ring-2 focus:ring-accent/40 uppercase"
+                    />
+                  </div>
+                  {isVipCode && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-2 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2"
+                    >
+                      <Sparkles size={16} className="text-emerald-600 flex-shrink-0" />
+                      <span>✨ VIP Code "PRATI100" Applied! ₹99 Consultation Fee Waived (100% OFF).</span>
+                    </motion.div>
+                  )}
+                </div>
               </div>
 
               {/* Consultation Fee Card Notice */}
-              <div className="bg-brand-light p-5 rounded-2xl border border-brand-border flex items-center justify-between">
+              <div className={`p-5 rounded-2xl border transition-all flex items-center justify-between ${
+                isVipCode ? 'bg-emerald-50/70 border-emerald-300' : 'bg-brand-light border-brand-border'
+              }`}>
                 <div>
-                  <p className="text-xs font-bold text-primary uppercase tracking-wider">Consultation Fee</p>
-                  <p className="text-xs text-brand-muted mt-0.5">Charged ONCE per parent • Includes 1-on-1 call with Founder</p>
+                  <p className="text-xs font-bold text-primary uppercase tracking-wider">
+                    {isVipCode ? 'VIP Access Unlocked' : 'Consultation Fee'}
+                  </p>
+                  <p className="text-xs text-brand-muted mt-0.5">
+                    {isVipCode 
+                      ? 'Direct registration access granted by Founder Pratibha Mishra' 
+                      : 'Charged ONCE per parent • Includes 1-on-1 call with Founder'}
+                  </p>
                 </div>
                 <div className="text-right">
-                  <span className="text-2xl font-extrabold text-primary font-serif">₹99</span>
-                  <span className="text-[10px] text-brand-muted block font-bold">One-time fee</span>
+                  {isVipCode ? (
+                    <div className="flex flex-col items-end">
+                      <span className="text-2xl font-extrabold text-emerald-600 font-serif">FREE</span>
+                      <span className="text-[10px] text-emerald-700 font-bold line-through">₹99</span>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="text-2xl font-extrabold text-primary font-serif">₹99</span>
+                      <span className="text-[10px] text-brand-muted block font-bold">One-time fee</span>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -373,18 +458,24 @@ export default function ParentConsultationStep1() {
                 </div>
               )}
 
-              {/* Pay Consultation Fee Button */}
+              {/* Pay Consultation Fee or Submit VIP Button */}
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full btn-gradient py-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer disabled:opacity-50"
               >
                 {loading ? (
-                  <span>Processing Payment Order...</span>
+                  <span>{isVipCode ? 'Unlocking Registration Form...' : 'Processing Payment Order...'}</span>
+                ) : isVipCode ? (
+                  <>
+                    <Sparkles size={18} />
+                    <span>Unlock &amp; Go to Registration Form (VIP Access)</span>
+                    <ArrowRight size={18} />
+                  </>
                 ) : (
                   <>
                     <CreditCard size={18} />
-                    <span>Pay ₹99 & Book Consultation</span>
+                    <span>Pay ₹99 &amp; Book Consultation</span>
                   </>
                 )}
               </button>

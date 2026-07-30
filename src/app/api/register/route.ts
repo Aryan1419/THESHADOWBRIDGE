@@ -149,7 +149,7 @@ export async function POST(request: Request) {
     // STEP 1: BOOK CONSULTATION (₹99)
     // =========================================================
     if (type === 'parent_consultation') {
-      const { parentName, phone, email, city, serviceNeeded, razorpayPaymentId, razorpayOrderId, razorpaySignature } = data;
+      const { parentName, phone, email, city, serviceNeeded, razorpayPaymentId, razorpayOrderId, razorpaySignature, promoCode, code } = data;
 
       if (!parentName || !phone || !email || !city || !serviceNeeded) {
         return NextResponse.json({ error: 'Missing required consultation fields (Name, Phone, Email, City, Service Needed).' }, { status: 400 });
@@ -157,8 +157,10 @@ export async function POST(request: Request) {
 
       const cleanEmail = email.trim().toLowerCase();
       const cleanPhoneDigits = phone.replace(/\D/g, '');
+      const cleanPromoCode = (promoCode || code || '').trim().toUpperCase();
+      const isVipCode = cleanPromoCode === 'PRATI100';
 
-      // Check if parent already paid ₹99 (One-Time Payment Enforcement)
+      // Check if parent already registered
       const { data: existingShadow } = await supabase
         .from('parent_shadow_requests')
         .select('*')
@@ -172,31 +174,59 @@ export async function POST(request: Request) {
         .maybeSingle();
 
       const existingRecord = existingShadow || existingTutor;
+      
+      // If VIP code PRATI100 is used on existing record, upgrade status to Consultation Completed
+      if (existingRecord && isVipCode && (existingRecord.status === 'Consultation Booked' || !existingRecord.consultation_paid)) {
+        const targetTable = existingShadow ? 'parent_shadow_requests' : 'parent_tutor_requests';
+        await supabase
+          .from(targetTable)
+          .update({
+            status: 'Consultation Completed',
+            consultation_paid: true,
+            notes: (existingRecord.notes || '') + ' | Upgraded via VIP Code PRATI100'
+          })
+          .eq('id', existingRecord.id);
+
+        const targetRegId = existingRecord.registration_id;
+        return NextResponse.json({
+          success: true,
+          isVip: true,
+          registration_id: targetRegId,
+          redirectUrl: `/register/parent/form?regId=${encodeURIComponent(targetRegId)}`,
+          status: 'Consultation Completed',
+          message: 'VIP Access Code PRATI100 applied! Registration form unlocked.'
+        });
+      }
+
       if (existingRecord && (existingRecord.consultation_paid || existingRecord.status !== 'Consultation Booked')) {
         return NextResponse.json({
           success: true,
           alreadyPaid: true,
           registration_id: existingRecord.registration_id,
+          redirectUrl: `/register/parent/form?regId=${encodeURIComponent(existingRecord.registration_id)}`,
           status: existingRecord.status,
           message: 'Consultation fee has already been paid for this parent account.'
         });
       }
 
-      // Verify Razorpay payment
-      if (!razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
-        return NextResponse.json({ error: 'Missing payment verification credentials.' }, { status: 400 });
-      }
+      // Verify Razorpay payment if NOT using VIP promo code
+      if (!isVipCode) {
+        if (!razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
+          return NextResponse.json({ error: 'Missing payment verification credentials.' }, { status: 400 });
+        }
 
-      const keySecret = process.env.RAZORPAY_KEY_SECRET || '';
-      const shasum = crypto.createHmac('sha256', keySecret);
-      shasum.update(razorpayOrderId + '|' + razorpayPaymentId);
-      if (shasum.digest('hex') !== razorpaySignature) {
-        return NextResponse.json({ error: 'Payment signature verification failed.' }, { status: 400 });
+        const keySecret = process.env.RAZORPAY_KEY_SECRET || '';
+        const shasum = crypto.createHmac('sha256', keySecret);
+        shasum.update(razorpayOrderId + '|' + razorpayPaymentId);
+        if (shasum.digest('hex') !== razorpaySignature) {
+          return NextResponse.json({ error: 'Payment signature verification failed.' }, { status: 400 });
+        }
       }
 
       const generatedId = `SB-${year}-${randomNumericId()}`;
       const bookingId = generatedId; // Single unified ID across all tables
       const isShadow = serviceNeeded.toLowerCase().includes('shadow');
+      const finalStatus = isVipCode ? 'Consultation Completed' : 'Consultation Booked';
 
       // Insert into bookings table
       const bookingData = {
@@ -205,14 +235,14 @@ export async function POST(request: Request) {
         phone,
         email: cleanEmail,
         city,
-        child_age: 'Pending Consultation',
+        child_age: 'Pending Registration Form',
         requirement: isShadow ? 'Shadow Teacher' : 'Home Tutor',
-        message: 'Step 1 Consultation Booked',
-        payment_status: 'paid',
-        amount: 99,
-        razorpay_payment_id: razorpayPaymentId,
-        razorpay_order_id: razorpayOrderId,
-        razorpay_signature: razorpaySignature
+        message: isVipCode ? 'Step 1 VIP Access Unlocked via PRATI100' : 'Step 1 Consultation Booked',
+        payment_status: isVipCode ? 'waived_prati100' : 'paid',
+        amount: isVipCode ? 0 : 99,
+        razorpay_payment_id: isVipCode ? 'VIP-PRATI100' : razorpayPaymentId,
+        razorpay_order_id: isVipCode ? 'VIP-PRATI100' : razorpayOrderId,
+        razorpay_signature: isVipCode ? 'VIP-PRATI100' : razorpaySignature
       };
 
       await supabase.from('bookings').insert([bookingData]);
@@ -225,13 +255,13 @@ export async function POST(request: Request) {
         phone,
         email: cleanEmail,
         city,
-        child_name: 'Pending Consultation',
-        child_grade: 'Pending Consultation',
-        status: 'Consultation Booked',
+        child_name: 'Pending Registration Form',
+        child_grade: 'Pending Registration Form',
+        status: finalStatus,
         consultation_paid: true,
         registration_id: generatedId,
         created_at: createdAt,
-        notes: `Unified ID: ${generatedId}`
+        notes: isVipCode ? `VIP Access via Code PRATI100 | Unified ID: ${generatedId}` : `Unified ID: ${generatedId}`
       };
 
       if (isShadow) parentRecord.relationship = 'Mother';
@@ -297,7 +327,14 @@ export async function POST(request: Request) {
         }).catch(err => console.error('Admin consultation alert fail:', err))
       ]);
 
-      return NextResponse.json({ success: true, registration_id: generatedId, booking_id: bookingId, record: toCamelCase(parentRecord) });
+      return NextResponse.json({ 
+        success: true, 
+        isVip: isVipCode,
+        registration_id: generatedId, 
+        booking_id: bookingId, 
+        redirectUrl: `/register/parent/form?regId=${encodeURIComponent(generatedId)}`,
+        record: toCamelCase(parentRecord) 
+      });
     }
 
     // =========================================================
