@@ -444,13 +444,13 @@ export default function BookConsultation() {
                         name="promoCode"
                         value={formData.promoCode}
                         onChange={handleInputChange}
-                        placeholder="Enter code (e.g. PRATI100)"
+                        placeholder="Enter VIP / Referral Code"
                         className="p-3 border border-brand-border bg-white rounded-xl text-sm font-mono font-bold text-primary focus:outline-none focus:ring-2 focus:ring-accent/40 uppercase"
                       />
                       {isVipCode && (
                         <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2 mt-1">
                           <Sparkles size={16} className="text-emerald-600 shrink-0" />
-                          <span>✨ VIP Code "PRATI100" Applied! ₹99 Consultation Fee Waived (100% OFF).</span>
+                          <span>✨ VIP Access Code Applied! ₹99 Consultation Fee Waived (100% OFF).</span>
                         </div>
                       )}
                     </div>

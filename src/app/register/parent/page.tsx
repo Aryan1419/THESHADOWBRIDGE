@@ -405,7 +405,7 @@ export default function ParentConsultationStep1() {
                       type="text"
                       value={promoCode}
                       onChange={(e) => setPromoCode(e.target.value)}
-                      placeholder="Enter access code (e.g. PRATI100)"
+                      placeholder="Enter VIP / Referral Code"
                       className="w-full px-4 py-3 bg-brand-light/50 border border-brand-border rounded-xl text-sm font-mono font-bold text-primary placeholder-brand-muted focus:outline-none focus:ring-2 focus:ring-accent/40 uppercase"
                     />
                   </div>
@@ -416,7 +416,7 @@ export default function ParentConsultationStep1() {
                       className="mt-2 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2"
                     >
                       <Sparkles size={16} className="text-emerald-600 flex-shrink-0" />
-                      <span>✨ VIP Code "PRATI100" Applied! ₹99 Consultation Fee Waived (100% OFF).</span>
+                      <span>✨ VIP Access Code Applied! ₹99 Consultation Fee Waived (100% OFF).</span>
                     </motion.div>
                   )}
                 </div>

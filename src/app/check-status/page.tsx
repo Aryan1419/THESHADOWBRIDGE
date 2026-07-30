@@ -125,7 +125,7 @@ export default function CheckStatusPage() {
         throw new Error(data.error || 'Failed to apply VIP Access Code.');
       }
 
-      setVipSuccessMsg('✨ VIP Code PRATI100 applied successfully! Your Child Registration Form is unlocked below.');
+      setVipSuccessMsg('✨ VIP Access Code applied successfully! Your Child Registration Form is unlocked below.');
       
       // Update local record status
       setRecordData((prev: any) => ({
@@ -342,10 +342,10 @@ export default function CheckStatusPage() {
                             Have a VIP Access Code?
                           </span>
                           <h3 className="font-serif text-lg font-bold text-primary">
-                            Redeem Access Code (e.g. PRATI100)
+                            Redeem VIP Access Code
                           </h3>
                           <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                            If our team provided you with an access code, enter it below to bypass consultation wait time and unlock your registration form instantly.
+                            If our team provided you with a VIP access code, enter it below to bypass consultation wait time and unlock your registration form instantly.
                           </p>
                         </div>
 
@@ -354,7 +354,7 @@ export default function CheckStatusPage() {
                             type="text"
                             value={vipCode}
                             onChange={(e) => setVipCode(e.target.value)}
-                            placeholder="Enter PRATI100"
+                            placeholder="Enter VIP Access Code"
                             className="px-4 py-2.5 bg-white border border-purple-300 rounded-xl text-xs font-mono font-bold text-primary uppercase focus:outline-none focus:ring-2 focus:ring-secondary/40"
                           />
                           <button
