@@ -149,7 +149,7 @@ export default function FounderStoryPage() {
                 <Users size={14} className="text-secondary" /> 500+ Families Supported
               </div>
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 text-primary border border-purple-100">
-                <GraduationCap size={14} className="text-accent" /> Special Needs Advocates
+                <GraduationCap size={14} className="text-accent" /> 11+ Years of Experience
               </div>
             </div>
           </div>
