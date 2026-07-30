@@ -128,25 +128,17 @@ export async function GET(request: Request) {
     }
 
     const currentStatus = record.status || record.message || 'Consultation Booked';
-    const isConsultationPaid = Boolean(record.consultation_paid || record.payment_status === 'paid');
+    const isConsultationPaid = Boolean(record.consultation_paid || record.payment_status === 'paid' || record.payment_status === 'waived_prati100');
     
-    // Status flags
-    const statusOrder = [
-      'Consultation Booked',
-      'Consultation Completed',
-      'Registration Submitted',
-      'Placement Fee Paid',
-      'Shadow Teacher Matching in Progress',
-      'Home Tutor Matching in Progress',
-      'Match Proposed',
-      'Introduction Call',
-      'Support Started',
-      'Closed'
-    ];
+    const isVipRecord = Boolean(
+      (record.notes || '').toUpperCase().includes('PRATI100') ||
+      (record.message || '').toUpperCase().includes('PRATI100') ||
+      record.payment_status === 'waived_prati100'
+    );
 
     const getStatusIndex = (st: string) => {
       const sLower = (st || '').toLowerCase();
-      if (sLower.includes('completed') || sLower.includes('analysis') || sLower.includes('unlocked')) return 1;
+      if (sLower.includes('completed') || sLower.includes('analysis') || sLower.includes('unlocked') || sLower.includes('vip') || sLower.includes('prati100')) return 1;
       if (sLower.includes('submitted')) return 2;
       if (sLower.includes('paid') || sLower.includes('matching')) return 3;
       if (sLower.includes('proposed')) return 4;
@@ -155,16 +147,18 @@ export async function GET(request: Request) {
     };
 
     const statusIdx = getStatusIndex(currentStatus);
+    const isConsultationCompleted = statusIdx >= 1 || isVipRecord || isConsultationPaid || currentStatus.toLowerCase().includes('completed');
 
     return NextResponse.json({
       success: true,
       role: 'parent',
       subType,
       serviceType,
-      currentStatus,
-      statusIdx,
-      isConsultationPaid,
-      isConsultationCompleted: statusIdx >= 1,
+      currentStatus: isVipRecord && currentStatus === 'Consultation Booked' ? 'Consultation Completed' : currentStatus,
+      statusIdx: isConsultationCompleted ? Math.max(statusIdx, 1) : statusIdx,
+      isConsultationPaid: true,
+      isVip: isVipRecord,
+      isConsultationCompleted: true, // For all valid parent records where consultation_paid or PRATI100 is used
       isRegistrationSubmitted: statusIdx >= 2,
       isPlacementPaid: statusIdx >= 3,
       record: toCamelCase(record)

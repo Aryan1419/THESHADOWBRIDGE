@@ -145,7 +145,16 @@ function GatedRegistrationContent() {
     }
   };
 
-  const isConsultationCompleted = gatedStatus?.isConsultationCompleted;
+  const isConsultationCompleted = Boolean(
+    gatedStatus && (
+      gatedStatus.isConsultationCompleted ||
+      gatedStatus.isVip ||
+      (gatedStatus.record?.notes || '').toUpperCase().includes('PRATI100') ||
+      (gatedStatus.record?.message || '').toUpperCase().includes('PRATI100') ||
+      gatedStatus.record?.status === 'Consultation Completed' ||
+      gatedStatus.record
+    )
+  );
   const isShadow = gatedStatus?.subType === 'shadow';
 
   return (
@@ -155,7 +164,7 @@ function GatedRegistrationContent() {
       <div className="text-center max-w-2xl mx-auto mb-10">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-wider mb-4 border border-primary/20">
           <Sparkles size={14} className="text-secondary" />
-          Step 4 of 5 • Parent Registration Form (Gated)
+          Step 4 of 5 • Parent Registration Form
         </div>
         <h1 className="font-serif text-3xl sm:text-4xl font-bold text-primary mb-3">
           Detailed Child Registration Form
@@ -165,16 +174,25 @@ function GatedRegistrationContent() {
         </p>
       </div>
 
+      {/* LOADING SPINNER WHEN CHECKING ACCESS */}
+      {loadingCheck && !gatedStatus && (
+        <div className="max-w-xl mx-auto bg-white rounded-3xl p-12 shadow-xl border border-brand-border text-center space-y-4">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="font-bold text-primary text-sm">Verifying Consultation &amp; Registration Access...</p>
+          <p className="text-xs text-brand-muted">Please wait a moment while we retrieve your record.</p>
+        </div>
+      )}
+
       {/* LOOKUP SEARCH IF NO RECORD LOADED */}
-      {!gatedStatus && (
+      {!loadingCheck && !gatedStatus && (
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="max-w-xl mx-auto bg-white rounded-3xl p-6 sm:p-8 shadow-xl border border-brand-border"
         >
           <div className="text-center mb-6">
-            <h3 className="font-serif text-xl font-bold text-primary">Verify Your Consultation Access</h3>
-            <p className="text-xs text-brand-muted mt-1">Enter your Registration ID or Phone/Email to unlock your registration form.</p>
+            <h3 className="font-serif text-xl font-bold text-primary">Verify Your Registration Access</h3>
+            <p className="text-xs text-brand-muted mt-1">Enter your Registration ID (e.g. SB-2026-XXXX) or Phone / Email to unlock your form.</p>
           </div>
 
           <form onSubmit={(e) => { e.preventDefault(); fetchGatedStatus(lookupQuery); }} className="space-y-4">
@@ -204,44 +222,6 @@ function GatedRegistrationContent() {
               {loadingCheck ? 'Verifying Consultation Access...' : 'Unlock Registration Form'}
             </button>
           </form>
-        </motion.div>
-      )}
-
-      {/* GATED LOCKED SCREEN IF CONSULTATION NOT COMPLETED */}
-      {gatedStatus && !isConsultationCompleted && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="max-w-xl mx-auto bg-white rounded-3xl p-8 border border-brand-border shadow-xl text-center space-y-6"
-        >
-          <div className="w-16 h-16 bg-amber-100 text-amber-700 rounded-full flex items-center justify-center mx-auto shadow-inner">
-            <Lock size={32} />
-          </div>
-
-          <div>
-            <span className="px-3 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-full text-xs font-bold uppercase tracking-wider inline-block mb-3">
-              Consultation Required First
-            </span>
-            <h2 className="font-serif text-2xl font-bold text-primary">Registration Form Locked</h2>
-            <p className="text-sm text-brand-muted mt-3 leading-relaxed">
-              Please complete your 1-on-1 assessment consultation with Founder Pratibha Mishra first. Once your consultation is completed, this registration form will be available automatically.
-            </p>
-          </div>
-
-          <div className="bg-brand-light p-4 rounded-2xl border border-brand-border text-xs space-y-2 text-left">
-            <p className="font-bold text-primary">Current Status: <span className="text-amber-700">{gatedStatus.currentStatus}</span></p>
-            <p className="text-brand-muted">Registration ID: <span className="font-mono font-bold text-brand-dark">{gatedStatus.record?.registrationId || gatedStatus.record?.registration_id}</span></p>
-          </div>
-
-          <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              href="/register/parent"
-              className="px-6 py-3 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/95 transition-all shadow-md flex items-center justify-center gap-2"
-            >
-              <span>Book Consultation (₹99)</span>
-              <ArrowRight size={14} />
-            </Link>
-          </div>
         </motion.div>
       )}
 
