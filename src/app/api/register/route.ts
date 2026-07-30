@@ -158,7 +158,7 @@ export async function POST(request: Request) {
       const cleanEmail = email.trim().toLowerCase();
       const cleanPhoneDigits = phone.replace(/\D/g, '');
       const cleanPromoCode = (promoCode || code || '').trim().toUpperCase();
-      const isVipCode = cleanPromoCode === 'PRATI100';
+      const isVipCode = cleanPromoCode === 'SHADOW100' || cleanPromoCode === 'PRATI100';
 
       // Check if parent already registered
       const { data: existingShadow } = await supabase
@@ -175,7 +175,7 @@ export async function POST(request: Request) {
 
       const existingRecord = existingShadow || existingTutor;
       
-      // If VIP code PRATI100 is used on existing record, upgrade status to Consultation Completed
+      // If VIP code SHADOW100 is used on existing record, upgrade status to Consultation Completed
       if (existingRecord && isVipCode && (existingRecord.status === 'Consultation Booked' || !existingRecord.consultation_paid)) {
         const targetTable = existingShadow ? 'parent_shadow_requests' : 'parent_tutor_requests';
         await supabase
@@ -183,7 +183,7 @@ export async function POST(request: Request) {
           .update({
             status: 'Consultation Completed',
             consultation_paid: true,
-            notes: (existingRecord.notes || '') + ' | Upgraded via VIP Code PRATI100'
+            notes: (existingRecord.notes || '') + ' | Upgraded via VIP Code SHADOW100'
           })
           .eq('id', existingRecord.id);
 
@@ -194,7 +194,7 @@ export async function POST(request: Request) {
           registration_id: targetRegId,
           redirectUrl: `/register/parent/form?regId=${encodeURIComponent(targetRegId)}`,
           status: 'Consultation Completed',
-          message: 'VIP Access Code PRATI100 applied! Registration form unlocked.'
+          message: 'VIP Access Code applied! Registration form unlocked.'
         });
       }
 
@@ -237,12 +237,12 @@ export async function POST(request: Request) {
         city,
         child_age: 'Pending Registration Form',
         requirement: isShadow ? 'Shadow Teacher' : 'Home Tutor',
-        message: isVipCode ? 'Step 1 VIP Access Unlocked via PRATI100' : 'Step 1 Consultation Booked',
-        payment_status: isVipCode ? 'waived_prati100' : 'paid',
+        message: isVipCode ? 'Step 1 VIP Access Unlocked via SHADOW100' : 'Step 1 Consultation Booked',
+        payment_status: isVipCode ? 'waived_shadow100' : 'paid',
         amount: isVipCode ? 0 : 99,
-        razorpay_payment_id: isVipCode ? 'VIP-PRATI100' : razorpayPaymentId,
-        razorpay_order_id: isVipCode ? 'VIP-PRATI100' : razorpayOrderId,
-        razorpay_signature: isVipCode ? 'VIP-PRATI100' : razorpaySignature
+        razorpay_payment_id: isVipCode ? 'VIP-SHADOW100' : razorpayPaymentId,
+        razorpay_order_id: isVipCode ? 'VIP-SHADOW100' : razorpayOrderId,
+        razorpay_signature: isVipCode ? 'VIP-SHADOW100' : razorpaySignature
       };
 
       await supabase.from('bookings').insert([bookingData]);
@@ -261,7 +261,7 @@ export async function POST(request: Request) {
         consultation_paid: true,
         registration_id: generatedId,
         created_at: createdAt,
-        notes: isVipCode ? `VIP Access via Code PRATI100 | Unified ID: ${generatedId}` : `Unified ID: ${generatedId}`
+        notes: isVipCode ? `VIP Access via Code SHADOW100 | Unified ID: ${generatedId}` : `Unified ID: ${generatedId}`
       };
 
       if (isShadow) parentRecord.relationship = 'Mother';

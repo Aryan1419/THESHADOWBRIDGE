@@ -128,11 +128,14 @@ export async function GET(request: Request) {
     }
 
     const currentStatus = record.status || record.message || 'Consultation Booked';
-    const isConsultationPaid = Boolean(record.consultation_paid || record.payment_status === 'paid' || record.payment_status === 'waived_prati100');
+    const isConsultationPaid = Boolean(record.consultation_paid || record.payment_status === 'paid' || record.payment_status === 'waived_shadow100' || record.payment_status === 'waived_prati100');
     
     const isVipRecord = Boolean(
+      (record.notes || '').toUpperCase().includes('SHADOW100') ||
+      (record.message || '').toUpperCase().includes('SHADOW100') ||
       (record.notes || '').toUpperCase().includes('PRATI100') ||
       (record.message || '').toUpperCase().includes('PRATI100') ||
+      record.payment_status === 'waived_shadow100' ||
       record.payment_status === 'waived_prati100'
     );
 

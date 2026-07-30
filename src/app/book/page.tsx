@@ -41,7 +41,7 @@ export default function BookConsultation() {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [receiptCode, setReceiptCode] = useState('');
 
-  const isVipCode = formData.promoCode.trim().toUpperCase() === 'PRATI100';
+  const isVipCode = formData.promoCode.trim().toUpperCase() === 'SHADOW100' || formData.promoCode.trim().toUpperCase() === 'PRATI100';
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -53,6 +53,8 @@ export default function BookConsultation() {
         preferredLocation: '',
         otherLocation: ''
       }));
+    } else if (name === 'promoCode') {
+      setFormData(prev => ({ ...prev, promoCode: value.toUpperCase() }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -74,7 +76,7 @@ export default function BookConsultation() {
             email: formData.email.trim().toLowerCase(),
             city: formData.city.trim() || 'Delhi NCR',
             serviceNeeded: formData.requirement || 'Shadow Teacher',
-            promoCode: 'PRATI100'
+            promoCode: 'SHADOW100'
           })
         });
 
@@ -452,6 +454,7 @@ export default function BookConsultation() {
                         placeholder="Enter VIP / Referral Code"
                         className="p-3 border border-brand-border bg-white rounded-xl text-sm font-mono font-bold text-primary focus:outline-none focus:ring-2 focus:ring-accent/40 uppercase"
                       />
+                      <p className="text-[11px] text-brand-muted mt-1 font-medium">Please enter your code in <strong>ALL CAPS</strong>.</p>
                       {isVipCode && (
                         <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2 mt-1">
                           <Sparkles size={16} className="text-emerald-600 shrink-0" />

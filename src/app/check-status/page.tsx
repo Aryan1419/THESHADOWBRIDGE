@@ -349,21 +349,24 @@ export default function CheckStatusPage() {
                           </p>
                         </div>
 
-                        <form onSubmit={handleApplyVipCode} className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto shrink-0">
-                          <input
-                            type="text"
-                            value={vipCode}
-                            onChange={(e) => setVipCode(e.target.value)}
-                            placeholder="Enter VIP Access Code"
-                            className="px-4 py-2.5 bg-white border border-purple-300 rounded-xl text-xs font-mono font-bold text-primary uppercase focus:outline-none focus:ring-2 focus:ring-secondary/40"
-                          />
-                          <button
-                            type="submit"
-                            disabled={vipLoading || !vipCode.trim()}
-                            className="px-5 py-2.5 bg-secondary hover:bg-secondary/90 text-white rounded-xl font-bold text-xs shadow-md transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
-                          >
-                            {vipLoading ? 'Applying...' : 'Unlock Form'}
-                          </button>
+                        <form onSubmit={handleApplyVipCode} className="flex flex-col gap-1.5 w-full sm:w-auto shrink-0">
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <input
+                              type="text"
+                              value={vipCode}
+                              onChange={(e) => setVipCode(e.target.value.toUpperCase())}
+                              placeholder="Enter VIP Access Code"
+                              className="px-4 py-2.5 bg-white border border-purple-300 rounded-xl text-xs font-mono font-bold text-primary uppercase focus:outline-none focus:ring-2 focus:ring-secondary/40"
+                            />
+                            <button
+                              type="submit"
+                              disabled={vipLoading || !vipCode.trim()}
+                              className="px-5 py-2.5 bg-secondary hover:bg-secondary/90 text-white rounded-xl font-bold text-xs shadow-md transition-all cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+                            >
+                              {vipLoading ? 'Applying...' : 'Unlock Form'}
+                            </button>
+                          </div>
+                          <p className="text-[10px] text-brand-muted font-medium text-left">Please enter code in <strong>ALL CAPS</strong>.</p>
                         </form>
                       </div>
 

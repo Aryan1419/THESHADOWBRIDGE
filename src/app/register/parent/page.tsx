@@ -37,7 +37,7 @@ export default function ParentConsultationStep1() {
   const [bookingSuccess, setBookingSuccess] = useState<any | null>(null);
 
   const cleanPromoCode = promoCode.trim().toUpperCase();
-  const isVipCode = cleanPromoCode === 'PRATI100';
+  const isVipCode = cleanPromoCode === 'SHADOW100' || cleanPromoCode === 'PRATI100';
 
   const handleConsultationPayment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +50,7 @@ export default function ParentConsultationStep1() {
     setErrorMsg(null);
 
     try {
-      // IF VIP PROMO CODE PRATI100 IS APPLIED -> BYPASS RAZORPAY & REDIRECT DIRECTLY
+      // IF VIP PROMO CODE SHADOW100 IS APPLIED -> BYPASS RAZORPAY & REDIRECT DIRECTLY
       if (isVipCode) {
         const registerRes = await fetch('/api/register', {
           method: 'POST',
@@ -62,7 +62,7 @@ export default function ParentConsultationStep1() {
             email: email.trim().toLowerCase(),
             city: city.trim(),
             serviceNeeded,
-            promoCode: 'PRATI100'
+            promoCode: 'SHADOW100'
           })
         });
 
@@ -410,11 +410,12 @@ export default function ParentConsultationStep1() {
                     <input
                       type="text"
                       value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value)}
+                      onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                       placeholder="Enter VIP / Referral Code"
                       className="w-full px-4 py-3 bg-brand-light/50 border border-brand-border rounded-xl text-sm font-mono font-bold text-primary placeholder-brand-muted focus:outline-none focus:ring-2 focus:ring-accent/40 uppercase"
                     />
                   </div>
+                  <p className="text-[11px] text-brand-muted mt-1 font-medium">Please enter your code in <strong>ALL CAPS</strong>.</p>
                   {isVipCode && (
                     <motion.div 
                       initial={{ opacity: 0, y: -4 }}
