@@ -71,6 +71,8 @@ export const metadata: Metadata = {
   },
 };
 
+import ScrollToTop from "@/components/ScrollToTop";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -120,8 +122,9 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="font-sans antialiased text-brand-dark bg-white">
+      <body className="font-sans antialiased text-brand-dark bg-white relative">
         {children}
+        <ScrollToTop />
       </body>
     </html>
   );
