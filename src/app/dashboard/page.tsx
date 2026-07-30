@@ -209,6 +209,11 @@ function DashboardContent() {
 
       const paymentObject = new (window as any).Razorpay(options);
       paymentObject.open();
+
+      paymentObject.on('payment.failed', function (response: any) {
+        setPaymentLoading(false);
+        alert(`⚠️ Payment Not Completed: ${response.error?.description || 'Transaction was cancelled or declined.'}`);
+      });
     } catch (error: any) {
       console.error(error);
       alert(error.message || 'An error occurred during payment checkout setup.');

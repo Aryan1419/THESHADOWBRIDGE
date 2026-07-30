@@ -132,6 +132,12 @@ function PlacementFeeContent() {
             setLoadingPayment(false);
           }
         },
+        modal: {
+          ondismiss: function () {
+            setLoadingPayment(false);
+            setPaymentError('⚠️ Payment Cancelled: The placement fee payment window was closed before completion. No money was deducted. You can retry when ready.');
+          }
+        },
         prefill: {
           name: record.parentName || record.name,
           email: record.email,
@@ -147,7 +153,7 @@ function PlacementFeeContent() {
 
       paymentObject.on('payment.failed', function (response: any) {
         setLoadingPayment(false);
-        setPaymentError(`Payment failed: ${response.error.description || 'Transaction cancelled.'}`);
+        setPaymentError(`⚠️ Payment Not Completed: ${response.error?.description || response.error?.reason || 'Transaction was cancelled or declined by your bank.'}`);
       });
 
     } catch (err: any) {

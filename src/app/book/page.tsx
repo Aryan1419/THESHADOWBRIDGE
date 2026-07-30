@@ -197,7 +197,7 @@ export default function BookConsultation() {
         modal: {
           ondismiss: function () {
             setLoading(false);
-            setPaymentError('Payment was cancelled or closed. You can retry clicking "Pay ₹99 & Complete Booking".');
+            setPaymentError('⚠️ Payment Cancelled: The payment window was closed before completion. No money was deducted. You can retry clicking "Pay ₹99 & Complete Booking".');
           }
         },
         prefill: {
@@ -212,6 +212,11 @@ export default function BookConsultation() {
 
       const paymentObject = new (window as any).Razorpay(options);
       paymentObject.open();
+
+      paymentObject.on('payment.failed', function (response: any) {
+        setLoading(false);
+        setPaymentError(`⚠️ Payment Not Completed: ${response.error?.description || response.error?.reason || 'Transaction was cancelled or declined by your bank.'}`);
+      });
 
     } catch (err: any) {
       console.error(err);

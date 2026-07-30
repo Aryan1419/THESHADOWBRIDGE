@@ -150,6 +150,12 @@ export default function ParentConsultationStep1() {
             setLoading(false);
           }
         },
+        modal: {
+          ondismiss: function () {
+            setLoading(false);
+            setErrorMsg('⚠️ Payment Cancelled: The payment window was closed before completion. No money was deducted. You can try again whenever you are ready.');
+          }
+        },
         prefill: {
           name: parentName,
           email: email,
@@ -165,7 +171,7 @@ export default function ParentConsultationStep1() {
 
       paymentObject.on('payment.failed', function (response: any) {
         setLoading(false);
-        setErrorMsg(`Payment failed: ${response.error.description || 'Transaction cancelled.'}`);
+        setErrorMsg(`⚠️ Payment Not Completed: ${response.error?.description || response.error?.reason || 'Transaction was cancelled or declined by your bank.'}`);
       });
 
     } catch (err: any) {
