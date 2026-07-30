@@ -203,6 +203,22 @@ export default function Navbar() {
                       </Link>
 
                       <Link
+                        href="/founder-story"
+                        onClick={() => setIsOpen(false)}
+                        className={`flex items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm transition-all ${
+                          pathname === '/founder-story'
+                            ? 'bg-amber-50 text-amber-900 border border-amber-200'
+                            : 'text-brand-dark hover:bg-amber-50/70 hover:text-primary'
+                        }`}
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <span>🌱</span>
+                          <span>Why I Started (Founder Story)</span>
+                        </span>
+                        <span className="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary text-[10px] uppercase font-bold tracking-wider">Story</span>
+                      </Link>
+
+                      <Link
                         href="/services"
                         onClick={() => setIsOpen(false)}
                         className={`flex items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm transition-all ${

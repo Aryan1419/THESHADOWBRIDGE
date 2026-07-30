@@ -117,7 +117,7 @@ export default function FounderStoryPage() {
           {/* Founder Image */}
           <div className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-2xl overflow-hidden shrink-0 shadow-lg border-2 border-primary/20">
             <Image 
-              src="/images/founder_pratibha.png"
+              src="/images/founder_pratibha.jpg"
               alt="Pratibha Mishra - Founder of The Shadow Bridge"
               fill
               className="object-cover object-top"

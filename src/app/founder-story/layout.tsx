@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     description: "The story behind The Shadow Bridge by Founder Pratibha Mishra. Empowering inclusive learning for children across India.",
     url: "https://theshadowbridge.com/founder-story",
     siteName: "The Shadow Bridge",
-    images: [{ url: "/images/founder_pratibha.png", width: 800, height: 800, alt: "Pratibha Mishra - Founder of The Shadow Bridge" }]
+    images: [{ url: "/images/founder_pratibha.jpg", width: 800, height: 800, alt: "Pratibha Mishra - Founder of The Shadow Bridge" }]
   }
 };
 
