@@ -42,6 +42,7 @@ export default function Navbar() {
 
   const navLinks = [
     { name: 'Home', path: '/', badge: null },
+    { name: 'Why I Started', path: '/founder-story', badge: 'Story' },
     { name: 'About Us', path: '/about', badge: null },
     { 
       name: 'Parents & Students', 
