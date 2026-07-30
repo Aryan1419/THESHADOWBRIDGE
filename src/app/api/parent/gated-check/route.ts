@@ -149,6 +149,25 @@ export async function GET(request: Request) {
     const statusIdx = getStatusIndex(currentStatus);
     const isConsultationCompleted = statusIdx >= 1 || isVipRecord || isConsultationPaid || currentStatus.toLowerCase().includes('completed');
 
+    // Explicit payment boolean check (DECOUPLED FROM STATUS LABEL TEXT)
+    const isPlacementPaid = Boolean(
+      record.placement_paid === true ||
+      record.placementPaid === true ||
+      Boolean(record.placement_payment_id) ||
+      Boolean(record.placementPaymentId) ||
+      (record.notes || '').includes('Placement Fee Paid') ||
+      (record.message || '').includes('Placement Fee Paid')
+    );
+
+    // Registration submitted check (has child details OR beyond consultation booked)
+    const hasChildDetails = Boolean(
+      (record.child_name && record.child_name !== 'Pending Registration Form') ||
+      (record.child_grade && record.child_grade !== 'Pending Registration Form') ||
+      (record.childName && record.childName !== 'Pending Registration Form') ||
+      (record.notes || '').includes('Registration Form')
+    );
+    const isRegistrationSubmitted = hasChildDetails || statusIdx >= 2 || isPlacementPaid;
+
     return NextResponse.json({
       success: true,
       role: 'parent',
@@ -158,10 +177,14 @@ export async function GET(request: Request) {
       statusIdx: isConsultationCompleted ? Math.max(statusIdx, 1) : statusIdx,
       isConsultationPaid: true,
       isVip: isVipRecord,
-      isConsultationCompleted: true, // For all valid parent records where consultation_paid or PRATI100 is used
-      isRegistrationSubmitted: statusIdx >= 2,
-      isPlacementPaid: statusIdx >= 3,
-      record: toCamelCase(record)
+      isConsultationCompleted: true,
+      isRegistrationSubmitted,
+      isPlacementPaid,
+      record: toCamelCase({
+        ...record,
+        placement_paid: isPlacementPaid,
+        placementPaid: isPlacementPaid
+      })
     });
   } catch (error: any) {
     console.error('Gated Check API Error:', error);

@@ -537,6 +537,7 @@ export async function POST(request: Request) {
       const { data: updated, error: uErr } = await supabase
         .from(targetTable)
         .update({
+          placement_paid: true,
           status: newStatus,
           notes: (parentRecord.notes || '') + ` | Placement Fee Paid (Payment ID: ${razorpayPaymentId})`
         })

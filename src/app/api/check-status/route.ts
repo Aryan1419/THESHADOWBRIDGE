@@ -90,11 +90,31 @@ export async function POST(request: Request) {
         matchedCandidate = candidate ? toCamelCase(candidate) : null;
       }
 
+      const isPlacementPaid = Boolean(
+        parentShadow.placement_paid === true ||
+        Boolean(parentShadow.placement_payment_id) ||
+        (parentShadow.notes || '').includes('Placement Fee Paid') ||
+        (parentShadow.message || '').includes('Placement Fee Paid')
+      );
+
+      const isRegistrationSubmitted = Boolean(
+        (parentShadow.child_name && parentShadow.child_name !== 'Pending Registration Form') ||
+        (parentShadow.child_grade && parentShadow.child_grade !== 'Pending Registration Form') ||
+        (parentShadow.notes || '').includes('Registration Form') ||
+        isPlacementPaid
+      );
+
       return NextResponse.json({
         success: true,
         role: 'parent',
         subType: 'shadow',
-        record: toCamelCase(parentShadow),
+        isPlacementPaid,
+        isRegistrationSubmitted,
+        record: toCamelCase({
+          ...parentShadow,
+          placement_paid: isPlacementPaid,
+          placementPaid: isPlacementPaid
+        }),
         matchedCandidate
       });
     }
@@ -117,11 +137,31 @@ export async function POST(request: Request) {
         matchedCandidate = candidate ? toCamelCase(candidate) : null;
       }
 
+      const isPlacementPaid = Boolean(
+        parentTutor.placement_paid === true ||
+        Boolean(parentTutor.placement_payment_id) ||
+        (parentTutor.notes || '').includes('Placement Fee Paid') ||
+        (parentTutor.message || '').includes('Placement Fee Paid')
+      );
+
+      const isRegistrationSubmitted = Boolean(
+        (parentTutor.child_name && parentTutor.child_name !== 'Pending Registration Form') ||
+        (parentTutor.child_grade && parentTutor.child_grade !== 'Pending Registration Form') ||
+        (parentTutor.notes || '').includes('Registration Form') ||
+        isPlacementPaid
+      );
+
       return NextResponse.json({
         success: true,
         role: 'parent',
         subType: 'tutor',
-        record: toCamelCase(parentTutor),
+        isPlacementPaid,
+        isRegistrationSubmitted,
+        record: toCamelCase({
+          ...parentTutor,
+          placement_paid: isPlacementPaid,
+          placementPaid: isPlacementPaid
+        }),
         matchedCandidate
       });
     }

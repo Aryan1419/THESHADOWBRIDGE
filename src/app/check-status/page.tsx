@@ -385,59 +385,109 @@ export default function CheckStatusPage() {
                       )}
                     </div>
                   )}
-                  {/* 1. Status: Consultation Completed -> Continue to Registration Form */}
-                  {(currentStatus.toLowerCase().includes('consultation completed') || (currentStatus.toLowerCase().includes('completed') && !currentStatus.toLowerCase().includes('submitted'))) && (
-                    <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-2xl p-6 mb-8 shadow-md">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div>
-                          <span className="px-3 py-1 bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold uppercase rounded-full tracking-wider">
-                            ✓ Step 4 • Consultation Completed
-                          </span>
-                          <h3 className="font-serif text-lg font-bold text-emerald-950 mt-2">
-                            Child Registration Form Unlocked!
-                          </h3>
-                          <p className="text-xs text-emerald-900 mt-1 leading-relaxed">
-                            Your 1-on-1 consultation call is complete. Please provide your child's specific developmental and school details to proceed with matching.
-                          </p>
+                  {/* REAL DATA BOOLEAN CHECK FOR PLACEMENT PAYMENT (DECOUPLED FROM STATUS LABEL TEXT) */}
+                  {(() => {
+                    const isPlacementPaid = Boolean(
+                      recordData?.isPlacementPaid ||
+                      record.placementPaid ||
+                      record.placement_paid ||
+                      record.placementPaymentId ||
+                      record.placement_payment_id ||
+                      (record.notes || '').includes('Placement Fee Paid') ||
+                      (record.message || '').includes('Placement Fee Paid')
+                    );
+
+                    const isRegistrationSubmitted = Boolean(
+                      recordData?.isRegistrationSubmitted ||
+                      (record.childName && record.childName !== 'Pending Registration Form') ||
+                      (record.child_name && record.child_name !== 'Pending Registration Form') ||
+                      (record.notes || '').includes('Registration Form')
+                    );
+
+                    const regId = record.registrationId || record.registration_id || record.bookingId || record.booking_id || '';
+
+                    // 1. IF PLACEMENT FEE IS NOT YET PAID: Show Pay Placement Fee button as long as registration/consultation is initiated, REGARDLESS of status label
+                    if (!isPlacementPaid) {
+                      return (
+                        <div className="space-y-4 mb-8">
+                          {/* If registration form is not yet completed, show option to complete form */}
+                          {!isRegistrationSubmitted && (
+                            <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-2xl p-6 shadow-md">
+                              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                <div>
+                                  <span className="px-3 py-1 bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold uppercase rounded-full tracking-wider">
+                                    ✓ Step 4 • Consultation Access Unlocked
+                                  </span>
+                                  <h3 className="font-serif text-lg font-bold text-emerald-950 mt-2">
+                                    Child Registration Form Unlocked!
+                                  </h3>
+                                  <p className="text-xs text-emerald-900 mt-1 leading-relaxed">
+                                    Your 1-on-1 consultation access is active. Provide your child's developmental and school placement details.
+                                  </p>
+                                </div>
+
+                                <a
+                                  href={`/register/parent/form?regId=${encodeURIComponent(regId)}`}
+                                  className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-2 whitespace-nowrap"
+                                >
+                                  <span>Continue to Registration Form</span>
+                                  <ArrowRight size={16} />
+                                </a>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Pay Placement Fee Card (ALWAYS VISIBLE UNTIL PAID) */}
+                          <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-6 shadow-md">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                              <div>
+                                <span className="px-3 py-1 bg-amber-200 text-amber-950 border border-amber-400 text-[10px] font-extrabold uppercase rounded-full tracking-wider flex items-center gap-1.5 w-fit">
+                                  <Sparkles size={12} className="text-amber-700" />
+                                  <span>Step 5 • Placement Onboarding Fee Pending</span>
+                                </span>
+                                <h3 className="font-serif text-lg font-bold text-amber-950 mt-2">
+                                  Complete Placement Fee to Lock Educator Shortlisting
+                                </h3>
+                                <p className="text-xs text-amber-900 mt-1 leading-relaxed">
+                                  Pay your placement fee (₹5,000 / ₹3,000) to initiate background-verified candidate matchmaking for your child.
+                                </p>
+                              </div>
+
+                              <a
+                                href={`/register/parent/placement-fee?regId=${encodeURIComponent(regId)}`}
+                                className="px-6 py-3.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-extrabold text-xs shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer"
+                              >
+                                <span>Pay Placement Fee Now</span>
+                                <ArrowRight size={16} />
+                              </a>
+                            </div>
+                          </div>
                         </div>
+                      );
+                    }
 
-                        <a
-                          href={`/register/parent/form?regId=${encodeURIComponent(record.registrationId || record.registration_id || record.bookingId || record.booking_id || '')}`}
-                          className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-2 whitespace-nowrap"
-                        >
-                          <span>Continue to Registration Form</span>
-                          <ArrowRight size={16} />
-                        </a>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* 2. Status: Registration Submitted -> Continue to Placement Fee Payment */}
-                  {currentStatus.toLowerCase().includes('registration submitted') && (
-                    <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-2xl p-6 mb-8 shadow-md">
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                        <div>
-                          <span className="px-3 py-1 bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-extrabold uppercase rounded-full tracking-wider">
-                            ⚡ Step 5 • Form Received
-                          </span>
-                          <h3 className="font-serif text-lg font-bold text-amber-950 mt-2">
-                            Ready for Educator Matching!
-                          </h3>
-                          <p className="text-xs text-amber-900 mt-1 leading-relaxed">
-                            Your child details have been saved. Pay the placement fee to lock your requirement and initiate educator shortlisting.
-                          </p>
+                    // 2. IF PLACEMENT FEE IS ALREADY PAID: Show Placement Paid Badge
+                    return (
+                      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-6 mb-8 shadow-md">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
+                            ✓
+                          </div>
+                          <div>
+                            <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-900 text-[10px] font-extrabold uppercase rounded-full tracking-wider border border-emerald-300">
+                              Placement Payment Confirmed
+                            </span>
+                            <h3 className="font-serif text-lg font-bold text-emerald-950 mt-1">
+                              Placement Fee Received &amp; Requirement Locked!
+                            </h3>
+                            <p className="text-xs text-emerald-900 mt-0.5">
+                              Our clinical placement team is actively shortlisting background-verified educators for your child.
+                            </p>
+                          </div>
                         </div>
-
-                        <a
-                          href={`/register/parent/placement-fee?regId=${encodeURIComponent(record.registrationId || record.registration_id || record.bookingId || record.booking_id || '')}`}
-                          className="px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-2 whitespace-nowrap"
-                        >
-                          <span>Continue to Placement Fee Payment</span>
-                          <ArrowRight size={16} />
-                        </a>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </>
               )}
 
