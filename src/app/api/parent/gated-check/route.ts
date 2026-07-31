@@ -138,10 +138,10 @@ export async function GET(request: Request) {
 
     const getStatusIndex = (st: string) => {
       const sLower = (st || '').toLowerCase();
-      if (sLower.includes('completed') || sLower.includes('analysis') || sLower.includes('unlocked') || sLower.includes('vip') || sLower.includes('prati100')) return 1;
-      if (sLower.includes('submitted')) return 2;
-      if (sLower.includes('paid') || sLower.includes('matching')) return 3;
-      if (sLower.includes('proposed')) return 4;
+      if (sLower.includes('matching') || sLower.includes('proposed') || sLower.includes('shortlisted') || sLower.includes('onboarding') || sLower.includes('active') || sLower.includes('support started')) return 4;
+      if (sLower.includes('placement fee paid') || sLower.includes('placement paid')) return 3;
+      if (sLower.includes('submitted') || sLower.includes('details saved')) return 2;
+      if (sLower.includes('completed') || sLower.includes('introduction') || sLower.includes('analysis') || sLower.includes('unlocked') || sLower.includes('vip')) return 1;
       if (sLower.includes('booked')) return 0;
       return 0;
     };

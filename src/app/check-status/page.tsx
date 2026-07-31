@@ -149,12 +149,75 @@ export default function CheckStatusPage() {
   const role = recordData?.role;
   const matchedCandidate = recordData?.matchedCandidate;
 
-  const timelineSteps = (role === 'shadow' || role === 'tutor') ? TEACHER_TIMELINE : PARENT_TIMELINE;
-  const currentStatus = record?.status || 'Interview Awaiting';
+  const isTeacherRole = role === 'shadow' || role === 'tutor';
+  const timelineSteps = isTeacherRole ? TEACHER_TIMELINE : PARENT_TIMELINE;
+  const currentStatus = record?.status || (isTeacherRole ? 'Interview Awaiting' : 'Consultation Booked');
 
   const getStepStatusIndex = (status: string) => {
-    const idx = timelineSteps.findIndex(s => s.name.toLowerCase() === status.toLowerCase());
-    return idx !== -1 ? idx : 0;
+    const sLower = (status || '').toLowerCase().trim();
+
+    if (isTeacherRole) {
+      if (sLower.includes('active') || sLower.includes('placed')) return 4;
+      if (sLower.includes('onboarding') || sLower.includes('verification')) return 3;
+      if (sLower.includes('shortlisted') || sLower.includes('pool')) return 2;
+      if (sLower.includes('scheduled') || sLower.includes('video') || sLower.includes('panel')) return 1;
+      return 0; // Interview Awaiting / Application Received
+    }
+
+    // PARENT TIMELINE MAPPING (DECOUPLED & COMPREHENSIVE)
+    const isPlacementPaid = Boolean(
+      recordData?.isPlacementPaid ||
+      record?.placementPaid ||
+      record?.placement_paid ||
+      record?.placementPaymentId ||
+      record?.placement_payment_id ||
+      (record?.notes || '').includes('Placement Fee Paid') ||
+      (record?.message || '').includes('Placement Fee Paid') ||
+      sLower.includes('placement fee paid') ||
+      sLower.includes('support started') ||
+      sLower.includes('active')
+    );
+
+    const isMatchingOrBeyond = isPlacementPaid || sLower.includes('matching') || sLower.includes('proposed') || sLower.includes('shortlisted') || sLower.includes('onboarding') || sLower.includes('active');
+
+    if (isMatchingOrBeyond || sLower.includes('matching')) {
+      return 4; // Step 5: Matching in Progress / Active Support
+    }
+
+    if (isPlacementPaid) {
+      return 3; // Step 4: Placement Fee Paid
+    }
+
+    const isRegistrationSubmitted = Boolean(
+      recordData?.isRegistrationSubmitted ||
+      (record?.childName && record?.childName !== 'Pending Registration Form') ||
+      (record?.child_name && record?.child_name !== 'Pending Registration Form') ||
+      (record?.notes || '').includes('Registration Form') ||
+      sLower.includes('registration submitted') ||
+      sLower.includes('form received') ||
+      sLower.includes('details saved')
+    );
+
+    if (isRegistrationSubmitted || sLower.includes('submitted')) {
+      return 2; // Step 3: Registration Submitted
+    }
+
+    const isConsultationCompleted = Boolean(
+      recordData?.isConsultationCompleted ||
+      recordData?.isVip ||
+      sLower.includes('completed') ||
+      sLower.includes('introduction') ||
+      sLower.includes('analysis') ||
+      sLower.includes('unlocked') ||
+      sLower.includes('vip') ||
+      (record?.notes || '').toUpperCase().includes('SHADOW100')
+    );
+
+    if (isConsultationCompleted || sLower.includes('introduction') || sLower.includes('analysis') || sLower.includes('unlocked')) {
+      return 1; // Step 2: Consultation Completed / Introduction Call
+    }
+
+    return 0; // Step 1: Consultation Booked
   };
 
   const currentStepIndex = record ? getStepStatusIndex(currentStatus) : 0;
