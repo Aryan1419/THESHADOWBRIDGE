@@ -21,7 +21,33 @@ export const metadata: Metadata = {
     template: "%s | The Shadow Bridge"
   },
   description: "Connecting families with professionally trained Shadow Teachers and Home Tutors in Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune. Special education, behavior support, and inclusive learning assistance.",
-  keywords: ["shadow teacher", "home tutor", "special education", "child support", "inclusive learning", "Delhi NCR", "Ahmedabad", "Hyderabad", "Bangalore", "Pune", "autism tutor", "ADHD support", "special needs mentor"],
+  keywords: [
+    "shadow teacher",
+    "home tutor",
+    "special education",
+    "child support",
+    "inclusive learning",
+    "Delhi NCR",
+    "Ahmedabad",
+    "Hyderabad",
+    "Bangalore",
+    "Pune",
+    "autism tutor",
+    "ADHD support",
+    "special needs mentor",
+    "shadow teacher near me",
+    "hire shadow teacher India",
+    "special needs home tutor",
+    "autism shadow teacher cost",
+    "ADHD classroom assistant",
+    "IEP guidance India",
+    "inclusive education assistance",
+    "shadow teacher jobs India",
+    "learning disability tutor",
+    "down syndrome shadow teacher",
+    "school permission shadow teacher",
+    "Pratibha Mishra shadow bridge"
+  ],
   alternates: {
     canonical: "https://theshadowbridge.com"
   },
@@ -108,7 +134,9 @@ export default function RootLayout({
           "Special Education Home Tutoring",
           "Inclusive Classroom Assistance",
           "Behavioral Management & Autism/ADHD Support",
-          "Individualized Education Program (IEP)"
+          "Individualized Education Program (IEP)",
+          "Down Syndrome & Learning Disability Support",
+          "Shadow Teacher Jobs & Training"
         ]
       }
     ]
