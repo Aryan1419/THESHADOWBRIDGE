@@ -98,6 +98,7 @@ export const metadata: Metadata = {
 };
 
 import ScrollToTop from "@/components/ScrollToTop";
+import { Analytics } from '@vercel/analytics/next';
 
 export default function RootLayout({
   children,
@@ -153,6 +154,7 @@ export default function RootLayout({
       <body className="font-sans antialiased text-brand-dark bg-white relative">
         {children}
         <ScrollToTop />
+        <Analytics />
       </body>
     </html>
   );
