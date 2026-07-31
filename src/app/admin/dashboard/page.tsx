@@ -600,20 +600,57 @@ export default function AdminDashboard() {
   const getPaymentsList = () => {
     if (!db) return [];
     const list: any[] = [];
+
+    const getRealPaymentId = (r: any, isPlacement: boolean) => {
+      const pid = isPlacement 
+        ? (r.placementPaymentId || r.placement_payment_id || r.razorpayPaymentId || r.razorpay_payment_id)
+        : (r.razorpayPaymentId || r.razorpay_payment_id);
+      
+      if (pid && pid !== 'Demo (Simulated)') return pid;
+
+      // Extract real Razorpay pay_XXXXXX ID from notes string if saved in notes
+      const notesStr = (r.notes || '') + ' ' + (r.message || '');
+      const match = notesStr.match(/Payment ID:\s*([^\s\|]+)/i) || notesStr.match(/(pay_[a-zA-Z0-9]+)/i);
+      if (match && match[1]) return match[1];
+
+      // Check VIP Code
+      if (notesStr.toUpperCase().includes('SHADOW100')) return 'VIP-SHADOW100';
+
+      return `PAY-CONFIRMED-${(r.registration_id || r.registrationId || r.id || '').slice(-8)}`;
+    };
+
+    const getRealOrderId = (r: any, isPlacement: boolean) => {
+      const oid = isPlacement
+        ? (r.placementOrderId || r.placement_order_id || r.razorpayOrderId || r.razorpay_order_id)
+        : (r.razorpayOrderId || r.razorpay_order_id);
+
+      if (oid && oid !== 'Demo (Simulated)') return oid;
+
+      // Extract real Razorpay order_XXXXXX ID from notes string if saved in notes
+      const notesStr = (r.notes || '') + ' ' + (r.message || '');
+      const match = notesStr.match(/Order ID:\s*([^\s\|]+)/i) || notesStr.match(/(order_[a-zA-Z0-9]+)/i);
+      if (match && match[1]) return match[1];
+
+      // Check VIP Code
+      if (notesStr.toUpperCase().includes('SHADOW100')) return 'VIP-SHADOW100';
+
+      return `ORD-CONFIRMED-${(r.registration_id || r.registrationId || r.id || '').slice(-8)}`;
+    };
+
     db.parent_shadow_requests.forEach(r => {
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
         list.push({
           id: r.id + '-cons',
           date: r.created_at,
           regId: r.registration_id,
-          parentName: r.parentName,
-          childName: r.childName,
+          parentName: r.parentName || (r as any).parent_name,
+          childName: r.childName || (r as any).child_name,
           phone: r.phone,
           email: r.email,
           type: 'Consultation Fee (Shadow Teacher)',
           amount: '₹99',
-          paymentId: (r as any).razorpayPaymentId || 'Demo (Simulated)',
-          orderId: (r as any).razorpayOrderId || 'Demo (Simulated)',
+          paymentId: getRealPaymentId(r, false),
+          orderId: getRealOrderId(r, false),
           status: 'Success'
         });
       }
@@ -622,32 +659,33 @@ export default function AdminDashboard() {
           id: r.id + '-place',
           date: (r as any).placementPaidAt || r.created_at,
           regId: r.registration_id,
-          parentName: r.parentName,
-          childName: r.childName,
+          parentName: r.parentName || (r as any).parent_name,
+          childName: r.childName || (r as any).child_name,
           phone: r.phone,
           email: r.email,
           type: 'Placement Fee (Shadow Teacher)',
           amount: `₹${((r as any).placementAmount || 5000).toLocaleString()}`,
-          paymentId: (r as any).placementPaymentId || (r as any).placement_payment_id || 'Demo (Simulated)',
-          orderId: (r as any).placementOrderId || (r as any).placement_order_id || 'Demo (Simulated)',
+          paymentId: getRealPaymentId(r, true),
+          orderId: getRealOrderId(r, true),
           status: 'Success'
         });
       }
     });
+
     db.parent_tutor_requests.forEach(r => {
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
         list.push({
           id: r.id + '-cons',
           date: r.created_at,
           regId: r.registration_id,
-          parentName: r.parentName,
-          childName: r.childName,
+          parentName: r.parentName || (r as any).parent_name,
+          childName: r.childName || (r as any).child_name,
           phone: r.phone,
           email: r.email,
           type: 'Consultation Fee (Home Tutor)',
           amount: '₹99',
-          paymentId: (r as any).razorpayPaymentId || 'Demo (Simulated)',
-          orderId: (r as any).razorpayOrderId || 'Demo (Simulated)',
+          paymentId: getRealPaymentId(r, false),
+          orderId: getRealOrderId(r, false),
           status: 'Success'
         });
       }
@@ -656,14 +694,14 @@ export default function AdminDashboard() {
           id: r.id + '-place',
           date: (r as any).placementPaidAt || r.created_at,
           regId: r.registration_id,
-          parentName: r.parentName,
-          childName: r.childName,
+          parentName: r.parentName || (r as any).parent_name,
+          childName: r.childName || (r as any).child_name,
           phone: r.phone,
           email: r.email,
           type: 'Placement Fee (Home Tutor)',
           amount: `₹${((r as any).placementAmount || 3000).toLocaleString()}`,
-          paymentId: (r as any).placementPaymentId || (r as any).placement_payment_id || 'Demo (Simulated)',
-          orderId: (r as any).placementOrderId || (r as any).placement_order_id || 'Demo (Simulated)',
+          paymentId: getRealPaymentId(r, true),
+          orderId: getRealOrderId(r, true),
           status: 'Success'
         });
       }

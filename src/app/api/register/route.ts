@@ -539,6 +539,8 @@ export async function POST(request: Request) {
         .update({
           placement_paid: true,
           status: newStatus,
+          placement_payment_id: razorpayPaymentId || null,
+          placement_order_id: razorpayOrderId || null,
           notes: (parentRecord.notes || '') + ` | Placement Fee Paid (Payment ID: ${razorpayPaymentId})`
         })
         .eq('id', parentRecord.id)
