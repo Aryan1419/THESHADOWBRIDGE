@@ -601,44 +601,47 @@ export default function AdminDashboard() {
     if (!db) return [];
     const list: any[] = [];
 
-    const getRealPaymentId = (r: any, isPlacement: boolean) => {
+    const isRecordWaived = (r: any) => {
+      const ps = (r.paymentStatus || r.payment_status || '').toLowerCase();
+      const notesStr = ((r.notes || '') + ' ' + (r.message || '')).toUpperCase();
+      return ps === 'waived_shadow100' || notesStr.includes('SHADOW100') || r.razorpayPaymentId === 'VIP-SHADOW100' || r.razorpay_payment_id === 'VIP-SHADOW100';
+    };
+
+    const getRealPaymentId = (r: any, isPlacement: boolean, isWaived: boolean) => {
+      if (isWaived) return 'N/A (VIP Outreach)';
+      
       const pid = isPlacement 
         ? (r.placementPaymentId || r.placement_payment_id || r.razorpayPaymentId || r.razorpay_payment_id)
         : (r.razorpayPaymentId || r.razorpay_payment_id);
       
-      if (pid && pid !== 'Demo (Simulated)') return pid;
+      if (pid && pid !== 'Demo (Simulated)' && !pid.includes('VIP')) return pid;
 
-      // Extract real Razorpay pay_XXXXXX ID from notes string if saved in notes
       const notesStr = (r.notes || '') + ' ' + (r.message || '');
       const match = notesStr.match(/Payment ID:\s*([^\s\|]+)/i) || notesStr.match(/(pay_[a-zA-Z0-9]+)/i);
-      if (match && match[1]) return match[1];
-
-      // Check VIP Code
-      if (notesStr.toUpperCase().includes('SHADOW100')) return 'VIP-SHADOW100';
+      if (match && match[1] && !match[1].includes('SHADOW100')) return match[1];
 
       return `PAY-CONFIRMED-${(r.registration_id || r.registrationId || r.id || '').slice(-8)}`;
     };
 
-    const getRealOrderId = (r: any, isPlacement: boolean) => {
+    const getRealOrderId = (r: any, isPlacement: boolean, isWaived: boolean) => {
+      if (isWaived) return 'N/A (VIP Outreach)';
+
       const oid = isPlacement
         ? (r.placementOrderId || r.placement_order_id || r.razorpayOrderId || r.razorpay_order_id)
         : (r.razorpayOrderId || r.razorpay_order_id);
 
-      if (oid && oid !== 'Demo (Simulated)') return oid;
+      if (oid && oid !== 'Demo (Simulated)' && !oid.includes('VIP')) return oid;
 
-      // Extract real Razorpay order_XXXXXX ID from notes string if saved in notes
       const notesStr = (r.notes || '') + ' ' + (r.message || '');
       const match = notesStr.match(/Order ID:\s*([^\s\|]+)/i) || notesStr.match(/(order_[a-zA-Z0-9]+)/i);
-      if (match && match[1]) return match[1];
-
-      // Check VIP Code
-      if (notesStr.toUpperCase().includes('SHADOW100')) return 'VIP-SHADOW100';
+      if (match && match[1] && !match[1].includes('SHADOW100')) return match[1];
 
       return `ORD-CONFIRMED-${(r.registration_id || r.registrationId || r.id || '').slice(-8)}`;
     };
 
     db.parent_shadow_requests.forEach(r => {
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
+        const isWaived = isRecordWaived(r);
         list.push({
           id: r.id + '-cons',
           date: r.created_at,
@@ -648,13 +651,17 @@ export default function AdminDashboard() {
           phone: r.phone,
           email: r.email,
           type: 'Consultation Fee (Shadow Teacher)',
-          amount: '₹99',
-          paymentId: getRealPaymentId(r, false),
-          orderId: getRealOrderId(r, false),
-          status: 'Success'
+          amount: isWaived ? '₹0 (Waived)' : '₹99',
+          numericAmount: isWaived ? 0 : 99,
+          originalFee: 99,
+          paymentId: getRealPaymentId(r, false, isWaived),
+          orderId: getRealOrderId(r, false, isWaived),
+          status: isWaived ? 'WAIVED (Outreach Code)' : 'SUCCESS',
+          isWaived
         });
       }
       if ((r as any).placementPaid || (r as any).placement_paid) {
+        const placementAmt = Number((r as any).placementAmount || 5000);
         list.push({
           id: r.id + '-place',
           date: (r as any).placementPaidAt || r.created_at,
@@ -664,16 +671,20 @@ export default function AdminDashboard() {
           phone: r.phone,
           email: r.email,
           type: 'Placement Fee (Shadow Teacher)',
-          amount: `₹${((r as any).placementAmount || 5000).toLocaleString()}`,
-          paymentId: getRealPaymentId(r, true),
-          orderId: getRealOrderId(r, true),
-          status: 'Success'
+          amount: `₹${placementAmt.toLocaleString()}`,
+          numericAmount: placementAmt,
+          originalFee: placementAmt,
+          paymentId: getRealPaymentId(r, true, false),
+          orderId: getRealOrderId(r, true, false),
+          status: 'SUCCESS',
+          isWaived: false
         });
       }
     });
 
     db.parent_tutor_requests.forEach(r => {
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
+        const isWaived = isRecordWaived(r);
         list.push({
           id: r.id + '-cons',
           date: r.created_at,
@@ -683,13 +694,17 @@ export default function AdminDashboard() {
           phone: r.phone,
           email: r.email,
           type: 'Consultation Fee (Home Tutor)',
-          amount: '₹99',
-          paymentId: getRealPaymentId(r, false),
-          orderId: getRealOrderId(r, false),
-          status: 'Success'
+          amount: isWaived ? '₹0 (Waived)' : '₹99',
+          numericAmount: isWaived ? 0 : 99,
+          originalFee: 99,
+          paymentId: getRealPaymentId(r, false, isWaived),
+          orderId: getRealOrderId(r, false, isWaived),
+          status: isWaived ? 'WAIVED (Outreach Code)' : 'SUCCESS',
+          isWaived
         });
       }
       if ((r as any).placementPaid || (r as any).placement_paid) {
+        const placementAmt = Number((r as any).placementAmount || 3000);
         list.push({
           id: r.id + '-place',
           date: (r as any).placementPaidAt || r.created_at,
@@ -699,10 +714,13 @@ export default function AdminDashboard() {
           phone: r.phone,
           email: r.email,
           type: 'Placement Fee (Home Tutor)',
-          amount: `₹${((r as any).placementAmount || 3000).toLocaleString()}`,
-          paymentId: getRealPaymentId(r, true),
-          orderId: getRealOrderId(r, true),
-          status: 'Success'
+          amount: `₹${placementAmt.toLocaleString()}`,
+          numericAmount: placementAmt,
+          originalFee: placementAmt,
+          paymentId: getRealPaymentId(r, true, false),
+          orderId: getRealOrderId(r, true, false),
+          status: 'SUCCESS',
+          isWaived: false
         });
       }
     });
@@ -1769,85 +1787,145 @@ export default function AdminDashboard() {
           )}
 
           {/* TAB 5: PAYMENTS LEDGER */}
-          {activeTab === 'payments' && (
-            <div className="space-y-6 animate-fade-in-up">
-              <div className="flex justify-between items-center">
-                <h2 className="font-serif text-2xl font-black text-primary">Payments Ledger</h2>
-                <div className="text-xs text-brand-muted font-bold">
-                  Total Revenue: <span className="text-emerald-600 font-extrabold text-sm">₹{paymentsList.length * 99}</span>
-                </div>
-              </div>
+          {activeTab === 'payments' && (() => {
+            const realRevenueTotal = paymentsList
+              .filter(p => !p.isWaived && p.status === 'SUCCESS')
+              .reduce((sum, p) => sum + (p.numericAmount || 0), 0);
 
-              {/* Test Mode warning banner */}
-              {process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.startsWith('rzp_test') && (
-                <div className="p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl flex items-center gap-3 text-xs font-bold text-left shadow-sm">
-                  <AlertCircle size={20} className="text-amber-600 flex-shrink-0 animate-pulse" />
+            const totalWaivedCount = paymentsList.filter(p => p.isWaived).length;
+            const totalWaivedValue = paymentsList.filter(p => p.isWaived).reduce((sum, p) => sum + (p.originalFee || 99), 0);
+            const realPaymentsCount = paymentsList.filter(p => !p.isWaived && p.status === 'SUCCESS').length;
+
+            return (
+              <div className="space-y-6 animate-fade-in-up">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <p className="font-bold text-amber-900 text-sm">TEST MODE — No real payments are being processed</p>
-                    <p className="font-medium text-amber-700 text-xs mt-0.5">
-                      Using Razorpay credentials in Sandbox environment. Card details, payment receipts, and signatures are validated for development and testing.
+                    <h2 className="font-serif text-2xl font-black text-primary">Payments Ledger</h2>
+                    <p className="text-xs text-brand-muted mt-0.5">Real-time ledger of Razorpay collections and outreach waivers.</p>
+                  </div>
+                </div>
+
+                {/* 3 STATS SUMMARY CARDS */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5 shadow-sm text-left relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-extrabold text-emerald-800 uppercase tracking-wider">Real Revenue Collected</span>
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    </div>
+                    <p className="text-3xl font-black text-emerald-950 mt-2">₹{realRevenueTotal.toLocaleString()}</p>
+                    <p className="text-[11px] text-emerald-800 font-bold mt-1">
+                      {realPaymentsCount} Successful Razorpay {realPaymentsCount === 1 ? 'Payment' : 'Payments'}
+                    </p>
+                  </div>
+
+                  <div className="bg-purple-50 border-2 border-purple-200 rounded-2xl p-5 shadow-sm text-left relative overflow-hidden">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-extrabold text-purple-800 uppercase tracking-wider">Total Waived (Outreach)</span>
+                      <Sparkles size={16} className="text-purple-600" />
+                    </div>
+                    <p className="text-3xl font-black text-purple-950 mt-2">{totalWaivedCount} <span className="text-sm font-semibold text-purple-800">Records</span></p>
+                    <p className="text-[11px] text-purple-800 font-bold mt-1">
+                      ₹{totalWaivedValue.toLocaleString()} Value Waived (Outreach Code `SHADOW100`)
+                    </p>
+                  </div>
+
+                  <div className="bg-brand-light/60 border border-brand-border rounded-2xl p-5 shadow-sm text-left">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-extrabold text-brand-muted uppercase tracking-wider">Total Ledger Activity</span>
+                    </div>
+                    <p className="text-3xl font-black text-primary mt-2">{paymentsList.length} <span className="text-sm font-semibold text-brand-muted">Entries</span></p>
+                    <p className="text-[11px] text-brand-muted font-bold mt-1">
+                      {realPaymentsCount} Real + {totalWaivedCount} Waived
                     </p>
                   </div>
                 </div>
-              )}
 
-              {/* Payments Table */}
-              <div className="bg-white border border-brand-border rounded-2xl shadow-sm overflow-hidden">
-                {loading ? (
-                  <div className="p-12 text-center text-brand-muted">
-                    <RefreshCw className="animate-spin mx-auto mb-2 text-primary" size={24} />
-                    <span>Loading transactions ledger...</span>
-                  </div>
-                ) : paymentsList.length === 0 ? (
-                  <div className="p-12 text-center text-brand-muted">No successful transactions found.</div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs border-collapse">
-                      <thead>
-                        <tr className="bg-brand-light/60 border-b border-brand-border text-primary font-bold">
-                          <th className="p-4">Transaction Date</th>
-                          <th className="p-4">Registration ID</th>
-                          <th className="p-4">Parent Name</th>
-                          <th className="p-4">Child Name</th>
-                          <th className="p-4">Booking Type</th>
-                          <th className="p-4">Amount</th>
-                          <th className="p-4">Razorpay Payment ID</th>
-                          <th className="p-4">Razorpay Order ID</th>
-                          <th className="p-4 text-center">Status</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-brand-border/40 text-brand-dark font-medium">
-                        {paymentsList.map((p) => (
-                          <tr key={p.id} className="hover:bg-brand-light/20">
-                            <td className="p-4 text-brand-muted">{formatDate(p.date)}</td>
-                            <td className="p-4 font-bold text-secondary">{p.regId}</td>
-                            <td className="p-4">
-                              <p className="font-bold">{p.parentName}</p>
-                              <p className="text-[10px] text-brand-muted">{p.phone} • {p.email}</p>
-                            </td>
-                            <td className="p-4 font-bold">{p.childName}</td>
-                            <td className="p-4">
-                              <span className="px-2 py-0.5 bg-brand-light border border-brand-border rounded-md text-[10px] font-bold text-primary uppercase">
-                                {p.type}
-                              </span>
-                            </td>
-                            <td className="p-4 font-extrabold text-brand-dark">{p.amount}</td>
-                            <td className="p-4 font-mono text-[10px] text-brand-muted">{p.paymentId}</td>
-                            <td className="p-4 font-mono text-[10px] text-brand-muted">{p.orderId}</td>
-                            <td className="p-4 text-center">
-                              <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-bold uppercase flex items-center justify-center gap-1 max-w-[80px] mx-auto">
-                                <CheckCircle size={10} /> {p.status}
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                {/* Test Mode warning banner */}
+                {process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.startsWith('rzp_test') && (
+                  <div className="p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl flex items-center gap-3 text-xs font-bold text-left shadow-sm">
+                    <AlertCircle size={20} className="text-amber-600 flex-shrink-0 animate-pulse" />
+                    <div>
+                      <p className="font-bold text-amber-900 text-sm">TEST MODE — Razorpay Sandbox Credentials Active</p>
+                      <p className="font-medium text-amber-700 text-xs mt-0.5">
+                        Card details, payment receipts, and signatures are validated for development and testing.
+                      </p>
+                    </div>
                   </div>
                 )}
+
+                {/* Payments Table */}
+                <div className="bg-white border border-brand-border rounded-2xl shadow-sm overflow-hidden">
+                  {loading ? (
+                    <div className="p-12 text-center text-brand-muted">
+                      <RefreshCw className="animate-spin mx-auto mb-2 text-primary" size={24} />
+                      <span>Loading transactions ledger...</span>
+                    </div>
+                  ) : paymentsList.length === 0 ? (
+                    <div className="p-12 text-center text-brand-muted">No successful transactions found.</div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="bg-brand-light/60 border-b border-brand-border text-primary font-bold">
+                            <th className="p-4">Transaction Date</th>
+                            <th className="p-4">Registration ID</th>
+                            <th className="p-4">Parent Name</th>
+                            <th className="p-4">Child Name</th>
+                            <th className="p-4">Booking Type</th>
+                            <th className="p-4">Amount</th>
+                            <th className="p-4">Razorpay Payment ID</th>
+                            <th className="p-4">Razorpay Order ID</th>
+                            <th className="p-4 text-center">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-brand-border/40 text-brand-dark font-medium">
+                          {paymentsList.map((p) => (
+                            <tr key={p.id} className={p.isWaived ? 'bg-purple-50/20 hover:bg-purple-50/40' : 'hover:bg-brand-light/20'}>
+                              <td className="p-4 text-brand-muted">{formatDate(p.date)}</td>
+                              <td className="p-4 font-bold text-secondary">{p.regId}</td>
+                              <td className="p-4">
+                                <p className="font-bold">{p.parentName}</p>
+                                <p className="text-[10px] text-brand-muted">{p.phone} • {p.email}</p>
+                              </td>
+                              <td className="p-4 font-bold">{p.childName}</td>
+                              <td className="p-4">
+                                <span className="px-2 py-0.5 bg-brand-light border border-brand-border rounded-md text-[10px] font-bold text-primary uppercase">
+                                  {p.type}
+                                </span>
+                              </td>
+                              <td className="p-4 font-extrabold text-brand-dark">
+                                {p.isWaived ? (
+                                  <span className="text-purple-700 font-extrabold bg-purple-100 px-2 py-0.5 rounded-md border border-purple-200">
+                                    ₹0 (Waived)
+                                  </span>
+                                ) : (
+                                  <span className="text-emerald-700 font-extrabold">
+                                    {p.amount}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="p-4 font-mono text-[10px] text-brand-muted">{p.paymentId}</td>
+                              <td className="p-4 font-mono text-[10px] text-brand-muted">{p.orderId}</td>
+                              <td className="p-4 text-center">
+                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase flex items-center justify-center gap-1.5 w-fit mx-auto ${
+                                  p.isWaived 
+                                    ? 'bg-purple-100 text-purple-900 border border-purple-300 shadow-xs' 
+                                    : 'bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-xs'
+                                }`}>
+                                  {p.isWaived ? <Sparkles size={11} className="text-purple-700 shrink-0" /> : <CheckCircle size={11} className="text-emerald-700 shrink-0" />}
+                                  <span>{p.status}</span>
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* TAB: NOTIFICATIONS LOG */}
           {activeTab === 'notifications' && (
