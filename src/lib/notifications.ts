@@ -49,10 +49,17 @@ export function wrapInEmailTemplate(subject: string, bodyContentHtml: string): s
             <td align="center">
               <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #E6E2EB; box-shadow: 0 4px 12px rgba(59, 42, 107, 0.04);">
                 
-                <!-- HEADER BAR -->
+                <!-- HEADER BAR WITH LOGO -->
                 <tr>
-                  <td align="center" style="background-color: #3B2A6B; padding: 30px; border-bottom: 4px solid #C89B3C;">
-                    <h1 style="color: #ffffff; font-family: Georgia, serif; font-size: 26px; font-weight: 900; margin: 0; letter-spacing: -0.5px;">The Shadow Bridge</h1>
+                  <td align="center" style="background-color: #3B2A6B; padding: 32px 20px; border-bottom: 4px solid #C89B3C; text-align: center;">
+                    <table border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
+                      <tr>
+                        <td align="center" style="padding-bottom: 12px;">
+                          <img src="https://theshadowbridge.com/favicon-192.png" alt="The Shadow Bridge Logo" width="60" height="60" style="display: block; border-radius: 12px; background-color: #ffffff; padding: 4px; border: 1px solid #C89B3C; box-shadow: 0 4px 10px rgba(0,0,0,0.15);" />
+                        </td>
+                      </tr>
+                    </table>
+                    <h1 style="color: #ffffff; font-family: Georgia, serif; font-size: 24px; font-weight: 900; margin: 0; letter-spacing: -0.5px;">The Shadow Bridge</h1>
                     <span style="color: #C89B3C; font-size: 10px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; display: block; margin-top: 6px;">by Pratibha Mishra</span>
                   </td>
                 </tr>
