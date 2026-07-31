@@ -614,13 +614,13 @@ export default function AdminDashboard() {
         ? (r.placementPaymentId || r.placement_payment_id || r.razorpayPaymentId || r.razorpay_payment_id)
         : (r.razorpayPaymentId || r.razorpay_payment_id);
       
-      if (pid && pid !== 'Demo (Simulated)' && !pid.includes('VIP')) return pid;
+      if (pid && (pid.startsWith('pay_') || pid.startsWith('PAY_'))) return pid;
 
       const notesStr = (r.notes || '') + ' ' + (r.message || '');
-      const match = notesStr.match(/Payment ID:\s*([^\s\|]+)/i) || notesStr.match(/(pay_[a-zA-Z0-9]+)/i);
-      if (match && match[1] && !match[1].includes('SHADOW100')) return match[1];
+      const match = notesStr.match(/(pay_[a-zA-Z0-9]+)/i);
+      if (match && match[1]) return match[1];
 
-      return `PAY-CONFIRMED-${(r.registration_id || r.registrationId || r.id || '').slice(-8)}`;
+      return 'N/A (No Razorpay ID)';
     };
 
     const getRealOrderId = (r: any, isPlacement: boolean, isWaived: boolean) => {
@@ -630,18 +630,22 @@ export default function AdminDashboard() {
         ? (r.placementOrderId || r.placement_order_id || r.razorpayOrderId || r.razorpay_order_id)
         : (r.razorpayOrderId || r.razorpay_order_id);
 
-      if (oid && oid !== 'Demo (Simulated)' && !oid.includes('VIP')) return oid;
+      if (oid && (oid.startsWith('order_') || oid.startsWith('ORDER_'))) return oid;
 
       const notesStr = (r.notes || '') + ' ' + (r.message || '');
-      const match = notesStr.match(/Order ID:\s*([^\s\|]+)/i) || notesStr.match(/(order_[a-zA-Z0-9]+)/i);
-      if (match && match[1] && !match[1].includes('SHADOW100')) return match[1];
+      const match = notesStr.match(/(order_[a-zA-Z0-9]+)/i);
+      if (match && match[1]) return match[1];
 
-      return `ORD-CONFIRMED-${(r.registration_id || r.registrationId || r.id || '').slice(-8)}`;
+      return 'N/A (No Order ID)';
     };
 
     db.parent_shadow_requests.forEach(r => {
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
         const isWaived = isRecordWaived(r);
+        const paymentId = getRealPaymentId(r, false, isWaived);
+        const orderId = getRealOrderId(r, false, isWaived);
+        const isRealSuccess = !isWaived && paymentId.startsWith('pay_');
+
         list.push({
           id: r.id + '-cons',
           date: r.created_at,
@@ -651,17 +655,22 @@ export default function AdminDashboard() {
           phone: r.phone,
           email: r.email,
           type: 'Consultation Fee (Shadow Teacher)',
-          amount: isWaived ? '₹0 (Waived)' : '₹99',
-          numericAmount: isWaived ? 0 : 99,
+          amount: isWaived ? '₹0 (Waived)' : (isRealSuccess ? '₹99' : '₹0 (Unverified)'),
+          numericAmount: isRealSuccess ? 99 : 0,
           originalFee: 99,
-          paymentId: getRealPaymentId(r, false, isWaived),
-          orderId: getRealOrderId(r, false, isWaived),
-          status: isWaived ? 'WAIVED (Outreach Code)' : 'SUCCESS',
-          isWaived
+          paymentId,
+          orderId,
+          status: isWaived ? 'WAIVED (Outreach Code)' : (isRealSuccess ? 'SUCCESS' : 'UNVERIFIED (No Razorpay ID)'),
+          isWaived,
+          isRealSuccess
         });
       }
       if ((r as any).placementPaid || (r as any).placement_paid) {
         const placementAmt = Number((r as any).placementAmount || 5000);
+        const paymentId = getRealPaymentId(r, true, false);
+        const orderId = getRealOrderId(r, true, false);
+        const isRealSuccess = paymentId.startsWith('pay_');
+
         list.push({
           id: r.id + '-place',
           date: (r as any).placementPaidAt || r.created_at,
@@ -671,13 +680,14 @@ export default function AdminDashboard() {
           phone: r.phone,
           email: r.email,
           type: 'Placement Fee (Shadow Teacher)',
-          amount: `₹${placementAmt.toLocaleString()}`,
-          numericAmount: placementAmt,
+          amount: isRealSuccess ? `₹${placementAmt.toLocaleString()}` : '₹0 (Unverified)',
+          numericAmount: isRealSuccess ? placementAmt : 0,
           originalFee: placementAmt,
-          paymentId: getRealPaymentId(r, true, false),
-          orderId: getRealOrderId(r, true, false),
-          status: 'SUCCESS',
-          isWaived: false
+          paymentId,
+          orderId,
+          status: isRealSuccess ? 'SUCCESS' : 'UNVERIFIED (No Razorpay ID)',
+          isWaived: false,
+          isRealSuccess
         });
       }
     });
@@ -685,6 +695,10 @@ export default function AdminDashboard() {
     db.parent_tutor_requests.forEach(r => {
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
         const isWaived = isRecordWaived(r);
+        const paymentId = getRealPaymentId(r, false, isWaived);
+        const orderId = getRealOrderId(r, false, isWaived);
+        const isRealSuccess = !isWaived && paymentId.startsWith('pay_');
+
         list.push({
           id: r.id + '-cons',
           date: r.created_at,
@@ -694,17 +708,22 @@ export default function AdminDashboard() {
           phone: r.phone,
           email: r.email,
           type: 'Consultation Fee (Home Tutor)',
-          amount: isWaived ? '₹0 (Waived)' : '₹99',
-          numericAmount: isWaived ? 0 : 99,
+          amount: isWaived ? '₹0 (Waived)' : (isRealSuccess ? '₹99' : '₹0 (Unverified)'),
+          numericAmount: isRealSuccess ? 99 : 0,
           originalFee: 99,
-          paymentId: getRealPaymentId(r, false, isWaived),
-          orderId: getRealOrderId(r, false, isWaived),
-          status: isWaived ? 'WAIVED (Outreach Code)' : 'SUCCESS',
-          isWaived
+          paymentId,
+          orderId,
+          status: isWaived ? 'WAIVED (Outreach Code)' : (isRealSuccess ? 'SUCCESS' : 'UNVERIFIED (No Razorpay ID)'),
+          isWaived,
+          isRealSuccess
         });
       }
       if ((r as any).placementPaid || (r as any).placement_paid) {
         const placementAmt = Number((r as any).placementAmount || 3000);
+        const paymentId = getRealPaymentId(r, true, false);
+        const orderId = getRealOrderId(r, true, false);
+        const isRealSuccess = paymentId.startsWith('pay_');
+
         list.push({
           id: r.id + '-place',
           date: (r as any).placementPaidAt || r.created_at,
@@ -714,13 +733,14 @@ export default function AdminDashboard() {
           phone: r.phone,
           email: r.email,
           type: 'Placement Fee (Home Tutor)',
-          amount: `₹${placementAmt.toLocaleString()}`,
-          numericAmount: placementAmt,
+          amount: isRealSuccess ? `₹${placementAmt.toLocaleString()}` : '₹0 (Unverified)',
+          numericAmount: isRealSuccess ? placementAmt : 0,
           originalFee: placementAmt,
-          paymentId: getRealPaymentId(r, true, false),
-          orderId: getRealOrderId(r, true, false),
-          status: 'SUCCESS',
-          isWaived: false
+          paymentId,
+          orderId,
+          status: isRealSuccess ? 'SUCCESS' : 'UNVERIFIED (No Razorpay ID)',
+          isWaived: false,
+          isRealSuccess
         });
       }
     });
@@ -1910,9 +1930,17 @@ export default function AdminDashboard() {
                                 <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase flex items-center justify-center gap-1.5 w-fit mx-auto ${
                                   p.isWaived 
                                     ? 'bg-purple-100 text-purple-900 border border-purple-300 shadow-xs' 
-                                    : 'bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-xs'
+                                    : p.isRealSuccess
+                                      ? 'bg-emerald-100 text-emerald-900 border border-emerald-300 shadow-xs'
+                                      : 'bg-amber-100 text-amber-900 border border-amber-300 shadow-xs'
                                 }`}>
-                                  {p.isWaived ? <Sparkles size={11} className="text-purple-700 shrink-0" /> : <CheckCircle size={11} className="text-emerald-700 shrink-0" />}
+                                  {p.isWaived ? (
+                                    <Sparkles size={11} className="text-purple-700 shrink-0" />
+                                  ) : p.isRealSuccess ? (
+                                    <CheckCircle size={11} className="text-emerald-700 shrink-0" />
+                                  ) : (
+                                    <AlertCircle size={11} className="text-amber-700 shrink-0" />
+                                  )}
                                   <span>{p.status}</span>
                                 </span>
                               </td>
