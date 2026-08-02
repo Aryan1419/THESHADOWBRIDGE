@@ -60,7 +60,7 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/favicon-512.png",
+        url: "https://theshadowbridge.com/favicon-512.png",
         width: 512,
         height: 512,
         alt: "The Shadow Bridge - Shadow Teachers & Special Education Tutors"
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "The Shadow Bridge | Shadow Teachers & Tutors",
     description: "Connecting families with verified Shadow Teachers & Special Education Tutors in Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune.",
-    images: ["/favicon-512.png"]
+    images: ["https://theshadowbridge.com/favicon-512.png"]
   },
   robots: {
     index: true,
@@ -112,8 +112,18 @@ export default function RootLayout({
         "@id": "https://theshadowbridge.com/#organization",
         "name": "The Shadow Bridge",
         "url": "https://theshadowbridge.com",
-        "logo": "https://theshadowbridge.com/favicon-512.png",
-        "image": "https://theshadowbridge.com/favicon-512.png",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://theshadowbridge.com/favicon-512.png",
+          "width": 512,
+          "height": 512
+        },
+        "image": {
+          "@type": "ImageObject",
+          "url": "https://theshadowbridge.com/favicon-512.png",
+          "width": 512,
+          "height": 512
+        },
         "description": "Connecting families with professionally trained Shadow Teachers and Special Education Home Tutors across Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune.",
         "founder": {
           "@type": "Person",
@@ -145,6 +155,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${inter.variable} scroll-smooth`} suppressHydrationWarning>
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="icon" type="image/png" sizes="512x512" href="/favicon-512.png" />
+        <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+        <link rel="apple-touch-icon" href="/favicon-192.png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
