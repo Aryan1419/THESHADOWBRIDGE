@@ -231,6 +231,25 @@ export default function Navbar() {
                         <ArrowRight size={14} className="text-brand-muted opacity-60" />
                       </Link>
 
+                      {/* Therapies – Home Sessions Link (Delhi NCR) */}
+                      <Link
+                        href="/therapies"
+                        onClick={() => setIsOpen(false)}
+                        className={`flex items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm transition-all border ${
+                          pathname?.startsWith('/therapies')
+                            ? 'bg-purple-50 text-purple-950 border-purple-300'
+                            : 'bg-gradient-to-r from-purple-50/60 to-white text-purple-950 border-purple-200/80 hover:border-purple-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">🧩</span>
+                          <span>Therapies – Home Sessions (Delhi NCR)</span>
+                        </div>
+                        <span className="px-2 py-0.5 bg-purple-700 text-white text-[9px] font-black rounded-full uppercase tracking-wider">
+                          NEW
+                        </span>
+                      </Link>
+
                       {/* Collaboration — Schools Link (NEW Tab for Schools) */}
                       <Link
                         href="/schools"

@@ -28,9 +28,26 @@ function GatedRegistrationContent() {
   const [childGrade, setChildGrade] = useState('');
   const [schoolLocation, setSchoolLocation] = useState('');
   const [homeLocation, setHomeLocation] = useState('');
-  const [hasDiagnosis, setHasDiagnosis] = useState('No');
+  const [hasDiagnosis, setHasDiagnosis] = useState<'Yes' | 'No'>('No');
   const [diagnosis, setDiagnosis] = useState('');
   const [difficulties, setDifficulties] = useState<string[]>([]);
+
+  // Therapy Specific Fields
+  const [therapyType, setTherapyType] = useState('ABA Therapy');
+  const [goals, setGoals] = useState('');
+  const [flatHouse, setFlatHouse] = useState('');
+  const [buildingSociety, setBuildingSociety] = useState('');
+  const [streetSector, setStreetSector] = useState('');
+  const [landmark, setLandmark] = useState('');
+  const [pincode, setPincode] = useState('');
+  const [stateName, setStateName] = useState('Delhi');
+  const [schoolDaycare, setSchoolDaycare] = useState('');
+  const [preferredDays, setPreferredDays] = useState('Mon, Wed, Fri');
+  const [preferredTime, setPreferredTime] = useState('Morning (9 AM - 12 PM)');
+
+  // Tutor Specific Fields
+  const [tutorType, setTutorType] = useState('Academic Tuition/Subjects');
+  const [subjects, setSubjects] = useState<string[]>([]);
   const [additionalNotes, setAdditionalNotes] = useState('');
 
   const [submitting, setSubmitting] = useState(false);
@@ -126,6 +143,12 @@ function GatedRegistrationContent() {
           hasDiagnosis,
           diagnosis: diagnosis.trim(),
           difficulties,
+          therapyType,
+          goals: goals.trim(),
+          preferredDays: preferredDays.trim(),
+          preferredTime: preferredTime.trim(),
+          tutorType,
+          subjects,
           additionalNotes: additionalNotes.trim()
         })
       });
@@ -156,6 +179,7 @@ function GatedRegistrationContent() {
     )
   );
   const isShadow = gatedStatus?.subType === 'shadow';
+  const isTherapy = gatedStatus?.subType === 'therapy' || (gatedStatus?.serviceType || '').toLowerCase().includes('therapy');
 
   return (
     <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full flex-grow">
@@ -341,67 +365,103 @@ function GatedRegistrationContent() {
               </div>
             </div>
 
-            {/* Diagnosis & Support Needs (For Shadow Teacher Path) */}
-            {isShadow && (
+            {/* Therapy Specific Details (Diagnosis, Challenges, Goals & Schedule) */}
+            {isTherapy && (
               <div className="space-y-4 pt-2">
-                <h3 className="font-serif text-lg font-bold text-primary border-b border-brand-border pb-2">
-                  Diagnostic & Special Support Details
+                <h3 className="font-serif text-lg font-bold text-primary border-b border-brand-border pb-2 flex items-center justify-between">
+                  <span>Home Therapy Specific Details</span>
+                  <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-900 border border-purple-200">Delhi NCR Only</span>
                 </h3>
 
-                <div>
-                  <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider mb-2">
-                    Does your child have a formal diagnosis?
-                  </label>
-                  <div className="flex gap-4">
-                    {['Yes', 'No'].map((opt) => (
-                      <label key={opt} className="flex items-center gap-2 text-xs font-bold text-brand-dark cursor-pointer">
-                        <input
-                          type="radio"
-                          name="hasDiagnosis"
-                          value={opt}
-                          checked={hasDiagnosis === opt}
-                          onChange={(e) => setHasDiagnosis(e.target.value)}
-                          className="accent-primary"
-                        />
-                        <span>{opt}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-
-                {hasDiagnosis === 'Yes' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider mb-1.5">
-                      Diagnosis Details
+                      Selected Therapy Type
+                    </label>
+                    <select
+                      value={therapyType}
+                      onChange={(e) => setTherapyType(e.target.value)}
+                      className="w-full px-4 py-3 bg-purple-50/50 border border-purple-200 rounded-xl text-sm font-bold text-purple-950 focus:outline-none focus:ring-2 focus:ring-secondary/30"
+                    >
+                      <option value="ABA Therapy">ABA Therapy (Applied Behavior Analysis)</option>
+                      <option value="Speech Therapy">Speech &amp; Language Therapy</option>
+                      <option value="Occupational Therapy">Occupational Therapy (OT)</option>
+                      <option value="Special Education">Special Education</option>
+                      <option value="Behavior Therapy">Pediatric Behavior Therapy</option>
+                      <option value="Physical Therapy">Physical Therapy (Physiotherapy)</option>
+                      <option value="Play Therapy">Play Therapy</option>
+                      <option value="Counseling & Psychological Support">Counseling &amp; Psychological Support</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider mb-1.5">
+                      Diagnosis / Condition (if any)
                     </label>
                     <input
                       type="text"
                       value={diagnosis}
                       onChange={(e) => setDiagnosis(e.target.value)}
-                      placeholder="e.g. Autism Spectrum (Mild), ADHD, Dyslexia"
+                      placeholder="e.g. Autism Spectrum Disorder, ADHD, Speech Delay, Dyslexia"
                       className="w-full px-4 py-3 bg-brand-light/50 border border-brand-border rounded-xl text-sm font-semibold text-brand-dark focus:outline-none focus:ring-2 focus:ring-primary/30"
                     />
                   </div>
-                )}
+                </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider mb-2">
-                    Primary Areas Needing Support (Select all that apply)
+                  <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider mb-1.5">
+                    Current Challenges Experienced by Child
                   </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                    {['Attention/Focus', 'Social Interaction', 'Speech & Communication', 'Behavioral Guidance', 'Classroom Learning', 'Emotional Regulation'].map((d) => (
-                      <label key={d} className={`p-2.5 rounded-xl border text-xs font-semibold cursor-pointer transition-all ${
-                        difficulties.includes(d) ? 'bg-primary/10 border-primary text-primary font-bold' : 'bg-brand-light/30 border-brand-border text-brand-dark'
-                      }`}>
-                        <input
-                          type="checkbox"
-                          checked={difficulties.includes(d)}
-                          onChange={() => handleDifficultyToggle(d)}
-                          className="hidden"
-                        />
-                        <span>{d}</span>
-                      </label>
-                    ))}
+                  <textarea
+                    rows={2}
+                    value={difficulties.join(', ')}
+                    onChange={(e) => setDifficulties([e.target.value])}
+                    placeholder="e.g. Difficulty in verbal communication, sensory overloads, motor coordination issues"
+                    className="w-full px-4 py-3 bg-brand-light/50 border border-brand-border rounded-xl text-sm font-semibold text-brand-dark focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider mb-1.5">
+                    Key Therapy Goals for Your Child
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={goals}
+                    onChange={(e) => setGoals(e.target.value)}
+                    placeholder="e.g. Wants child to express 2-word sentences, improve handwriting, reduce meltdowns"
+                    className="w-full px-4 py-3 bg-brand-light/50 border border-brand-border rounded-xl text-sm font-semibold text-brand-dark focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider mb-1.5">
+                      Preferred Therapy Days
+                    </label>
+                    <input
+                      type="text"
+                      value={preferredDays}
+                      onChange={(e) => setPreferredDays(e.target.value)}
+                      placeholder="e.g. Mon, Wed, Fri or Weekends"
+                      className="w-full px-4 py-3 bg-brand-light/50 border border-brand-border rounded-xl text-sm font-semibold text-brand-dark focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-brand-dark uppercase tracking-wider mb-1.5">
+                      Preferred Time Slot
+                    </label>
+                    <select
+                      value={preferredTime}
+                      onChange={(e) => setPreferredTime(e.target.value)}
+                      className="w-full px-4 py-3 bg-brand-light/50 border border-brand-border rounded-xl text-sm font-semibold text-brand-dark focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    >
+                      <option value="Morning (9 AM - 12 PM)">Morning (9 AM - 12 PM)</option>
+                      <option value="Afternoon (12 PM - 4 PM)">Afternoon (12 PM - 4 PM)</option>
+                      <option value="Evening (4 PM - 7 PM)">Evening (4 PM - 7 PM)</option>
+                      <option value="Flexible Schedule">Flexible Schedule</option>
+                    </select>
                   </div>
                 </div>
               </div>

@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Calendar, CreditCard, ShieldCheck, CheckCircle, ArrowRight, User, Phone, Mail, MapPin, Smile, MessageCircle, ShieldAlert, Info, Ticket } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -21,7 +21,8 @@ const loadRazorpayScript = () => {
   });
 };
 
-export default function BookConsultation() {
+function BookConsultationForm() {
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [step, setStep] = useState(1); // 1: Details, 2: Payment, 3: Success
   const [loading, setLoading] = useState(false);
@@ -34,9 +35,36 @@ export default function BookConsultation() {
     otherLocation: '',
     childAge: '',
     requirement: '',
+    therapyType: '',
     message: '',
     promoCode: ''
   });
+
+  useEffect(() => {
+    const serviceParam = searchParams.get('service');
+    const typeParam = searchParams.get('type');
+    if (serviceParam === 'therapy' || (typeParam && typeParam !== '')) {
+      const therapyMap: Record<string, string> = {
+        'aba-therapy': 'ABA Therapy',
+        'speech-therapy': 'Speech Therapy',
+        'occupational-therapy': 'Occupational Therapy',
+        'special-education': 'Special Education',
+        'behavior-therapy': 'Behavior Therapy',
+        'physical-therapy': 'Physical Therapy',
+        'play-therapy': 'Play Therapy',
+        'counseling-psychological-support': 'Counseling & Psychological Support'
+      };
+
+      const matchedName = typeParam ? (therapyMap[typeParam] || 'ABA Therapy') : 'ABA Therapy';
+
+      setFormData(prev => ({
+        ...prev,
+        requirement: 'Home Therapy Sessions (Delhi NCR Only)',
+        therapyType: matchedName,
+        city: 'Delhi NCR'
+      }));
+    }
+  }, [searchParams]);
 
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [receiptCode, setReceiptCode] = useState('');
@@ -414,15 +442,55 @@ export default function BookConsultation() {
                           name="requirement"
                           required
                           value={formData.requirement}
-                          onChange={handleInputChange}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            if (val.includes('Therapy')) {
+                              setFormData(prev => ({ ...prev, requirement: val, city: 'Delhi NCR' }));
+                            } else {
+                              setFormData(prev => ({ ...prev, requirement: val }));
+                            }
+                          }}
                           className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
                         >
                           <option value="">Select Option</option>
                           <option value="Classroom Shadow Teacher">Classroom Shadow Teacher</option>
                           <option value="Academic Home Tutor">Academic Home Tutor</option>
+                          <option value="Home Therapy Sessions (Delhi NCR Only)">Home Therapy Sessions (Delhi NCR Only)</option>
                         </select>
                       </div>
                     </div>
+
+                    {/* THERAPY TYPE SELECTOR (Appears when Therapy is selected) */}
+                    {formData.requirement.includes('Therapy') && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -5 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex flex-col gap-1.5 p-4 bg-purple-50/60 border border-purple-200 rounded-2xl"
+                      >
+                        <label className="text-xs font-bold text-purple-950 uppercase tracking-wider flex items-center gap-1">
+                          <Sparkles size={14} className="text-secondary" /> Select Specific Therapy Type <span className="text-rose-500">*</span>
+                        </label>
+                        <select
+                          name="therapyType"
+                          required
+                          value={formData.therapyType || 'ABA Therapy'}
+                          onChange={(e) => setFormData(prev => ({ ...prev, therapyType: e.target.value }))}
+                          className="p-3 border border-purple-200 bg-white rounded-xl text-sm font-bold text-purple-950 focus:outline-none focus:ring-2 focus:ring-secondary/40"
+                        >
+                          <option value="ABA Therapy">ABA Therapy (Applied Behavior Analysis)</option>
+                          <option value="Speech Therapy">Speech &amp; Language Therapy</option>
+                          <option value="Occupational Therapy">Occupational Therapy (OT)</option>
+                          <option value="Special Education">Special Education</option>
+                          <option value="Behavior Therapy">Pediatric Behavior Therapy</option>
+                          <option value="Physical Therapy">Physical Therapy (Physiotherapy)</option>
+                          <option value="Play Therapy">Play Therapy</option>
+                          <option value="Counseling & Psychological Support">Counseling &amp; Psychological Support</option>
+                        </select>
+                        <p className="text-[11px] text-purple-800 font-semibold mt-1">
+                          🔒 Note: Home Therapy Sessions are available exclusively in <strong>Delhi NCR</strong>. City has been set to Delhi NCR.
+                        </p>
+                      </motion.div>
+                    )}
 
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs font-bold text-brand-dark uppercase tracking-wider flex items-center gap-1">
@@ -616,5 +684,13 @@ export default function BookConsultation() {
 
       <Footer />
     </div>
+  );
+}
+
+export default function BookConsultation() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-brand-light/30 flex items-center justify-center p-8 font-bold text-primary">Loading...</div>}>
+      <BookConsultationForm />
+    </Suspense>
   );
 }

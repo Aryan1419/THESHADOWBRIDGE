@@ -185,6 +185,48 @@ export interface ParentTutorRequestRecord {
   terms_accepted_at?: string;
 }
 
+export interface ParentTherapyRequestRecord {
+  id: string;
+  parentName: string;
+  relationship?: string;
+  phone: string;
+  email: string;
+  childName: string;
+  childDob?: string;
+  childAge?: string;
+  childGender?: string;
+  hasDiagnosis?: 'Yes' | 'No';
+  diagnosis?: string;
+  challenges?: string;
+  goals?: string;
+  therapyType: string; // 1 of 8 therapy types
+  city: string; // Restricted to Delhi NCR
+  address?: string;
+  flatHouse?: string;
+  buildingSociety?: string;
+  streetSector?: string;
+  landmark?: string;
+  state?: string;
+  pincode?: string;
+  schoolDaycare?: string;
+  preferredDays?: string;
+  preferredTime?: string;
+  status: 'Consultation Booked' | 'Consultation Scheduled' | 'Consultation Completed' | 'Registration Form Submitted' | 'Matching in Progress' | 'Therapist Assigned' | 'Home Sessions Begin' | 'Closed';
+  consultation_paid: boolean;
+  consultation_amount?: number;
+  placement_paid?: boolean;
+  placement_amount?: number;
+  razorpay_payment_id?: string;
+  razorpay_order_id?: string;
+  placement_payment_id?: string;
+  placement_order_id?: string;
+  therapist_assigned?: string;
+  registration_id: string; // SB-2026-XXXX
+  created_at: string;
+  notes?: string;
+  terms_accepted_at?: string;
+}
+
 export interface SchoolRequestRecord {
   id: string;
   registration_id: string; // SCH-2026-XXXX
@@ -231,7 +273,7 @@ export interface ReviewRecord {
   rating: number;
   review_text: string;
   city: string;
-  service_type: 'Shadow Teacher' | 'Home Tutor';
+  service_type: 'Shadow Teacher' | 'Home Tutor' | 'Therapy Sessions';
   status: 'pending' | 'approved' | 'rejected';
   submitted_at: string;
   approved_at?: string;
@@ -257,6 +299,7 @@ export interface DatabaseSchema {
   shadow_teachers: ShadowTeacherRecord[];
   parent_shadow_requests: ParentShadowRequestRecord[];
   parent_tutor_requests: ParentTutorRequestRecord[];
+  parent_therapy_requests: ParentTherapyRequestRecord[];
   school_requests: SchoolRequestRecord[];
   admin_users: AdminUserRecord[];
   notifications: any[];
@@ -272,6 +315,7 @@ const DEFAULT_DB: DatabaseSchema = {
   notifications: [],
   reviews: [],
   school_requests: [],
+  parent_therapy_requests: [],
 
   // Seed default admin and mock records
   admin_users: [

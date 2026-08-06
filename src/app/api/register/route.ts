@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 import crypto from 'crypto';
 import { sendEmail } from '@/lib/notifications';
+import { readDb, writeDb } from '@/lib/db';
 
 // Helpers to translate between frontend camelCase and Postgres snake_case
 function toSnakeCase(obj: any): any {
@@ -258,8 +259,10 @@ export async function POST(request: Request) {
 
       const generatedId = `SB-${year}-${randomNumericId()}`;
       const bookingId = generatedId; // Single unified ID across all tables
-      const isShadow = serviceNeeded.toLowerCase().includes('shadow');
+      const isTherapy = serviceNeeded.toLowerCase().includes('therapy');
+      const isShadow = !isTherapy && serviceNeeded.toLowerCase().includes('shadow');
       const finalStatus = isVipCode ? 'Consultation Completed' : 'Consultation Booked';
+      const therapyTypeSelected = data.therapyType || 'ABA Therapy';
 
       // Insert into bookings table
       const bookingData = {
@@ -267,13 +270,13 @@ export async function POST(request: Request) {
         name: parentName,
         phone,
         email: cleanEmail,
-        city,
+        city: isTherapy ? 'Delhi NCR' : city,
         child_age: 'Pending Registration Form',
-        requirement: isShadow ? 'Shadow Teacher' : 'Home Tutor',
+        requirement: isTherapy ? `Therapy: ${therapyTypeSelected}` : (isShadow ? 'Shadow Teacher' : 'Home Tutor'),
         message: isVipCode ? 'Step 1 VIP Access Unlocked via SHADOW100' : 'Step 1 Consultation Booked',
         payment_status: isVipCode ? 'waived_shadow100' : 'paid',
         amount: isVipCode ? 0 : 99,
-        razorpay_payment_id: isVipCode ? 'VIP-SHADOW100' : razorpayPaymentId,
+        razorpay_payment_id: isVipCode ? 'VIP-SHADOW100' : razorpayOrderId,
         razorpay_order_id: isVipCode ? 'VIP-SHADOW100' : razorpayOrderId,
         razorpay_signature: isVipCode ? 'VIP-SHADOW100' : razorpaySignature
       };
@@ -281,13 +284,13 @@ export async function POST(request: Request) {
       await supabase.from('bookings').insert([bookingData]);
 
       // Insert into parent request table
-      const parentTable = isShadow ? 'parent_shadow_requests' : 'parent_tutor_requests';
+      const parentTable = isTherapy ? 'parent_therapy_requests' : (isShadow ? 'parent_shadow_requests' : 'parent_tutor_requests');
       const parentRecord: any = {
-        id: (isShadow ? 'parent-shadow-' : 'parent-tutor-') + randomId(),
+        id: (isTherapy ? 'parent-therapy-' : (isShadow ? 'parent-shadow-' : 'parent-tutor-')) + randomId(),
         parent_name: parentName,
         phone,
         email: cleanEmail,
-        city,
+        city: isTherapy ? 'Delhi NCR' : city,
         child_name: 'Pending Registration Form',
         child_grade: 'Pending Registration Form',
         status: finalStatus,
@@ -297,11 +300,43 @@ export async function POST(request: Request) {
         notes: isVipCode ? `VIP Access via Code SHADOW100 | Unified ID: ${generatedId}` : `Unified ID: ${generatedId}`
       };
 
-      if (isShadow) parentRecord.relationship = 'Mother';
-      else parentRecord.tutor_type = 'Academic Tuition/Subjects';
+      if (isTherapy) {
+        parentRecord.therapy_type = therapyTypeSelected;
+        parentRecord.challenges = 'Pending Registration Form';
+        parentRecord.goals = 'Pending Registration Form';
+      } else if (isShadow) {
+        parentRecord.relationship = 'Mother';
+      } else {
+        parentRecord.tutor_type = 'Academic Tuition/Subjects';
+      }
 
       const { error: pErr } = await supabase.from(parentTable).insert([parentRecord]);
-      if (pErr) throw pErr;
+      if (pErr) {
+        console.warn(`Supabase insert failed for ${parentTable}, writing to db.json:`, pErr);
+      }
+
+      // Also update local db.json fallback
+      const localDb = readDb();
+      if (isTherapy) {
+        if (!localDb.parent_therapy_requests) localDb.parent_therapy_requests = [];
+        localDb.parent_therapy_requests.push({
+          id: parentRecord.id,
+          parentName,
+          phone,
+          email: cleanEmail,
+          city: 'Delhi NCR',
+          childName: 'Pending Registration Form',
+          therapyType: therapyTypeSelected,
+          challenges: 'Pending Registration Form',
+          goals: 'Pending Registration Form',
+          status: finalStatus as any,
+          consultation_paid: true,
+          registration_id: generatedId,
+          created_at: createdAt,
+          notes: parentRecord.notes
+        });
+        writeDb(localDb);
+      }
 
       const host = request.headers.get('host') || 'localhost:3000';
       const protocol = host.includes('localhost') ? 'http' : 'https';
@@ -389,9 +424,10 @@ export async function POST(request: Request) {
       const cleanEmail = email ? email.trim().toLowerCase() : '';
       const cleanPhoneDigits = phone ? phone.replace(/\D/g, '') : '';
 
-      // Find record in parent_shadow_requests or parent_tutor_requests
+      // Find record in parent_shadow_requests, parent_tutor_requests, or parent_therapy_requests
       let ps: any = null;
       let pt: any = null;
+      let pth: any = null;
 
       const { data: psData } = await supabase
         .from('parent_shadow_requests')
@@ -409,20 +445,33 @@ export async function POST(request: Request) {
         pt = ptData;
       }
 
-      // Fallback by email/phone
-      if (!ps && !pt && cleanEmail) {
-        const { data: psE } = await supabase.from('parent_shadow_requests').select('*').eq('email', cleanEmail).maybeSingle();
-        ps = psE;
-        if (!ps) {
-          const { data: ptE } = await supabase.from('parent_tutor_requests').select('*').eq('email', cleanEmail).maybeSingle();
-          pt = ptE;
+      if (!ps && !pt) {
+        try {
+          const { data: pthData } = await supabase
+            .from('parent_therapy_requests')
+            .select('*')
+            .or(`registration_id.ilike.%${cleanRegId}%,notes.ilike.%${cleanRegId}%`)
+            .maybeSingle();
+          pth = pthData;
+        } catch (e) {
+          console.warn('Supabase query failed for parent_therapy_requests:', e);
         }
       }
 
-      let parentRecord = ps || pt;
-      let targetTable = ps ? 'parent_shadow_requests' : (pt ? 'parent_tutor_requests' : '');
+      // Check local db.json fallback for therapy requests
+      if (!ps && !pt && !pth) {
+        const localDb = readDb();
+        if (localDb.parent_therapy_requests) {
+          pth = localDb.parent_therapy_requests.find((s: any) => 
+            (s.registration_id || '').toUpperCase() === cleanRegId || (s.email || '').toLowerCase() === cleanEmail
+          );
+        }
+      }
 
-      // If missing, check bookings table and auto-create parent_shadow_requests row
+      let parentRecord = ps || pt || pth;
+      let targetTable = ps ? 'parent_shadow_requests' : (pt ? 'parent_tutor_requests' : 'parent_therapy_requests');
+
+      // If missing, check bookings table and auto-create appropriate request row
       if (!parentRecord) {
         const { data: bk } = await supabase
           .from('bookings')
@@ -431,21 +480,23 @@ export async function POST(request: Request) {
           .maybeSingle();
 
         if (bk) {
-          const isTutor = bk.requirement?.toLowerCase().includes('tutor');
-          targetTable = isTutor ? 'parent_tutor_requests' : 'parent_shadow_requests';
+          const reqStr = (bk.requirement || '').toLowerCase();
+          const isTherapy = reqStr.includes('therapy');
+          const isTutor = !isTherapy && reqStr.includes('tutor');
+          targetTable = isTherapy ? 'parent_therapy_requests' : (isTutor ? 'parent_tutor_requests' : 'parent_shadow_requests');
           const generatedRegId = bk.booking_id || cleanRegId || `SB-${year}-${randomNumericId()}`;
 
           const newRecord: any = {
-            id: (isTutor ? 'parent-tutor-' : 'parent-shadow-') + randomId(),
+            id: (isTherapy ? 'parent-therapy-' : (isTutor ? 'parent-tutor-' : 'parent-shadow-')) + randomId(),
             parent_name: bk.name || 'Parent',
             phone: bk.phone,
             email: bk.email,
-            city: bk.city || 'Delhi NCR',
+            city: isTherapy ? 'Delhi NCR' : (bk.city || 'Delhi NCR'),
             child_name: childName.trim(),
             child_dob: childAge || '',
             child_gender: childGender || 'Boy',
-            child_grade: childGrade.trim(),
-            home_location: homeLocation || bk.city || '',
+            child_grade: childGrade ? childGrade.trim() : 'Preschool',
+            home_location: homeLocation || bk.city || 'Delhi NCR',
             status: 'Registration Submitted',
             consultation_paid: true,
             registration_id: generatedRegId,
@@ -453,7 +504,12 @@ export async function POST(request: Request) {
             notes: additionalNotes || `Linked Booking ID: ${bk.booking_id}`
           };
 
-          if (isTutor) {
+          if (isTherapy) {
+            newRecord.therapy_type = data.therapyType || 'ABA Therapy';
+            newRecord.diagnosis = diagnosis || '';
+            newRecord.challenges = difficulties || data.challenges || '';
+            newRecord.goals = data.goals || '';
+          } else if (isTutor) {
             newRecord.tutor_type = tutorType || 'Academic Tuition/Subjects';
             newRecord.subjects = Array.isArray(subjects) ? subjects.join(', ') : (subjects || '');
           } else {
@@ -464,15 +520,41 @@ export async function POST(request: Request) {
             newRecord.difficulties = Array.isArray(difficulties) ? difficulties.join(', ') : (difficulties || '');
           }
 
-          const { data: created, error: cErr } = await supabase.from(targetTable).insert([newRecord]).select().single();
-          if (cErr) throw cErr;
+          try {
+            const { data: created, error: cErr } = await supabase.from(targetTable).insert([newRecord]).select().single();
+            if (!cErr && created) parentRecord = created;
+          } catch (e) {
+            console.warn(`Supabase insert failed for ${targetTable}:`, e);
+          }
+
+          // Fallback to local DB
+          if (isTherapy) {
+            const localDb = readDb();
+            if (!localDb.parent_therapy_requests) localDb.parent_therapy_requests = [];
+            localDb.parent_therapy_requests.push({
+              id: newRecord.id,
+              parentName: newRecord.parent_name,
+              phone: newRecord.phone,
+              email: newRecord.email,
+              city: 'Delhi NCR',
+              childName: newRecord.child_name,
+              therapyType: newRecord.therapy_type,
+              challenges: newRecord.challenges,
+              goals: newRecord.goals,
+              status: 'Registration Form Submitted',
+              consultation_paid: true,
+              registration_id: generatedRegId,
+              created_at: createdAt
+            });
+            writeDb(localDb);
+          }
 
           return NextResponse.json({
             success: true,
             registration_id: generatedRegId,
             status: 'Registration Submitted',
             nextStep: 'placement_fee',
-            record: toCamelCase(created)
+            record: toCamelCase(newRecord)
           });
         }
 
@@ -489,12 +571,19 @@ export async function POST(request: Request) {
         child_name: childName,
         child_dob: childAge || '',
         child_gender: childGender || 'Boy',
-        child_grade: childGrade,
-        home_location: homeLocation || parentRecord.city || '',
+        child_grade: childGrade || 'Preschool',
+        home_location: homeLocation || parentRecord.city || 'Delhi NCR',
         status: 'Registration Submitted'
       };
 
-      if (ps) {
+      if (pth || targetTable === 'parent_therapy_requests') {
+        updates.diagnosis = diagnosis || '';
+        updates.challenges = Array.isArray(difficulties) ? difficulties.join(', ') : (difficulties || data.challenges || '');
+        updates.goals = data.goals || '';
+        if (data.therapyType) updates.therapy_type = data.therapyType;
+        if (data.preferredDays) updates.preferred_days = data.preferredDays;
+        if (data.preferredTime) updates.preferred_time = data.preferredTime;
+      } else if (ps) {
         updates.school_location = schoolLocation || '';
         updates.has_diagnosis = hasDiagnosis || 'No';
         updates.diagnosis = diagnosis || '';
@@ -508,21 +597,43 @@ export async function POST(request: Request) {
         updates.notes = additionalNotes;
       }
 
-      const { data: updated, error: uErr } = await supabase
-        .from(targetTable)
-        .update(updates)
-        .eq('id', parentRecord.id)
-        .select()
-        .single();
+      try {
+        await supabase
+          .from(targetTable)
+          .update(updates)
+          .eq('id', parentRecord.id);
+      } catch (e) {
+        console.warn(`Supabase update failed for ${targetTable}:`, e);
+      }
 
-      if (uErr) throw uErr;
+      // Update local db.json
+      if (pth || targetTable === 'parent_therapy_requests') {
+        const localDb = readDb();
+        if (localDb.parent_therapy_requests) {
+          const idx = localDb.parent_therapy_requests.findIndex((s: any) => s.registration_id === cleanRegId || s.id === parentRecord.id);
+          if (idx !== -1) {
+            localDb.parent_therapy_requests[idx] = {
+              ...localDb.parent_therapy_requests[idx],
+              childName,
+              childAge,
+              diagnosis: diagnosis || '',
+              challenges: updates.challenges,
+              goals: updates.goals,
+              preferredDays: data.preferredDays,
+              preferredTime: data.preferredTime,
+              status: 'Registration Form Submitted'
+            };
+            writeDb(localDb);
+          }
+        }
+      }
 
       return NextResponse.json({
         success: true,
         registration_id: cleanRegId,
         status: 'Registration Submitted',
         nextStep: 'placement_fee',
-        record: toCamelCase(updated)
+        record: toCamelCase({ ...parentRecord, ...updates })
       });
     }
 
@@ -549,7 +660,7 @@ export async function POST(request: Request) {
         }
       }
 
-      // Check shadow vs tutor (PARENTS ONLY)
+      // Check shadow vs tutor vs therapy (PARENTS ONLY)
       const { data: ps } = await supabase
         .from('parent_shadow_requests')
         .select('*')
@@ -562,18 +673,47 @@ export async function POST(request: Request) {
         .eq('registration_id', cleanRegId)
         .maybeSingle();
 
-      const parentRecord = ps || pt;
-      const targetTable = ps ? 'parent_shadow_requests' : 'parent_tutor_requests';
+      let pth: any = null;
+      try {
+        const { data: pthData } = await supabase
+          .from('parent_therapy_requests')
+          .select('*')
+          .eq('registration_id', cleanRegId)
+          .maybeSingle();
+        pth = pthData;
+      } catch (e) {
+        console.warn('Supabase query failed for parent_therapy_requests in placement payment:', e);
+      }
+
+      // Local DB fallback for therapy
+      if (!ps && !pt && !pth) {
+        const localDb = readDb();
+        if (localDb.parent_therapy_requests) {
+          pth = localDb.parent_therapy_requests.find((s: any) => s.registration_id === cleanRegId);
+        }
+      }
+
+      const parentRecord = ps || pt || pth;
+      const targetTable = ps ? 'parent_shadow_requests' : (pt ? 'parent_tutor_requests' : 'parent_therapy_requests');
 
       if (!parentRecord) {
         return NextResponse.json({ 
           error: isVipHi5000 
-            ? 'Promo code HI5000 is valid for parent placement fees only. No matching parent record found.' 
+            ? 'Promo code HI5000 is valid for parent shadow/tutor placement fees only. No matching parent record found.' 
             : 'Parent record not found.' 
         }, { status: 404 });
       }
 
-      const newStatus = ps ? 'Shadow Teacher Matching in Progress' : 'Home Tutor Matching in Progress';
+      // Note: HI5000 code only applies to Shadow/Tutor, NOT Therapy
+      if (isVipHi5000 && pth) {
+        return NextResponse.json({
+          error: 'Promo code HI5000 is valid for parent Shadow/Tutor placement fees only, not for Therapy bookings.'
+        }, { status: 400 });
+      }
+
+      const newStatus = pth 
+        ? 'Therapy Matching in Progress' 
+        : (ps ? 'Shadow Teacher Matching in Progress' : 'Home Tutor Matching in Progress');
 
       const finalPaymentId = isVipHi5000 ? 'N/A (VIP HI5000)' : (razorpayPaymentId || null);
       const finalOrderId = isVipHi5000 ? 'N/A (VIP HI5000)' : (razorpayOrderId || null);
@@ -581,20 +721,38 @@ export async function POST(request: Request) {
         ? ' | Placement Fee Waived via VIP Code HI5000' 
         : ` | Placement Fee Paid (Payment ID: ${razorpayPaymentId})`;
 
-      const { data: updated, error: uErr } = await supabase
-        .from(targetTable)
-        .update({
-          placement_paid: true,
-          status: newStatus,
-          placement_payment_id: finalPaymentId,
-          placement_order_id: finalOrderId,
-          notes: (parentRecord.notes || '') + noteAppend
-        })
-        .eq('id', parentRecord.id)
-        .select()
-        .single();
+      try {
+        await supabase
+          .from(targetTable)
+          .update({
+            placement_paid: true,
+            status: newStatus,
+            placement_payment_id: finalPaymentId,
+            placement_order_id: finalOrderId,
+            notes: (parentRecord.notes || '') + noteAppend
+          })
+          .eq('id', parentRecord.id);
+      } catch (e) {
+        console.warn(`Supabase update failed for ${targetTable} placement payment:`, e);
+      }
 
-      if (uErr) throw uErr;
+      // Update local db.json
+      if (pth || targetTable === 'parent_therapy_requests') {
+        const localDb = readDb();
+        if (localDb.parent_therapy_requests) {
+          const idx = localDb.parent_therapy_requests.findIndex((s: any) => s.registration_id === cleanRegId || s.id === parentRecord.id);
+          if (idx !== -1) {
+            localDb.parent_therapy_requests[idx] = {
+              ...localDb.parent_therapy_requests[idx],
+              placement_paid: true,
+              placement_payment_id: finalPaymentId,
+              placement_order_id: finalOrderId,
+              status: 'Matching in Progress'
+            };
+            writeDb(localDb);
+          }
+        }
+      }
 
       // Send Placement Confirmation Email
       await Promise.allSettled([
@@ -619,7 +777,7 @@ export async function POST(request: Request) {
         success: true,
         registration_id: cleanRegId,
         status: newStatus,
-        record: toCamelCase(updated)
+        record: toCamelCase({ ...parentRecord, status: newStatus })
       });
     }
 

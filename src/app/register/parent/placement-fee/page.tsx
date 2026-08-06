@@ -103,7 +103,8 @@ function PlacementFeeContent() {
   }, [searchParams]);
 
   const isShadow = gatedStatus?.subType === 'shadow';
-  const feeAmount = isShadow ? 5000 : 3000;
+  const isTherapy = gatedStatus?.subType === 'therapy' || gatedStatus?.serviceType?.toLowerCase().includes('therapy');
+  const feeAmount = (isShadow || isTherapy) ? 5000 : 3000;
   const isRegistrationSubmitted = gatedStatus?.isRegistrationSubmitted;
   const record = gatedStatus?.record;
 

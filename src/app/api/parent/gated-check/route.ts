@@ -64,7 +64,41 @@ export async function GET(request: Request) {
       }
     }
 
-    // 3. Search in bookings if not found
+    // 3. Search in parent_therapy_requests if not found
+    if (!record && cleanRegId) {
+      try {
+        const { data: pth } = await supabase
+          .from('parent_therapy_requests')
+          .select('*')
+          .ilike('registration_id', `%${cleanRegId}%`)
+          .maybeSingle();
+        if (pth) {
+          record = pth;
+          serviceType = 'Home Therapy Sessions';
+          subType = 'therapy';
+        }
+      } catch (e) {
+        console.warn('Supabase query failed for parent_therapy_requests in gated-check:', e);
+      }
+    }
+
+    // 4. Local DB fallback for therapy if not found in Supabase
+    if (!record && cleanRegId) {
+      const { readDb } = await import('@/lib/db');
+      const localDb = readDb();
+      if (localDb.parent_therapy_requests) {
+        const pth = localDb.parent_therapy_requests.find((s: any) => 
+          (s.registration_id || '').toUpperCase() === cleanRegId
+        );
+        if (pth) {
+          record = pth;
+          serviceType = 'Home Therapy Sessions';
+          subType = 'therapy';
+        }
+      }
+    }
+
+    // 5. Search in bookings if not found
     if (!record && cleanRegId) {
       const { data: bk } = await supabase
         .from('bookings')
@@ -73,8 +107,11 @@ export async function GET(request: Request) {
         .maybeSingle();
       if (bk) {
         record = bk;
-        serviceType = bk.requirement?.toLowerCase().includes('tutor') ? 'Home Tutor' : 'Shadow Teacher';
-        subType = bk.requirement?.toLowerCase().includes('tutor') ? 'tutor' : 'shadow';
+        const reqStr = (bk.requirement || '').toLowerCase();
+        const isTherapy = reqStr.includes('therapy');
+        const isTutor = !isTherapy && reqStr.includes('tutor');
+        serviceType = isTherapy ? 'Home Therapy Sessions' : (isTutor ? 'Home Tutor' : 'Shadow Teacher');
+        subType = isTherapy ? 'therapy' : (isTutor ? 'tutor' : 'shadow');
       }
     }
 

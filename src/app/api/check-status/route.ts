@@ -166,6 +166,56 @@ export async function POST(request: Request) {
       });
     }
 
+    // 4B. Check Parent Therapy Requests table
+    let parentTherapy: any = null;
+    try {
+      const { data: pth } = await supabase
+        .from('parent_therapy_requests')
+        .select('*')
+        .or(`registration_id.ilike.%${cleanRegId}%,notes.ilike.%${cleanRegId}%`)
+        .maybeSingle();
+      parentTherapy = pth;
+    } catch (e) {
+      console.warn('Supabase query failed for parent_therapy_requests in check-status:', e);
+    }
+
+    if (!parentTherapy) {
+      const { readDb } = await import('@/lib/db');
+      const localDb = readDb();
+      if (localDb.parent_therapy_requests) {
+        parentTherapy = localDb.parent_therapy_requests.find((s: any) => 
+          (s.registration_id || '').toUpperCase() === cleanRegId
+        );
+      }
+    }
+
+    if (parentTherapy && isContactMatch(parentTherapy.email || parentTherapy.email_address, parentTherapy.phone)) {
+      const isPlacementPaid = Boolean(
+        parentTherapy.placement_paid === true ||
+        Boolean(parentTherapy.placement_payment_id) ||
+        (parentTherapy.notes || '').includes('Placement Fee Paid')
+      );
+
+      const isRegistrationSubmitted = Boolean(
+        (parentTherapy.childName && parentTherapy.childName !== 'Pending Registration Form') ||
+        (parentTherapy.child_name && parentTherapy.child_name !== 'Pending Registration Form') ||
+        isPlacementPaid
+      );
+
+      return NextResponse.json({
+        success: true,
+        role: 'parent',
+        subType: 'therapy',
+        isPlacementPaid,
+        isRegistrationSubmitted,
+        record: toCamelCase({
+          ...parentTherapy,
+          placement_paid: isPlacementPaid,
+          placementPaid: isPlacementPaid
+        })
+      });
+    }
+
     // 5. Check School Requests table (by registration_id: SCH-2026-XXXX)
     try {
       const { data: schoolReq } = await supabase

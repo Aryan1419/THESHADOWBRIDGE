@@ -130,6 +130,7 @@ export async function POST(request: Request) {
         'shadow_teachers',
         'parent_shadow_requests',
         'parent_tutor_requests',
+        'parent_therapy_requests',
         'school_requests',
         'reviews',
         'bookings'
@@ -440,6 +441,9 @@ export async function POST(request: Request) {
       }
       if (notes !== undefined) {
         updates.notes = notes;
+      }
+      if (body.therapistAssigned !== undefined || body.therapist_assigned !== undefined) {
+        updates.therapist_assigned = body.therapistAssigned || body.therapist_assigned;
       }
       if (suggestedMatchId !== undefined && (type === 'parent_shadow_requests' || type === 'parent_tutor_requests')) {
         updates.suggested_match_id = suggestedMatchId;

@@ -34,7 +34,7 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
   // Parent Requests sub-tab state
-  const [parentSubTab, setParentSubTab] = useState<'shadow' | 'tutor'>('shadow');
+  const [parentSubTab, setParentSubTab] = useState<'shadow' | 'tutor' | 'therapy'>('shadow');
 
   // Search & Filter states
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,7 +48,7 @@ export default function AdminDashboard() {
 
   // Selected item detail view modal state
   const [selectedRecord, setSelectedRecord] = useState<{
-    type: 'tutors' | 'shadow_teachers' | 'parent_shadow_requests' | 'parent_tutor_requests';
+    type: 'tutors' | 'shadow_teachers' | 'parent_shadow_requests' | 'parent_tutor_requests' | 'parent_therapy_requests' | 'school_requests';
     data: any;
   } | null>(null);
 
@@ -57,6 +57,7 @@ export default function AdminDashboard() {
   const [editNotes, setEditNotes] = useState('');
   const [editCandidateMessage, setEditCandidateMessage] = useState('');
   const [editMatchId, setEditMatchId] = useState('');
+  const [editTherapistAssigned, setEditTherapistAssigned] = useState('');
   const [modalSuccessMsg, setModalSuccessMsg] = useState<string | null>(null);
   const [modalErrorMsg, setModalErrorMsg] = useState<string | null>(null);
 
@@ -204,7 +205,8 @@ export default function AdminDashboard() {
       status: editStatus,
       notes: editNotes,
       candidateMessage: editCandidateMessage,
-      suggestedMatchId: editMatchId
+      suggestedMatchId: editMatchId,
+      therapistAssigned: editTherapistAssigned
     };
 
     try {
@@ -791,10 +793,12 @@ export default function AdminDashboard() {
 
   const getFilteredParentRequests = () => {
     if (!db) return [];
-    const collection = parentSubTab === 'shadow' ? db.parent_shadow_requests : db.parent_tutor_requests;
+    const collection = parentSubTab === 'shadow' 
+      ? db.parent_shadow_requests 
+      : (parentSubTab === 'therapy' ? (db.parent_therapy_requests || []) : db.parent_tutor_requests);
     return collection.filter(r => {
-      const matchSearch = (r.parentName ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          (r.childName ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      const matchSearch = (r.parentName ?? (r as any).parent_name ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (r.childName ?? (r as any).child_name ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (r.registration_id ?? '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                           (r.phone ?? '').includes(searchQuery);
       const matchCity = filterCity ? r.city === filterCity : true;
@@ -1486,6 +1490,16 @@ export default function AdminDashboard() {
                     >
                       Home Tutor Requests
                     </button>
+                    <button
+                      onClick={() => setParentSubTab('therapy')}
+                      className={`px-4 py-1.5 rounded-lg font-bold text-[10px] transition-all cursor-pointer ${
+                        parentSubTab === 'therapy'
+                          ? 'bg-purple-900 text-white'
+                          : 'text-brand-muted hover:text-brand-dark'
+                      }`}
+                    >
+                      Therapy Requests (Delhi NCR)
+                    </button>
                   </div>
                 </div>
 
@@ -1580,6 +1594,11 @@ export default function AdminDashboard() {
                               <th className="p-4">Diagnosis</th>
                               <th className="p-4">Difficulties</th>
                             </>
+                          ) : parentSubTab === 'therapy' ? (
+                            <>
+                              <th className="p-4">Therapy Type</th>
+                              <th className="p-4">Assigned Therapist</th>
+                            </>
                           ) : (
                             <>
                               <th className="p-4">Tutor Type</th>
@@ -1596,12 +1615,12 @@ export default function AdminDashboard() {
                           <tr key={r.id} className="hover:bg-brand-light/20">
                             <td className="p-4 font-bold text-secondary">{r.registration_id}</td>
                             <td className="p-4">
-                              <p className="font-bold">{r.parentName}</p>
-                              <p className="text-[10px] text-brand-muted">{r.phone} • {r.relationship}</p>
+                              <p className="font-bold">{r.parentName || (r as any).parent_name}</p>
+                              <p className="text-[10px] text-brand-muted">{r.phone} • {r.email}</p>
                             </td>
                             <td className="p-4">
-                              <p className="font-bold">{r.childName}</p>
-                              <p className="text-brand-muted text-[10px]">{r.childGrade} • DOB: {formatDate(r.childDob)}</p>
+                              <p className="font-bold">{r.childName || (r as any).child_name}</p>
+                              <p className="text-brand-muted text-[10px]">{(r as any).childGrade || (r as any).child_grade || 'Preschool'} • DOB: {formatDate((r as any).childDob || (r as any).child_dob)}</p>
                             </td>
                             <td className="p-4">{r.city}</td>
                             
@@ -1616,6 +1635,15 @@ export default function AdminDashboard() {
                                 </td>
                                 <td className="p-4 max-w-[150px] truncate">{(r as any).difficulties}</td>
                               </>
+                            ) : parentSubTab === 'therapy' ? (
+                              <>
+                                <td className="p-4 max-w-[120px] truncate font-bold text-purple-900">
+                                  {(r as any).therapyType || (r as any).therapy_type || 'ABA Therapy'}
+                                </td>
+                                <td className="p-4 max-w-[150px] truncate font-semibold text-emerald-800">
+                                  {(r as any).therapist_assigned || (r as any).therapistAssigned || 'Not Assigned'}
+                                </td>
+                              </>
                             ) : (
                               <>
                                 <td className="p-4 max-w-[120px] truncate">{(r as any).tutorType}</td>
@@ -1626,7 +1654,7 @@ export default function AdminDashboard() {
                             <td className="p-4 text-center">
                               {(() => {
                                 const isPaid = Boolean((r as any).placementPaid || (r as any).placement_paid);
-                                const amount = (r as any).placementAmount || (r as any).placement_amount || (parentSubTab === 'shadow' ? 5000 : 3000);
+                                const amount = (r as any).placementAmount || (r as any).placement_amount || ((parentSubTab === 'shadow' || parentSubTab === 'therapy') ? 5000 : 3000);
                                 return (
                                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                                     isPaid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
@@ -1650,8 +1678,9 @@ export default function AdminDashboard() {
                                      setEditStatus(r.status);
                                      setEditNotes(r.notes || '');
                                      setEditMatchId((r as any).suggestedMatchId || '');
+                                     setEditTherapistAssigned((r as any).therapist_assigned || (r as any).therapistAssigned || '');
                                      setSelectedRecord({ 
-                                       type: parentSubTab === 'shadow' ? 'parent_shadow_requests' : 'parent_tutor_requests', 
+                                       type: parentSubTab === 'shadow' ? 'parent_shadow_requests' : (parentSubTab === 'therapy' ? 'parent_therapy_requests' : 'parent_tutor_requests'), 
                                        data: r 
                                      });
                                    }}
@@ -1661,10 +1690,10 @@ export default function AdminDashboard() {
                                  </button>
                                  <button
                                    onClick={() => setDeleteTarget({
-                                     type: parentSubTab === 'shadow' ? 'parent_shadow_requests' : 'parent_tutor_requests',
+                                     type: parentSubTab === 'shadow' ? 'parent_shadow_requests' : (parentSubTab === 'therapy' ? 'parent_therapy_requests' : 'parent_tutor_requests'),
                                      id: r.id,
-                                     name: r.parentName || r.registration_id || 'Parent Request',
-                                     label: `Parent Request ${r.registration_id || ''} (${r.parentName})`
+                                     name: r.parentName || (r as any).parent_name || r.registration_id || 'Parent Request',
+                                     label: `Parent Request ${r.registration_id || ''} (${r.parentName || (r as any).parent_name})`
                                    })}
                                    className="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 border border-rose-200 rounded-lg transition-all cursor-pointer"
                                    title="Delete Parent Request Permanently"
@@ -2767,8 +2796,37 @@ export default function AdminDashboard() {
                           <option value="Closed">Closed</option>
                         </>
                       )}
+
+                      {/* Statuses for Therapy requests */}
+                      {selectedRecord.type === 'parent_therapy_requests' && (
+                        <>
+                          <option value="Consultation Booked">Consultation Booked</option>
+                          <option value="Consultation Completed">Consultation Completed</option>
+                          <option value="Registration Form Submitted">Registration Form Submitted</option>
+                          <option value="Placement Fee Paid">Placement Fee Paid</option>
+                          <option value="Matching in Progress">Matching in Progress</option>
+                          <option value="Therapist Assigned">Therapist Assigned</option>
+                          <option value="Home Sessions Begin">Home Sessions Begin</option>
+                          <option value="Closed">Closed</option>
+                        </>
+                      )}
                     </select>
                   </div>
+
+                  {selectedRecord.type === 'parent_therapy_requests' && (
+                    <div className="flex flex-col gap-1">
+                      <label className="text-[10px] font-bold text-purple-950 uppercase tracking-wider">
+                        Assigned Therapist (Internal Note)
+                      </label>
+                      <input
+                        type="text"
+                        value={editTherapistAssigned}
+                        onChange={(e) => setEditTherapistAssigned(e.target.value)}
+                        placeholder="e.g. Dr. Ananya Sharma (BCBA) / Team Lead"
+                        className="p-2 border border-purple-200 bg-purple-50/40 rounded-xl text-xs font-semibold text-purple-950 focus:outline-none"
+                      />
+                    </div>
+                  )}
 
                   <div className="flex flex-col gap-1">
                     <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider flex items-center justify-between">
