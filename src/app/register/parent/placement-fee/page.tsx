@@ -41,7 +41,7 @@ function PlacementFeeContent() {
     const clean = promoCode.trim().toUpperCase();
     if (!clean) return;
     if (clean !== 'HI5000') {
-      setPaymentError('Invalid Placement Promo Code. Code HI5000 is valid for parent placement fee waiver.');
+      setPaymentError('Invalid Placement Promo Code. Please check and try again.');
       return;
     }
 
@@ -56,19 +56,19 @@ function PlacementFeeContent() {
         body: JSON.stringify({
           type: 'parent_placement_payment',
           regId,
-          promoCode: 'HI5000'
+          promoCode: clean
         })
       });
 
       const vData = await res.json();
       if (!res.ok || !vData.success) {
-        throw new Error(vData.error || 'Failed to apply promo code HI5000.');
+        throw new Error(vData.error || 'Failed to apply promo code.');
       }
 
       confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
       setPlacementSuccess({
         registration_id: regId,
-        status: vData.status || 'Placement Fee Waived (HI5000)',
+        status: vData.status || 'Placement Fee Waived (VIP Promo)',
         isWaived: true
       });
     } catch (err: any) {
@@ -358,7 +358,7 @@ function PlacementFeeContent() {
                 <div className="flex gap-2">
                   <input
                     type="text"
-                    placeholder="Enter Code (e.g. HI5000)"
+                    placeholder="Enter Promo Code"
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value)}
                     className="flex-grow p-2.5 bg-white border border-purple-200 rounded-xl text-xs font-mono font-bold text-purple-950 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-secondary/40"
@@ -372,7 +372,7 @@ function PlacementFeeContent() {
                     {applyingPromo ? 'Applying...' : 'Apply Code'}
                   </button>
                 </div>
-                <p className="text-[11px] text-purple-800">Entering code <strong>HI5000</strong> waives the placement onboarding fee for parents.</p>
+                <p className="text-[11px] text-purple-800">Enter your authorized promo code to waive or discount the placement onboarding fee.</p>
               </div>
 
               {paymentError && (
