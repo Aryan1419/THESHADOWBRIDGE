@@ -506,30 +506,32 @@ function BookConsultationForm() {
                       />
                     </div>
 
-                    {/* VIP Access / Referral Code */}
-                    <div className="flex flex-col gap-1.5 pt-2">
-                      <label className="text-xs font-bold text-primary uppercase tracking-wider flex items-center justify-between">
-                        <span className="flex items-center gap-1">
-                          <Ticket size={14} className="text-accent" /> Have a VIP Access Code / Referral Code?
-                        </span>
-                        <span className="text-[10px] text-brand-muted font-normal">Optional</span>
-                      </label>
-                      <input
-                        type="text"
-                        name="promoCode"
-                        value={formData.promoCode}
-                        onChange={handleInputChange}
-                        placeholder="Enter VIP / Referral Code"
-                        className="p-3 border border-brand-border bg-white rounded-xl text-sm font-mono font-bold text-primary focus:outline-none focus:ring-2 focus:ring-accent/40 uppercase"
-                      />
-                      <p className="text-[11px] text-brand-muted mt-1 font-medium">Please enter your code in <strong>ALL CAPS</strong>.</p>
-                      {isVipCode && (
-                        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2 mt-1">
-                          <Sparkles size={16} className="text-emerald-600 shrink-0" />
-                          <span>✨ VIP Access Code Applied! ₹99 Consultation Fee Waived (100% OFF).</span>
-                        </div>
-                      )}
-                    </div>
+                    {/* VIP Access / Referral Code (Only for Shadow Teacher / Home Tutor, hidden for Therapy) */}
+                    {!formData.requirement.includes('Therapy') && (
+                      <div className="flex flex-col gap-1.5 pt-2">
+                        <label className="text-xs font-bold text-primary uppercase tracking-wider flex items-center justify-between">
+                          <span className="flex items-center gap-1">
+                            <Ticket size={14} className="text-accent" /> Have a VIP Access Code / Referral Code?
+                          </span>
+                          <span className="text-[10px] text-brand-muted font-normal">Optional</span>
+                        </label>
+                        <input
+                          type="text"
+                          name="promoCode"
+                          value={formData.promoCode}
+                          onChange={handleInputChange}
+                          placeholder="Enter VIP / Referral Code"
+                          className="p-3 border border-brand-border bg-white rounded-xl text-sm font-mono font-bold text-primary focus:outline-none focus:ring-2 focus:ring-accent/40 uppercase"
+                        />
+                        <p className="text-[11px] text-brand-muted mt-1 font-medium">Please enter your code in <strong>ALL CAPS</strong>.</p>
+                        {isVipCode && (
+                          <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2 mt-1">
+                            <Sparkles size={16} className="text-emerald-600 shrink-0" />
+                            <span>✨ VIP Access Code Applied! ₹99 Consultation Fee Waived (100% OFF).</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
                     {paymentError && (
                       <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2">
