@@ -276,12 +276,17 @@ export async function POST(request: Request) {
         message: isVipCode ? 'Step 1 VIP Access Unlocked via SHADOW100' : 'Step 1 Consultation Booked',
         payment_status: isVipCode ? 'waived_shadow100' : 'paid',
         amount: isVipCode ? 0 : 99,
-        razorpay_payment_id: isVipCode ? 'VIP-SHADOW100' : razorpayOrderId,
+        razorpay_payment_id: isVipCode ? 'VIP-SHADOW100' : razorpayPaymentId,
         razorpay_order_id: isVipCode ? 'VIP-SHADOW100' : razorpayOrderId,
         razorpay_signature: isVipCode ? 'VIP-SHADOW100' : razorpaySignature
       };
 
-      await supabase.from('bookings').insert([bookingData]);
+      const { error: bookingErr } = await supabase.from('bookings').insert([bookingData]);
+      if (bookingErr) {
+        console.error(`❌ Supabase bookings insert FAILED for ${generatedId} | PaymentID: ${razorpayPaymentId} | OrderID: ${razorpayOrderId}:`, bookingErr);
+      } else {
+        console.log(`✅ Booking saved: ${generatedId} | PaymentID: ${razorpayPaymentId} | OrderID: ${razorpayOrderId}`);
+      }
 
       // Insert into parent request table
       const parentTable = isTherapy ? 'parent_therapy_requests' : (isShadow ? 'parent_shadow_requests' : 'parent_tutor_requests');
@@ -297,6 +302,9 @@ export async function POST(request: Request) {
         consultation_paid: true,
         registration_id: generatedId,
         created_at: createdAt,
+        razorpay_payment_id: isVipCode ? 'VIP-SHADOW100' : razorpayPaymentId,
+        razorpay_order_id: isVipCode ? 'VIP-SHADOW100' : razorpayOrderId,
+        razorpay_signature: isVipCode ? 'VIP-SHADOW100' : razorpaySignature,
         notes: isVipCode ? `VIP Access via Code SHADOW100 | Unified ID: ${generatedId}` : `Unified ID: ${generatedId}`
       };
 
@@ -312,7 +320,9 @@ export async function POST(request: Request) {
 
       const { error: pErr } = await supabase.from(parentTable).insert([parentRecord]);
       if (pErr) {
-        console.warn(`Supabase insert failed for ${parentTable}, writing to db.json:`, pErr);
+        console.error(`❌ Supabase ${parentTable} insert FAILED for ${generatedId} | PaymentID: ${razorpayPaymentId}:`, pErr);
+      } else {
+        console.log(`✅ Parent record saved to ${parentTable}: ${generatedId} | PaymentID: ${razorpayPaymentId}`);
       }
 
       // Also update local db.json fallback
