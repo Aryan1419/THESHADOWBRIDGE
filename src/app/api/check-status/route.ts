@@ -166,7 +166,27 @@ export async function POST(request: Request) {
       });
     }
 
-    // 5. Check Bookings table (for standalone consultation bookings)
+    // 5. Check School Requests table (by registration_id: SCH-2026-XXXX)
+    try {
+      const { data: schoolReq } = await supabase
+        .from('school_requests')
+        .select('*')
+        .ilike('registration_id', cleanRegId)
+        .maybeSingle();
+
+      if (schoolReq && isContactMatch(schoolReq.email, schoolReq.phone)) {
+        return NextResponse.json({
+          success: true,
+          role: 'school',
+          isPlacementPaid: Boolean(schoolReq.placement_paid),
+          record: toCamelCase(schoolReq)
+        });
+      }
+    } catch (err) {
+      console.warn('Supabase lookup failed for school_requests in check-status, checking local DB:', err);
+    }
+
+    // 6. Check Bookings table (for standalone consultation bookings)
     const { data: booking } = await supabase
       .from('bookings')
       .select('*')
@@ -200,6 +220,23 @@ export async function POST(request: Request) {
         isCompleted,
         record
       });
+    }
+
+    // 7. Check local db.json fallback
+    const { readDb } = await import('@/lib/db');
+    const localDb = readDb();
+    if (localDb.school_requests) {
+      const sch = localDb.school_requests.find((s: any) => 
+        (s.registration_id || '').toUpperCase() === cleanRegId && isContactMatch(s.email, s.phone)
+      );
+      if (sch) {
+        return NextResponse.json({
+          success: true,
+          role: 'school',
+          isPlacementPaid: Boolean(sch.placement_paid),
+          record: toCamelCase(sch)
+        });
+      }
     }
 
     return NextResponse.json(

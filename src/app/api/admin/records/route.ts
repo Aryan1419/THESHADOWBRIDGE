@@ -50,7 +50,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
     }
 
-    let tutors = null, shadowTeachers = null, parentShadow = null, parentTutor = null, notifications = null, contacts = null, reviews = null, bookings = null;
+    let tutors = null, shadowTeachers = null, parentShadow = null, parentTutor = null, schoolRequests = null, notifications = null, contacts = null, reviews = null, bookings = null;
 
     if (isSupabaseConfigured) {
       try {
@@ -58,6 +58,7 @@ export async function GET(request: Request) {
         const { data: st } = await supabase.from('shadow_teachers').select('*');
         const { data: ps } = await supabase.from('parent_shadow_requests').select('*');
         const { data: pt } = await supabase.from('parent_tutor_requests').select('*');
+        const { data: sch } = await supabase.from('school_requests').select('*');
         const { data: c } = await supabase.from('contacts').select('*').order('created_at', { ascending: false });
         const { data: n } = await supabase.from('notifications_log').select('*').order('created_at', { ascending: false });
         const { data: rev } = await supabase.from('reviews').select('*').order('submitted_at', { ascending: false });
@@ -67,6 +68,7 @@ export async function GET(request: Request) {
         shadowTeachers = st;
         parentShadow = ps;
         parentTutor = pt;
+        schoolRequests = sch;
         contacts = c;
         notifications = n;
         reviews = rev;
@@ -81,6 +83,7 @@ export async function GET(request: Request) {
     if (!shadowTeachers) shadowTeachers = localDb.shadow_teachers || [];
     if (!parentShadow) parentShadow = localDb.parent_shadow_requests || [];
     if (!parentTutor) parentTutor = localDb.parent_tutor_requests || [];
+    if (!schoolRequests) schoolRequests = localDb.school_requests || [];
     if (!contacts) contacts = (localDb as any).contacts || [];
     if (!notifications) notifications = localDb.notifications || [];
     if (!reviews) reviews = localDb.reviews || [];
@@ -91,6 +94,7 @@ export async function GET(request: Request) {
       shadow_teachers: toCamelCase(shadowTeachers || []),
       parent_shadow_requests: toCamelCase(parentShadow || []),
       parent_tutor_requests: toCamelCase(parentTutor || []),
+      school_requests: toCamelCase(schoolRequests || []),
       contacts: toCamelCase(contacts || []),
       notifications: toCamelCase(notifications || []),
       reviews: toCamelCase(reviews || []),
@@ -126,6 +130,7 @@ export async function POST(request: Request) {
         'shadow_teachers',
         'parent_shadow_requests',
         'parent_tutor_requests',
+        'school_requests',
         'reviews',
         'bookings'
       ];

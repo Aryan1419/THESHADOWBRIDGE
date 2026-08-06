@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Users, User, GraduationCap, ClipboardList, Settings, LogOut,
   RefreshCw, Search, Filter, ShieldCheck, Mail, Phone, MapPin, Calendar,
   CheckCircle, X, XCircle, ChevronRight, FileText, AlertCircle, Save, Info, Sparkles, CreditCard,
-  Star, CheckCircle2, MessageSquare, Reply, Send, MailCheck, MessageSquareQuote, CornerDownRight, Trash2, AlertTriangle, ExternalLink, Menu
+  Star, CheckCircle2, MessageSquare, Reply, Send, MailCheck, MessageSquareQuote, CornerDownRight, Trash2, AlertTriangle, ExternalLink, Menu, School
 } from 'lucide-react';
 
 import { DatabaseSchema, TutorRecord, ShadowTeacherRecord, ParentShadowRequestRecord, ParentTutorRequestRecord } from '@/lib/db';
@@ -28,7 +28,7 @@ export default function AdminDashboard() {
   const [toastLog, setToastLog] = useState<string | null>(null);
 
   // Navigation tab state
-  const [activeTab, setActiveTab] = useState<'overview' | 'tutors' | 'shadows' | 'parents' | 'bookings' | 'contacts' | 'payments' | 'notifications' | 'settings' | 'reviews'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'tutors' | 'shadows' | 'parents' | 'schools' | 'bookings' | 'contacts' | 'payments' | 'notifications' | 'settings' | 'reviews'>('overview');
 
   // Mobile sidebar collapse state
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -868,6 +868,7 @@ export default function AdminDashboard() {
               { key: 'tutors', label: 'Tutors Registry', icon: Users },
               { key: 'shadows', label: 'Shadow Teachers', icon: GraduationCap },
               { key: 'parents', label: 'Parent Requests', icon: ClipboardList },
+              { key: 'schools', label: 'School Requests', icon: School },
               { key: 'bookings', label: 'Consultations (₹99)', icon: Calendar },
               { key: 'contacts', label: 'Contact Messages', icon: MessageSquare },
               { key: 'payments', label: 'Payments Ledger', icon: CreditCard },

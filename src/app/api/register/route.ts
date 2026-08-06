@@ -124,6 +124,39 @@ export async function GET(request: Request) {
       });
     }
 
+    // Look up in School Requests
+    try {
+      const { data: schoolReq } = await supabase
+        .from('school_requests')
+        .select('*')
+        .eq('registration_id', regId)
+        .maybeSingle();
+
+      if (schoolReq) {
+        return NextResponse.json({
+          success: true,
+          role: 'school',
+          record: toCamelCase(schoolReq)
+        });
+      }
+    } catch (err) {
+      console.warn('Supabase lookup failed for school_requests, checking local DB:', err);
+    }
+
+    // Fallback to local DB
+    const { readDb } = await import('@/lib/db');
+    const localDb = readDb();
+    if (localDb.school_requests) {
+      const sch = localDb.school_requests.find((s: any) => s.registration_id === regId);
+      if (sch) {
+        return NextResponse.json({
+          success: true,
+          role: 'school',
+          record: toCamelCase(sch)
+        });
+      }
+    }
+
     return NextResponse.json({ error: 'Registration ID not found' }, { status: 404 });
   } catch (error: any) {
     console.error('Registration GET API Error:', error);

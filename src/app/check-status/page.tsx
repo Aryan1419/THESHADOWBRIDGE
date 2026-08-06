@@ -46,6 +46,16 @@ const PARENT_TIMELINE = [
   { name: 'Matching in Progress', desc: 'Background-Verified Candidate Trial Match' }
 ];
 
+const SCHOOL_TIMELINE = [
+  { name: 'Consultation Booked', desc: 'Requirement Form Submitted • Booking Fee Received' },
+  { name: 'Requirement Analysis', desc: 'Consultation Call with Educational Specialist' },
+  { name: 'Placement Fee Pending', desc: 'Placement Fee Unlocked (₹5,000)' },
+  { name: 'Placement Fee Paid', desc: 'Placement Paid • Detailed Registration Completed' },
+  { name: 'Profiles Shared', desc: 'Candidate Profiles Shortlisted for School' },
+  { name: 'Interview Scheduled', desc: 'Interviews Conducted at School Convenience' },
+  { name: 'Support Started', desc: 'Shadow Teacher Joined & Support Commenced' }
+];
+
 export default function CheckStatusPage() {
   const [registrationId, setRegistrationId] = useState('');
   const [contactInfo, setContactInfo] = useState('');
@@ -122,10 +132,10 @@ export default function CheckStatusPage() {
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to apply VIP Access Code.');
+        throw new Error(data.error || 'Invalid VIP Code.');
       }
 
-      setVipSuccessMsg('✨ VIP Access Code applied successfully! Your Child Registration Form is unlocked below.');
+      setVipSuccessMsg('🎉 VIP Code Verified! Consultation step unlocked.');
       
       // Update local record status
       setRecordData((prev: any) => ({
@@ -150,8 +160,9 @@ export default function CheckStatusPage() {
   const matchedCandidate = recordData?.matchedCandidate;
 
   const isTeacherRole = role === 'shadow' || role === 'tutor';
-  const timelineSteps = isTeacherRole ? TEACHER_TIMELINE : PARENT_TIMELINE;
-  const currentStatus = record?.status || (isTeacherRole ? 'Interview Awaiting' : 'Consultation Booked');
+  const isSchoolRole = role === 'school';
+  const timelineSteps = isTeacherRole ? TEACHER_TIMELINE : (isSchoolRole ? SCHOOL_TIMELINE : PARENT_TIMELINE);
+  const currentStatus = record?.status || (isTeacherRole ? 'Interview Awaiting' : (isSchoolRole ? 'Consultation Booked' : 'Consultation Booked'));
 
   const getStepStatusIndex = (status: string) => {
     const sLower = (status || '').toLowerCase().trim();
@@ -162,6 +173,16 @@ export default function CheckStatusPage() {
       if (sLower.includes('shortlisted') || sLower.includes('pool')) return 2;
       if (sLower.includes('scheduled') || sLower.includes('video') || sLower.includes('panel')) return 1;
       return 0; // Interview Awaiting / Application Received
+    }
+
+    if (isSchoolRole) {
+      if (sLower.includes('started') || sLower.includes('active')) return 6;
+      if (sLower.includes('interview')) return 5;
+      if (sLower.includes('profiles') || sLower.includes('shortlist')) return 4;
+      if (sLower.includes('placement fee paid') || record?.placementPaid || record?.placement_paid) return 3;
+      if (sLower.includes('pending') || sLower.includes('placement fee')) return 2;
+      if (sLower.includes('analysis') || sLower.includes('proposal') || sLower.includes('call')) return 1;
+      return 0;
     }
 
     // PARENT TIMELINE MAPPING (DECOUPLED & COMPREHENSIVE)

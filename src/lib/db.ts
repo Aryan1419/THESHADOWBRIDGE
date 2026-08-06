@@ -185,6 +185,44 @@ export interface ParentTutorRequestRecord {
   terms_accepted_at?: string;
 }
 
+export interface SchoolRequestRecord {
+  id: string;
+  registration_id: string; // SCH-2026-XXXX
+  school_name: string;
+  contact_name: string;
+  designation: string;
+  email: string;
+  phone: string;
+  city: string;
+  preferred_location: string;
+  levels_required: string; // comma-separated
+  specific_grades: string; // comma-separated
+  teachers_count: number;
+  start_date: string;
+  notes?: string;
+  status: 'Consultation Booked' | 'Requirement Analysis' | 'Proposal Shared' | 'Placement Fee Pending' | 'Placement Fee Paid' | 'Profiles Shared' | 'Interview Scheduled' | 'Selection Completed' | 'Support Started' | 'Closed';
+  consultation_paid: boolean;
+  consultation_amount?: number;
+  placement_paid: boolean;
+  placement_amount?: number;
+  razorpay_payment_id?: string;
+  razorpay_order_id?: string;
+  placement_payment_id?: string;
+  placement_order_id?: string;
+  detailed_address?: string;
+  street_landmark?: string;
+  pincode?: string;
+  state?: string;
+  alternate_number?: string;
+  expected_joining_date?: string;
+  working_days?: string;
+  working_hours?: string;
+  terms_accepted?: boolean;
+  terms_accepted_at?: string;
+  suggested_match_ids?: string[];
+  created_at: string;
+}
+
 export interface ReviewRecord {
   id: string;
   parent_registration_id: string;
@@ -219,6 +257,7 @@ export interface DatabaseSchema {
   shadow_teachers: ShadowTeacherRecord[];
   parent_shadow_requests: ParentShadowRequestRecord[];
   parent_tutor_requests: ParentTutorRequestRecord[];
+  school_requests: SchoolRequestRecord[];
   admin_users: AdminUserRecord[];
   notifications: any[];
   reviews: ReviewRecord[];
@@ -232,6 +271,7 @@ const DEFAULT_DB: DatabaseSchema = {
   contacts: [],
   notifications: [],
   reviews: [],
+  school_requests: [],
 
   // Seed default admin and mock records
   admin_users: [

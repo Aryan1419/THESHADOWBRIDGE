@@ -231,6 +231,25 @@ export default function Navbar() {
                         <ArrowRight size={14} className="text-brand-muted opacity-60" />
                       </Link>
 
+                      {/* Collaboration — Schools Link (NEW Tab for Schools) */}
+                      <Link
+                        href="/schools"
+                        onClick={() => setIsOpen(false)}
+                        className={`flex items-center justify-between px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-xl sm:rounded-2xl font-bold text-xs sm:text-sm transition-all border ${
+                          pathname === '/schools' || pathname === '/collaboration-schools'
+                            ? 'bg-pink-50 text-pink-900 border-pink-300'
+                            : 'bg-gradient-to-r from-pink-50/60 to-white text-pink-950 border-pink-200/80 hover:border-pink-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">🏫</span>
+                          <span>Collaboration — Schools</span>
+                        </div>
+                        <span className="px-2 py-0.5 bg-pink-600 text-white text-[9px] font-black rounded-full uppercase tracking-wider">
+                          NEW
+                        </span>
+                      </Link>
+
                       {/* Check Status - Highlighted Card */}
                       <Link
                         href="/check-status"
