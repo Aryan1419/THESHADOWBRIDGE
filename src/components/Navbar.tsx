@@ -140,30 +140,32 @@ export default function Navbar() {
             </div>
           </div>
         </div>
+      </nav>
 
-                {/* 3. Clean Slide-Out / Dropdown Navigation Panel (Works seamlessly on Desktop & Mobile) */}
-        <AnimatePresence>
-          {isOpen && (
-            <>
-              {/* Backdrop Blur Overlay - Click outside to close */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="fixed inset-0 bg-slate-900/30 backdrop-blur-xs z-40 top-[56px] sm:top-[73px]"
-                onClick={() => setIsOpen(false)}
-              />
+      {/* Backdrop + Menu Panel rendered OUTSIDE <nav> so backdrop covers full viewport */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop Overlay - Click anywhere on this to close the menu */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="fixed inset-0 bg-slate-900/30 backdrop-blur-[2px] z-[55]"
+              onClick={() => setIsOpen(false)}
+              aria-hidden="true"
+            />
 
-              {/* Menu Panel */}
-              <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.98 }}
-                transition={{ duration: 0.25, ease: 'easeOut' }}
-                onClick={(e) => e.stopPropagation()}
-                className="absolute top-full left-0 w-full bg-white border-b border-brand-border shadow-2xl z-50 overflow-hidden"
-              >
+            {/* Menu Panel - sits above backdrop, stopPropagation prevents close on internal clicks */}
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              onClick={(e) => e.stopPropagation()}
+              className="fixed top-[56px] sm:top-[73px] left-0 w-full bg-white border-b border-brand-border shadow-2xl z-[60] overflow-hidden"
+            >
                 {/* Brand Accent Top Stripe */}
                 <div className="h-1 bg-gradient-to-r from-primary via-secondary to-accent"></div>
 
@@ -475,11 +477,10 @@ export default function Navbar() {
 
                   </div>
                 </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
-      </nav>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </>
   );
 }
