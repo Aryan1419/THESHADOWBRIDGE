@@ -24,7 +24,7 @@ export default function TermsConditions() {
           <p className="text-brand-muted text-sm sm:text-base font-medium max-w-xl mx-auto">
             <strong>The Shadow Bridge by Pratibha Mishra</strong>
             <br />
-            Last Updated: 21/07/2026
+            Last Updated: 06/08/2026
           </p>
         </div>
       </section>
@@ -186,6 +186,42 @@ export default function TermsConditions() {
                     <li>Tutor selection is based on the student&apos;s requirements, tutor availability, location, qualifications, and schedule compatibility.</li>
                     <li>While every effort is made to provide the most suitable tutor, The Shadow Bridge cannot guarantee a specific tutor, gender, qualification, or availability.</li>
                     <li>Any changes to tuition timings, subject requirements, or location after confirmation may require a fresh tutor search and may be subject to additional charges.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <hr className="border-brand-border/60" />
+
+              {/* 5C. School Collaboration & Placement Services */}
+              <div className="space-y-4">
+                <h3 className="font-serif font-bold text-primary text-base">5C. School Collaboration &amp; Placement Services</h3>
+                
+                <div className="space-y-2 text-brand-muted text-sm leading-relaxed">
+                  <h4 className="font-bold text-brand-dark">Consultation Booking Fee</h4>
+                  <ul className="list-disc pl-6 space-y-1.5">
+                    <li>A consultation booking fee of <strong>₹199</strong> is payable at the time of submitting a school requirement form to schedule a dedicated assessment call with our Lead Educational Specialist. This fee is non-refundable.</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2 text-brand-muted text-sm leading-relaxed">
+                  <h4 className="font-bold text-brand-dark">One-Time Placement Fee</h4>
+                  <ul className="list-disc pl-6 space-y-1.5">
+                    <li>Once the consultation call is completed and requirements are finalized, a one-time, non-recurring placement fee of <strong>₹5,000</strong> is payable before educator profile shortlisting and school interviews begin.</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2 text-brand-muted text-sm leading-relaxed">
+                  <h4 className="font-bold text-brand-dark">First Month Commission</h4>
+                  <ul className="list-disc pl-6 space-y-1.5">
+                    <li>The school agrees to pay <strong>50% of the first month&apos;s agreed salary</strong> of the selected Shadow Teacher as a one-time recruitment commission to The Shadow Bridge.</li>
+                    <li>From the second month onwards, no monthly or recurring commission is levied on the school by The Shadow Bridge.</li>
+                  </ul>
+                </div>
+
+                <div className="space-y-2 text-brand-muted text-sm leading-relaxed">
+                  <h4 className="font-bold text-brand-dark">Educator Replacement &amp; Notice</h4>
+                  <ul className="list-disc pl-6 space-y-1.5">
+                    <li>In case of unsatisfactory performance or if a placed Shadow Teacher leaves during the placement period, The Shadow Bridge provides a replacement guarantee at no extra placement fee, subject to a reasonable advance notice of at least one month.</li>
                   </ul>
                 </div>
               </div>
