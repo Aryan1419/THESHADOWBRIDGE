@@ -530,22 +530,26 @@ export async function POST(request: Request) {
     // STEP 5: PLACEMENT FEE PAYMENT SUBMISSION
     // =========================================================
     if (type === 'parent_placement_payment') {
-      const { regId, razorpayPaymentId, razorpayOrderId, razorpaySignature } = data;
+      const { regId, razorpayPaymentId, razorpayOrderId, razorpaySignature, promoCode } = data;
 
-      if (!regId || !razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
+      const cleanRegId = (regId || '').trim().toUpperCase();
+      const cleanPromoCode = (promoCode || '').trim().toUpperCase();
+      const isVipHi5000 = cleanPromoCode === 'HI5000';
+
+      if (!isVipHi5000 && (!regId || !razorpayPaymentId || !razorpayOrderId || !razorpaySignature)) {
         return NextResponse.json({ error: 'Missing placement payment parameters.' }, { status: 400 });
       }
 
-      const cleanRegId = regId.trim().toUpperCase();
-
-      const keySecret = process.env.RAZORPAY_KEY_SECRET || '';
-      const shasum = crypto.createHmac('sha256', keySecret);
-      shasum.update(razorpayOrderId + '|' + razorpayPaymentId);
-      if (shasum.digest('hex') !== razorpaySignature) {
-        return NextResponse.json({ error: 'Payment signature verification failed.' }, { status: 400 });
+      if (!isVipHi5000) {
+        const keySecret = process.env.RAZORPAY_KEY_SECRET || '';
+        const shasum = crypto.createHmac('sha256', keySecret);
+        shasum.update(razorpayOrderId + '|' + razorpayPaymentId);
+        if (shasum.digest('hex') !== razorpaySignature) {
+          return NextResponse.json({ error: 'Payment signature verification failed.' }, { status: 400 });
+        }
       }
 
-      // Check shadow vs tutor
+      // Check shadow vs tutor (PARENTS ONLY)
       const { data: ps } = await supabase
         .from('parent_shadow_requests')
         .select('*')
@@ -562,19 +566,29 @@ export async function POST(request: Request) {
       const targetTable = ps ? 'parent_shadow_requests' : 'parent_tutor_requests';
 
       if (!parentRecord) {
-        return NextResponse.json({ error: 'Parent record not found.' }, { status: 404 });
+        return NextResponse.json({ 
+          error: isVipHi5000 
+            ? 'Promo code HI5000 is valid for parent placement fees only. No matching parent record found.' 
+            : 'Parent record not found.' 
+        }, { status: 404 });
       }
 
       const newStatus = ps ? 'Shadow Teacher Matching in Progress' : 'Home Tutor Matching in Progress';
+
+      const finalPaymentId = isVipHi5000 ? 'N/A (VIP HI5000)' : (razorpayPaymentId || null);
+      const finalOrderId = isVipHi5000 ? 'N/A (VIP HI5000)' : (razorpayOrderId || null);
+      const noteAppend = isVipHi5000 
+        ? ' | Placement Fee Waived via VIP Code HI5000' 
+        : ` | Placement Fee Paid (Payment ID: ${razorpayPaymentId})`;
 
       const { data: updated, error: uErr } = await supabase
         .from(targetTable)
         .update({
           placement_paid: true,
           status: newStatus,
-          placement_payment_id: razorpayPaymentId || null,
-          placement_order_id: razorpayOrderId || null,
-          notes: (parentRecord.notes || '') + ` | Placement Fee Paid (Payment ID: ${razorpayPaymentId})`
+          placement_payment_id: finalPaymentId,
+          placement_order_id: finalOrderId,
+          notes: (parentRecord.notes || '') + noteAppend
         })
         .eq('id', parentRecord.id)
         .select()

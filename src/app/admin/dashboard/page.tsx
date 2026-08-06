@@ -667,9 +667,13 @@ export default function AdminDashboard() {
       }
       if ((r as any).placementPaid || (r as any).placement_paid) {
         const placementAmt = Number((r as any).placementAmount || 5000);
-        const paymentId = getRealPaymentId(r, true, false);
-        const orderId = getRealOrderId(r, true, false);
-        const isRealSuccess = paymentId.startsWith('pay_');
+        const pidStr = (r as any).placementPaymentId || (r as any).placement_payment_id || '';
+        const notesStr = ((r as any).notes || '').toUpperCase();
+        const isPlacementWaived = pidStr.includes('HI5000') || notesStr.includes('HI5000') || pidStr === 'N/A (VIP HI5000)';
+
+        const paymentId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealPaymentId(r, true, false);
+        const orderId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealOrderId(r, true, false);
+        const isRealSuccess = !isPlacementWaived && paymentId.startsWith('pay_');
 
         list.push({
           id: r.id + '-place',
@@ -680,13 +684,13 @@ export default function AdminDashboard() {
           phone: r.phone,
           email: r.email,
           type: 'Placement Fee (Shadow Teacher)',
-          amount: isRealSuccess ? `₹${placementAmt.toLocaleString()}` : '₹0 (Unverified)',
+          amount: isPlacementWaived ? '₹0 (Waived)' : (isRealSuccess ? `₹${placementAmt.toLocaleString()}` : '₹0 (Unverified)'),
           numericAmount: isRealSuccess ? placementAmt : 0,
           originalFee: placementAmt,
           paymentId,
           orderId,
-          status: isRealSuccess ? 'SUCCESS' : 'UNVERIFIED (No Razorpay ID)',
-          isWaived: false,
+          status: isPlacementWaived ? 'WAIVED (Placement Code HI5000)' : (isRealSuccess ? 'SUCCESS' : 'UNVERIFIED (No Razorpay ID)'),
+          isWaived: isPlacementWaived,
           isRealSuccess
         });
       }
@@ -720,9 +724,13 @@ export default function AdminDashboard() {
       }
       if ((r as any).placementPaid || (r as any).placement_paid) {
         const placementAmt = Number((r as any).placementAmount || 3000);
-        const paymentId = getRealPaymentId(r, true, false);
-        const orderId = getRealOrderId(r, true, false);
-        const isRealSuccess = paymentId.startsWith('pay_');
+        const pidStr = (r as any).placementPaymentId || (r as any).placement_payment_id || '';
+        const notesStr = ((r as any).notes || '').toUpperCase();
+        const isPlacementWaived = pidStr.includes('HI5000') || notesStr.includes('HI5000') || pidStr === 'N/A (VIP HI5000)';
+
+        const paymentId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealPaymentId(r, true, false);
+        const orderId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealOrderId(r, true, false);
+        const isRealSuccess = !isPlacementWaived && paymentId.startsWith('pay_');
 
         list.push({
           id: r.id + '-place',
@@ -733,13 +741,13 @@ export default function AdminDashboard() {
           phone: r.phone,
           email: r.email,
           type: 'Placement Fee (Home Tutor)',
-          amount: isRealSuccess ? `₹${placementAmt.toLocaleString()}` : '₹0 (Unverified)',
+          amount: isPlacementWaived ? '₹0 (Waived)' : (isRealSuccess ? `₹${placementAmt.toLocaleString()}` : '₹0 (Unverified)'),
           numericAmount: isRealSuccess ? placementAmt : 0,
           originalFee: placementAmt,
           paymentId,
           orderId,
-          status: isRealSuccess ? 'SUCCESS' : 'UNVERIFIED (No Razorpay ID)',
-          isWaived: false,
+          status: isPlacementWaived ? 'WAIVED (Placement Code HI5000)' : (isRealSuccess ? 'SUCCESS' : 'UNVERIFIED (No Razorpay ID)'),
+          isWaived: isPlacementWaived,
           isRealSuccess
         });
       }

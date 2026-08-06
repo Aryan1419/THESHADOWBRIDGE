@@ -34,6 +34,51 @@ function PlacementFeeContent() {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [placementSuccess, setPlacementSuccess] = useState<any | null>(null);
 
+  const [promoCode, setPromoCode] = useState('');
+  const [applyingPromo, setApplyingPromo] = useState(false);
+
+  const handleApplyPromoCode = async () => {
+    const clean = promoCode.trim().toUpperCase();
+    if (!clean) return;
+    if (clean !== 'HI5000') {
+      setPaymentError('Invalid Placement Promo Code. Code HI5000 is valid for parent placement fee waiver.');
+      return;
+    }
+
+    setApplyingPromo(true);
+    setPaymentError(null);
+
+    try {
+      const regId = record?.registrationId || record?.registration_id;
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'parent_placement_payment',
+          regId,
+          promoCode: 'HI5000'
+        })
+      });
+
+      const vData = await res.json();
+      if (!res.ok || !vData.success) {
+        throw new Error(vData.error || 'Failed to apply promo code HI5000.');
+      }
+
+      confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+      setPlacementSuccess({
+        registration_id: regId,
+        status: vData.status || 'Placement Fee Waived (HI5000)',
+        isWaived: true
+      });
+    } catch (err: any) {
+      console.error(err);
+      setPaymentError(err.message || 'Failed to apply promo code.');
+    } finally {
+      setApplyingPromo(false);
+    }
+  };
+
   useEffect(() => {
     const regId = searchParams.get('regId');
     if (!regId) {
@@ -302,6 +347,32 @@ function PlacementFeeContent() {
                 <p className="text-xs text-brand-muted leading-relaxed">
                   Separate from initial ₹99 consultation fee. Payable after consultation & registration form submission before candidate trial matching begins.
                 </p>
+              </div>
+
+              {/* VIP / Promo Code Section */}
+              <div className="p-4 bg-purple-50/60 border border-purple-200/80 rounded-2xl space-y-2 text-left">
+                <label className="block text-xs font-bold text-purple-950 flex items-center gap-1.5">
+                  <Sparkles size={14} className="text-secondary" />
+                  <span>Have a Placement Promo / VIP Code?</span>
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Enter Code (e.g. HI5000)"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value)}
+                    className="flex-grow p-2.5 bg-white border border-purple-200 rounded-xl text-xs font-mono font-bold text-purple-950 uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-secondary/40"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyPromoCode}
+                    disabled={applyingPromo || !promoCode.trim()}
+                    className="px-4 py-2.5 bg-secondary text-white rounded-xl font-bold text-xs hover:bg-secondary/90 transition-all cursor-pointer disabled:opacity-50 shrink-0"
+                  >
+                    {applyingPromo ? 'Applying...' : 'Apply Code'}
+                  </button>
+                </div>
+                <p className="text-[11px] text-purple-800">Entering code <strong>HI5000</strong> waives the placement onboarding fee for parents.</p>
               </div>
 
               {paymentError && (
