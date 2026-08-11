@@ -88,7 +88,7 @@ export default function AdminLogin() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="pratibha@theshadowbridge.com"
+                placeholder="Enter admin email address"
                 className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
               />
             </div>
