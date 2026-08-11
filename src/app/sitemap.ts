@@ -34,6 +34,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/contact`, priority: 0.8, changeFrequency: 'monthly' as const },
     { url: `${baseUrl}/faqs`, priority: 0.7, changeFrequency: 'monthly' as const },
     { url: `${baseUrl}/testimonials`, priority: 0.7, changeFrequency: 'monthly' as const },
+    { url: `${baseUrl}/leave-review`, priority: 0.6, changeFrequency: 'monthly' as const },
     { url: `${baseUrl}/check-status`, priority: 0.6, changeFrequency: 'weekly' as const },
     { url: `${baseUrl}/terms`, priority: 0.4, changeFrequency: 'yearly' as const },
     { url: `${baseUrl}/privacy`, priority: 0.4, changeFrequency: 'yearly' as const },
