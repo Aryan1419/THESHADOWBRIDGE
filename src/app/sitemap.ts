@@ -4,108 +4,54 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://theshadowbridge.com';
   const currentDate = new Date();
 
+  const therapySlugs = [
+    'aba-therapy',
+    'speech-therapy',
+    'occupational-therapy',
+    'special-education',
+    'behavior-therapy',
+    'physical-therapy',
+    'play-therapy',
+    'counseling-psychological-support',
+  ];
+
+  const mainRoutes = [
+    { url: baseUrl, priority: 1.0, changeFrequency: 'weekly' as const },
+    { url: `${baseUrl}/services`, priority: 0.9, changeFrequency: 'monthly' as const },
+    { url: `${baseUrl}/therapies`, priority: 0.9, changeFrequency: 'weekly' as const },
+    { url: `${baseUrl}/shadow-teachers`, priority: 0.9, changeFrequency: 'monthly' as const },
+    { url: `${baseUrl}/tutors`, priority: 0.9, changeFrequency: 'monthly' as const },
+    { url: `${baseUrl}/schools`, priority: 0.9, changeFrequency: 'weekly' as const },
+    { url: `${baseUrl}/collaboration-schools`, priority: 0.8, changeFrequency: 'weekly' as const },
+    { url: `${baseUrl}/parents`, priority: 0.8, changeFrequency: 'monthly' as const },
+    { url: `${baseUrl}/founder-story`, priority: 0.9, changeFrequency: 'monthly' as const },
+    { url: `${baseUrl}/our-story`, priority: 0.8, changeFrequency: 'monthly' as const },
+    { url: `${baseUrl}/book`, priority: 0.9, changeFrequency: 'weekly' as const },
+    { url: `${baseUrl}/register/parent`, priority: 0.9, changeFrequency: 'monthly' as const },
+    { url: `${baseUrl}/register/shadow-teacher`, priority: 0.9, changeFrequency: 'monthly' as const },
+    { url: `${baseUrl}/register/tutor`, priority: 0.9, changeFrequency: 'monthly' as const },
+    { url: `${baseUrl}/about`, priority: 0.8, changeFrequency: 'monthly' as const },
+    { url: `${baseUrl}/contact`, priority: 0.8, changeFrequency: 'monthly' as const },
+    { url: `${baseUrl}/faqs`, priority: 0.7, changeFrequency: 'monthly' as const },
+    { url: `${baseUrl}/testimonials`, priority: 0.7, changeFrequency: 'monthly' as const },
+    { url: `${baseUrl}/check-status`, priority: 0.6, changeFrequency: 'weekly' as const },
+    { url: `${baseUrl}/terms`, priority: 0.4, changeFrequency: 'yearly' as const },
+    { url: `${baseUrl}/privacy`, priority: 0.4, changeFrequency: 'yearly' as const },
+  ];
+
+  const therapyRoutes = therapySlugs.map((slug) => ({
+    url: `${baseUrl}/therapies/${slug}`,
+    lastModified: currentDate,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
   return [
-    {
-      url: baseUrl,
+    ...mainRoutes.map((route) => ({
+      ...route,
       lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/founder-story`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/our-story`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/services`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/schools`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/collaboration-schools`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/shadow-teachers`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/tutors`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/parents`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/book`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/about`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/contact`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/faqs`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/testimonials`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/check-status`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.6,
-    },
-    {
-      url: `${baseUrl}/terms`,
-      lastModified: currentDate,
-      changeFrequency: 'yearly',
-      priority: 0.4,
-    },
-    {
-      url: `${baseUrl}/privacy`,
-      lastModified: currentDate,
-      changeFrequency: 'yearly',
-      priority: 0.4,
-    },
+    })),
+    ...therapyRoutes,
   ];
 }
+
