@@ -5,16 +5,6 @@
   --foreground: #1a1a1a;
 }
 
-.dark {
-  --background: #0D091B;
-  --foreground: #F4F1FA;
-  --color-primary: #C5B6F0;
-  --color-brand-light: #161028;
-  --color-brand-border: #2B2144;
-  --color-brand-dark: #F4F1FA;
-  --color-brand-muted: #A69EB8;
-}
-
 @theme {
   --color-primary: #3B2A6B;
   --color-secondary: #B0206B;
@@ -51,68 +41,16 @@
   }
 }
 
+/* ===== BASE STYLES ===== */
 body {
   background-color: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
-.dark body {
-  background-color: #0D091B;
-  color: #F4F1FA;
-}
-
-.dark nav {
-  background-color: rgba(15, 11, 28, 0.95) !important;
-  border-color: #2B2144 !important;
-}
-
-.dark .bg-white {
-  background-color: #150F26 !important;
-  color: #F4F1FA !important;
-}
-
-.dark .bg-brand-light,
-.dark .bg-brand-light\/30,
-.dark .bg-brand-light\/20,
-.dark .bg-brand-light\/40,
-.dark .bg-\[\#F7F5FC\],
-.dark .bg-purple-50,
-.dark .bg-purple-50\/40,
-.dark .bg-purple-50\/60 {
-  background-color: #1A1330 !important;
-}
-
-.dark .border-brand-border,
-.dark .border-brand-border\/40,
-.dark .border-brand-border\/60,
-.dark .border-purple-200 {
-  border-color: #2B2144 !important;
-}
-
-.dark .text-primary {
-  color: #DDD5FA !important;
-}
-
-.dark .text-brand-dark {
-  color: #F4F1FA !important;
-}
-
-.dark .text-brand-muted {
-  color: #A69EB8 !important;
-}
-
-.dark input,
-.dark select,
-.dark textarea {
-  background-color: #1D1535 !important;
-  color: #F4F1FA !important;
-  border-color: #342852 !important;
-}
-
-/* Custom Utilities */
+/* ===== CUSTOM UTILITIES ===== */
 .btn-gradient {
   background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%);
   color: #ffffff;
@@ -131,21 +69,12 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-.dark .text-gradient {
-  background: linear-gradient(135deg, #C5B6F0 0%, #E86DA9 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Scrollbar styling */
+/* ===== SCROLLBAR ===== */
 ::-webkit-scrollbar {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
   background: #F8F5FB;
-}
-.dark ::-webkit-scrollbar-track {
-  background: #150F26;
 }
 ::-webkit-scrollbar-thumb {
   background: #C2185B;
@@ -153,4 +82,244 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #4B1363;
+}
+
+
+/* ============================================================
+   DARK MODE — Comprehensive overrides
+   Applied when <html> has class="dark"
+   ============================================================ */
+
+/* --- Core body --- */
+.dark {
+  --background: #0C0818;
+  --foreground: #EDE9F6;
+}
+
+.dark body {
+  background-color: #0C0818 !important;
+  color: #EDE9F6 !important;
+}
+
+/* --- Global transition for all elements --- */
+.dark * {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* --- Navbar --- */
+.dark nav {
+  background-color: rgba(12, 8, 24, 0.96) !important;
+  border-color: #2B2144 !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+/* --- White backgrounds → deep dark --- */
+.dark section,
+.dark main,
+.dark div {
+  /* We don't blanket all divs — we target specific bg patterns */
+}
+
+/* Catch-all for Tailwind bg-white utility */
+html.dark [class*="bg-white"] {
+  background-color: #13101F !important;
+}
+
+/* Catch-all for Tailwind bg-gray-50, bg-gray-100 */
+html.dark [class*="bg-gray-50"],
+html.dark [class*="bg-gray-100"],
+html.dark [class*="bg-slate-50"],
+html.dark [class*="bg-slate-100"] {
+  background-color: #161028 !important;
+}
+
+/* Brand light backgrounds */
+html.dark [class*="bg-brand-light"],
+html.dark [class*="bg-\\[\\#F7F5FC\\]"],
+html.dark [class*="bg-purple-50"],
+html.dark [class*="bg-violet-50"],
+html.dark [class*="bg-indigo-50"] {
+  background-color: #1A1330 !important;
+}
+
+/* Section gradient backgrounds — common pattern: from-[#F7F5FC] to-white */
+html.dark [class*="from-\\[\\#F7F5FC\\]"] {
+  --tw-gradient-from: #161028 !important;
+}
+html.dark [class*="to-white"] {
+  --tw-gradient-to: #0C0818 !important;
+}
+html.dark [class*="from-white"] {
+  --tw-gradient-from: #0C0818 !important;
+}
+html.dark [class*="to-\\[\\#F7F5FC\\]"] {
+  --tw-gradient-to: #161028 !important;
+}
+
+/* Emerald/green backgrounds */
+html.dark [class*="bg-emerald-50"],
+html.dark [class*="bg-green-50"] {
+  background-color: #0F1A15 !important;
+}
+
+/* Amber/yellow backgrounds */
+html.dark [class*="bg-amber-50"],
+html.dark [class*="bg-yellow-50"] {
+  background-color: #1A170F !important;
+}
+
+/* Rose/red backgrounds */
+html.dark [class*="bg-rose-50"],
+html.dark [class*="bg-red-50"],
+html.dark [class*="bg-pink-50"] {
+  background-color: #1A0F14 !important;
+}
+
+/* --- Borders --- */
+html.dark [class*="border-brand-border"],
+html.dark [class*="border-purple-200"],
+html.dark [class*="border-purple-100"],
+html.dark [class*="border-gray-200"],
+html.dark [class*="border-gray-100"],
+html.dark [class*="border-slate-200"],
+html.dark [class*="border-indigo-100"] {
+  border-color: #2B2144 !important;
+}
+
+html.dark [class*="border-gray-300"],
+html.dark [class*="border-slate-300"] {
+  border-color: #3D3258 !important;
+}
+
+/* --- Text colors --- */
+/* Primary text (deep purple → light lavender) */
+html.dark [class*="text-primary"] {
+  color: #DDD5FA !important;
+}
+
+/* Dark/black text → light */
+html.dark [class*="text-brand-dark"],
+html.dark [class*="text-gray-900"],
+html.dark [class*="text-slate-900"],
+html.dark [class*="text-gray-800"],
+html.dark [class*="text-slate-800"],
+html.dark [class*="text-black"] {
+  color: #F0ECF9 !important;
+}
+
+/* Medium text */
+html.dark [class*="text-brand-muted"],
+html.dark [class*="text-gray-600"],
+html.dark [class*="text-slate-600"],
+html.dark [class*="text-gray-500"],
+html.dark [class*="text-slate-500"] {
+  color: #A69EB8 !important;
+}
+
+/* Lighter text */
+html.dark [class*="text-gray-700"],
+html.dark [class*="text-slate-700"] {
+  color: #C4BDD6 !important;
+}
+
+html.dark [class*="text-gray-400"],
+html.dark [class*="text-slate-400"] {
+  color: #887FA0 !important;
+}
+
+/* --- .text-gradient in dark --- */
+.dark .text-gradient {
+  background: linear-gradient(135deg, #D4C5FF 0%, #F09BC0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* --- Form elements --- */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #1D1535 !important;
+  color: #F0ECF9 !important;
+  border-color: #342852 !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #7A7190 !important;
+}
+
+/* --- Cards & elevated surfaces --- */
+html.dark [class*="shadow-md"],
+html.dark [class*="shadow-lg"],
+html.dark [class*="shadow-xl"],
+html.dark [class*="shadow-sm"] {
+  --tw-shadow-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+/* --- Dividers / horizontal rules --- */
+.dark hr {
+  border-color: #2B2144 !important;
+}
+
+/* --- Tables --- */
+.dark th {
+  background-color: #1A1330 !important;
+  color: #DDD5FA !important;
+  border-color: #2B2144 !important;
+}
+.dark td {
+  border-color: #221A38 !important;
+  color: #D4CDE6 !important;
+}
+.dark tr:hover td {
+  background-color: #1A1330 !important;
+}
+
+/* --- Scrollbar dark --- */
+.dark ::-webkit-scrollbar-track {
+  background: #0C0818;
+}
+
+/* --- Footer already has bg-primary which is dark-friendly --- */
+/* Just make sure the footer in dark mode keeps good contrast */
+.dark footer {
+  background-color: #0A0714 !important;
+  border-color: #C89B3C !important;
+}
+
+/* --- Btn-gradient in dark → slightly brighter --- */
+.dark .btn-gradient {
+  background: linear-gradient(135deg, #4E37A0 0%, #C93080 100%);
+}
+.dark .btn-gradient:hover {
+  box-shadow: 0 4px 18px rgba(201, 48, 128, 0.5);
+}
+
+/* --- Accent badge backgrounds in dark --- */
+html.dark [class*="bg-primary\\/10"],
+html.dark [class*="bg-primary\\/5"] {
+  background-color: rgba(197, 182, 240, 0.12) !important;
+}
+html.dark [class*="bg-secondary\\/10"],
+html.dark [class*="bg-secondary\\/5"] {
+  background-color: rgba(232, 109, 169, 0.12) !important;
+}
+html.dark [class*="bg-accent\\/10"],
+html.dark [class*="bg-accent\\/5"] {
+  background-color: rgba(200, 155, 60, 0.12) !important;
+}
+
+/* --- Ring / outline colors --- */
+html.dark [class*="ring-purple"],
+html.dark [class*="ring-brand-border"],
+html.dark [class*="ring-gray-200"] {
+  --tw-ring-color: #2B2144 !important;
+}
+
+/* --- Specific hardcoded colors used in the codebase --- */
+html.dark [style*="background-color: rgb(255, 255, 255)"],
+html.dark [style*="background: rgb(255, 255, 255)"],
+html.dark [style*="background-color: white"],
+html.dark [style*="background: white"] {
+  background-color: #13101F !important;
 }
