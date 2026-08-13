@@ -1712,6 +1712,290 @@ export default function AdminDashboard() {
             </div>
           )}
 
+          {/* TAB 3C: SCHOOL COLLABORATION REQUESTS TAB */}
+          {activeTab === 'schools' && (
+            <div className="space-y-6 animate-fade-in-up">
+              
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h3 className="font-serif text-xl font-bold text-primary">School Collaboration Requests</h3>
+                  <p className="text-xs text-brand-muted mt-1">Review school partner inquiries for shadow teacher classroom placements & institution programs.</p>
+                </div>
+                <button
+                  onClick={fetchDatabase}
+                  className="px-3.5 py-2 bg-brand-light hover:bg-brand-border text-primary rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+                >
+                  <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                  <span>Refresh Data</span>
+                </button>
+              </div>
+
+              {/* Stats Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                <div className="bg-white border border-brand-border p-4 rounded-2xl shadow-2xs text-left">
+                  <div className="flex items-center justify-between text-brand-muted text-xs font-semibold mb-1">
+                    <span>Total Inquiries</span>
+                    <School size={16} className="text-primary" />
+                  </div>
+                  <div className="text-2xl font-black text-primary font-serif">
+                    {db?.school_requests?.length || 0}
+                  </div>
+                </div>
+
+                <div className="bg-white border border-brand-border p-4 rounded-2xl shadow-2xs text-left">
+                  <div className="flex items-center justify-between text-brand-muted text-xs font-semibold mb-1">
+                    <span>Booking Fee Paid</span>
+                    <CreditCard size={16} className="text-emerald-600" />
+                  </div>
+                  <div className="text-2xl font-black text-emerald-700 font-serif">
+                    {(db?.school_requests || []).filter((r: any) => r.consultationPaid || r.consultation_paid).length}
+                  </div>
+                </div>
+
+                <div className="bg-white border border-brand-border p-4 rounded-2xl shadow-2xs text-left">
+                  <div className="flex items-center justify-between text-brand-muted text-xs font-semibold mb-1">
+                    <span>Placement Fee Paid</span>
+                    <CheckCircle2 size={16} className="text-purple-600" />
+                  </div>
+                  <div className="text-2xl font-black text-purple-700 font-serif">
+                    {(db?.school_requests || []).filter((r: any) => r.placementPaid || r.placement_paid).length}
+                  </div>
+                </div>
+
+                <div className="bg-white border border-brand-border p-4 rounded-2xl shadow-2xs text-left">
+                  <div className="flex items-center justify-between text-brand-muted text-xs font-semibold mb-1">
+                    <span>Active Support</span>
+                    <ShieldCheck size={16} className="text-secondary" />
+                  </div>
+                  <div className="text-2xl font-black text-secondary font-serif">
+                    {(db?.school_requests || []).filter((r: any) => (r.status || '').includes('Support Started') || (r.status || '').includes('Active')).length}
+                  </div>
+                </div>
+              </div>
+
+              {/* Filters Bar */}
+              <div className="bg-white border border-brand-border p-4 rounded-2xl shadow-2xs space-y-3">
+                <div className="flex flex-col md:flex-row gap-3">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-3 text-brand-muted" size={16} />
+                    <input
+                      type="text"
+                      placeholder="Search by school name, contact person, email, city or reg ID..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2 border border-brand-border rounded-xl text-xs text-brand-dark focus:outline-none focus:ring-2 focus:ring-primary/40 bg-white"
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <select
+                      value={filterCity}
+                      onChange={(e) => setFilterCity(e.target.value)}
+                      className="px-3 py-2 border border-brand-border rounded-xl text-xs font-semibold text-brand-dark bg-white focus:outline-none"
+                    >
+                      <option value="">All Cities</option>
+                      <option value="Delhi NCR">Delhi NCR</option>
+                      <option value="Ahmedabad">Ahmedabad</option>
+                      <option value="Hyderabad">Hyderabad</option>
+                      <option value="Bangalore">Bangalore</option>
+                      <option value="Pune">Pune</option>
+                    </select>
+
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                      className="px-3 py-2 border border-brand-border rounded-xl text-xs font-semibold text-brand-dark bg-white focus:outline-none"
+                    >
+                      <option value="">All Statuses</option>
+                      <option value="Consultation Booked">Consultation Booked</option>
+                      <option value="Requirement Analysis">Requirement Analysis</option>
+                      <option value="Proposal Shared">Proposal Shared</option>
+                      <option value="Placement Fee Pending">Placement Fee Pending</option>
+                      <option value="Placement Fee Paid">Placement Fee Paid</option>
+                      <option value="Profiles Shared">Profiles Shared</option>
+                      <option value="Interview Scheduled">Interview Scheduled</option>
+                      <option value="Selection Completed">Selection Completed</option>
+                      <option value="Support Started">Support Started</option>
+                      <option value="Closed">Closed</option>
+                    </select>
+
+                    {(searchQuery || filterCity || filterStatus) && (
+                      <button
+                        onClick={() => {
+                          setSearchQuery('');
+                          setFilterCity('');
+                          setFilterStatus('');
+                        }}
+                        className="px-3 py-2 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                      >
+                        Reset Filters
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Table / Empty State */}
+              <div className="bg-white border border-brand-border rounded-2xl shadow-2xs overflow-hidden text-left">
+                {loading ? (
+                  <div className="p-12 text-center text-brand-muted space-y-2">
+                    <RefreshCw className="animate-spin mx-auto text-primary" size={24} />
+                    <p className="text-xs font-semibold">Loading school collaboration requests...</p>
+                  </div>
+                ) : (() => {
+                  const list = (db?.school_requests || []).filter((r: any) => {
+                    const q = searchQuery.toLowerCase();
+                    const matchesSearch = !q || 
+                      (r.schoolName || r.school_name || '').toLowerCase().includes(q) ||
+                      (r.contactName || r.contact_name || '').toLowerCase().includes(q) ||
+                      (r.email || '').toLowerCase().includes(q) ||
+                      (r.phone || '').includes(q) ||
+                      (r.city || '').toLowerCase().includes(q) ||
+                      (r.registrationId || r.registration_id || '').toLowerCase().includes(q);
+
+                    const matchesCity = !filterCity || (r.city || '').toLowerCase().includes(filterCity.toLowerCase());
+                    const matchesStatus = !filterStatus || (r.status || '').toLowerCase() === filterStatus.toLowerCase();
+
+                    return matchesSearch && matchesCity && matchesStatus;
+                  });
+
+                  if (list.length === 0) {
+                    return (
+                      <div className="p-12 text-center text-brand-muted space-y-3">
+                        <div className="w-16 h-16 rounded-full bg-purple-50 text-primary flex items-center justify-center mx-auto border border-purple-100 shadow-2xs">
+                          <School size={28} />
+                        </div>
+                        <h4 className="font-serif text-lg font-bold text-primary">No School Requests Found</h4>
+                        <p className="text-xs text-brand-muted max-w-md mx-auto leading-relaxed">
+                          {searchQuery || filterCity || filterStatus 
+                            ? "No school requests match your current search and filter criteria. Try resetting filters." 
+                            : "No school partnership or collaboration requests have been submitted yet. New school submissions from the /schools portal will automatically appear here."}
+                        </p>
+                        {searchQuery || filterCity || filterStatus ? (
+                          <button
+                            onClick={() => { setSearchQuery(''); setFilterCity(''); setFilterStatus(''); }}
+                            className="px-4 py-2 bg-primary text-white rounded-xl text-xs font-bold shadow-xs hover:bg-primary/90 transition-all cursor-pointer"
+                          >
+                            Reset Search Filters
+                          </button>
+                        ) : (
+                          <button
+                            onClick={fetchDatabase}
+                            className="px-4 py-2 bg-brand-light border border-brand-border text-primary rounded-xl text-xs font-bold hover:bg-white transition-all inline-flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <RefreshCw size={13} />
+                            <span>Check for Updates</span>
+                          </button>
+                        )}
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs border-collapse">
+                        <thead>
+                          <tr className="bg-brand-light/60 border-b border-brand-border text-primary font-bold">
+                            <th className="p-4">Reg ID</th>
+                            <th className="p-4">School &amp; Contact Person</th>
+                            <th className="p-4">Phone / Email</th>
+                            <th className="p-4">City</th>
+                            <th className="p-4">Teachers Needed</th>
+                            <th className="p-4 text-center">Booking Fee</th>
+                            <th className="p-4 text-center">Placement Fee</th>
+                            <th className="p-4 text-center">Status</th>
+                            <th className="p-4 text-center">Action</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-brand-border/60">
+                          {list.map((r: any) => {
+                            const isConsultPaid = r.consultationPaid || r.consultation_paid;
+                            const isPlacePaid = r.placementPaid || r.placement_paid;
+                            const statusStr = r.status || 'Consultation Booked';
+
+                            return (
+                              <tr key={r.id || r.registration_id} className="hover:bg-brand-light/30 transition-colors">
+                                <td className="p-4 font-mono font-bold text-secondary whitespace-nowrap">
+                                  {r.registrationId || r.registration_id}
+                                </td>
+                                <td className="p-4">
+                                  <div className="font-bold text-primary text-sm">{r.schoolName || r.school_name}</div>
+                                  <div className="text-[11px] text-brand-muted mt-0.5">
+                                    {r.contactName || r.contact_name} {r.designation ? `(${r.designation})` : ''}
+                                  </div>
+                                </td>
+                                <td className="p-4">
+                                  <div className="font-semibold text-brand-dark">{r.phone}</div>
+                                  <div className="text-[11px] text-brand-muted">{r.email}</div>
+                                </td>
+                                <td className="p-4 font-semibold text-brand-dark whitespace-nowrap">
+                                  {r.city}
+                                </td>
+                                <td className="p-4">
+                                  <div className="font-bold text-primary">{r.teachersCount || r.teachers_count || 1} Shadow Teacher(s)</div>
+                                  <div className="text-[11px] text-brand-muted">{r.levelsRequired || r.levels_required || 'General'}</div>
+                                </td>
+                                <td className="p-4 text-center whitespace-nowrap">
+                                  {isConsultPaid ? (
+                                    <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase">
+                                      ₹99 Paid
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase">
+                                      Pending
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="p-4 text-center whitespace-nowrap">
+                                  {isPlacePaid ? (
+                                    <span className="px-2 py-0.5 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-[10px] font-black uppercase">
+                                      ₹5,000 Paid
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase">
+                                      Unpaid
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="p-4 text-center whitespace-nowrap">
+                                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase border ${
+                                    statusStr.includes('Support Started') ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
+                                    statusStr.includes('Paid') ? 'bg-purple-50 border-purple-200 text-purple-700' :
+                                    statusStr.includes('Closed') ? 'bg-slate-100 border-slate-200 text-slate-600' :
+                                    'bg-amber-50 border-amber-200 text-amber-800'
+                                  }`}>
+                                    {statusStr}
+                                  </span>
+                                </td>
+                                <td className="p-4 text-center whitespace-nowrap">
+                                  <button
+                                    onClick={() => {
+                                      setSelectedRecord({
+                                        type: 'school_requests',
+                                        data: r
+                                      });
+                                      setEditStatus(r.status || 'Consultation Booked');
+                                      setEditNotes(r.notes || '');
+                                    }}
+                                    className="px-3 py-1.5 bg-primary text-white hover:bg-primary/90 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                  >
+                                    View / Edit
+                                  </button>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                })()}
+              </div>
+
+            </div>
+          )}
+
           {/* TAB 4B: BOOKINGS & CONSULTATIONS TAB */}
           {activeTab === 'bookings' && (
             <div className="space-y-6 animate-fade-in-up">
@@ -2705,6 +2989,20 @@ export default function AdminDashboard() {
                       </>
                     )}
 
+                    {/* School Requests specific */}
+                    {selectedRecord.type === 'school_requests' && (
+                      <>
+                        <div className="col-span-2"><strong>School Name:</strong> {selectedRecord.data.schoolName || selectedRecord.data.school_name}</div>
+                        <div><strong>Contact Person:</strong> {selectedRecord.data.contactName || selectedRecord.data.contact_name}</div>
+                        <div><strong>Designation:</strong> {selectedRecord.data.designation || 'Not Specified'}</div>
+                        <div className="col-span-2"><strong>Preferred Location:</strong> {selectedRecord.data.preferredLocation || selectedRecord.data.preferred_location}</div>
+                        <div className="col-span-2"><strong>Levels Required:</strong> {selectedRecord.data.levelsRequired || selectedRecord.data.levels_required}</div>
+                        <div className="col-span-2"><strong>Specific Grades:</strong> {selectedRecord.data.specificGrades || selectedRecord.data.specific_grades}</div>
+                        <div><strong>Shadow Teachers Needed:</strong> {selectedRecord.data.teachersCount || selectedRecord.data.teachers_count || 1}</div>
+                        <div><strong>Expected Start Date:</strong> {selectedRecord.data.startDate || selectedRecord.data.start_date || 'ASAP'}</div>
+                      </>
+                    )}
+
                   </div>
                 </div>
 
@@ -2807,6 +3105,22 @@ export default function AdminDashboard() {
                           <option value="Matching in Progress">Matching in Progress</option>
                           <option value="Therapist Assigned">Therapist Assigned</option>
                           <option value="Home Sessions Begin">Home Sessions Begin</option>
+                          <option value="Closed">Closed</option>
+                        </>
+                      )}
+
+                      {/* Statuses for School requests */}
+                      {selectedRecord.type === 'school_requests' && (
+                        <>
+                          <option value="Consultation Booked">Consultation Booked</option>
+                          <option value="Requirement Analysis">Requirement Analysis</option>
+                          <option value="Proposal Shared">Proposal Shared</option>
+                          <option value="Placement Fee Pending">Placement Fee Pending</option>
+                          <option value="Placement Fee Paid">Placement Fee Paid</option>
+                          <option value="Profiles Shared">Profiles Shared</option>
+                          <option value="Interview Scheduled">Interview Scheduled</option>
+                          <option value="Selection Completed">Selection Completed</option>
+                          <option value="Support Started">Support Started</option>
                           <option value="Closed">Closed</option>
                         </>
                       )}
