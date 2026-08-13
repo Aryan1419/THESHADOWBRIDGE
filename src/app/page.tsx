@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
   Sparkles, CheckCircle2, Award, Users, BookOpen, Compass, 
-  MapPin, Send, HelpCircle, ArrowRight, Star, Heart, GraduationCap, ShieldCheck, Clock
+  MapPin, Send, HelpCircle, ArrowRight, Star, Heart, GraduationCap, ShieldCheck, Clock, PhoneCall
 } from 'lucide-react';
 
 import Navbar from '@/components/Navbar';
@@ -194,20 +194,59 @@ export default function Home() {
                 Connecting families with professionally trained Shadow Teachers and Home Tutors who provide the right support, guidance, and care every child deserves.
               </p>
 
-              {/* Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
-                <Link
-                  href="/book"
-                  className="btn-gradient px-8 py-4 rounded-full text-base font-bold text-center shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2"
-                >
-                  Book a Consultation – Just ₹99
-                </Link>
-                <Link
-                  href="/register/parent"
-                  className="px-8 py-4 rounded-full border-2 border-primary text-primary hover:bg-brand-light font-bold text-center transition-all flex items-center justify-center gap-2"
-                >
-                  I Need a Shadow / Tutor
-                </Link>
+              {/* Buttons & Quick Service Shortcuts */}
+              <div className="space-y-4 pt-2">
+                <div className="flex flex-col sm:flex-row gap-3.5 justify-center lg:justify-start">
+                  <Link
+                    href="/services"
+                    className="btn-gradient px-7 py-4 rounded-full text-base font-bold text-center shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2.5 text-white cursor-pointer"
+                  >
+                    <Compass size={20} className="shrink-0" />
+                    <span>EXPLORE SERVICES</span>
+                  </Link>
+
+                  <Link
+                    href="/book"
+                    className="px-7 py-4 rounded-full bg-white border-2 border-primary text-primary hover:bg-brand-light font-bold text-center transition-all flex items-center justify-center gap-2 shadow-md hover:scale-105 active:scale-95 cursor-pointer"
+                  >
+                    <PhoneCall size={18} className="shrink-0 text-secondary" />
+                    <span>Book Consultation (₹99)</span>
+                  </Link>
+                </div>
+
+                {/* Quick Service Category Shortcuts */}
+                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1">
+                  <span className="text-xs font-bold text-brand-muted uppercase tracking-wider mr-1">Quick Explore:</span>
+                  <Link
+                    href="/shadow-teachers"
+                    className="px-3 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <Users size={13} className="text-secondary" />
+                    <span>Shadow Teachers</span>
+                  </Link>
+                  <Link
+                    href="/tutors"
+                    className="px-3 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <GraduationCap size={13} className="text-primary" />
+                    <span>Home Tutors</span>
+                  </Link>
+                  <Link
+                    href="/therapies"
+                    className="px-3 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <Heart size={13} className="text-secondary" />
+                    <span>Therapy Sessions</span>
+                    <span className="bg-secondary/15 text-secondary text-[9px] font-black px-1.5 py-0.5 rounded-full">Delhi NCR</span>
+                  </Link>
+                  <Link
+                    href="/schools"
+                    className="px-3 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <BookOpen size={13} className="text-accent" />
+                    <span>For Schools</span>
+                  </Link>
+                </div>
               </div>
             </div>
 
