@@ -5,6 +5,16 @@
   --foreground: #1a1a1a;
 }
 
+.dark {
+  --background: #0D091B;
+  --foreground: #F4F1FA;
+  --color-primary: #C5B6F0;
+  --color-brand-light: #161028;
+  --color-brand-border: #2B2144;
+  --color-brand-dark: #F4F1FA;
+  --color-brand-muted: #A69EB8;
+}
+
 @theme {
   --color-primary: #3B2A6B;
   --color-secondary: #B0206B;
@@ -46,6 +56,60 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark body {
+  background-color: #0D091B;
+  color: #F4F1FA;
+}
+
+.dark nav {
+  background-color: rgba(15, 11, 28, 0.95) !important;
+  border-color: #2B2144 !important;
+}
+
+.dark .bg-white {
+  background-color: #150F26 !important;
+  color: #F4F1FA !important;
+}
+
+.dark .bg-brand-light,
+.dark .bg-brand-light\/30,
+.dark .bg-brand-light\/20,
+.dark .bg-brand-light\/40,
+.dark .bg-\[\#F7F5FC\],
+.dark .bg-purple-50,
+.dark .bg-purple-50\/40,
+.dark .bg-purple-50\/60 {
+  background-color: #1A1330 !important;
+}
+
+.dark .border-brand-border,
+.dark .border-brand-border\/40,
+.dark .border-brand-border\/60,
+.dark .border-purple-200 {
+  border-color: #2B2144 !important;
+}
+
+.dark .text-primary {
+  color: #DDD5FA !important;
+}
+
+.dark .text-brand-dark {
+  color: #F4F1FA !important;
+}
+
+.dark .text-brand-muted {
+  color: #A69EB8 !important;
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #1D1535 !important;
+  color: #F4F1FA !important;
+  border-color: #342852 !important;
 }
 
 /* Custom Utilities */
@@ -67,12 +131,21 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
+.dark .text-gradient {
+  background: linear-gradient(135deg, #C5B6F0 0%, #E86DA9 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;
 }
 ::-webkit-scrollbar-track {
   background: #F8F5FB;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #150F26;
 }
 ::-webkit-scrollbar-thumb {
   background: #C2185B;
