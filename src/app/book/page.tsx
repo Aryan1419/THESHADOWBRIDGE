@@ -45,6 +45,8 @@ function BookConsultationForm() {
     const typeParam = searchParams.get('type');
     if (serviceParam === 'therapy' || (typeParam && typeParam !== '')) {
       const therapyMap: Record<string, string> = {
+        'aba-online-therapy': 'ABA Online Therapy (PAN India)',
+        'online-parent-training': 'Online Parent Training (PAN India)',
         'aba-therapy': 'ABA Therapy',
         'speech-therapy': 'Speech Therapy',
         'occupational-therapy': 'Occupational Therapy',
@@ -56,12 +58,13 @@ function BookConsultationForm() {
       };
 
       const matchedName = typeParam ? (therapyMap[typeParam] || 'ABA Therapy') : 'ABA Therapy';
+      const isOnlineTherapy = matchedName.includes('PAN India') || matchedName.includes('Online');
 
       setFormData(prev => ({
         ...prev,
-        requirement: 'Home Therapy Sessions (Delhi NCR Only)',
+        requirement: isOnlineTherapy ? `Therapy: ${matchedName}` : 'Home Therapy Sessions (Delhi NCR Only)',
         therapyType: matchedName,
-        city: 'Delhi NCR'
+        city: isOnlineTherapy ? (prev.city || 'Delhi NCR') : 'Delhi NCR'
       }));
     }
   }, [searchParams]);
@@ -477,17 +480,23 @@ function BookConsultationForm() {
                           onChange={(e) => setFormData(prev => ({ ...prev, therapyType: e.target.value }))}
                           className="p-3 border border-purple-200 bg-white rounded-xl text-sm font-bold text-purple-950 focus:outline-none focus:ring-2 focus:ring-secondary/40"
                         >
-                          <option value="ABA Therapy">ABA Therapy (Applied Behavior Analysis)</option>
-                          <option value="Speech Therapy">Speech &amp; Language Therapy</option>
-                          <option value="Occupational Therapy">Occupational Therapy (OT)</option>
-                          <option value="Special Education">Special Education</option>
-                          <option value="Behavior Therapy">Pediatric Behavior Therapy</option>
-                          <option value="Physical Therapy">Physical Therapy (Physiotherapy)</option>
-                          <option value="Play Therapy">Play Therapy</option>
+                          <option value="ABA Online Therapy (PAN India)">🌐 ABA Online Therapy (PAN India)</option>
+                          <option value="Online Parent Training (PAN India)">🌐 Online Parent Training (PAN India)</option>
+                          <option value="ABA Therapy">ABA Therapy (In-Home - Delhi NCR)</option>
+                          <option value="Speech Therapy">Speech &amp; Language Therapy (In-Home)</option>
+                          <option value="Occupational Therapy">Occupational Therapy (In-Home)</option>
+                          <option value="Special Education">Special Education (In-Home)</option>
+                          <option value="Behavior Therapy">Pediatric Behavior Therapy (In-Home)</option>
+                          <option value="Physical Therapy">Physical Therapy (In-Home)</option>
+                          <option value="Play Therapy">Play Therapy (In-Home)</option>
                           <option value="Counseling & Psychological Support">Counseling &amp; Psychological Support</option>
                         </select>
                         <p className="text-[11px] text-purple-800 font-semibold mt-1">
-                          🔒 Note: Home Therapy Sessions are available exclusively in <strong>Delhi NCR</strong>. City has been set to Delhi NCR.
+                          {formData.therapyType.includes('PAN India') || formData.therapyType.includes('Online') ? (
+                            <span>🌐 <strong>PAN India Online Service:</strong> Live 1-on-1 video sessions available to families anywhere across India.</span>
+                          ) : (
+                            <span>🔒 Note: In-Home Therapy Sessions are available exclusively in <strong>Delhi NCR</strong>.</span>
+                          )}
                         </p>
                       </motion.div>
                     )}

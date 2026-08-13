@@ -27,6 +27,38 @@ export default function Services() {
       ctaText: "Find a Shadow Teacher"
     },
     {
+      id: "aba-online",
+      icon: <BookOpen size={32} className="text-primary" />,
+      title: "ABA Online Therapy (PAN India)",
+      subtitle: "Live 1-on-1 ABA Therapy Sessions Across All States of India",
+      description: "Connect with certified Applied Behavior Analysis (ABA) experts online from anywhere in India. Our telehealth ABA program provides data-driven behavior plans, functional communication training, task focus, and real-time therapist guidance directly in your home.",
+      features: [
+        "Available All Over India (PAN India) via live 1-on-1 video calls",
+        "Customized Individualized ABA Behavior & Skill Acquisition Plans",
+        "Functional Communication & Verbal Behavior Training",
+        "Task focus, sensory regulation & meltdown reduction strategies",
+        "Regular data tracking and monthly formal progress evaluation reports"
+      ],
+      ctaLink: "/therapies/aba-online-therapy",
+      ctaText: "Explore ABA Online Therapy"
+    },
+    {
+      id: "parent-training",
+      icon: <Users size={32} className="text-secondary" />,
+      title: "Online Parent Training (PAN India)",
+      subtitle: "1-on-1 Parent Coaching & ABA Strategy Training (PAN India)",
+      description: "Empowering parents across India with practical behavioral management tools, ABA techniques, routine building, and positive reinforcement strategies to support their child with Autism, ADHD, or speech/learning delays at home.",
+      features: [
+        "100% Online 1-on-1 sessions available anywhere in India",
+        "Step-by-step behavior management & meltdown strategies",
+        "Daily home routine design & visual schedule implementation",
+        "Positive reinforcement & task compliance tools",
+        "Direct guidance from senior behavior analysts & special educators"
+      ],
+      ctaLink: "/therapies/online-parent-training",
+      ctaText: "Explore Parent Training"
+    },
+    {
       id: "tutors",
       icon: <GraduationCap size={32} className="text-secondary" />,
       title: "Inclusive Home Tutoring",

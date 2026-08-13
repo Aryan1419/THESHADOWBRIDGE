@@ -5,6 +5,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const currentDate = new Date();
 
   const therapySlugs = [
+    'aba-online-therapy',
+    'online-parent-training',
     'aba-therapy',
     'speech-therapy',
     'occupational-therapy',

@@ -4,8 +4,8 @@ import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
-  Sparkles, Check, ArrowRight, MapPin, PhoneCall, ShieldCheck, HeartHandshake,
-  Activity, MessageSquare, Brain, GraduationCap, Smile, Dumbbell, Puzzle, HeartPulse
+  Sparkles, Check, ArrowRight, MapPin, PhoneCall, ShieldCheck, HeartHandshake, Globe, Laptop,
+  Activity, MessageSquare, Brain, GraduationCap, Smile, Dumbbell, Puzzle, HeartPulse, Users
 } from 'lucide-react';
 
 import Navbar from '@/components/Navbar';
@@ -13,12 +13,32 @@ import Footer from '@/components/Footer';
 
 export const THERAPY_TYPES = [
   {
+    slug: 'aba-online-therapy',
+    name: 'ABA Online Therapy',
+    icon: Laptop,
+    shortDesc: 'Live 1-on-1 ABA therapy sessions conducted online for children & parents across India. Data-driven behavior plan & guidance.',
+    color: 'from-purple-500/10 to-indigo-500/10 border-purple-200 text-purple-900',
+    badge: 'PAN INDIA (ONLINE)',
+    isPanIndia: true,
+    isOnline: true
+  },
+  {
+    slug: 'online-parent-training',
+    name: 'Online Parent Training',
+    icon: Users,
+    shortDesc: 'Empowering parents nationwide with practical ABA tools, routine design, meltdown management, and positive behavior strategies.',
+    color: 'from-emerald-500/10 to-teal-500/10 border-emerald-200 text-emerald-900',
+    badge: 'PAN INDIA (ONLINE)',
+    isPanIndia: true,
+    isOnline: true
+  },
+  {
     slug: 'aba-therapy',
-    name: 'ABA Therapy',
+    name: 'ABA Therapy (In-Home)',
     icon: Brain,
     shortDesc: 'Applied Behavior Analysis focusing on communication, social skills, play, and positive behavior management.',
     color: 'from-purple-500/10 to-indigo-500/10 border-purple-200 text-purple-900',
-    badge: 'Popular'
+    badge: 'Delhi NCR'
   },
   {
     slug: 'speech-therapy',
@@ -90,31 +110,31 @@ export default function TherapiesLandingPage() {
             
             {/* Left Content Column */}
             <div className="lg:col-span-7 space-y-6 text-left">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-100 border border-purple-200 text-purple-950 text-xs font-extrabold uppercase tracking-wider">
+              <div className="inline-flex flex-wrap items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-100 border border-purple-200 text-purple-950 text-xs font-extrabold tracking-wider">
                 <Sparkles size={13} className="text-secondary" />
-                <span>Therapies – Home Sessions</span>
-                <span className="px-2 py-0.5 rounded-full bg-secondary text-white text-[9px] font-black">DELHI NCR ONLY</span>
+                <span>Pediatric Therapies &amp; Behavioral Care</span>
+                <span className="px-2 py-0.5 rounded-full bg-secondary text-white text-[9px] font-black uppercase">PAN INDIA &amp; DELHI NCR</span>
               </div>
 
               <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-black text-primary leading-tight tracking-tight">
-                Home Therapy Sessions For Delhi NCR Parents
+                Pediatric Therapies &amp; Online ABA Parent Training
               </h1>
 
               <p className="text-base sm:text-lg text-purple-950 font-extrabold leading-snug">
-                All Therapies. Expert Care. At Your Doorstep.
+                All Therapies • Expert Care • Home Sessions (Delhi NCR) &amp; Online Services (PAN INDIA)
               </p>
 
               <p className="text-xs sm:text-sm text-brand-dark/80 font-medium leading-relaxed max-w-2xl">
-                We bring certified pediatric therapists directly to your home for personalized 1-on-1 sessions. Convenient, comfortable, and tailored to your child&apos;s unique developmental goals.
+                We connect certified pediatric therapists directly to your family. Enjoy 1-on-1 In-Home Therapy across Delhi NCR or access live <strong>ABA Online Therapy &amp; Online Parent Training anywhere across India (PAN India)</strong>.
               </p>
 
               {/* 4 Feature Bullets */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 {[
-                  'Expert & Certified Therapists',
-                  'Personalized Therapy Plans',
-                  'One-on-One Home Sessions',
-                  'Convenient & Safe Environment'
+                  'In-Home Therapy (Delhi NCR)',
+                  'ABA Online Therapy (PAN India)',
+                  'Online Parent Training (PAN India)',
+                  'Certified & Experienced Experts'
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-center gap-2.5 text-xs font-bold text-primary">
                     <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 border border-emerald-200">
@@ -138,7 +158,7 @@ export default function TherapiesLandingPage() {
                   href="#services-grid"
                   className="px-6 py-3.5 rounded-2xl font-bold text-xs border border-brand-border bg-white text-primary hover:bg-brand-light flex items-center justify-center gap-2"
                 >
-                  Explore All 8 Therapies
+                  Explore All 10 Services
                 </a>
               </div>
             </div>
@@ -148,22 +168,22 @@ export default function TherapiesLandingPage() {
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-white p-6 space-y-4 text-left">
                 <div className="flex items-center gap-3 border-b border-brand-border/60 pb-4">
                   <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-xl shrink-0">
-                    🧩
+                    🌐
                   </div>
                   <div>
-                    <span className="text-[10px] font-extrabold text-secondary uppercase tracking-wider">Home Therapy Care</span>
-                    <h3 className="font-serif text-lg font-bold text-primary">Delhi NCR Specialized Care</h3>
+                    <span className="text-[10px] font-extrabold text-secondary uppercase tracking-wider">Comprehensive Therapy Care</span>
+                    <h3 className="font-serif text-lg font-bold text-primary">PAN India &amp; Delhi NCR</h3>
                   </div>
                 </div>
 
                 <div className="space-y-3 text-xs text-brand-dark/80 leading-relaxed font-medium">
-                  <p>• <strong>1-on-1 In-Home Convenience:</strong> No commuting stress for your child. Therapy happens in their most natural, comfortable space.</p>
-                  <p>• <strong>Customized Assessments:</strong> Detailed evaluation and monthly progress reports delivered directly to parents.</p>
-                  <p>• <strong>Multi-Disciplinary Team:</strong> ABA, Speech, OT, Special Education, Behavior & Psychological experts under one platform.</p>
+                  <p>• <strong>🌐 Online Services (PAN India):</strong> ABA Online Therapy &amp; 1-on-1 Online Parent Training available to families across all states in India.</p>
+                  <p>• <strong>🏡 In-Home Convenience (Delhi NCR):</strong> Direct doorstep visits by certified Speech, OT, ABA, &amp; Special Educators across Delhi NCR.</p>
+                  <p>• <strong>Customized Progress Reviews:</strong> Structured assessment charts and monthly evaluation reports shared with parents.</p>
                 </div>
 
                 <div className="p-3 bg-purple-50 rounded-xl text-center text-xs font-bold text-purple-900 border border-purple-200">
-                  📍 Exclusively Available in Delhi, Noida, Greater Noida, Ghaziabad, Gurugram & Faridabad.
+                  🇮🇳 Online Services Available All Over India | 📍 In-Home Visits Across Delhi NCR.
                 </div>
               </div>
             </div>
@@ -174,9 +194,9 @@ export default function TherapiesLandingPage() {
 
       {/* Regional Location Banner */}
       <section className="bg-gradient-to-r from-primary via-[#2A1D4E] to-primary text-white py-4 border-y border-accent/40 shadow-inner">
-        <div className="max-w-7xl mx-auto px-4 text-center flex flex-col sm:flex-row items-center justify-center gap-2 text-xs font-bold">
-          <MapPin size={16} className="text-accent shrink-0 animate-bounce" />
-          <span>Only for Delhi NCR — Our therapists are available across Delhi, Noida, Greater Noida, Ghaziabad, Gurugram, Faridabad &amp; surrounding areas</span>
+        <div className="max-w-7xl mx-auto px-4 text-center flex flex-col sm:flex-row items-center justify-center gap-3 text-xs font-bold">
+          <Globe size={16} className="text-accent shrink-0 animate-pulse" />
+          <span>🌐 <strong>PAN INDIA:</strong> ABA Online Therapy &amp; Online Parent Training available All Over India &nbsp;|&nbsp; 📍 <strong>IN-HOME:</strong> Delhi NCR (Delhi, Noida, Gurugram, Ghaziabad, Faridabad)</span>
         </div>
       </section>
 

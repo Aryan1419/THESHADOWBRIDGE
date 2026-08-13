@@ -23,6 +23,82 @@ interface TherapyDetail {
 }
 
 const THERAPY_DETAILS: Record<string, TherapyDetail> = {
+  'aba-online-therapy': {
+    slug: 'aba-online-therapy',
+    name: 'ABA Online Therapy (PAN India)',
+    subtitle: 'Live 1-on-1 video ABA therapy & behavioral coaching for children across all states of India.',
+    icon: Brain,
+    description: 'ABA Online Therapy brings certified Applied Behavior Analysis experts directly to your home via live 1-on-1 video sessions. Designed for children with Autism Spectrum Disorder (ASD), ADHD, or developmental delays, our online ABA program delivers structured skill acquisition, functional communication training, task compliance, and real-time therapist guidance anywhere in India.',
+    helpsWith: [
+      'Functional Communication & Verbal Ability',
+      'Task Focus, Attention & Instructional Compliance',
+      'Behavioral Management & Meltdown Reduction',
+      'Social Skills & Tele-Play Guidance',
+      'Daily Routine Compliance & Independence',
+      'Data-Driven Weekly Progress Tracking',
+      'Accessible All Over India (PAN India)'
+    ],
+    faqs: [
+      {
+        question: 'Is ABA Online Therapy available all over India (PAN India)?',
+        answer: 'Yes! ABA Online Therapy is 100% online and available to families across all states and cities in India (Delhi NCR, Mumbai, Bangalore, Hyderabad, Chennai, Kolkata, Pune, Ahmedabad, etc.).'
+      },
+      {
+        question: 'How do live online ABA sessions work?',
+        answer: 'Sessions are conducted 1-on-1 over secure video calls. Certified therapists guide the child through interactive learning tasks while coaching parents to reinforce positive behaviors in real time.'
+      },
+      {
+        question: 'What equipment is needed at home?',
+        answer: 'A smartphone, tablet, or laptop with a stable internet connection, along with basic toys or learning tools recommended by the therapist.'
+      },
+      {
+        question: 'How long is each online session?',
+        answer: 'Sessions run for 45 to 60 minutes, scheduled 2 to 4 times per week based on your child\'s requirements.'
+      },
+      {
+        question: 'Will parents receive formal progress reports?',
+        answer: 'Yes! Data is logged every session and parents receive documented monthly behavioral & milestone evaluations.'
+      }
+    ]
+  },
+  'online-parent-training': {
+    slug: 'online-parent-training',
+    name: 'Online Parent Training (PAN India)',
+    subtitle: 'Live 1-on-1 professional coaching empowering parents with practical ABA & behavioral tools at home.',
+    icon: Brain,
+    description: 'Online Parent Training is a 1-on-1 coaching program designed for parents across India raising children with Autism, ADHD, speech delays, or behavioral challenges. Guided by senior behavior analysts, parents learn step-by-step how to manage tantrums, build predictable routines, implement positive reinforcement, and support learning independently.',
+    helpsWith: [
+      'Handling Tantrums, Aggression & Meltdowns at Home',
+      'Designing Daily Home Routines & Visual Schedules',
+      'Positive Reinforcement & Task Compliance Strategies',
+      'Sensory Regulation & Environmental Adaptations',
+      'Fostering Independent Play & Self-Care Skills',
+      'Navigating School Permissions & IEP Implementation',
+      'Available All Over India (PAN India)'
+    ],
+    faqs: [
+      {
+        question: 'Is Online Parent Training available all over India (PAN India)?',
+        answer: 'Yes! Online Parent Training is conducted via live 1-on-1 video calls and is accessible to parents residing in any city, state, or region of India.'
+      },
+      {
+        question: 'Who should enroll in Online Parent Training?',
+        answer: 'Parents who want hands-on, actionable strategies to manage challenging behaviors, establish smooth home routines, and accelerate their child\'s development.'
+      },
+      {
+        question: 'What is the schedule for parent training calls?',
+        answer: 'Sessions are scheduled flexibly at mutually convenient times, including evening and weekend options.'
+      },
+      {
+        question: 'Can both parents or caregivers join the call?',
+        answer: 'Yes! Both parents, grandparents, or primary home caregivers are welcome to join together.'
+      },
+      {
+        question: 'Do parents get written guides and tracking sheets?',
+        answer: 'Yes, customized visual schedules, behavior tracking charts, and strategy checklists are provided.'
+      }
+    ]
+  },
   'aba-therapy': {
     slug: 'aba-therapy',
     name: 'ABA Therapy (Applied Behavior Analysis)',
@@ -362,7 +438,7 @@ export default function TherapyDetailPage() {
 
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 border border-purple-200 text-purple-950 text-[11px] font-extrabold uppercase">
             <Sparkles size={12} className="text-secondary" />
-            <span>Delhi NCR Home Session</span>
+            <span>{slug.includes('online') ? '🌐 PAN INDIA (ONLINE SERVICE)' : '📍 Delhi NCR Home Session'}</span>
           </div>
 
           <div className="flex items-start gap-4">
