@@ -462,7 +462,8 @@ export default function AdminDashboard() {
       id: selectedRecord.data.id,
       status: 'Match Proposed',
       notes: editNotes,
-      suggestedMatchId: candidateId
+      suggestedMatchId: candidateId,
+      candidateMessage: editCandidateMessage
     };
 
     try {

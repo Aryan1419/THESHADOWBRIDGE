@@ -473,19 +473,90 @@ export async function POST(request: Request) {
         const dashboardLink = `${protocol}://${host}/dashboard?regId=${regId}`;
 
         if (status === 'Match Proposed') {
-          // Trigger Match Ready Payment Request Email
           const amountDue = type === 'parent_shadow_requests' ? 5000 : 3000;
           const childName = record.childName || 'your child';
-          
-          const emailRes = await sendEmail({
-            to: record.email,
-            subject: `Your Match is Ready! - The Shadow Bridge [${regId}]`,
-            type: 'match_ready',
-            bodyHtml: `
+          const alreadyPaid = updatedRecord.placement_paid === true || record.placementPaid === true;
+          const cleanCandidateMsg = candidateMessage ? candidateMessage.trim() : '';
+
+          // Fetch matched teacher/tutor details if suggestedMatchId is available
+          const matchId = suggestedMatchId || updatedRecord.suggested_match_id || record.suggestedMatchId;
+          let matchedTeacher: any = null;
+          if (matchId) {
+            try {
+              const teacherTable = type === 'parent_shadow_requests' ? 'shadow_teachers' : 'tutors';
+              const { data: teacher } = await supabase.from(teacherTable).select('*').eq('id', matchId).maybeSingle();
+              if (teacher) matchedTeacher = teacher;
+            } catch (lookupErr) {
+              console.warn('Teacher lookup for match email failed:', lookupErr);
+            }
+          }
+
+          // Build teacher details block if we have a matched teacher
+          let teacherDetailsBlock = '';
+          if (matchedTeacher) {
+            const teacherName = matchedTeacher.name || 'Our Proposed Educator';
+            const teacherExp = matchedTeacher.experience || 'Verified';
+            const teacherSpec = matchedTeacher.specialization || matchedTeacher.special_needs_exp || '';
+            const teacherCity = matchedTeacher.city || '';
+
+            teacherDetailsBlock = `
+              <div style="background-color: #F0FFF4; border: 1px solid #C6F6D5; padding: 20px; border-radius: 12px; margin: 24px 0;">
+                <h3 style="margin: 0 0 12px 0; color: #276749; font-size: 16px; font-family: Georgia, serif;">✨ Your Proposed Educator Match</h3>
+                <table border="0" cellpadding="0" cellspacing="0" style="font-size: 14px; color: #2D253A; line-height: 1.8;">
+                  <tr><td style="padding-right: 12px; font-weight: bold; color: #6A5B7C;">Name:</td><td style="font-weight: bold; color: #3B2A6B; font-size: 15px;">${teacherName}</td></tr>
+                  <tr><td style="padding-right: 12px; font-weight: bold; color: #6A5B7C;">Experience:</td><td>${teacherExp}</td></tr>
+                  ${teacherSpec ? `<tr><td style="padding-right: 12px; font-weight: bold; color: #6A5B7C;">Specialization:</td><td>${teacherSpec}</td></tr>` : ''}
+                  ${teacherCity ? `<tr><td style="padding-right: 12px; font-weight: bold; color: #6A5B7C;">Location:</td><td>${teacherCity}</td></tr>` : ''}
+                </table>
+                <p style="margin: 14px 0 0 0; font-size: 13px; color: #276749; line-height: 1.5;">We're excited to propose <strong>${teacherName}</strong> as an educator match for <strong>${childName}</strong>. ${teacherName} has <strong>${teacherExp}</strong> of experience${teacherSpec ? ` specializing in ${teacherSpec}` : ''} and has been carefully selected based on your child's specific needs and profile.</p>
+              </div>
+            `;
+          }
+
+          // Build custom admin message block
+          let customMessageBlock = '';
+          if (cleanCandidateMsg) {
+            customMessageBlock = `
+              <div style="background-color: #F3EEF8; border-left: 4px solid #B0206B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+                <p style="margin: 0 0 8px 0; font-size: 13px; color: #B0206B; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">Message from Administration</p>
+                <div style="margin: 0; font-size: 14px; line-height: 1.6; color: #2D253A; font-weight: 500;">
+                  ${cleanCandidateMsg.replace(/\n/g, '<br />')}
+                </div>
+              </div>
+            `;
+          }
+
+          // Build email body depending on payment status
+          let emailBody = '';
+          if (alreadyPaid) {
+            // Parent has ALREADY paid — DO NOT ask for payment
+            emailBody = `
               <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${notificationUser},</h2>
-              <p style="margin: 0 0 16px 0;">We are excited to share that we have successfully proposed a background-verified educational candidate matching trial run for <strong>${childName}</strong>!</p>
-              <p style="margin: 0 0 16px 0;">A detailed profile guideline is now available on your parent dashboard. To lock in this match placement and begin educator trial sessions, please review the profile and complete the program onboarding fee of <strong>₹${amountDue.toLocaleString('en-IN')}</strong>.</p>
-              
+              <p style="margin: 0 0 16px 0;">Great news! We have successfully identified and proposed a background-verified educator match for <strong>${childName}</strong>!</p>
+
+              ${teacherDetailsBlock}
+              ${customMessageBlock}
+
+              <div style="background-color: #F8F5FB; padding: 20px; border-radius: 12px; margin: 24px 0; border: 1px solid #E6E2EB; text-align: center;">
+                <h3 style="margin: 0 0 8px 0; color: #3B2A6B; font-size: 16px;">Next Steps</h3>
+                <p style="margin: 0 0 16px 0; font-size: 13px; color: #6A5B7C;">
+                  Your placement fee is confirmed. ✅<br />
+                  <strong>Registration ID:</strong> ${regId}
+                </p>
+                <a href="${dashboardLink}" style="display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Review Your Match Details →</a>
+              </div>
+            `;
+          } else {
+            // Parent has NOT paid yet — include payment CTA (safety fallback)
+            emailBody = `
+              <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${notificationUser},</h2>
+              <p style="margin: 0 0 16px 0;">We are excited to share that we have successfully proposed a background-verified educational candidate match for <strong>${childName}</strong>!</p>
+
+              ${teacherDetailsBlock}
+              ${customMessageBlock}
+
+              <p style="margin: 0 0 16px 0;">A detailed profile is now available on your parent dashboard. To lock in this match placement and begin educator trial sessions, please review the profile and complete the program onboarding fee of <strong>₹${amountDue.toLocaleString('en-IN')}</strong>.</p>
+
               <div style="background-color: #F3EEF8; padding: 20px; border-radius: 12px; margin: 24px 0; border: 1px solid #E6E2EB; text-align: center;">
                 <h3 style="margin: 0 0 8px 0; color: #3B2A6B; font-size: 16px;">Program Placement Details</h3>
                 <p style="margin: 0 0 16px 0; font-size: 13px; color: #6A5B7C;">
@@ -494,11 +565,18 @@ export async function POST(request: Request) {
                 </p>
                 <a href="${dashboardLink}" style="display: inline-block; padding: 12px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Pay Placement Fee & Review Match</a>
               </div>
-            `
+            `;
+          }
+
+          const emailRes = await sendEmail({
+            to: record.email,
+            subject: `Your Match is Ready! - The Shadow Bridge [${regId}]`,
+            type: 'match_ready',
+            bodyHtml: emailBody
           });
 
           if (emailRes.success) {
-            notificationLog = `[Email Sent via Resend] Match notification email delivered to ${notificationUser} (${record.email}).`;
+            notificationLog = `[Email Sent via Resend] Match notification email${alreadyPaid ? ' (no payment ask — already paid)' : ''} delivered to ${notificationUser} (${record.email}).`;
           } else {
             notificationLog = `[Email Delivery Warning] Record updated, but email delivery to ${record.email} failed: ${emailRes.error}`;
           }
