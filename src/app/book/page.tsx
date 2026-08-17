@@ -62,9 +62,13 @@ function BookConsultationForm() {
 
       setFormData(prev => ({
         ...prev,
-        requirement: isOnlineTherapy ? `Therapy: ${matchedName}` : 'Home Therapy Sessions (Delhi NCR Only)',
+        requirement: isOnlineTherapy 
+          ? (matchedName.includes('Parent Training') ? 'Online Parent Training (PAN India)' : 'Online Therapy Session (PAN India)')
+          : 'Home Therapy Sessions (Delhi NCR Only)',
         therapyType: matchedName,
-        city: isOnlineTherapy ? (prev.city || 'Delhi NCR') : 'Delhi NCR'
+        city: isOnlineTherapy ? '' : 'Delhi NCR',
+        preferredLocation: isOnlineTherapy ? '' : prev.preferredLocation,
+        otherLocation: isOnlineTherapy ? '' : prev.otherLocation
       }));
     }
   }, [searchParams]);
@@ -105,7 +109,7 @@ function BookConsultationForm() {
             parentName: formData.name.trim(),
             phone: formData.phone.trim(),
             email: formData.email.trim().toLowerCase(),
-            city: formData.city.trim() || 'Delhi NCR',
+            city: formData.city.trim() || (formData.requirement.includes('Online') || formData.requirement.includes('PAN India') ? 'Online / PAN India' : 'Delhi NCR'),
             serviceNeeded: formData.requirement || 'Shadow Teacher',
             promoCode: 'SHADOW100'
           })
@@ -350,6 +354,8 @@ function BookConsultationForm() {
                           className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
                         />
                       </div>
+                      {/* City field — hidden for PAN India online therapy (location irrelevant for video sessions) */}
+                      {!(formData.requirement.includes('Online') || formData.requirement.includes('PAN India')) && (
                       <div className="flex flex-col gap-1.5">
                         <label className="text-xs font-bold text-brand-dark uppercase tracking-wider flex items-center gap-1">
                           <MapPin size={12} /> Preferred City
@@ -369,10 +375,11 @@ function BookConsultationForm() {
                           <option value="Pune">Pune</option>
                         </select>
                       </div>
+                      )}
                     </div>
 
-                    {/* DEPENDENT LOCATION DROPDOWN (Appears after City is selected) */}
-                    {formData.city && CITY_LOCALITIES[formData.city] && (
+                    {/* DEPENDENT LOCATION DROPDOWN (Appears after City is selected — hidden for online therapy) */}
+                    {formData.city && CITY_LOCALITIES[formData.city] && !(formData.requirement.includes('Online') || formData.requirement.includes('PAN India')) && (
                       <motion.div
                         initial={{ opacity: 0, y: -5 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -447,10 +454,13 @@ function BookConsultationForm() {
                           value={formData.requirement}
                           onChange={(e) => {
                             const val = e.target.value;
-                            if (val.includes('Therapy')) {
-                              setFormData(prev => ({ ...prev, requirement: val, city: 'Delhi NCR' }));
+                            if (val.includes('Online') || val.includes('PAN India')) {
+                              // Online therapy — don't force city, clear location fields
+                              setFormData(prev => ({ ...prev, requirement: val, therapyType: val.includes('Parent Training') ? 'Online Parent Training (PAN India)' : 'ABA Online Therapy (PAN India)', city: '', preferredLocation: '', otherLocation: '' }));
+                            } else if (val.includes('Therapy')) {
+                              setFormData(prev => ({ ...prev, requirement: val, city: 'Delhi NCR', therapyType: prev.therapyType || 'ABA Therapy' }));
                             } else {
-                              setFormData(prev => ({ ...prev, requirement: val }));
+                              setFormData(prev => ({ ...prev, requirement: val, therapyType: '' }));
                             }
                           }}
                           className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
@@ -459,12 +469,14 @@ function BookConsultationForm() {
                           <option value="Classroom Shadow Teacher">Classroom Shadow Teacher</option>
                           <option value="Academic Home Tutor">Academic Home Tutor</option>
                           <option value="Home Therapy Sessions (Delhi NCR Only)">Home Therapy Sessions (Delhi NCR Only)</option>
+                          <option value="Online Therapy Session (PAN India)">🌐 Online Therapy Session (PAN India)</option>
+                          <option value="Online Parent Training (PAN India)">🌐 Online Parent Training (PAN India)</option>
                         </select>
                       </div>
                     </div>
 
-                    {/* THERAPY TYPE SELECTOR (Appears when Therapy is selected) */}
-                    {formData.requirement.includes('Therapy') && (
+                    {/* THERAPY TYPE SELECTOR (Appears when Therapy or Online service is selected) */}
+                    {(formData.requirement.includes('Therapy') || formData.requirement.includes('Online') || formData.requirement.includes('PAN India')) && (
                       <motion.div
                         initial={{ opacity: 0, y: -5 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -477,7 +489,18 @@ function BookConsultationForm() {
                           name="therapyType"
                           required
                           value={formData.therapyType || 'ABA Therapy'}
-                          onChange={(e) => setFormData(prev => ({ ...prev, therapyType: e.target.value }))}
+                          onChange={(e) => {
+                            const newType = e.target.value;
+                            const isOnline = newType.includes('PAN India') || newType.includes('Online');
+                            setFormData(prev => ({
+                              ...prev,
+                              therapyType: newType,
+                              requirement: isOnline ? `Online Therapy Session (PAN India)` : 'Home Therapy Sessions (Delhi NCR Only)',
+                              city: isOnline ? '' : 'Delhi NCR',
+                              preferredLocation: isOnline ? '' : prev.preferredLocation,
+                              otherLocation: isOnline ? '' : prev.otherLocation
+                            }));
+                          }}
                           className="p-3 border border-purple-200 bg-white rounded-xl text-sm font-bold text-purple-950 focus:outline-none focus:ring-2 focus:ring-secondary/40"
                         >
                           <option value="ABA Online Therapy (PAN India)">🌐 ABA Online Therapy (PAN India)</option>
@@ -515,8 +538,8 @@ function BookConsultationForm() {
                       />
                     </div>
 
-                    {/* VIP Access / Referral Code (Only for Shadow Teacher / Home Tutor, hidden for Therapy) */}
-                    {!formData.requirement.includes('Therapy') && (
+                    {/* VIP Access / Referral Code (Only for Shadow Teacher / Home Tutor, hidden for Therapy/Online services) */}
+                    {!(formData.requirement.includes('Therapy') || formData.requirement.includes('Online') || formData.requirement.includes('PAN India')) && (
                       <div className="flex flex-col gap-1.5 pt-2">
                         <label className="text-xs font-bold text-primary uppercase tracking-wider flex items-center justify-between">
                           <span className="flex items-center gap-1">
