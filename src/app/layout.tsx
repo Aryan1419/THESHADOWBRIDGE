@@ -162,7 +162,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/favicon-192.png" />
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var d=document.documentElement;var t=localStorage.getItem('theme');if(t==='dark'){d.classList.add('dark')}else if(t==='light'){d.classList.remove('dark')}else if(window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches){d.classList.add('dark')}}catch(e){}})();`
+            __html: `(function(){try{var d=document.documentElement;if(localStorage.getItem('theme')==='dark'){d.classList.add('dark')}}catch(e){}})();`
           }}
         />
         <script
