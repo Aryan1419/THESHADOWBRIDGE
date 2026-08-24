@@ -1,60 +1,105 @@
 @import "tailwindcss";
 
+/* ==========================================================================
+   LAYER 1: CSS Custom Property Layer
+   Brand colors defined as CSS vars so .dark can override them.
+   @theme references these via var() — making ALL Tailwind brand utilities
+   (text-primary, bg-brand-light, border-brand-border, etc.) auto-adapt.
+   ========================================================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #1a1a1a;
+  /* Brand palette — light mode */
+  --brand-primary: #3B2A6B;
+  --brand-secondary: #B0206B;
+  --brand-accent: #C89B3C;
+  --brand-light: #F7F5FC;
+  --brand-border: #E5DFEF;
+  --brand-dark: #1A1A1A;
+  --brand-muted: #555555;
+
+  /* Page-level tokens */
+  --bg-base: #ffffff;
+  --fg-base: #1a1a1a;
+  --bg-surface: #ffffff;
+  --bg-surface-alt: #F7F5FC;
 }
 
+html.dark:not([data-admin]) {
+  /* Brand palette — dark mode */
+  --brand-primary: #A78BDB;
+  --brand-secondary: #E06B9B;
+  --brand-accent: #D4AD55;
+  --brand-light: #1E1A2E;
+  --brand-border: #342852;
+  --brand-dark: #F0ECF9;
+  --brand-muted: #A69EB8;
+
+  /* Page-level tokens */
+  --bg-base: #14101F;
+  --fg-base: #E8E4F0;
+  --bg-surface: #1C1829;
+  --bg-surface-alt: #1E1A2E;
+}
+
+
+/* ==========================================================================
+   LAYER 2: @theme — Tailwind v4 Design Tokens (reference CSS vars)
+   ========================================================================== */
+
 @theme {
-  --color-primary: #3B2A6B;
-  --color-secondary: #B0206B;
-  --color-accent: #C89B3C;
-  --color-brand-light: #F7F5FC;
-  --color-brand-border: #E5DFEF;
-  --color-brand-dark: #1A1A1A;
-  --color-brand-muted: #555555;
-  
+  --color-primary: var(--brand-primary);
+  --color-secondary: var(--brand-secondary);
+  --color-accent: var(--brand-accent);
+  --color-brand-light: var(--brand-light);
+  --color-brand-border: var(--brand-border);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-muted: var(--brand-muted);
+
   --font-serif: var(--font-playfair), serif;
   --font-sans: var(--font-inter), sans-serif;
-  
+
   --animate-float: float 6s ease-in-out infinite;
   --animate-fade-in-up: fadeInUp 0.8s ease-out forwards;
 }
 
+
+/* ==========================================================================
+   KEYFRAMES
+   ========================================================================== */
+
 @keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+
+
+/* ==========================================================================
+   BASE STYLES
+   ========================================================================== */
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--bg-base);
+  color: var(--fg-base);
   font-family: var(--font-sans);
   overflow-x: hidden;
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
-/* Custom Utilities */
+
+/* ==========================================================================
+   CUSTOM UTILITIES
+   ========================================================================== */
+
 .btn-gradient {
-  background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%);
+  background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
   color: #ffffff;
   transition: all 0.3s ease;
 }
-
 .btn-gradient:hover {
   opacity: 0.95;
   transform: translateY(-1px);
@@ -62,22 +107,251 @@ body {
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%);
+  background: linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-surface-alt); }
+::-webkit-scrollbar-thumb { background: #C2185B; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #4B1363; }
+
+
+/* ==========================================================================
+   LAYER 3: Dark Mode Overrides for Non-Brand Colors
+   All selectors scoped to html.dark:not([data-admin]) so admin stays light.
+   ========================================================================== */
+
+/* --- Smooth transition on all elements --- */
+html.dark:not([data-admin]) * {
+  transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
 }
-::-webkit-scrollbar-track {
-  background: #F8F5FB;
+
+/* --- Navbar --- */
+html.dark:not([data-admin]) nav {
+  background-color: rgba(20, 16, 31, 0.96) !important;
+  border-color: var(--brand-border) !important;
+  backdrop-filter: blur(12px) !important;
 }
-::-webkit-scrollbar-thumb {
-  background: #C2185B;
-  border-radius: 4px;
+
+/* --- White backgrounds → dark surface --- */
+html.dark:not([data-admin]) .bg-white {
+  background-color: var(--bg-surface) !important;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #4B1363;
+
+/* IMPORTANT: Preserve white text (footer, buttons, badges) */
+html.dark:not([data-admin]) .text-white {
+  color: #ffffff !important;
+}
+
+/* --- Gray / Slate backgrounds --- */
+html.dark:not([data-admin]) .bg-gray-50,
+html.dark:not([data-admin]) .bg-gray-100,
+html.dark:not([data-admin]) .bg-slate-50,
+html.dark:not([data-admin]) .bg-slate-100 {
+  background-color: #1A1630 !important;
+}
+
+/* --- Purple tint backgrounds --- */
+html.dark:not([data-admin]) .bg-purple-50,
+html.dark:not([data-admin]) .bg-purple-50\/40,
+html.dark:not([data-admin]) .bg-purple-50\/60,
+html.dark:not([data-admin]) .bg-violet-50,
+html.dark:not([data-admin]) .bg-indigo-50 {
+  background-color: #201A34 !important;
+}
+
+/* --- Emerald / Green backgrounds --- */
+html.dark:not([data-admin]) .bg-emerald-50,
+html.dark:not([data-admin]) .bg-green-50 {
+  background-color: #121F1A !important;
+}
+
+/* --- Amber / Yellow backgrounds --- */
+html.dark:not([data-admin]) .bg-amber-50,
+html.dark:not([data-admin]) .bg-yellow-50 {
+  background-color: #1F1C12 !important;
+}
+
+/* --- Rose / Pink / Red backgrounds --- */
+html.dark:not([data-admin]) .bg-rose-50,
+html.dark:not([data-admin]) .bg-red-50,
+html.dark:not([data-admin]) .bg-pink-50 {
+  background-color: #1F1218 !important;
+}
+
+/* --- Gradient overrides for section backgrounds --- */
+html.dark:not([data-admin]) .from-\[\#F7F5FC\] {
+  --tw-gradient-from: #1A1630 !important;
+}
+html.dark:not([data-admin]) .to-white {
+  --tw-gradient-to: var(--bg-base) !important;
+}
+html.dark:not([data-admin]) .from-white {
+  --tw-gradient-from: var(--bg-base) !important;
+}
+html.dark:not([data-admin]) .to-\[\#F7F5FC\] {
+  --tw-gradient-to: #1A1630 !important;
+}
+
+/* --- Borders --- */
+html.dark:not([data-admin]) .border-gray-200,
+html.dark:not([data-admin]) .border-gray-100,
+html.dark:not([data-admin]) .border-slate-200,
+html.dark:not([data-admin]) .border-slate-100,
+html.dark:not([data-admin]) .border-purple-200,
+html.dark:not([data-admin]) .border-purple-100,
+html.dark:not([data-admin]) .border-indigo-100 {
+  border-color: #2D2444 !important;
+}
+html.dark:not([data-admin]) .border-gray-300,
+html.dark:not([data-admin]) .border-slate-300 {
+  border-color: #3D3258 !important;
+}
+
+/* --- Text colors: dark heading/body text → light --- */
+html.dark:not([data-admin]) .text-gray-900,
+html.dark:not([data-admin]) .text-slate-900,
+html.dark:not([data-admin]) .text-gray-800,
+html.dark:not([data-admin]) .text-slate-800,
+html.dark:not([data-admin]) .text-black {
+  color: #F0ECF9 !important;
+}
+html.dark:not([data-admin]) .text-gray-700,
+html.dark:not([data-admin]) .text-slate-700 {
+  color: #C4BDD6 !important;
+}
+html.dark:not([data-admin]) .text-gray-600,
+html.dark:not([data-admin]) .text-slate-600 {
+  color: #A69EB8 !important;
+}
+html.dark:not([data-admin]) .text-gray-500,
+html.dark:not([data-admin]) .text-slate-500 {
+  color: #958DAA !important;
+}
+html.dark:not([data-admin]) .text-gray-400,
+html.dark:not([data-admin]) .text-slate-400 {
+  color: #7E7694 !important;
+}
+
+/* Purple text variants */
+html.dark:not([data-admin]) .text-purple-950,
+html.dark:not([data-admin]) .text-purple-900 {
+  color: #D4CCEF !important;
+}
+html.dark:not([data-admin]) .text-purple-800 {
+  color: #C4BAE0 !important;
+}
+
+/* Emerald / green text */
+html.dark:not([data-admin]) .text-emerald-800,
+html.dark:not([data-admin]) .text-emerald-700,
+html.dark:not([data-admin]) .text-green-800,
+html.dark:not([data-admin]) .text-green-700 {
+  color: #6EE7B7 !important;
+}
+
+/* Amber text */
+html.dark:not([data-admin]) .text-amber-800,
+html.dark:not([data-admin]) .text-amber-700 {
+  color: #FCD34D !important;
+}
+
+/* Rose / red text */
+html.dark:not([data-admin]) .text-rose-800,
+html.dark:not([data-admin]) .text-rose-700,
+html.dark:not([data-admin]) .text-rose-500 {
+  color: #FDA4AF !important;
+}
+
+/* --- Form elements --- */
+html.dark:not([data-admin]) input:not([type="checkbox"]):not([type="radio"]),
+html.dark:not([data-admin]) select,
+html.dark:not([data-admin]) textarea {
+  background-color: #1D1535 !important;
+  color: #F0ECF9 !important;
+  border-color: #342852 !important;
+}
+html.dark:not([data-admin]) input::placeholder,
+html.dark:not([data-admin]) textarea::placeholder {
+  color: #7A7190 !important;
+}
+
+/* --- Shadows → darker --- */
+html.dark:not([data-admin]) .shadow-md,
+html.dark:not([data-admin]) .shadow-lg,
+html.dark:not([data-admin]) .shadow-xl,
+html.dark:not([data-admin]) .shadow-sm,
+html.dark:not([data-admin]) .shadow-xs {
+  --tw-shadow-color: rgba(0, 0, 0, 0.35) !important;
+}
+
+/* --- Tables --- */
+html.dark:not([data-admin]) th {
+  background-color: #1A1630 !important;
+  color: #D4CCEF !important;
+  border-color: #2D2444 !important;
+}
+html.dark:not([data-admin]) td {
+  border-color: #241E38 !important;
+  color: #D4CDE6 !important;
+}
+html.dark:not([data-admin]) tr:hover td {
+  background-color: #1E1A2E !important;
+}
+
+/* --- Dividers --- */
+html.dark:not([data-admin]) hr {
+  border-color: #2D2444 !important;
+}
+
+/* --- Footer (already dark bg-primary, just match dark theme) --- */
+html.dark:not([data-admin]) footer {
+  background-color: #0E0A1A !important;
+  border-color: var(--brand-accent) !important;
+}
+
+/* --- Ring / focus colors --- */
+html.dark:not([data-admin]) .ring-purple-200,
+html.dark:not([data-admin]) .ring-gray-200 {
+  --tw-ring-color: #342852 !important;
+}
+
+/* --- Accent opacity backgrounds --- */
+html.dark:not([data-admin]) .bg-primary\/10,
+html.dark:not([data-admin]) .bg-primary\/5 {
+  background-color: rgba(167, 139, 219, 0.12) !important;
+}
+html.dark:not([data-admin]) .bg-secondary\/10,
+html.dark:not([data-admin]) .bg-secondary\/5 {
+  background-color: rgba(224, 107, 155, 0.12) !important;
+}
+html.dark:not([data-admin]) .bg-accent\/10,
+html.dark:not([data-admin]) .bg-accent\/5 {
+  background-color: rgba(212, 173, 85, 0.12) !important;
+}
+
+/* --- Specific hardcoded hex backgrounds used in components --- */
+html.dark:not([data-admin]) .bg-\[\#F7F5FC\] {
+  background-color: #1E1A2E !important;
+}
+html.dark:not([data-admin]) .bg-\[\#F3EEF8\] {
+  background-color: #201A34 !important;
+}
+html.dark:not([data-admin]) .bg-\[\#F8F5FB\] {
+  background-color: #1A1630 !important;
+}
+html.dark:not([data-admin]) .bg-\[\#FFF9EB\] {
+  background-color: #1F1C12 !important;
+}
+
+/* --- Hover states for interactive elements --- */
+html.dark:not([data-admin]) .hover\:bg-white:hover {
+  background-color: var(--bg-surface) !important;
+}
+html.dark:not([data-admin]) .hover\:bg-gray-50:hover,
+html.dark:not([data-admin]) .hover\:bg-gray-100:hover {
+  background-color: #221E36 !important;
 }

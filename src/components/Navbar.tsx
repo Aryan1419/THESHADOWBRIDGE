@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Menu, X, PhoneCall, ChevronDown, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ThemeToggle from './ThemeToggle';
 
 
 export default function Navbar() {
@@ -108,8 +109,11 @@ export default function Navbar() {
               </Link>
             </div>
 
-            {/* 2. Right Side: Book Consultation CTA + Unified Hamburger Icon */}
+            {/* 2. Right Side: Theme Toggle + Book Consultation CTA + Unified Hamburger Icon */}
             <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
+              {/* Theme Toggle */}
+              <ThemeToggle />
+
               {/* Primary CTA Button - Compact on Mobile, Full on Desktop */}
               <Link
                 href="/book"
