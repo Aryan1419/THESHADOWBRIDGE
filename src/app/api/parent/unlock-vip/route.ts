@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       }
 
       if (!record) {
-        return NextResponse.json({ error: 'No matching therapy consultation record found. Note: Coupon THERAPY99 is strictly for Therapy bookings only.' }, { status: 404 });
+        return NextResponse.json({ error: 'No matching therapy consultation record found. Please verify your details or registration ID.' }, { status: 404 });
       }
     } else {
       // SHADOW100 strictly unlocks ONLY shadow or tutor requests
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
       }
 
       if (!record) {
-        return NextResponse.json({ error: 'No matching Shadow Teacher or Home Tutor record found. Note: Code SHADOW100 is strictly for Shadow and Tutor bookings.' }, { status: 404 });
+        return NextResponse.json({ error: 'No matching Shadow Teacher or Home Tutor record found. Please verify your details or registration ID.' }, { status: 404 });
       }
     }
 

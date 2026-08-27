@@ -199,13 +199,13 @@ export async function POST(request: Request) {
       // Strict validation: THERAPY99 is ONLY for Therapy; SHADOW100 is ONLY for Shadow Teachers & Tutors
       if (cleanPromoCode === 'THERAPY99' && !isTherapy) {
         return NextResponse.json({
-          error: 'Coupon code THERAPY99 is strictly valid only for Therapy bookings. It cannot be used for Shadow Teacher or Home Tutor requests.'
+          error: 'This coupon code is not valid for Shadow Teacher or Home Tutor requests.'
         }, { status: 400 });
       }
 
       if (cleanPromoCode === 'SHADOW100' && isTherapy) {
         return NextResponse.json({
-          error: 'VIP code SHADOW100 is only valid for Shadow Teacher and Home Tutor bookings. For Therapy bookings, please use coupon code THERAPY99.'
+          error: 'This code is not valid for Therapy bookings.'
         }, { status: 400 });
       }
 

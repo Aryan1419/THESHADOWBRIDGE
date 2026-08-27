@@ -114,12 +114,12 @@ function BookConsultationForm() {
     e.preventDefault();
 
     if (isTherapyUsingShadowCode) {
-      setPaymentError('Code SHADOW100 is only valid for Shadow Teacher and Home Tutor bookings. For Therapy sessions, please use coupon THERAPY99.');
+      setPaymentError('This code is not valid for Therapy bookings.');
       return;
     }
 
     if (isShadowUsingTherapyCode) {
-      setPaymentError('Coupon THERAPY99 is strictly valid for Therapy bookings only. It cannot be used for Shadow Teacher or Home Tutor requests.');
+      setPaymentError('This code is not valid for Shadow Teacher or Home Tutor requests.');
       return;
     }
 
@@ -579,20 +579,16 @@ function BookConsultationForm() {
                         name="promoCode"
                         value={formData.promoCode}
                         onChange={handleInputChange}
-                        placeholder={isTherapyBooking ? "Enter Coupon Code (e.g. THERAPY99)" : "Enter VIP / Referral Code (e.g. SHADOW100)"}
+                        placeholder={isTherapyBooking ? "Enter Coupon Code" : "Enter VIP / Referral Code"}
                         className="p-3 border border-brand-border bg-white rounded-xl text-sm font-mono font-bold text-primary focus:outline-none focus:ring-2 focus:ring-accent/40 uppercase"
                       />
                       <p className="text-[11px] text-brand-muted mt-1 font-medium">
-                        {isTherapyBooking ? (
-                          <span>Use coupon code <strong className="text-secondary font-mono">THERAPY99</strong> to waive the ₹99 consultation fee.</span>
-                        ) : (
-                          <span>Please enter your code in <strong>ALL CAPS</strong>.</span>
-                        )}
+                        Please enter your code in <strong>ALL CAPS</strong>.
                       </p>
                       {isTherapyCouponValid && (
                         <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2 mt-1">
                           <Sparkles size={16} className="text-emerald-600 shrink-0" />
-                          <span>✨ THERAPY99 Coupon Applied! ₹99 Therapy Fee Waived (100% OFF).</span>
+                          <span>✨ Coupon Applied! ₹99 Therapy Fee Waived (100% OFF).</span>
                         </div>
                       )}
                       {isShadowVipValid && (
@@ -604,23 +600,19 @@ function BookConsultationForm() {
                       {isTherapyUsingShadowCode && (
                         <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2 mt-1">
                           <ShieldAlert size={14} className="text-rose-600 shrink-0" />
-                          <span>Code <strong>SHADOW100</strong> is only valid for Shadow Teachers and Home Tutors. For Therapy, please use coupon <strong>THERAPY99</strong>.</span>
+                          <span>This code is not valid for Therapy bookings.</span>
                         </div>
                       )}
                       {isShadowUsingTherapyCode && (
                         <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2 mt-1">
                           <ShieldAlert size={14} className="text-rose-600 shrink-0" />
-                          <span>Coupon <strong>THERAPY99</strong> is strictly valid only for Therapy bookings. It cannot be used for Shadow Teacher or Home Tutor requests.</span>
+                          <span>This code is not valid for Shadow Teacher or Home Tutor requests.</span>
                         </div>
                       )}
                       {cleanPromoCode && !isWaivedCode && !isTherapyUsingShadowCode && !isShadowUsingTherapyCode && (
                         <div className="p-2.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs font-medium flex items-center gap-2 mt-1">
                           <Info size={14} className="text-amber-700 shrink-0" />
-                          <span>
-                            {isTherapyBooking 
-                              ? 'Unrecognized code. Enter coupon THERAPY99 to waive the ₹99 therapy consultation fee.' 
-                              : 'Unrecognized code. Enter SHADOW100 if you have VIP outreach access.'}
-                          </span>
+                          <span>Invalid or unrecognized code. Please check and try again.</span>
                         </div>
                       )}
                     </div>

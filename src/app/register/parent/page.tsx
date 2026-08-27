@@ -48,7 +48,7 @@ export default function ParentConsultationStep1() {
     }
 
     if (isTherapyCodeEntered) {
-      setErrorMsg('Coupon THERAPY99 is strictly valid only for Therapy bookings. For Shadow Teacher or Home Tutor requests, please use VIP outreach code SHADOW100.');
+      setErrorMsg('This code is not valid for Shadow Teacher or Home Tutor requests.');
       return;
     }
 
@@ -439,12 +439,12 @@ export default function ParentConsultationStep1() {
                       className="mt-2 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2"
                     >
                       <AlertCircle size={16} className="text-rose-600 flex-shrink-0" />
-                      <span>Coupon <strong>THERAPY99</strong> is strictly for Therapy bookings. For Shadow Teacher / Tutor, please enter VIP outreach code <strong>SHADOW100</strong>.</span>
+                      <span>This code is not valid for Shadow Teacher or Home Tutor requests.</span>
                     </motion.div>
                   )}
                   {cleanPromoCode && !isVipCode && !isTherapyCodeEntered && (
                     <p className="text-[11px] text-amber-700 font-semibold mt-1">
-                      Code not recognized. Enter <strong>SHADOW100</strong> if you have VIP outreach access.
+                      Invalid or unrecognized code. Please check and try again.
                     </p>
                   )}
                 </div>
