@@ -22,82 +22,86 @@ export async function POST(request: Request) {
     const cleanPhoneDigits = contact ? contact.replace(/\D/g, '') : '';
 
     let record: any = null;
-    let table = 'parent_shadow_requests';
+    let table = isTherapyCoupon ? 'parent_therapy_requests' : 'parent_shadow_requests';
 
-    // Search parent_shadow_requests
-    if (cleanRegId) {
-      const { data: ps } = await supabase
-        .from('parent_shadow_requests')
-        .select('*')
-        .ilike('registration_id', `%${cleanRegId}%`)
-        .maybeSingle();
-      if (ps) {
-        record = ps;
-        table = 'parent_shadow_requests';
+    if (isTherapyCoupon) {
+      // THERAPY99 strictly unlocks ONLY parent_therapy_requests
+      if (cleanRegId) {
+        const { data: pth } = await supabase
+          .from('parent_therapy_requests')
+          .select('*')
+          .ilike('registration_id', `%${cleanRegId}%`)
+          .maybeSingle();
+        if (pth) {
+          record = pth;
+          table = 'parent_therapy_requests';
+        }
       }
-    }
 
-    // Search parent_tutor_requests
-    if (!record && cleanRegId) {
-      const { data: pt } = await supabase
-        .from('parent_tutor_requests')
-        .select('*')
-        .ilike('registration_id', `%${cleanRegId}%`)
-        .maybeSingle();
-      if (pt) {
-        record = pt;
-        table = 'parent_tutor_requests';
-      }
-    }
-
-    // Search parent_therapy_requests
-    if (!record && cleanRegId) {
-      const { data: pth } = await supabase
-        .from('parent_therapy_requests')
-        .select('*')
-        .ilike('registration_id', `%${cleanRegId}%`)
-        .maybeSingle();
-      if (pth) {
-        record = pth;
-        table = 'parent_therapy_requests';
-      }
-    }
-
-    // Search by contact if regId not provided
-    if (!record && cleanContact) {
-      const { data: ps } = await supabase
-        .from('parent_shadow_requests')
-        .select('*')
-        .or(`email.ilike.${cleanContact},phone.ilike.%${cleanPhoneDigits}%`)
-        .maybeSingle();
-      if (ps) {
-        record = ps;
-        table = 'parent_shadow_requests';
-      } else {
-        const { data: pt } = await supabase
-          .from('parent_tutor_requests')
+      if (!record && cleanContact) {
+        const { data: pth } = await supabase
+          .from('parent_therapy_requests')
           .select('*')
           .or(`email.ilike.${cleanContact},phone.ilike.%${cleanPhoneDigits}%`)
           .maybeSingle();
-        if (pt) {
-          record = pt;
-          table = 'parent_tutor_requests';
+        if (pth) {
+          record = pth;
+          table = 'parent_therapy_requests';
+        }
+      }
+
+      if (!record) {
+        return NextResponse.json({ error: 'No matching therapy consultation record found. Note: Coupon THERAPY99 is strictly for Therapy bookings only.' }, { status: 404 });
+      }
+    } else {
+      // SHADOW100 strictly unlocks ONLY shadow or tutor requests
+      if (cleanRegId) {
+        const { data: ps } = await supabase
+          .from('parent_shadow_requests')
+          .select('*')
+          .ilike('registration_id', `%${cleanRegId}%`)
+          .maybeSingle();
+        if (ps) {
+          record = ps;
+          table = 'parent_shadow_requests';
         } else {
-          const { data: pth } = await supabase
-            .from('parent_therapy_requests')
+          const { data: pt } = await supabase
+            .from('parent_tutor_requests')
             .select('*')
-            .or(`email.ilike.${cleanContact},phone.ilike.%${cleanPhoneDigits}%`)
+            .ilike('registration_id', `%${cleanRegId}%`)
             .maybeSingle();
-          if (pth) {
-            record = pth;
-            table = 'parent_therapy_requests';
+          if (pt) {
+            record = pt;
+            table = 'parent_tutor_requests';
           }
         }
       }
-    }
 
-    if (!record) {
-      return NextResponse.json({ error: 'No matching parent record found.' }, { status: 404 });
+      if (!record && cleanContact) {
+        const { data: ps } = await supabase
+          .from('parent_shadow_requests')
+          .select('*')
+          .or(`email.ilike.${cleanContact},phone.ilike.%${cleanPhoneDigits}%`)
+          .maybeSingle();
+        if (ps) {
+          record = ps;
+          table = 'parent_shadow_requests';
+        } else {
+          const { data: pt } = await supabase
+            .from('parent_tutor_requests')
+            .select('*')
+            .or(`email.ilike.${cleanContact},phone.ilike.%${cleanPhoneDigits}%`)
+            .maybeSingle();
+          if (pt) {
+            record = pt;
+            table = 'parent_tutor_requests';
+          }
+        }
+      }
+
+      if (!record) {
+        return NextResponse.json({ error: 'No matching Shadow Teacher or Home Tutor record found. Note: Code SHADOW100 is strictly for Shadow and Tutor bookings.' }, { status: 404 });
+      }
     }
 
     const targetRegId = record.registration_id || record.booking_id;

@@ -192,8 +192,25 @@ export async function POST(request: Request) {
       const cleanEmail = email.trim().toLowerCase();
       const cleanPhoneDigits = phone.replace(/\D/g, '');
       const cleanPromoCode = (promoCode || code || '').trim().toUpperCase();
-      const isShadowVip = cleanPromoCode === 'SHADOW100';
-      const isTherapyCoupon = cleanPromoCode === 'THERAPY99';
+
+      const isTherapy = serviceNeeded.toLowerCase().includes('therapy') || serviceNeeded.toLowerCase().includes('parent training');
+      const isShadowOrTutor = !isTherapy;
+
+      // Strict validation: THERAPY99 is ONLY for Therapy; SHADOW100 is ONLY for Shadow Teachers & Tutors
+      if (cleanPromoCode === 'THERAPY99' && !isTherapy) {
+        return NextResponse.json({
+          error: 'Coupon code THERAPY99 is strictly valid only for Therapy bookings. It cannot be used for Shadow Teacher or Home Tutor requests.'
+        }, { status: 400 });
+      }
+
+      if (cleanPromoCode === 'SHADOW100' && isTherapy) {
+        return NextResponse.json({
+          error: 'VIP code SHADOW100 is only valid for Shadow Teacher and Home Tutor bookings. For Therapy bookings, please use coupon code THERAPY99.'
+        }, { status: 400 });
+      }
+
+      const isShadowVip = cleanPromoCode === 'SHADOW100' && isShadowOrTutor;
+      const isTherapyCoupon = cleanPromoCode === 'THERAPY99' && isTherapy;
       const isVipCode = isShadowVip || isTherapyCoupon;
 
       // Check if parent already registered across shadow, tutor, or therapy requests
@@ -215,11 +232,11 @@ export async function POST(request: Request) {
         .or(`email.ilike.${cleanEmail},phone.ilike.%${cleanPhoneDigits}%`)
         .maybeSingle();
 
-      const existingRecord = existingShadow || existingTutor || existingTherapy;
+      const existingRecord = isTherapy ? existingTherapy : (existingShadow || existingTutor);
       
       // If VIP / Coupon code is used on existing record, upgrade status to Consultation Completed
       if (existingRecord && isVipCode && (existingRecord.status === 'Consultation Booked' || !existingRecord.consultation_paid)) {
-        const targetTable = existingShadow ? 'parent_shadow_requests' : (existingTutor ? 'parent_tutor_requests' : 'parent_therapy_requests');
+        const targetTable = isTherapy ? 'parent_therapy_requests' : (existingShadow ? 'parent_shadow_requests' : 'parent_tutor_requests');
         const codeNote = isTherapyCoupon ? 'Upgraded via Coupon THERAPY99' : 'Upgraded via VIP Code SHADOW100';
         await supabase
           .from(targetTable)
@@ -237,7 +254,7 @@ export async function POST(request: Request) {
           registration_id: targetRegId,
           redirectUrl: `/register/parent/form?regId=${encodeURIComponent(targetRegId)}`,
           status: 'Consultation Completed',
-          message: isTherapyCoupon ? 'THERAPY99 Coupon applied! Registration form unlocked.' : 'VIP Access Code applied! Registration form unlocked.'
+          message: isTherapyCoupon ? 'THERAPY99 Coupon applied! Therapy registration unlocked.' : 'VIP Access Code applied! Registration form unlocked.'
         });
       }
 
@@ -268,7 +285,6 @@ export async function POST(request: Request) {
 
       const generatedId = `SB-${year}-${randomNumericId()}`;
       const bookingId = generatedId; // Single unified ID across all tables
-      const isTherapy = serviceNeeded.toLowerCase().includes('therapy') || serviceNeeded.toLowerCase().includes('parent training');
       const isShadow = !isTherapy && serviceNeeded.toLowerCase().includes('shadow');
       const finalStatus = isVipCode ? 'Consultation Completed' : 'Consultation Booked';
       const therapyTypeSelected = data.therapyType || (serviceNeeded.includes(':') ? serviceNeeded.split(':')[1].trim() : 'ABA Therapy');

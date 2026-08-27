@@ -37,7 +37,8 @@ export default function ParentConsultationStep1() {
   const [bookingSuccess, setBookingSuccess] = useState<any | null>(null);
 
   const cleanPromoCode = promoCode.trim().toUpperCase();
-  const isVipCode = cleanPromoCode === 'SHADOW100' || cleanPromoCode === 'THERAPY99';
+  const isVipCode = cleanPromoCode === 'SHADOW100';
+  const isTherapyCodeEntered = cleanPromoCode === 'THERAPY99';
 
   const handleConsultationPayment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,11 +47,16 @@ export default function ParentConsultationStep1() {
       return;
     }
 
+    if (isTherapyCodeEntered) {
+      setErrorMsg('Coupon THERAPY99 is strictly valid only for Therapy bookings. For Shadow Teacher or Home Tutor requests, please use VIP outreach code SHADOW100.');
+      return;
+    }
+
     setLoading(true);
     setErrorMsg(null);
 
     try {
-      // IF VIP / COUPON PROMO CODE (SHADOW100 or THERAPY99) IS APPLIED -> BYPASS RAZORPAY & REDIRECT DIRECTLY
+      // IF VIP PROMO CODE SHADOW100 IS APPLIED -> BYPASS RAZORPAY & REDIRECT DIRECTLY
       if (isVipCode) {
         const registerRes = await fetch('/api/register', {
           method: 'POST',
@@ -62,7 +68,7 @@ export default function ParentConsultationStep1() {
             email: email.trim().toLowerCase(),
             city: city.trim(),
             serviceNeeded,
-            promoCode: cleanPromoCode
+            promoCode: 'SHADOW100'
           })
         });
 
@@ -423,8 +429,23 @@ export default function ParentConsultationStep1() {
                       className="mt-2 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2"
                     >
                       <Sparkles size={16} className="text-emerald-600 flex-shrink-0" />
-                      <span>✨ {cleanPromoCode === 'THERAPY99' ? 'THERAPY99 Coupon' : 'VIP Access Code'} Applied! ₹99 Consultation Fee Waived (100% OFF).</span>
+                      <span>✨ VIP Access Code Applied! ₹99 Consultation Fee Waived (100% OFF).</span>
                     </motion.div>
+                  )}
+                  {isTherapyCodeEntered && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-2 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2"
+                    >
+                      <AlertCircle size={16} className="text-rose-600 flex-shrink-0" />
+                      <span>Coupon <strong>THERAPY99</strong> is strictly for Therapy bookings. For Shadow Teacher / Tutor, please enter VIP outreach code <strong>SHADOW100</strong>.</span>
+                    </motion.div>
+                  )}
+                  {cleanPromoCode && !isVipCode && !isTherapyCodeEntered && (
+                    <p className="text-[11px] text-amber-700 font-semibold mt-1">
+                      Code not recognized. Enter <strong>SHADOW100</strong> if you have VIP outreach access.
+                    </p>
                   )}
                 </div>
               </div>
