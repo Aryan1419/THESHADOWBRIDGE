@@ -76,7 +76,15 @@ function BookConsultationForm() {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [receiptCode, setReceiptCode] = useState('');
 
-  const isVipCode = formData.promoCode.trim().toUpperCase() === 'SHADOW100';
+  const isTherapyBooking = Boolean(
+    formData.requirement.includes('Therapy') || 
+    formData.requirement.includes('Online') || 
+    formData.requirement.includes('PAN India')
+  );
+  const cleanPromoCode = formData.promoCode.trim().toUpperCase();
+  const isShadowVip = cleanPromoCode === 'SHADOW100';
+  const isTherapyCoupon = cleanPromoCode === 'THERAPY99';
+  const isWaivedCode = isShadowVip || isTherapyCoupon;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -97,7 +105,7 @@ function BookConsultationForm() {
 
   const handleDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isVipCode) {
+    if (isWaivedCode) {
       setLoading(true);
       setPaymentError(null);
       try {
@@ -109,15 +117,16 @@ function BookConsultationForm() {
             parentName: formData.name.trim(),
             phone: formData.phone.trim(),
             email: formData.email.trim().toLowerCase(),
-            city: formData.city.trim() || (formData.requirement.includes('Online') || formData.requirement.includes('PAN India') ? 'Online / PAN India' : 'Delhi NCR'),
-            serviceNeeded: formData.requirement || 'Shadow Teacher',
-            promoCode: 'SHADOW100'
+            city: formData.city.trim() || (isTherapyBooking ? 'Online / PAN India' : 'Delhi NCR'),
+            serviceNeeded: formData.requirement || (isTherapyBooking ? `Therapy: ${formData.therapyType || 'ABA Therapy'}` : 'Shadow Teacher'),
+            therapyType: formData.therapyType || 'ABA Therapy',
+            promoCode: cleanPromoCode
           })
         });
 
         const data = await res.json();
         if (!res.ok || !data.success) {
-          throw new Error(data.error || 'Failed to apply VIP Access Code.');
+          throw new Error(data.error || 'Failed to apply coupon/access code.');
         }
 
         confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
@@ -127,7 +136,7 @@ function BookConsultationForm() {
         }, 1000);
       } catch (err: any) {
         console.error(err);
-        setPaymentError(err.message || 'Error processing VIP Access Code.');
+        setPaymentError(err.message || 'Error processing coupon/access code.');
       } finally {
         setLoading(false);
       }
@@ -538,32 +547,51 @@ function BookConsultationForm() {
                       />
                     </div>
 
-                    {/* VIP Access / Referral Code (Only for Shadow Teacher / Home Tutor, hidden for Therapy/Online services) */}
-                    {!(formData.requirement.includes('Therapy') || formData.requirement.includes('Online') || formData.requirement.includes('PAN India')) && (
-                      <div className="flex flex-col gap-1.5 pt-2">
-                        <label className="text-xs font-bold text-primary uppercase tracking-wider flex items-center justify-between">
-                          <span className="flex items-center gap-1">
-                            <Ticket size={14} className="text-accent" /> Have a VIP Access Code / Referral Code?
-                          </span>
-                          <span className="text-[10px] text-brand-muted font-normal">Optional</span>
-                        </label>
-                        <input
-                          type="text"
-                          name="promoCode"
-                          value={formData.promoCode}
-                          onChange={handleInputChange}
-                          placeholder="Enter VIP / Referral Code"
-                          className="p-3 border border-brand-border bg-white rounded-xl text-sm font-mono font-bold text-primary focus:outline-none focus:ring-2 focus:ring-accent/40 uppercase"
-                        />
-                        <p className="text-[11px] text-brand-muted mt-1 font-medium">Please enter your code in <strong>ALL CAPS</strong>.</p>
-                        {isVipCode && (
-                          <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2 mt-1">
-                            <Sparkles size={16} className="text-emerald-600 shrink-0" />
-                            <span>✨ VIP Access Code Applied! ₹99 Consultation Fee Waived (100% OFF).</span>
-                          </div>
+                    {/* VIP Access / Therapy Coupon Code */}
+                    <div className="flex flex-col gap-1.5 pt-2">
+                      <label className="text-xs font-bold text-primary uppercase tracking-wider flex items-center justify-between">
+                        <span className="flex items-center gap-1">
+                          <Ticket size={14} className="text-accent" /> 
+                          {isTherapyBooking ? 'Have a Therapy Coupon / Promo Code?' : 'Have a VIP Access Code / Referral Code?'}
+                        </span>
+                        <span className="text-[10px] text-brand-muted font-normal">Optional</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="promoCode"
+                        value={formData.promoCode}
+                        onChange={handleInputChange}
+                        placeholder={isTherapyBooking ? "Enter Coupon Code (e.g. THERAPY99)" : "Enter VIP / Referral Code (e.g. SHADOW100)"}
+                        className="p-3 border border-brand-border bg-white rounded-xl text-sm font-mono font-bold text-primary focus:outline-none focus:ring-2 focus:ring-accent/40 uppercase"
+                      />
+                      <p className="text-[11px] text-brand-muted mt-1 font-medium">
+                        {isTherapyBooking ? (
+                          <span>Use coupon code <strong className="text-secondary font-mono">THERAPY99</strong> to waive the ₹99 consultation fee.</span>
+                        ) : (
+                          <span>Please enter your code in <strong>ALL CAPS</strong>.</span>
                         )}
-                      </div>
-                    )}
+                      </p>
+                      {isWaivedCode && (
+                        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2 mt-1">
+                          <Sparkles size={16} className="text-emerald-600 shrink-0" />
+                          <span>
+                            {isTherapyCoupon
+                              ? '✨ THERAPY99 Coupon Applied! ₹99 Therapy Fee Waived (100% OFF).'
+                              : '✨ VIP Access Code Applied! ₹99 Consultation Fee Waived (100% OFF).'}
+                          </span>
+                        </div>
+                      )}
+                      {cleanPromoCode && !isWaivedCode && (
+                        <div className="p-2.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs font-medium flex items-center gap-2 mt-1">
+                          <Info size={14} className="text-amber-700 shrink-0" />
+                          <span>
+                            {isTherapyBooking 
+                              ? 'Unrecognized code. Enter THERAPY99 to waive the ₹99 fee.' 
+                              : 'Unrecognized code. Enter SHADOW100 if you have VIP access.'}
+                          </span>
+                        </div>
+                      )}
+                    </div>
 
                     {paymentError && (
                       <div className="p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2">
@@ -578,11 +606,15 @@ function BookConsultationForm() {
                       className="btn-gradient w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                     >
                       {loading ? (
-                        <span>Processing VIP Access...</span>
-                      ) : isVipCode ? (
+                        <span>Processing {isTherapyCoupon ? 'Coupon...' : 'VIP Access...'}</span>
+                      ) : isWaivedCode ? (
                         <>
                           <Sparkles size={16} />
-                          <span>Unlock &amp; Go to Child Registration Form</span>
+                          <span>
+                            {isTherapyCoupon 
+                              ? 'Claim Free Therapy Booking & Continue' 
+                              : 'Unlock & Go to Child Registration Form'}
+                          </span>
                           <ArrowRight size={16} />
                         </>
                       ) : (

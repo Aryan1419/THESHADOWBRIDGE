@@ -192,9 +192,11 @@ export async function POST(request: Request) {
       const cleanEmail = email.trim().toLowerCase();
       const cleanPhoneDigits = phone.replace(/\D/g, '');
       const cleanPromoCode = (promoCode || code || '').trim().toUpperCase();
-      const isVipCode = cleanPromoCode === 'SHADOW100';
+      const isShadowVip = cleanPromoCode === 'SHADOW100';
+      const isTherapyCoupon = cleanPromoCode === 'THERAPY99';
+      const isVipCode = isShadowVip || isTherapyCoupon;
 
-      // Check if parent already registered
+      // Check if parent already registered across shadow, tutor, or therapy requests
       const { data: existingShadow } = await supabase
         .from('parent_shadow_requests')
         .select('*')
@@ -207,17 +209,24 @@ export async function POST(request: Request) {
         .or(`email.ilike.${cleanEmail},phone.ilike.%${cleanPhoneDigits}%`)
         .maybeSingle();
 
-      const existingRecord = existingShadow || existingTutor;
+      const { data: existingTherapy } = await supabase
+        .from('parent_therapy_requests')
+        .select('*')
+        .or(`email.ilike.${cleanEmail},phone.ilike.%${cleanPhoneDigits}%`)
+        .maybeSingle();
+
+      const existingRecord = existingShadow || existingTutor || existingTherapy;
       
-      // If VIP code SHADOW100 is used on existing record, upgrade status to Consultation Completed
+      // If VIP / Coupon code is used on existing record, upgrade status to Consultation Completed
       if (existingRecord && isVipCode && (existingRecord.status === 'Consultation Booked' || !existingRecord.consultation_paid)) {
-        const targetTable = existingShadow ? 'parent_shadow_requests' : 'parent_tutor_requests';
+        const targetTable = existingShadow ? 'parent_shadow_requests' : (existingTutor ? 'parent_tutor_requests' : 'parent_therapy_requests');
+        const codeNote = isTherapyCoupon ? 'Upgraded via Coupon THERAPY99' : 'Upgraded via VIP Code SHADOW100';
         await supabase
           .from(targetTable)
           .update({
             status: 'Consultation Completed',
             consultation_paid: true,
-            notes: (existingRecord.notes || '') + ' | Upgraded via VIP Code SHADOW100'
+            notes: (existingRecord.notes || '') + ` | ${codeNote}`
           })
           .eq('id', existingRecord.id);
 
@@ -228,7 +237,7 @@ export async function POST(request: Request) {
           registration_id: targetRegId,
           redirectUrl: `/register/parent/form?regId=${encodeURIComponent(targetRegId)}`,
           status: 'Consultation Completed',
-          message: 'VIP Access Code applied! Registration form unlocked.'
+          message: isTherapyCoupon ? 'THERAPY99 Coupon applied! Registration form unlocked.' : 'VIP Access Code applied! Registration form unlocked.'
         });
       }
 
@@ -243,7 +252,7 @@ export async function POST(request: Request) {
         });
       }
 
-      // Verify Razorpay payment if NOT using VIP promo code
+      // Verify Razorpay payment if NOT using VIP / Coupon promo code
       if (!isVipCode) {
         if (!razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {
           return NextResponse.json({ error: 'Missing payment verification credentials.' }, { status: 400 });
@@ -259,10 +268,21 @@ export async function POST(request: Request) {
 
       const generatedId = `SB-${year}-${randomNumericId()}`;
       const bookingId = generatedId; // Single unified ID across all tables
-      const isTherapy = serviceNeeded.toLowerCase().includes('therapy');
+      const isTherapy = serviceNeeded.toLowerCase().includes('therapy') || serviceNeeded.toLowerCase().includes('parent training');
       const isShadow = !isTherapy && serviceNeeded.toLowerCase().includes('shadow');
       const finalStatus = isVipCode ? 'Consultation Completed' : 'Consultation Booked';
-      const therapyTypeSelected = data.therapyType || 'ABA Therapy';
+      const therapyTypeSelected = data.therapyType || (serviceNeeded.includes(':') ? serviceNeeded.split(':')[1].trim() : 'ABA Therapy');
+
+      const paymentStatus = isTherapyCoupon ? 'waived_therapy99' : (isShadowVip ? 'waived_shadow100' : 'paid');
+      const promoPaymentId = isTherapyCoupon ? 'COUPON-THERAPY99' : (isShadowVip ? 'VIP-SHADOW100' : razorpayPaymentId);
+      const promoOrderId = isTherapyCoupon ? 'COUPON-THERAPY99' : (isShadowVip ? 'VIP-SHADOW100' : razorpayOrderId);
+      const promoSignature = isTherapyCoupon ? 'COUPON-THERAPY99' : (isShadowVip ? 'VIP-SHADOW100' : razorpaySignature);
+      const bookingMessage = isTherapyCoupon ? 'Step 1 Therapy Fee Waived via THERAPY99' : (isShadowVip ? 'Step 1 VIP Access Unlocked via SHADOW100' : 'Step 1 Consultation Booked');
+      const recordNotes = isTherapyCoupon
+        ? `Therapy Fee Waived via Code THERAPY99 | Unified ID: ${generatedId}`
+        : (isShadowVip ? `VIP Access via Code SHADOW100 | Unified ID: ${generatedId}` : `Unified ID: ${generatedId}`);
+
+      const resolvedCity = city || (isTherapy && (therapyTypeSelected.includes('PAN India') || therapyTypeSelected.includes('Online')) ? 'Online / PAN India' : 'Delhi NCR');
 
       // Insert into bookings table
       const bookingData = {
@@ -270,22 +290,22 @@ export async function POST(request: Request) {
         name: parentName,
         phone,
         email: cleanEmail,
-        city: isTherapy ? 'Delhi NCR' : city,
+        city: resolvedCity,
         child_age: 'Pending Registration Form',
         requirement: isTherapy ? `Therapy: ${therapyTypeSelected}` : (isShadow ? 'Shadow Teacher' : 'Home Tutor'),
-        message: isVipCode ? 'Step 1 VIP Access Unlocked via SHADOW100' : 'Step 1 Consultation Booked',
-        payment_status: isVipCode ? 'waived_shadow100' : 'paid',
+        message: bookingMessage,
+        payment_status: paymentStatus,
         amount: isVipCode ? 0 : 99,
-        razorpay_payment_id: isVipCode ? 'VIP-SHADOW100' : razorpayPaymentId,
-        razorpay_order_id: isVipCode ? 'VIP-SHADOW100' : razorpayOrderId,
-        razorpay_signature: isVipCode ? 'VIP-SHADOW100' : razorpaySignature
+        razorpay_payment_id: promoPaymentId,
+        razorpay_order_id: promoOrderId,
+        razorpay_signature: promoSignature
       };
 
       const { error: bookingErr } = await supabase.from('bookings').insert([bookingData]);
       if (bookingErr) {
-        console.error(`❌ Supabase bookings insert FAILED for ${generatedId} | PaymentID: ${razorpayPaymentId} | OrderID: ${razorpayOrderId}:`, bookingErr);
+        console.error(`❌ Supabase bookings insert FAILED for ${generatedId} | PaymentID: ${promoPaymentId} | OrderID: ${promoOrderId}:`, bookingErr);
       } else {
-        console.log(`✅ Booking saved: ${generatedId} | PaymentID: ${razorpayPaymentId} | OrderID: ${razorpayOrderId}`);
+        console.log(`✅ Booking saved: ${generatedId} | PaymentID: ${promoPaymentId} | OrderID: ${promoOrderId}`);
       }
 
       // Insert into parent request table
@@ -295,17 +315,17 @@ export async function POST(request: Request) {
         parent_name: parentName,
         phone,
         email: cleanEmail,
-        city: isTherapy ? 'Delhi NCR' : city,
+        city: resolvedCity,
         child_name: 'Pending Registration Form',
         child_grade: 'Pending Registration Form',
         status: finalStatus,
         consultation_paid: true,
         registration_id: generatedId,
         created_at: createdAt,
-        razorpay_payment_id: isVipCode ? 'VIP-SHADOW100' : razorpayPaymentId,
-        razorpay_order_id: isVipCode ? 'VIP-SHADOW100' : razorpayOrderId,
-        razorpay_signature: isVipCode ? 'VIP-SHADOW100' : razorpaySignature,
-        notes: isVipCode ? `VIP Access via Code SHADOW100 | Unified ID: ${generatedId}` : `Unified ID: ${generatedId}`
+        razorpay_payment_id: promoPaymentId,
+        razorpay_order_id: promoOrderId,
+        razorpay_signature: promoSignature,
+        notes: recordNotes
       };
 
       if (isTherapy) {
@@ -352,6 +372,12 @@ export async function POST(request: Request) {
       const protocol = host.includes('localhost') ? 'http' : 'https';
 
       // Send Parent Receipt & Admin Alert Emails concurrently and await completion
+      const feeStatusText = isTherapyCoupon 
+        ? 'Your consultation fee of ₹99 has been waived 100% via coupon code <strong>THERAPY99</strong>.' 
+        : (isShadowVip 
+          ? 'Your consultation fee of ₹99 has been waived 100% via VIP code <strong>SHADOW100</strong>.' 
+          : 'We have received your consultation fee payment of <strong>₹99</strong>.');
+
       await Promise.allSettled([
         sendEmail({
           to: cleanEmail,
@@ -360,13 +386,13 @@ export async function POST(request: Request) {
           bodyHtml: `
             <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
             <p style="margin: 0 0 16px 0;">Thank you for booking a 1-on-1 consultation session for <strong>${serviceNeeded}</strong> support with Founder Pratibha Mishra.</p>
-            <p style="margin: 0 0 16px 0;">We have received your consultation fee payment of <strong>₹99</strong>.</p>
+            <p style="margin: 0 0 16px 0;">${feeStatusText}</p>
             
             <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 20px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
               <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: bold; color: #3B2A6B; font-family: Georgia, serif;">Your Login &amp; Consultation Details</h3>
               <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: bold; color: #3B2A6B;">Your Unique ID: <span style="font-family: monospace; color: #B0206B; font-size: 16px;">${generatedId}</span></p>
               <p style="margin: 0 0 8px 0;"><strong>Service Selected:</strong> ${serviceNeeded}</p>
-              <p style="margin: 0;"><strong>Status:</strong> Consultation Booked (Call Pending)</p>
+              <p style="margin: 0;"><strong>Status:</strong> ${isVipCode ? 'VIP / Free Access Unlocked' : 'Consultation Booked (Call Pending)'}</p>
             </div>
 
             <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 16px 20px; border-radius: 4px; font-size: 13px; color: #5C4300; line-height: 1.6;">
@@ -384,11 +410,11 @@ export async function POST(request: Request) {
 
         sendEmail({
           to: 'theshadowbridgesupport@gmail.com',
-          subject: `New Parent Consultation Booked: ${parentName} [${generatedId}]`,
+          subject: `New Parent Consultation Booked: ${parentName} [${generatedId}]${isVipCode ? (isTherapyCoupon ? ' (Coupon THERAPY99)' : ' (VIP SHADOW100)') : ''}`,
           type: 'contact_alert',
           bodyHtml: `
             <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Parent Consultation Booked</h2>
-            <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new parent has booked and paid the ₹99 consultation fee.</p>
+            <p style="margin: 0 0 16px 0; color: #4A3E5E;">${isTherapyCoupon ? 'A new parent has registered for therapy with fee waived via coupon <strong>THERAPY99</strong>.' : (isShadowVip ? 'A new parent has registered with fee waived via VIP code <strong>SHADOW100</strong>.' : 'A new parent has booked and paid the ₹99 consultation fee.')}</p>
             
             <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
               <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
@@ -396,8 +422,9 @@ export async function POST(request: Request) {
               <p style="margin: 0 0 8px 0;"><strong>Parent Name:</strong> ${parentName}</p>
               <p style="margin: 0 0 8px 0;"><strong>Phone:</strong> ${phone}</p>
               <p style="margin: 0 0 8px 0;"><strong>Email:</strong> ${cleanEmail}</p>
-              <p style="margin: 0 0 8px 0;"><strong>City:</strong> ${city}</p>
+              <p style="margin: 0 0 8px 0;"><strong>City:</strong> ${resolvedCity}</p>
               <p style="margin: 0;"><strong>Service Requested:</strong> ${serviceNeeded}</p>
+              ${isVipCode ? `<p style="margin: 8px 0 0 0; color: #2E7D32;"><strong>Promo Applied:</strong> ${cleanPromoCode}</p>` : ''}
             </div>
 
             <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to mark this consultation as completed after calling the parent.</p>

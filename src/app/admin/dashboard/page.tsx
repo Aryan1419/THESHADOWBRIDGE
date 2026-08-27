@@ -607,11 +607,22 @@ export default function AdminDashboard() {
     const isRecordWaived = (r: any) => {
       const ps = (r.paymentStatus || r.payment_status || '').toLowerCase();
       const notesStr = ((r.notes || '') + ' ' + (r.message || '')).toUpperCase();
-      return ps === 'waived_shadow100' || notesStr.includes('SHADOW100') || r.razorpayPaymentId === 'VIP-SHADOW100' || r.razorpay_payment_id === 'VIP-SHADOW100';
+      const payId = (r.razorpayPaymentId || r.razorpay_payment_id || '').toUpperCase();
+      return ps.includes('waived') || 
+             notesStr.includes('SHADOW100') || 
+             notesStr.includes('THERAPY99') || 
+             payId.includes('SHADOW100') || 
+             payId.includes('THERAPY99');
     };
 
     const getRealPaymentId = (r: any, isPlacement: boolean, isWaived: boolean) => {
-      if (isWaived) return 'N/A (VIP Outreach)';
+      if (isWaived) {
+        const notesStr = ((r.notes || '') + ' ' + (r.message || '')).toUpperCase();
+        if (notesStr.includes('THERAPY99') || (r.razorpayPaymentId || '').includes('THERAPY99')) {
+          return 'N/A (Coupon THERAPY99)';
+        }
+        return 'N/A (VIP Outreach)';
+      }
       
       const pid = isPlacement 
         ? (r.placementPaymentId || r.placement_payment_id || r.razorpayPaymentId || r.razorpay_payment_id)
@@ -627,7 +638,13 @@ export default function AdminDashboard() {
     };
 
     const getRealOrderId = (r: any, isPlacement: boolean, isWaived: boolean) => {
-      if (isWaived) return 'N/A (VIP Outreach)';
+      if (isWaived) {
+        const notesStr = ((r.notes || '') + ' ' + (r.message || '')).toUpperCase();
+        if (notesStr.includes('THERAPY99') || (r.razorpayOrderId || '').includes('THERAPY99')) {
+          return 'N/A (Coupon THERAPY99)';
+        }
+        return 'N/A (VIP Outreach)';
+      }
 
       const oid = isPlacement
         ? (r.placementOrderId || r.placement_order_id || r.razorpayOrderId || r.razorpay_order_id)
@@ -751,6 +768,35 @@ export default function AdminDashboard() {
           orderId,
           status: isPlacementWaived ? 'WAIVED (Placement Code HI5000)' : (isRealSuccess ? 'SUCCESS' : 'UNVERIFIED (No Razorpay ID)'),
           isWaived: isPlacementWaived,
+          isRealSuccess
+        });
+      }
+    });
+
+    (db.parent_therapy_requests || []).forEach(r => {
+      if ((r as any).consultationPaid || (r as any).consultation_paid) {
+        const isWaived = isRecordWaived(r);
+        const paymentId = getRealPaymentId(r, false, isWaived);
+        const orderId = getRealOrderId(r, false, isWaived);
+        const isRealSuccess = !isWaived && paymentId.startsWith('pay_');
+        const thType = (r as any).therapyType || (r as any).therapy_type || 'Therapy';
+
+        list.push({
+          id: r.id + '-cons',
+          date: r.created_at,
+          regId: r.registration_id,
+          parentName: r.parentName || (r as any).parent_name,
+          childName: r.childName || (r as any).child_name,
+          phone: r.phone,
+          email: r.email,
+          type: `Consultation Fee (${thType})`,
+          amount: isWaived ? '₹0 (Waived)' : (isRealSuccess ? '₹99' : '₹0 (Unverified)'),
+          numericAmount: isRealSuccess ? 99 : 0,
+          originalFee: 99,
+          paymentId,
+          orderId,
+          status: isWaived ? (paymentId.includes('THERAPY99') ? 'WAIVED (Coupon THERAPY99)' : 'WAIVED (Outreach Code)') : (isRealSuccess ? 'SUCCESS' : 'UNVERIFIED (No Razorpay ID)'),
+          isWaived,
           isRealSuccess
         });
       }
@@ -2161,16 +2207,16 @@ export default function AdminDashboard() {
                     </p>
                   </div>
 
-                  <div className="bg-purple-50 border-2 border-purple-200 rounded-2xl p-5 shadow-sm text-left relative overflow-hidden">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-extrabold text-purple-800 uppercase tracking-wider">Total Waived (Outreach)</span>
-                      <Sparkles size={16} className="text-purple-600" />
+                    <div className="bg-purple-50 border-2 border-purple-200 rounded-2xl p-5 shadow-sm text-left relative overflow-hidden">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-extrabold text-purple-800 uppercase tracking-wider">Total Waived (Promo / Outreach)</span>
+                        <Sparkles size={16} className="text-purple-600" />
+                      </div>
+                      <p className="text-3xl font-black text-purple-950 mt-2">{totalWaivedCount} <span className="text-sm font-semibold text-purple-800">Records</span></p>
+                      <p className="text-[11px] text-purple-800 font-bold mt-1">
+                        ₹{totalWaivedValue.toLocaleString()} Value Waived (SHADOW100 / THERAPY99)
+                      </p>
                     </div>
-                    <p className="text-3xl font-black text-purple-950 mt-2">{totalWaivedCount} <span className="text-sm font-semibold text-purple-800">Records</span></p>
-                    <p className="text-[11px] text-purple-800 font-bold mt-1">
-                      ₹{totalWaivedValue.toLocaleString()} Value Waived (Outreach Code `SHADOW100`)
-                    </p>
-                  </div>
 
                   <div className="bg-brand-light/60 border border-brand-border rounded-2xl p-5 shadow-sm text-left">
                     <div className="flex items-center justify-between">

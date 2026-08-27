@@ -37,7 +37,7 @@ export default function ParentConsultationStep1() {
   const [bookingSuccess, setBookingSuccess] = useState<any | null>(null);
 
   const cleanPromoCode = promoCode.trim().toUpperCase();
-  const isVipCode = cleanPromoCode === 'SHADOW100';
+  const isVipCode = cleanPromoCode === 'SHADOW100' || cleanPromoCode === 'THERAPY99';
 
   const handleConsultationPayment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +50,7 @@ export default function ParentConsultationStep1() {
     setErrorMsg(null);
 
     try {
-      // IF VIP PROMO CODE SHADOW100 IS APPLIED -> BYPASS RAZORPAY & REDIRECT DIRECTLY
+      // IF VIP / COUPON PROMO CODE (SHADOW100 or THERAPY99) IS APPLIED -> BYPASS RAZORPAY & REDIRECT DIRECTLY
       if (isVipCode) {
         const registerRes = await fetch('/api/register', {
           method: 'POST',
@@ -62,13 +62,13 @@ export default function ParentConsultationStep1() {
             email: email.trim().toLowerCase(),
             city: city.trim(),
             serviceNeeded,
-            promoCode: 'SHADOW100'
+            promoCode: cleanPromoCode
           })
         });
 
         const regData = await registerRes.json();
         if (!registerRes.ok || !regData.success) {
-          throw new Error(regData.error || 'Failed to apply VIP Access Code.');
+          throw new Error(regData.error || 'Failed to apply coupon/access code.');
         }
 
         confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
@@ -423,7 +423,7 @@ export default function ParentConsultationStep1() {
                       className="mt-2 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2"
                     >
                       <Sparkles size={16} className="text-emerald-600 flex-shrink-0" />
-                      <span>✨ VIP Access Code Applied! ₹99 Consultation Fee Waived (100% OFF).</span>
+                      <span>✨ {cleanPromoCode === 'THERAPY99' ? 'THERAPY99 Coupon' : 'VIP Access Code'} Applied! ₹99 Consultation Fee Waived (100% OFF).</span>
                     </motion.div>
                   )}
                 </div>

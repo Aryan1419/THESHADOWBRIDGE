@@ -173,7 +173,10 @@ function GatedRegistrationContent() {
       gatedStatus.isConsultationCompleted ||
       gatedStatus.isVip ||
       (gatedStatus.record?.notes || '').toUpperCase().includes('SHADOW100') ||
+      (gatedStatus.record?.notes || '').toUpperCase().includes('THERAPY99') ||
       (gatedStatus.record?.message || '').toUpperCase().includes('SHADOW100') ||
+      (gatedStatus.record?.message || '').toUpperCase().includes('THERAPY99') ||
+      (gatedStatus.record?.payment_status || '').toLowerCase().includes('waived') ||
       gatedStatus.record?.status === 'Consultation Completed' ||
       gatedStatus.record
     )

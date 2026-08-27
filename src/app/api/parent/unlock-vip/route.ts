@@ -7,8 +7,10 @@ export async function POST(request: Request) {
     const { regId, contact, promoCode } = body;
 
     const cleanPromoCode = (promoCode || '').trim().toUpperCase();
-    if (cleanPromoCode !== 'SHADOW100') {
-      return NextResponse.json({ error: 'Invalid VIP Access Code. Please check and try again.' }, { status: 400 });
+    const isShadowVip = cleanPromoCode === 'SHADOW100';
+    const isTherapyCoupon = cleanPromoCode === 'THERAPY99';
+    if (!isShadowVip && !isTherapyCoupon) {
+      return NextResponse.json({ error: 'Invalid Promo/Coupon Code. Please check and try again.' }, { status: 400 });
     }
 
     if (!regId && !contact) {
@@ -48,6 +50,19 @@ export async function POST(request: Request) {
       }
     }
 
+    // Search parent_therapy_requests
+    if (!record && cleanRegId) {
+      const { data: pth } = await supabase
+        .from('parent_therapy_requests')
+        .select('*')
+        .ilike('registration_id', `%${cleanRegId}%`)
+        .maybeSingle();
+      if (pth) {
+        record = pth;
+        table = 'parent_therapy_requests';
+      }
+    }
+
     // Search by contact if regId not provided
     if (!record && cleanContact) {
       const { data: ps } = await supabase
@@ -67,6 +82,16 @@ export async function POST(request: Request) {
         if (pt) {
           record = pt;
           table = 'parent_tutor_requests';
+        } else {
+          const { data: pth } = await supabase
+            .from('parent_therapy_requests')
+            .select('*')
+            .or(`email.ilike.${cleanContact},phone.ilike.%${cleanPhoneDigits}%`)
+            .maybeSingle();
+          if (pth) {
+            record = pth;
+            table = 'parent_therapy_requests';
+          }
         }
       }
     }
@@ -76,6 +101,7 @@ export async function POST(request: Request) {
     }
 
     const targetRegId = record.registration_id || record.booking_id;
+    const codeNote = isTherapyCoupon ? 'Unlocked via Coupon THERAPY99' : 'Unlocked via VIP Code SHADOW100';
 
     // Update status to Consultation Completed
     const { error: updateErr } = await supabase
@@ -83,7 +109,7 @@ export async function POST(request: Request) {
       .update({
         status: 'Consultation Completed',
         consultation_paid: true,
-        notes: (record.notes || '') + ' | Unlocked via VIP Code PRATI100'
+        notes: (record.notes || '') + ` | ${codeNote}`
       })
       .eq('id', record.id);
 
@@ -93,7 +119,9 @@ export async function POST(request: Request) {
       success: true,
       registration_id: targetRegId,
       redirectUrl: `/register/parent/form?regId=${encodeURIComponent(targetRegId)}`,
-      message: 'VIP Code PRATI100 applied successfully! Child registration form unlocked.'
+      message: isTherapyCoupon 
+        ? 'Coupon THERAPY99 applied successfully! Child registration form unlocked.' 
+        : 'VIP Code SHADOW100 applied successfully! Child registration form unlocked.'
     });
 
   } catch (error: any) {

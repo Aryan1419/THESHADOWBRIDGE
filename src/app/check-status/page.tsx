@@ -230,8 +230,10 @@ export default function CheckStatusPage() {
       sLower.includes('introduction') ||
       sLower.includes('analysis') ||
       sLower.includes('unlocked') ||
-      sLower.includes('vip') ||
-      (record?.notes || '').toUpperCase().includes('SHADOW100')
+      (record?.notes || '').toUpperCase().includes('SHADOW100') ||
+      (record?.notes || '').toUpperCase().includes('THERAPY99') ||
+      (record?.message || '').toUpperCase().includes('THERAPY99') ||
+      (record?.payment_status || '').toLowerCase().includes('waived')
     );
 
     if (isConsultationCompleted || sLower.includes('introduction') || sLower.includes('analysis') || sLower.includes('unlocked')) {

@@ -165,12 +165,20 @@ export async function GET(request: Request) {
     }
 
     const currentStatus = record.status || record.message || 'Consultation Booked';
-    const isConsultationPaid = Boolean(record.consultation_paid || record.payment_status === 'paid' || record.payment_status === 'waived_shadow100');
+    const isConsultationPaid = Boolean(
+      record.consultation_paid || 
+      record.payment_status === 'paid' || 
+      record.payment_status === 'waived_shadow100' ||
+      record.payment_status === 'waived_therapy99' ||
+      (record.payment_status || '').toLowerCase().includes('waived')
+    );
     
     const isVipRecord = Boolean(
       (record.notes || '').toUpperCase().includes('SHADOW100') ||
+      (record.notes || '').toUpperCase().includes('THERAPY99') ||
       (record.message || '').toUpperCase().includes('SHADOW100') ||
-      record.payment_status === 'waived_shadow100'
+      (record.message || '').toUpperCase().includes('THERAPY99') ||
+      (record.payment_status || '').toLowerCase().includes('waived')
     );
 
     const getStatusIndex = (st: string) => {
