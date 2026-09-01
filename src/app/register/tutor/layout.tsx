@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: 'Home Tutor Registration — Apply Now',
   description: 'Register as a Home Tutor with The Shadow Bridge. Teach and support children across Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune.',
   alternates: {
-    canonical: 'https://theshadowbridge.com/register/tutor',
+    canonical: 'https://www.theshadowbridge.com/register/tutor',
   },
 };
 

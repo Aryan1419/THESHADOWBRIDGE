@@ -19,7 +19,7 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://theshadowbridge.com/sitemap.xml',
+    sitemap: 'https://www.theshadowbridge.com/sitemap.xml',
   };
 }
 

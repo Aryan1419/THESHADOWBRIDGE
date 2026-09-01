@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Check real-time progress for your consultation, child registration, or educator application using your Registration ID.',
   keywords: ['check status', 'shadow teacher status check', 'registration tracker'],
   alternates: {
-    canonical: 'https://theshadowbridge.com/check-status',
+    canonical: 'https://www.theshadowbridge.com/check-status',
   },
 };
 

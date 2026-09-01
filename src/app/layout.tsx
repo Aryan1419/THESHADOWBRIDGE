@@ -15,7 +15,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://theshadowbridge.com"),
+  metadataBase: new URL("https://www.theshadowbridge.com"),
   title: {
     default: "The Shadow Bridge | Trained Shadow Teachers & Home Tutors",
     template: "%s | The Shadow Bridge"
@@ -49,18 +49,18 @@ export const metadata: Metadata = {
     "Pratibha Mishra shadow bridge"
   ],
   alternates: {
-    canonical: "https://theshadowbridge.com"
+    canonical: "https://www.theshadowbridge.com"
   },
   openGraph: {
     title: "The Shadow Bridge | Shadow Teachers & Special Education Tutors",
     description: "Empowering children with academic, behavioral, and inclusive support. Serving families across Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune.",
-    url: "https://theshadowbridge.com",
+    url: "https://www.theshadowbridge.com",
     siteName: "The Shadow Bridge",
     locale: "en_IN",
     type: "website",
     images: [
       {
-        url: "https://theshadowbridge.com/favicon-512.png",
+        url: "https://www.theshadowbridge.com/favicon-512.png",
         width: 512,
         height: 512,
         alt: "The Shadow Bridge - Shadow Teachers & Special Education Tutors"
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "The Shadow Bridge | Shadow Teachers & Tutors",
     description: "Connecting families with verified Shadow Teachers & Special Education Tutors in Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune.",
-    images: ["https://theshadowbridge.com/favicon-512.png"]
+    images: ["https://www.theshadowbridge.com/favicon-512.png"]
   },
   robots: {
     index: true,
@@ -109,18 +109,18 @@ export default function RootLayout({
     "@graph": [
       {
         "@type": ["EducationalOrganization", "LocalBusiness"],
-        "@id": "https://theshadowbridge.com/#organization",
+        "@id": "https://www.theshadowbridge.com/#organization",
         "name": "The Shadow Bridge",
-        "url": "https://theshadowbridge.com",
+        "url": "https://www.theshadowbridge.com",
         "logo": {
           "@type": "ImageObject",
-          "url": "https://theshadowbridge.com/favicon-512.png",
+          "url": "https://www.theshadowbridge.com/favicon-512.png",
           "width": 512,
           "height": 512
         },
         "image": {
           "@type": "ImageObject",
-          "url": "https://theshadowbridge.com/favicon-512.png",
+          "url": "https://www.theshadowbridge.com/favicon-512.png",
           "width": 512,
           "height": 512
         },

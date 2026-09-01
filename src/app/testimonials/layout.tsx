@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Read verified reviews and success stories from parents and educators who have transformed learning journeys with The Shadow Bridge.',
   keywords: ['parent reviews shadow teacher', 'special education testimonials', 'shadow bridge reviews'],
   alternates: {
-    canonical: 'https://theshadowbridge.com/testimonials',
+    canonical: 'https://www.theshadowbridge.com/testimonials',
   },
 };
 

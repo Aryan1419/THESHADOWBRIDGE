@@ -213,7 +213,7 @@ export async function POST(request: Request) {
 
           <div style="border-top: 1px solid #E6E2EB; padding-top: 16px; margin-top: 24px;">
             <p style="margin: 0 0 4px 0; font-weight: bold; color: #3B2A6B; font-size: 14px;">The Shadow Bridge Team</p>
-            <p style="margin: 0; font-size: 12px; color: #6A5B7C;">Email: theshadowbridgesupport@gmail.com | Web: https://theshadowbridge.com</p>
+            <p style="margin: 0; font-size: 12px; color: #6A5B7C;">Email: theshadowbridgesupport@gmail.com | Web: https://www.theshadowbridge.com</p>
           </div>
         `
       });

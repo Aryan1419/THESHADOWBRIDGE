@@ -55,7 +55,7 @@ export function wrapInEmailTemplate(subject: string, bodyContentHtml: string): s
                     <table border="0" cellpadding="0" cellspacing="0" style="margin: 0 auto;">
                       <tr>
                         <td align="center" style="padding-bottom: 12px;">
-                          <img src="https://theshadowbridge.com/favicon-192.png" alt="The Shadow Bridge Logo" width="60" height="60" style="display: block; border-radius: 12px; background-color: #ffffff; padding: 4px; border: 1px solid #C89B3C; box-shadow: 0 4px 10px rgba(0,0,0,0.15);" />
+                          <img src="https://www.theshadowbridge.com/favicon-192.png" alt="The Shadow Bridge Logo" width="60" height="60" style="display: block; border-radius: 12px; background-color: #ffffff; padding: 4px; border: 1px solid #C89B3C; box-shadow: 0 4px 10px rgba(0,0,0,0.15);" />
                         </td>
                       </tr>
                     </table>

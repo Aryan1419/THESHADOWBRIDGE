@@ -124,7 +124,7 @@ export async function POST(request: Request) {
           <h3 style="color: #3B2A6B; font-size: 15px; margin: 24px 0 10px 0;">Next Steps:</h3>
           <p style="margin: 0 0 16px 0;">Our Lead Educational Specialist will contact you within 24 business hours for a dedicated consultation call to understand your specific student needs, classroom dynamics, and educator parameters.</p>
 
-          <p style="margin: 0 0 16px 0;">You can check your requirement status at any time using your Registration ID <strong>${registrationId}</strong> at <a href="https://theshadowbridge.com/check-status" style="color: #E04D74; font-weight: bold; text-decoration: none;">theshadowbridge.com/check-status</a>.</p>
+          <p style="margin: 0 0 16px 0;">You can check your requirement status at any time using your Registration ID <strong>${registrationId}</strong> at <a href="https://www.theshadowbridge.com/check-status" style="color: #E04D74; font-weight: bold; text-decoration: none;">theshadowbridge.com/check-status</a>.</p>
 
           <p style="margin: 24px 0 0 0; font-size: 14px;">Warm regards,<br /><strong>Pratibha Mishra & Team</strong><br />The Shadow Bridge</p>
         `

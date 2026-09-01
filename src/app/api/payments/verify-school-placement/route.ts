@@ -115,7 +115,7 @@ export async function POST(request: Request) {
           </div>
 
           <h3 style="color: #3B2A6B; font-size: 15px; margin: 24px 0 10px 0;">Registration Form Unlocked!</h3>
-          <p style="margin: 0 0 16px 0;">Your complete School Registration Form is now unlocked. Please complete your detailed address, hiring parameters, and terms agreement at <a href="https://theshadowbridge.com/schools/form?regId=${registrationId}" style="color: #E04D74; font-weight: bold; text-decoration: none;">theshadowbridge.com/schools/form?regId=${registrationId}</a>.</p>
+          <p style="margin: 0 0 16px 0;">Your complete School Registration Form is now unlocked. Please complete your detailed address, hiring parameters, and terms agreement at <a href="https://www.theshadowbridge.com/schools/form?regId=${registrationId}" style="color: #E04D74; font-weight: bold; text-decoration: none;">theshadowbridge.com/schools/form?regId=${registrationId}</a>.</p>
 
           <p style="margin: 24px 0 0 0; font-size: 14px;">Warm regards,<br /><strong>The Shadow Bridge Team</strong></p>
         `

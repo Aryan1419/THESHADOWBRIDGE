@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Answers to common questions about Shadow Teacher hiring, school permissions, fees, candidate qualifications, and special education tutoring.',
   keywords: ['shadow teacher FAQs', 'how shadow teaching works', 'school permission shadow teacher', 'special needs tutor FAQ'],
   alternates: {
-    canonical: 'https://theshadowbridge.com/faqs',
+    canonical: 'https://www.theshadowbridge.com/faqs',
   },
 };
 

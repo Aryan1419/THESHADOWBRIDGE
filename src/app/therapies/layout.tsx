@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: 'Home Therapy Sessions — Delhi NCR',
   description: 'Expert home therapy sessions in Delhi NCR — ABA Therapy, Speech Therapy, Occupational Therapy, and more. Book a ₹99 consultation today.',
   alternates: {
-    canonical: 'https://theshadowbridge.com/therapies',
+    canonical: 'https://www.theshadowbridge.com/therapies',
   },
 };
 

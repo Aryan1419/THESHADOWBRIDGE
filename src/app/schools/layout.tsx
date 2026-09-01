@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: 'For Schools — Shadow Teacher Collaboration Program',
   description: 'Partner with The Shadow Bridge for Shadow Teacher placements in your school. Inclusive education support for students with special needs.',
   alternates: {
-    canonical: 'https://theshadowbridge.com/schools',
+    canonical: 'https://www.theshadowbridge.com/schools',
   },
 };
 

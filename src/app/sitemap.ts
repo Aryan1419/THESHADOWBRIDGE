@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://theshadowbridge.com';
+  const baseUrl = 'https://www.theshadowbridge.com';
   const currentDate = new Date();
 
   const therapySlugs = [
@@ -24,10 +24,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/shadow-teachers`, priority: 0.9, changeFrequency: 'monthly' as const },
     { url: `${baseUrl}/tutors`, priority: 0.9, changeFrequency: 'monthly' as const },
     { url: `${baseUrl}/schools`, priority: 0.9, changeFrequency: 'weekly' as const },
-    { url: `${baseUrl}/collaboration-schools`, priority: 0.8, changeFrequency: 'weekly' as const },
     { url: `${baseUrl}/parents`, priority: 0.8, changeFrequency: 'monthly' as const },
     { url: `${baseUrl}/founder-story`, priority: 0.9, changeFrequency: 'monthly' as const },
-    { url: `${baseUrl}/our-story`, priority: 0.8, changeFrequency: 'monthly' as const },
     { url: `${baseUrl}/book`, priority: 0.9, changeFrequency: 'weekly' as const },
     { url: `${baseUrl}/register/parent`, priority: 0.9, changeFrequency: 'monthly' as const },
     { url: `${baseUrl}/register/shadow-teacher`, priority: 0.9, changeFrequency: 'monthly' as const },
