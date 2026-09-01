@@ -9,7 +9,7 @@ import {
   RefreshCw, Search, Filter, ShieldCheck, Mail, Phone, MapPin, Calendar,
   CheckCircle, X, XCircle, ChevronRight, ChevronLeft, FileText, AlertCircle, Save, Info, Sparkles, CreditCard,
   Star, CheckCircle2, MessageSquare, Reply, Send, MailCheck, MessageSquareQuote, CornerDownRight, Trash2, AlertTriangle, ExternalLink, Menu, School,
-  Bell, Eye, Briefcase
+  Bell, Eye, Briefcase, BadgePercent, DollarSign, Wallet, TrendingUp, CheckSquare, PlusCircle, Clock3, CalendarDays, Percent
 } from 'lucide-react';
 
 import { DatabaseSchema, TutorRecord, ShadowTeacherRecord, ParentShadowRequestRecord, ParentTutorRequestRecord } from '@/lib/db';
@@ -30,7 +30,7 @@ export default function AdminDashboard() {
   const [toastLog, setToastLog] = useState<string | null>(null);
 
   // Navigation tab state
-  const [activeTab, setActiveTab] = useState<'overview' | 'tutors' | 'shadows' | 'parents' | 'schools' | 'bookings' | 'contacts' | 'payments' | 'notifications' | 'settings' | 'reviews'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'tutors' | 'shadows' | 'commissions' | 'parents' | 'schools' | 'bookings' | 'contacts' | 'payments' | 'notifications' | 'settings' | 'reviews'>('overview');
 
   // Mobile sidebar collapse state
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -89,6 +89,73 @@ export default function AdminDashboard() {
   const [locationAlerts, setLocationAlerts] = useState<LocationAlert[]>([]);
   const [activeAlertIndex, setActiveAlertIndex] = useState(0);
   const [showLocationAlert, setShowLocationAlert] = useState(false);
+
+  // ─── COMMISSION MANAGEMENT STATES ───────────────────────────────
+  const [commissionSelectedMonth, setCommissionSelectedMonth] = useState<string>('current');
+  const [commissionSearchQuery, setCommissionSearchQuery] = useState('');
+  const [commissionStatusFilter, setCommissionStatusFilter] = useState<'All' | 'Pending' | 'Paid' | 'Partially Paid' | 'Overdue'>('All');
+
+  // Commission Wizard Setup / Edit Modal
+  const [commissionModalOpen, setCommissionModalOpen] = useState(false);
+  const [commissionTeacherId, setCommissionTeacherId] = useState('');
+  const [commissionSalary, setCommissionSalary] = useState<number | string>(16000);
+  const [commissionPercentage, setCommissionPercentage] = useState<number>(40);
+  const [commissionInstallmentCount, setCommissionInstallmentCount] = useState<number>(2);
+  const [commissionInstallments, setCommissionInstallments] = useState<Array<{
+    id: string;
+    installmentNumber: number;
+    month: string;
+    dueDate: string;
+    amount: number;
+    status: 'Pending' | 'Paid' | 'Partially Paid' | 'Overdue';
+    paidAmount?: number;
+    paidDate?: string;
+    paymentMethod?: string;
+    transactionRef?: string;
+    notes?: string;
+  }>>([]);
+  const [commissionSendEmail, setCommissionSendEmail] = useState(true);
+  const [commissionNotes, setCommissionNotes] = useState('');
+  const [savingCommission, setSavingCommission] = useState(false);
+  const [commissionModalError, setCommissionModalError] = useState<string | null>(null);
+
+  // Installment Payment Logger Modal
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentTargetTeacher, setPaymentTargetTeacher] = useState<any | null>(null);
+  const [paymentTargetInstallment, setPaymentTargetInstallment] = useState<any | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<'Paid' | 'Partially Paid' | 'Pending' | 'Overdue'>('Paid');
+  const [paymentAmount, setPaymentAmount] = useState<number | string>(0);
+  const [paymentDate, setPaymentDate] = useState<string>('');
+  const [paymentMethod, setPaymentMethod] = useState<string>('UPI');
+  const [paymentRef, setPaymentRef] = useState<string>('');
+  const [paymentNotes, setPaymentNotes] = useState<string>('');
+  const [savingPayment, setSavingPayment] = useState(false);
+  const [paymentModalError, setPaymentModalError] = useState<string | null>(null);
+
+  const generateDefaultInstallments = (totalAmount: number, count: number) => {
+    const installments = [];
+    const validCount = Math.max(1, count || 1);
+    const baseAmount = Math.floor(totalAmount / validCount);
+    const remainder = totalAmount - (baseAmount * validCount);
+    
+    const now = new Date();
+    for (let i = 0; i < validCount; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() + i, 10);
+      const monthStr = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      const dueStr = d.toISOString().split('T')[0];
+      const instAmount = i === 0 ? baseAmount + remainder : baseAmount;
+      installments.push({
+        id: `inst-${i + 1}-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+        installmentNumber: i + 1,
+        month: monthStr,
+        dueDate: dueStr,
+        amount: instAmount,
+        status: 'Pending' as const,
+        paidAmount: 0
+      });
+    }
+    return installments;
+  };
 
   // Authentication guard check
   useEffect(() => {
@@ -725,6 +792,345 @@ export default function AdminDashboard() {
   const totalParentTutors = db?.parent_tutor_requests?.length || 0;
   const totalRequests = totalParentShadows + totalParentTutors;
 
+  // ─── COMMISSION ACTION HANDLERS ─────────────────────────────────
+  const openCommissionWizard = (teacher?: any) => {
+    setCommissionModalError(null);
+    if (teacher) {
+      setCommissionTeacherId(teacher.id || teacher.registration_id);
+      if (teacher.commission) {
+        const comm = teacher.commission;
+        setCommissionSalary(comm.monthlySalary || 16000);
+        setCommissionPercentage(comm.commissionPercentage || 40);
+        setCommissionInstallmentCount(comm.numberOfInstallments || (comm.installments ? comm.installments.length : 2));
+        setCommissionInstallments(comm.installments && comm.installments.length > 0 ? comm.installments : generateDefaultInstallments(comm.totalCommission || 6400, comm.numberOfInstallments || 2));
+        setCommissionNotes(comm.notes || '');
+      } else {
+        const defaultSal = 16000;
+        const defaultPct = 40;
+        const defaultTotal = Math.round(defaultSal * defaultPct / 100);
+        setCommissionSalary(defaultSal);
+        setCommissionPercentage(defaultPct);
+        setCommissionInstallmentCount(2);
+        setCommissionInstallments(generateDefaultInstallments(defaultTotal, 2));
+        setCommissionNotes('');
+      }
+    } else {
+      const activeTeachers = (db?.shadow_teachers || []).filter((t: any) => t.status === 'Active' || t.status === 'Onboarding' || t.status === 'Shortlisted');
+      const firstId = activeTeachers.length > 0 ? (activeTeachers[0].id || activeTeachers[0].registration_id) : ((db?.shadow_teachers || [])[0]?.id || '');
+      setCommissionTeacherId(firstId);
+      const defaultSal = 16000;
+      const defaultPct = 40;
+      const defaultTotal = Math.round(defaultSal * defaultPct / 100);
+      setCommissionSalary(defaultSal);
+      setCommissionPercentage(defaultPct);
+      setCommissionInstallmentCount(2);
+      setCommissionInstallments(generateDefaultInstallments(defaultTotal, 2));
+      setCommissionNotes('');
+    }
+    setCommissionSendEmail(true);
+    setCommissionModalOpen(true);
+  };
+
+  const handleSalaryChange = (newSalary: number | string) => {
+    setCommissionSalary(newSalary);
+    const numSal = Number(newSalary) || 0;
+    const total = Math.round(numSal * (commissionPercentage / 100));
+    setCommissionInstallments(generateDefaultInstallments(total, commissionInstallmentCount));
+  };
+
+  const handlePercentageChange = (newPct: number) => {
+    setCommissionPercentage(newPct);
+    const numSal = Number(commissionSalary) || 0;
+    const total = Math.round(numSal * (newPct / 100));
+    setCommissionInstallments(generateDefaultInstallments(total, commissionInstallmentCount));
+  };
+
+  const handleInstallmentCountChange = (newCount: number) => {
+    const count = Math.max(1, newCount || 1);
+    setCommissionInstallmentCount(count);
+    const numSal = Number(commissionSalary) || 0;
+    const total = Math.round(numSal * (commissionPercentage / 100));
+    setCommissionInstallments(generateDefaultInstallments(total, count));
+  };
+
+  const handleInstallmentFieldChange = (index: number, field: string, value: any) => {
+    setCommissionInstallments(prev => {
+      const copy = [...prev];
+      if (copy[index]) {
+        copy[index] = { ...copy[index], [field]: value };
+      }
+      return copy;
+    });
+  };
+
+  const handleSaveCommissionPlan = async () => {
+    if (!commissionTeacherId) {
+      setCommissionModalError('Please select a Shadow Teacher.');
+      return;
+    }
+
+    const numSalary = Number(commissionSalary) || 0;
+    if (numSalary <= 0) {
+      setCommissionModalError('Please enter a valid monthly salary amount.');
+      return;
+    }
+
+    const expectedTotal = Math.round(numSalary * (commissionPercentage / 100));
+    const currentSum = commissionInstallments.reduce((sum, inst) => sum + (Number(inst.amount) || 0), 0);
+
+    if (currentSum !== expectedTotal) {
+      setCommissionModalError(`Total installments (₹${currentSum.toLocaleString('en-IN')}) must exactly match calculated commission (₹${expectedTotal.toLocaleString('en-IN')}). Difference: ₹${(expectedTotal - currentSum).toLocaleString('en-IN')}`);
+      return;
+    }
+
+    setSavingCommission(true);
+    setCommissionModalError(null);
+
+    const teacher = (db?.shadow_teachers || []).find((t: any) => t.id === commissionTeacherId || t.registration_id === commissionTeacherId);
+
+    const totalPaid = commissionInstallments.reduce((sum, inst) => sum + (inst.status === 'Paid' ? (Number(inst.amount) || 0) : (Number(inst.paidAmount) || 0)), 0);
+    const totalPending = Math.max(0, expectedTotal - totalPaid);
+
+    const commissionPayload = {
+      shadowTeacherId: commissionTeacherId,
+      shadowTeacherName: teacher?.name || 'Shadow Teacher',
+      shadowTeacherRegId: teacher?.registration_id || (teacher as any)?.registrationId || commissionTeacherId,
+      shadowTeacherPhone: teacher?.phone || '',
+      shadowTeacherEmail: teacher?.email || '',
+      city: teacher?.city || '',
+      monthlySalary: numSalary,
+      commissionPercentage,
+      totalCommission: expectedTotal,
+      numberOfInstallments: commissionInstallmentCount,
+      installments: commissionInstallments,
+      totalPaid,
+      totalPending,
+      status: totalPaid >= expectedTotal ? 'Completed' : 'Active',
+      createdAt: teacher?.commission?.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      notes: commissionNotes
+    };
+
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const res = await fetch('/api/admin/records', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          action: 'save_commission',
+          id: commissionTeacherId,
+          commission: commissionPayload,
+          sendEmailNotification: commissionSendEmail
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setToastLog(data.notificationLog || 'Commission plan saved successfully!');
+        setCommissionModalOpen(false);
+
+        // Update local database state
+        if (db && db.shadow_teachers) {
+          const updatedShadows = db.shadow_teachers.map((st: any) => 
+            (st.id === commissionTeacherId || st.registration_id === commissionTeacherId)
+              ? { ...st, commission: data.commission }
+              : st
+          );
+          setDb(prev => ({ ...prev!, shadow_teachers: updatedShadows }));
+          
+          if (selectedRecord && (selectedRecord.data.id === commissionTeacherId || selectedRecord.data.registration_id === commissionTeacherId)) {
+            setSelectedRecord(prev => ({
+              ...prev!,
+              data: { ...prev!.data, commission: data.commission }
+            }));
+          }
+        }
+
+        setTimeout(() => setToastLog(null), 4000);
+      } else {
+        setCommissionModalError(data.error || 'Failed to save commission plan');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setCommissionModalError(err.message || 'Error communicating with server');
+    } finally {
+      setSavingCommission(false);
+    }
+  };
+
+  const openPaymentLogger = (teacher: any, installment: any) => {
+    setPaymentTargetTeacher(teacher);
+    setPaymentTargetInstallment(installment);
+    setPaymentStatus('Paid');
+    const remainingForInst = installment.status === 'Paid' ? installment.amount : Math.max(0, installment.amount - (installment.paidAmount || 0));
+    setPaymentAmount(remainingForInst || installment.amount);
+    setPaymentDate(new Date().toISOString().split('T')[0]);
+    setPaymentMethod(installment.paymentMethod || 'UPI');
+    setPaymentRef(installment.transactionRef || '');
+    setPaymentNotes(installment.notes || '');
+    setPaymentModalError(null);
+    setPaymentModalOpen(true);
+  };
+
+  const handleSavePayment = async () => {
+    if (!paymentTargetTeacher || !paymentTargetInstallment) return;
+
+    setSavingPayment(true);
+    setPaymentModalError(null);
+
+    const teacherId = paymentTargetTeacher.id || paymentTargetTeacher.registration_id;
+
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const res = await fetch('/api/admin/records', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          action: 'update_commission_payment',
+          id: teacherId,
+          installmentId: paymentTargetInstallment.id,
+          status: paymentStatus,
+          paidAmount: Number(paymentAmount) || 0,
+          paidDate: paymentDate,
+          paymentMethod,
+          transactionRef: paymentRef,
+          installmentNotes: paymentNotes
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setToastLog(data.notificationLog || 'Payment recorded successfully!');
+        setPaymentModalOpen(false);
+
+        if (db && db.shadow_teachers) {
+          const updatedShadows = db.shadow_teachers.map((st: any) => 
+            (st.id === teacherId || st.registration_id === teacherId)
+              ? { ...st, commission: data.commission }
+              : st
+          );
+          setDb(prev => ({ ...prev!, shadow_teachers: updatedShadows }));
+
+          if (selectedRecord && (selectedRecord.data.id === teacherId || selectedRecord.data.registration_id === teacherId)) {
+            setSelectedRecord(prev => ({
+              ...prev!,
+              data: { ...prev!.data, commission: data.commission }
+            }));
+          }
+        }
+
+        setTimeout(() => setToastLog(null), 4000);
+      } else {
+        setPaymentModalError(data.error || 'Failed to update installment payment');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setPaymentModalError(err.message || 'Error updating payment');
+    } finally {
+      setSavingPayment(false);
+    }
+  };
+
+  const handleOpenTeacherProfile = (st: any) => {
+    setEditStatus(st.status || 'Active');
+    setEditNotes(st.notes || '');
+    setSelectedRecord({ type: 'shadow_teachers', data: st });
+  };
+
+  // Commission Calculations & Monthly Overview Helpers
+  const getAllCommissionInstallments = () => {
+    if (!db || !db.shadow_teachers) return [];
+    const list: Array<{
+      teacher: any;
+      installment: any;
+    }> = [];
+
+    db.shadow_teachers.forEach((st: any) => {
+      if (st.commission && st.commission.installments) {
+        st.commission.installments.forEach((inst: any) => {
+          list.push({
+            teacher: st,
+            installment: inst
+          });
+        });
+      }
+    });
+
+    return list;
+  };
+
+  const getCommissionMonthlyStats = () => {
+    const allInstallments = getAllCommissionInstallments();
+    const now = new Date();
+    const currentMonthStr = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+    // Extract unique months
+    const monthSet = new Set<string>();
+    monthSet.add(currentMonthStr);
+    
+    // Add current and surrounding months to selector
+    for (let i = -2; i <= 4; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
+      monthSet.add(d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
+    }
+
+    allInstallments.forEach(({ installment }) => {
+      if (installment.month) monthSet.add(installment.month);
+    });
+
+    const activeMonth = commissionSelectedMonth === 'current' ? currentMonthStr : commissionSelectedMonth;
+
+    // Filter installments for selected month
+    const matchingInstallments = activeMonth === 'all' 
+      ? allInstallments 
+      : allInstallments.filter(({ installment }) => {
+          if (installment.month && installment.month.toLowerCase() === activeMonth.toLowerCase()) return true;
+          if (installment.dueDate) {
+            const dueMonth = new Date(installment.dueDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            return dueMonth.toLowerCase() === activeMonth.toLowerCase();
+          }
+          return false;
+        });
+
+    const totalExpected = matchingInstallments.reduce((sum, { installment }) => sum + (Number(installment.amount) || 0), 0);
+    const totalReceived = matchingInstallments.reduce((sum, { installment }) => {
+      if (installment.status === 'Paid') return sum + (Number(installment.amount) || 0);
+      if (installment.status === 'Partially Paid') return sum + (Number(installment.paidAmount) || 0);
+      return sum;
+    }, 0);
+    const totalPending = Math.max(0, totalExpected - totalReceived);
+
+    // Overdue count & amount (due date before today and status is Pending / Partially Paid)
+    const todayIso = now.toISOString().split('T')[0];
+    const overdueList = allInstallments.filter(({ installment }) => {
+      if (installment.status === 'Paid') return false;
+      if (installment.dueDate && installment.dueDate < todayIso) return true;
+      return installment.status === 'Overdue';
+    });
+    const totalOverdueAmount = overdueList.reduce((sum, { installment }) => {
+      const remaining = installment.amount - (installment.paidAmount || 0);
+      return sum + Math.max(0, remaining);
+    }, 0);
+
+    return {
+      activeMonth,
+      availableMonths: Array.from(monthSet),
+      matchingInstallments,
+      totalExpected,
+      totalReceived,
+      totalPending,
+      overdueCount: overdueList.length,
+      totalOverdueAmount,
+      currentMonthStr
+    };
+  };
+
   // New this week (last 7 days)
   const getNewThisWeek = () => {
     if (!db) return 0;
@@ -1087,6 +1493,7 @@ export default function AdminDashboard() {
               { key: 'overview', label: 'Overview', icon: LayoutDashboard },
               { key: 'tutors', label: 'Tutors Registry', icon: Users },
               { key: 'shadows', label: 'Shadow Teachers', icon: GraduationCap },
+              { key: 'commissions', label: 'Commission Management', icon: BadgePercent },
               { key: 'parents', label: 'Parent Requests', icon: ClipboardList },
               { key: 'schools', label: 'School Requests', icon: School },
               { key: 'bookings', label: 'Consultations (₹99)', icon: Calendar },
@@ -1236,6 +1643,133 @@ export default function AdminDashboard() {
                 </div>
 
               </div>
+
+              {/* Expected Commission This Month Widget */}
+              {(() => {
+                const stats = getCommissionMonthlyStats();
+                const thisMonthInstallments = stats.matchingInstallments;
+
+                return (
+                  <div className="bg-white rounded-3xl border border-brand-border/80 shadow-sm overflow-hidden space-y-4">
+                    <div className="p-5 sm:p-6 border-b border-brand-border/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-gradient-to-r from-purple-50/60 to-white">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="p-1.5 bg-primary text-white rounded-lg">
+                            <BadgePercent size={16} />
+                          </span>
+                          <h3 className="font-serif text-lg font-bold text-primary">
+                            Expected Commission This Month ({stats.currentMonthStr})
+                          </h3>
+                        </div>
+                        <p className="text-xs text-brand-muted mt-1">
+                          Track one-time placement commission installments due in {stats.currentMonthStr}.
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          onClick={() => openCommissionWizard()}
+                          className="px-3.5 py-1.5 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+                        >
+                          <PlusCircle size={14} />
+                          <span>Add Commission</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setActiveTab('commissions');
+                            setCommissionSelectedMonth('current');
+                          }}
+                          className="px-3.5 py-1.5 bg-brand-light hover:bg-brand-light/80 text-brand-dark font-bold text-xs rounded-xl border border-brand-border transition-all cursor-pointer flex items-center gap-1"
+                        >
+                          <span>Commission Dashboard</span>
+                          <ChevronRight size={14} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="px-5 sm:px-6 py-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
+                      <div className="p-4 bg-brand-light/40 rounded-2xl border border-brand-border/60">
+                        <span className="text-[10px] text-brand-muted font-bold uppercase tracking-wider block">Expected Revenue</span>
+                        <span className="text-xl font-black text-primary mt-0.5 block">₹{stats.totalExpected.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200/60">
+                        <span className="text-[10px] text-emerald-800 font-bold uppercase tracking-wider block">Collected</span>
+                        <span className="text-xl font-black text-emerald-700 mt-0.5 block">₹{stats.totalReceived.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div className="p-4 bg-amber-50/60 rounded-2xl border border-amber-200/60">
+                        <span className="text-[10px] text-amber-800 font-bold uppercase tracking-wider block">Pending Balance</span>
+                        <span className="text-xl font-black text-amber-700 mt-0.5 block">₹{stats.totalPending.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div className="p-4 bg-rose-50/60 rounded-2xl border border-rose-200/60">
+                        <span className="text-[10px] text-rose-800 font-bold uppercase tracking-wider block">Overdue Installments</span>
+                        <span className="text-xl font-black text-rose-700 mt-0.5 block">{stats.overdueCount} ({`₹${stats.totalOverdueAmount.toLocaleString('en-IN')}`})</span>
+                      </div>
+                    </div>
+
+                    {thisMonthInstallments.length > 0 ? (
+                      <div className="overflow-x-auto border-t border-brand-border/60">
+                        <table className="w-full text-left border-collapse text-xs">
+                          <thead>
+                            <tr className="bg-brand-light/40 text-brand-muted text-[10px] uppercase font-bold border-b border-brand-border">
+                              <th className="py-2.5 px-5">Shadow Teacher</th>
+                              <th className="py-2.5 px-4">Installment</th>
+                              <th className="py-2.5 px-4">Due Date</th>
+                              <th className="py-2.5 px-4">Amount</th>
+                              <th className="py-2.5 px-4">Status</th>
+                              <th className="py-2.5 px-5 text-right">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-brand-border/40">
+                            {thisMonthInstallments.slice(0, 5).map(({ teacher, installment }) => {
+                              const isOverdue = installment.status !== 'Paid' && installment.dueDate && installment.dueDate < new Date().toISOString().split('T')[0];
+                              const effStatus = isOverdue ? 'Overdue' : installment.status;
+
+                              return (
+                                <tr key={`${teacher.id}-${installment.id}`} className="hover:bg-brand-light/20">
+                                  <td className="py-2.5 px-5">
+                                    <div className="font-bold text-primary">{teacher.name}</div>
+                                    <div className="text-[10px] text-brand-muted font-mono">{teacher.registration_id} • {teacher.city}</div>
+                                  </td>
+                                  <td className="py-2.5 px-4 font-medium text-brand-dark">
+                                    Inst #{installment.installmentNumber}
+                                  </td>
+                                  <td className="py-2.5 px-4 font-mono text-[11px] text-brand-dark">
+                                    {installment.dueDate ? new Date(installment.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—'}
+                                  </td>
+                                  <td className="py-2.5 px-4 font-black text-primary">
+                                    ₹{installment.amount.toLocaleString('en-IN')}
+                                  </td>
+                                  <td className="py-2.5 px-4">
+                                    <span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                                      effStatus === 'Paid'
+                                        ? 'bg-emerald-50 text-emerald-700'
+                                        : (effStatus === 'Partially Paid' ? 'bg-blue-50 text-blue-700' : (effStatus === 'Overdue' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700'))
+                                    }`}>
+                                      {effStatus}
+                                    </span>
+                                  </td>
+                                  <td className="py-2.5 px-5 text-right">
+                                    <button
+                                      onClick={() => openPaymentLogger(teacher, installment)}
+                                      className="px-2.5 py-1 bg-primary hover:bg-primary/90 text-white font-bold text-[10px] rounded-lg transition-all cursor-pointer shadow-sm"
+                                    >
+                                      Update
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    ) : (
+                      <div className="p-6 text-center text-xs text-brand-muted">
+                        No commission installments scheduled for {stats.currentMonthStr} yet.
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Recent Submissions Table */}
               <div className="space-y-4">
@@ -1668,6 +2202,537 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
+
+          {/* TAB: COMMISSION MANAGEMENT & PAYMENT TRACKING */}
+          {activeTab === 'commissions' && (() => {
+            const stats = getCommissionMonthlyStats();
+            const allShadows = db?.shadow_teachers || [];
+
+            // Filter placed/active teachers or teachers with commission configured
+            const placedTeachers = allShadows.filter((st: any) => {
+              const matchesSearch = (st.name || '').toLowerCase().includes(commissionSearchQuery.toLowerCase()) ||
+                                    (st.registration_id || '').toLowerCase().includes(commissionSearchQuery.toLowerCase()) ||
+                                    (st.city || '').toLowerCase().includes(commissionSearchQuery.toLowerCase()) ||
+                                    (st.phone || '').includes(commissionSearchQuery);
+              if (!matchesSearch) return false;
+
+              if (commissionStatusFilter === 'All') return true;
+              if (commissionStatusFilter === 'Pending') return st.commission?.status === 'Active' && st.commission?.totalPending > 0;
+              if (commissionStatusFilter === 'Paid') return st.commission?.status === 'Completed' || (st.commission && st.commission.totalPending === 0);
+              if (commissionStatusFilter === 'Overdue') {
+                return (st.commission?.installments || []).some((inst: any) => inst.status === 'Overdue' || (inst.dueDate && inst.dueDate < new Date().toISOString().split('T')[0] && inst.status !== 'Paid'));
+              }
+              return true;
+            });
+
+            // Filter month installments by search
+            const filteredMonthlyInstallments = stats.matchingInstallments.filter(({ teacher, installment }) => {
+              const matchesSearch = (teacher.name || '').toLowerCase().includes(commissionSearchQuery.toLowerCase()) ||
+                                    (teacher.registration_id || '').toLowerCase().includes(commissionSearchQuery.toLowerCase()) ||
+                                    (teacher.city || '').toLowerCase().includes(commissionSearchQuery.toLowerCase()) ||
+                                    (teacher.phone || '').includes(commissionSearchQuery);
+              if (!matchesSearch) return false;
+              if (commissionStatusFilter !== 'All') {
+                if (commissionStatusFilter === 'Overdue') {
+                  const today = new Date().toISOString().split('T')[0];
+                  return installment.status === 'Overdue' || (installment.dueDate && installment.dueDate < today && installment.status !== 'Paid');
+                }
+                return installment.status === commissionStatusFilter;
+              }
+              return true;
+            });
+
+            return (
+              <div className="space-y-8 animate-fade-in-up">
+                
+                {/* Header Banner */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-gradient-to-r from-primary via-purple-900 to-[#4A3275] p-6 sm:p-8 rounded-3xl text-white shadow-md relative overflow-hidden">
+                  <div className="space-y-1 relative z-10">
+                    <div className="flex items-center gap-2">
+                      <span className="p-2 bg-accent text-primary rounded-xl font-bold flex items-center justify-center">
+                        <BadgePercent size={20} />
+                      </span>
+                      <h2 className="font-serif text-2xl sm:text-3xl font-black">Commission Management</h2>
+                    </div>
+                    <p className="text-white/80 text-xs sm:text-sm max-w-2xl font-medium">
+                      Automated tracking for Shadow Teacher one-time placement commissions, installment schedules, and monthly revenue collection.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0 relative z-10">
+                    <button
+                      onClick={() => openCommissionWizard()}
+                      className="px-5 py-3 bg-accent hover:bg-accent/90 text-primary font-bold rounded-2xl text-xs flex items-center gap-2 shadow-lg transition-all cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      <PlusCircle size={16} />
+                      Setup New Commission
+                    </button>
+                  </div>
+                  <div className="absolute right-0 top-0 bottom-0 w-96 bg-radial from-white/10 to-transparent pointer-events-none" />
+                </div>
+
+                {/* Overdue Alert Banner (if any) */}
+                {stats.overdueCount > 0 && (
+                  <div className="p-4 sm:p-5 bg-rose-50 border border-rose-200 rounded-2xl flex items-start sm:items-center justify-between gap-4 text-rose-900">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-rose-100 text-rose-700 rounded-xl shrink-0">
+                        <AlertTriangle size={20} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm">Overdue Commission Alert</h4>
+                        <p className="text-xs text-rose-700">
+                          <strong>{stats.overdueCount} installment(s)</strong> totaling <strong>₹{stats.totalOverdueAmount.toLocaleString('en-IN')}</strong> have passed their due date and remain unpaid.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setCommissionStatusFilter('Overdue')}
+                      className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer shrink-0"
+                    >
+                      View Overdue
+                    </button>
+                  </div>
+                )}
+
+                {/* Period Selector & Search Filter Bar */}
+                <div className="bg-white p-5 rounded-3xl border border-brand-border/60 shadow-sm space-y-4">
+                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    {/* Month Tabs */}
+                    <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-thin">
+                      <span className="text-[11px] font-bold text-brand-muted uppercase tracking-wider shrink-0 flex items-center gap-1.5 mr-1">
+                        <CalendarDays size={14} className="text-secondary" />
+                        Month:
+                      </span>
+                      <button
+                        onClick={() => setCommissionSelectedMonth('current')}
+                        className={`px-4 py-2 rounded-xl font-bold text-xs transition-all shrink-0 cursor-pointer ${
+                          commissionSelectedMonth === 'current'
+                            ? 'bg-primary text-white shadow-sm'
+                            : 'bg-brand-light/60 text-brand-dark hover:bg-brand-light'
+                        }`}
+                      >
+                        {stats.currentMonthStr} (Current)
+                      </button>
+                      {stats.availableMonths
+                        .filter(m => m !== stats.currentMonthStr)
+                        .slice(0, 5)
+                        .map(m => (
+                          <button
+                            key={m}
+                            onClick={() => setCommissionSelectedMonth(m)}
+                            className={`px-4 py-2 rounded-xl font-bold text-xs transition-all shrink-0 cursor-pointer ${
+                              commissionSelectedMonth === m
+                                ? 'bg-primary text-white shadow-sm'
+                                : 'bg-brand-light/60 text-brand-dark hover:bg-brand-light'
+                            }`}
+                          >
+                            {m}
+                          </button>
+                        ))}
+                      <button
+                        onClick={() => setCommissionSelectedMonth('all')}
+                        className={`px-4 py-2 rounded-xl font-bold text-xs transition-all shrink-0 cursor-pointer ${
+                          commissionSelectedMonth === 'all'
+                            ? 'bg-primary text-white shadow-sm'
+                            : 'bg-brand-light/60 text-brand-dark hover:bg-brand-light'
+                        }`}
+                      >
+                        All Time
+                      </button>
+                    </div>
+
+                    {/* Search & Status Filter */}
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                      <div className="relative flex-grow md:w-64">
+                        <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-muted" />
+                        <input
+                          type="text"
+                          placeholder="Search teacher, city, ID..."
+                          value={commissionSearchQuery}
+                          onChange={(e) => setCommissionSearchQuery(e.target.value)}
+                          className="w-full pl-9 pr-3 py-2 bg-brand-light/40 border border-brand-border rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary"
+                        />
+                      </div>
+                      <select
+                        value={commissionStatusFilter}
+                        onChange={(e) => setCommissionStatusFilter(e.target.value as any)}
+                        className="px-3 py-2 bg-brand-light/40 border border-brand-border rounded-xl text-xs font-bold text-brand-dark focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary shrink-0 cursor-pointer"
+                      >
+                        <option value="All">All Statuses</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Partially Paid">Partially Paid</option>
+                        <option value="Overdue">Overdue</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Top Monthly Metric Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                  
+                  {/* Expected This Month */}
+                  <div className="bg-white p-5 sm:p-6 rounded-3xl border border-brand-border/80 shadow-sm space-y-2 relative overflow-hidden">
+                    <div className="flex justify-between items-center text-brand-muted">
+                      <span className="text-[11px] uppercase font-bold tracking-wider">
+                        {commissionSelectedMonth === 'all' ? 'All-Time Expected' : `Expected (${stats.activeMonth})`}
+                      </span>
+                      <div className="p-2.5 bg-purple-50 text-purple-700 rounded-2xl">
+                        <TrendingUp size={18} />
+                      </div>
+                    </div>
+                    <div className="space-y-0.5">
+                      <h3 className="font-serif text-2xl sm:text-3xl font-black text-primary">
+                        ₹{stats.totalExpected.toLocaleString('en-IN')}
+                      </h3>
+                      <p className="text-[11px] text-brand-muted font-medium">
+                        Across {stats.matchingInstallments.length} installment(s)
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Received This Month */}
+                  <div className="bg-white p-5 sm:p-6 rounded-3xl border border-brand-border/80 shadow-sm space-y-2 relative overflow-hidden">
+                    <div className="flex justify-between items-center text-brand-muted">
+                      <span className="text-[11px] uppercase font-bold tracking-wider">
+                        {commissionSelectedMonth === 'all' ? 'Total Collected' : `Received (${stats.activeMonth})`}
+                      </span>
+                      <div className="p-2.5 bg-emerald-50 text-emerald-700 rounded-2xl">
+                        <CheckCircle2 size={18} />
+                      </div>
+                    </div>
+                    <div className="space-y-0.5">
+                      <h3 className="font-serif text-2xl sm:text-3xl font-black text-emerald-700">
+                        ₹{stats.totalReceived.toLocaleString('en-IN')}
+                      </h3>
+                      <p className="text-[11px] text-emerald-600 font-medium">
+                        {stats.totalExpected > 0 ? Math.round((stats.totalReceived / stats.totalExpected) * 100) : 0}% collected
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Pending This Month */}
+                  <div className="bg-white p-5 sm:p-6 rounded-3xl border border-brand-border/80 shadow-sm space-y-2 relative overflow-hidden">
+                    <div className="flex justify-between items-center text-brand-muted">
+                      <span className="text-[11px] uppercase font-bold tracking-wider">
+                        {commissionSelectedMonth === 'all' ? 'Total Outstanding' : `Pending (${stats.activeMonth})`}
+                      </span>
+                      <div className="p-2.5 bg-amber-50 text-amber-700 rounded-2xl">
+                        <Clock3 size={18} />
+                      </div>
+                    </div>
+                    <div className="space-y-0.5">
+                      <h3 className="font-serif text-2xl sm:text-3xl font-black text-amber-700">
+                        ₹{stats.totalPending.toLocaleString('en-IN')}
+                      </h3>
+                      <p className="text-[11px] text-amber-600 font-medium">
+                        Awaiting payment clearance
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Overdue Total */}
+                  <div className="bg-white p-5 sm:p-6 rounded-3xl border border-brand-border/80 shadow-sm space-y-2 relative overflow-hidden">
+                    <div className="flex justify-between items-center text-brand-muted">
+                      <span className="text-[11px] uppercase font-bold tracking-wider">Overdue Installments</span>
+                      <div className="p-2.5 bg-rose-50 text-rose-700 rounded-2xl">
+                        <AlertCircle size={18} />
+                      </div>
+                    </div>
+                    <div className="space-y-0.5">
+                      <h3 className="font-serif text-2xl sm:text-3xl font-black text-rose-700">
+                        ₹{stats.totalOverdueAmount.toLocaleString('en-IN')}
+                      </h3>
+                      <p className="text-[11px] text-rose-600 font-medium">
+                        {stats.overdueCount} overdue installment(s)
+                      </p>
+                    </div>
+                  </div>
+
+                </div>
+
+                {/* 1. MONTHLY EXPECTED INSTALLMENTS BREAKDOWN TABLE */}
+                <div className="bg-white rounded-3xl border border-brand-border/80 shadow-sm overflow-hidden space-y-4">
+                  <div className="p-5 sm:p-6 border-b border-brand-border/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                      <h3 className="font-serif text-lg font-bold text-primary flex items-center gap-2">
+                        <Calendar size={18} className="text-secondary" />
+                        Installments Scheduled for {stats.activeMonth}
+                      </h3>
+                      <p className="text-xs text-brand-muted mt-0.5">
+                        Specific commission installments expected or due in {stats.activeMonth}.
+                      </p>
+                    </div>
+                    <span className="px-3 py-1 bg-purple-50 text-purple-800 border border-purple-200 rounded-xl text-xs font-bold">
+                      {filteredMonthlyInstallments.length} Installment(s)
+                    </span>
+                  </div>
+
+                  {filteredMonthlyInstallments.length === 0 ? (
+                    <div className="p-12 text-center space-y-3">
+                      <div className="w-12 h-12 rounded-2xl bg-brand-light flex items-center justify-center mx-auto text-brand-muted">
+                        <CalendarDays size={24} />
+                      </div>
+                      <h4 className="font-bold text-brand-dark text-sm">No Installments Scheduled for {stats.activeMonth}</h4>
+                      <p className="text-xs text-brand-muted max-w-sm mx-auto">
+                        There are no shadow teacher commission installments due in this month matching your search.
+                      </p>
+                      <button
+                        onClick={() => openCommissionWizard()}
+                        className="mt-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
+                      >
+                        <PlusCircle size={14} />
+                        Add New Commission
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-brand-light/50 text-brand-muted text-[11px] uppercase tracking-wider font-bold border-b border-brand-border">
+                            <th className="py-3.5 px-5">Shadow Teacher</th>
+                            <th className="py-3.5 px-4">Location</th>
+                            <th className="py-3.5 px-4">Decided Salary</th>
+                            <th className="py-3.5 px-4">Rate (%)</th>
+                            <th className="py-3.5 px-4">Installment</th>
+                            <th className="py-3.5 px-4">Due Date</th>
+                            <th className="py-3.5 px-4">Amount Due</th>
+                            <th className="py-3.5 px-4">Payment Status</th>
+                            <th className="py-3.5 px-5 text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-brand-border/60 text-xs">
+                          {filteredMonthlyInstallments.map(({ teacher, installment }) => {
+                            const isOverdue = installment.status !== 'Paid' && installment.dueDate && installment.dueDate < new Date().toISOString().split('T')[0];
+                            const effectiveStatus = isOverdue ? 'Overdue' : installment.status;
+
+                            return (
+                              <tr key={`${teacher.id}-${installment.id}`} className="hover:bg-brand-light/30 transition-colors">
+                                <td className="py-3.5 px-5">
+                                  <div className="font-bold text-primary">{teacher.name}</div>
+                                  <div className="text-[10px] text-brand-muted font-mono">{teacher.registration_id || teacher.id}</div>
+                                </td>
+                                <td className="py-3.5 px-4 text-brand-dark font-medium">
+                                  {teacher.city || '—'}
+                                </td>
+                                <td className="py-3.5 px-4 text-brand-dark font-bold">
+                                  ₹{(teacher.commission?.monthlySalary || 0).toLocaleString('en-IN')}
+                                </td>
+                                <td className="py-3.5 px-4 text-brand-dark font-medium">
+                                  {teacher.commission?.commissionPercentage || 40}%
+                                </td>
+                                <td className="py-3.5 px-4 font-semibold text-brand-dark">
+                                  Inst #{installment.installmentNumber}
+                                  <span className="block text-[10px] text-brand-muted">{installment.month}</span>
+                                </td>
+                                <td className="py-3.5 px-4 text-brand-dark">
+                                  {installment.dueDate ? (
+                                    <span className={`font-mono text-[11px] ${isOverdue ? 'text-rose-700 font-bold' : ''}`}>
+                                      {new Date(installment.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                    </span>
+                                  ) : '—'}
+                                </td>
+                                <td className="py-3.5 px-4 font-black text-primary text-sm">
+                                  ₹{installment.amount.toLocaleString('en-IN')}
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                                    effectiveStatus === 'Paid'
+                                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                      : (effectiveStatus === 'Partially Paid'
+                                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                          : (effectiveStatus === 'Overdue'
+                                              ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                              : 'bg-amber-50 text-amber-700 border border-amber-200'))
+                                  }`}>
+                                    {effectiveStatus}
+                                  </span>
+                                  {installment.paidDate && (
+                                    <span className="block text-[9px] text-emerald-600 font-mono mt-0.5">
+                                      Paid on {new Date(installment.paidDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-3.5 px-5 text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <button
+                                      onClick={() => openPaymentLogger(teacher, installment)}
+                                      className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-sm flex items-center gap-1"
+                                    >
+                                      <CheckSquare size={13} />
+                                      <span>Update Status</span>
+                                    </button>
+                                    <button
+                                      onClick={() => openCommissionWizard(teacher)}
+                                      className="p-1.5 text-brand-muted hover:text-brand-dark hover:bg-brand-light rounded-lg transition-colors cursor-pointer"
+                                      title="Edit Commission Plan"
+                                    >
+                                      <Settings size={14} />
+                                    </button>
+                                    <button
+                                      onClick={() => handleOpenTeacherProfile(teacher)}
+                                      className="p-1.5 text-brand-muted hover:text-brand-dark hover:bg-brand-light rounded-lg transition-colors cursor-pointer"
+                                      title="View Shadow Teacher Profile"
+                                    >
+                                      <Eye size={14} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* 2. ALL PLACED SHADOW TEACHERS COMMISSION REGISTRY */}
+                <div className="bg-white rounded-3xl border border-brand-border/80 shadow-sm overflow-hidden space-y-4">
+                  <div className="p-5 sm:p-6 border-b border-brand-border/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                    <div>
+                      <h3 className="font-serif text-lg font-bold text-primary flex items-center gap-2">
+                        <Users size={18} className="text-secondary" />
+                        Placed Shadow Teachers Master Registry &amp; Commission Plans
+                      </h3>
+                      <p className="text-xs text-brand-muted mt-0.5">
+                        Overview of all Shadow Teachers with active placements and overall commission collection status.
+                      </p>
+                    </div>
+                    <span className="px-3 py-1 bg-brand-light text-brand-dark border border-brand-border rounded-xl text-xs font-bold">
+                      {placedTeachers.length} Shadow Teachers
+                    </span>
+                  </div>
+
+                  {placedTeachers.length === 0 ? (
+                    <div className="p-12 text-center text-brand-muted text-xs">
+                      No Shadow Teachers found matching your filters.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-brand-light/50 text-brand-muted text-[11px] uppercase tracking-wider font-bold border-b border-brand-border">
+                            <th className="py-3.5 px-5">Shadow Teacher</th>
+                            <th className="py-3.5 px-4">City</th>
+                            <th className="py-3.5 px-4">Placement Status</th>
+                            <th className="py-3.5 px-4">Decided Salary</th>
+                            <th className="py-3.5 px-4">Total Commission</th>
+                            <th className="py-3.5 px-4">Collection Progress</th>
+                            <th className="py-3.5 px-4">Balance Pending</th>
+                            <th className="py-3.5 px-4">Plan Status</th>
+                            <th className="py-3.5 px-5 text-right">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-brand-border/60 text-xs">
+                          {placedTeachers.map((st: any) => {
+                            const comm = st.commission;
+                            const hasComm = !!comm;
+                            const salary = comm?.monthlySalary || 0;
+                            const totalComm = comm?.totalCommission || 0;
+                            const totalPaid = comm?.totalPaid || 0;
+                            const pending = comm?.totalPending || totalComm;
+                            const pct = totalComm > 0 ? Math.round((totalPaid / totalComm) * 100) : 0;
+
+                            return (
+                              <tr key={st.id} className="hover:bg-brand-light/30 transition-colors">
+                                <td className="py-3.5 px-5">
+                                  <div className="font-bold text-primary">{st.name}</div>
+                                  <div className="text-[10px] text-brand-muted font-mono">{st.registration_id || st.id}</div>
+                                  <div className="text-[10px] text-brand-muted">{st.phone}</div>
+                                </td>
+                                <td className="py-3.5 px-4 font-medium text-brand-dark">
+                                  {st.city || '—'}
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusColor(st.status)}`}>
+                                    {st.status}
+                                  </span>
+                                </td>
+                                <td className="py-3.5 px-4 font-bold text-brand-dark">
+                                  {hasComm ? `₹${salary.toLocaleString('en-IN')}` : <span className="text-brand-muted italic">Not Set</span>}
+                                </td>
+                                <td className="py-3.5 px-4 font-black text-primary">
+                                  {hasComm ? `₹${totalComm.toLocaleString('en-IN')}` : <span className="text-brand-muted italic">—</span>}
+                                  {hasComm && (
+                                    <span className="block text-[10px] font-normal text-brand-muted">{comm.commissionPercentage}% rate ({comm.numberOfInstallments} inst)</span>
+                                  )}
+                                </td>
+                                <td className="py-3.5 px-4 min-w-[140px]">
+                                  {hasComm ? (
+                                    <div className="space-y-1">
+                                      <div className="flex justify-between text-[10px] font-bold">
+                                        <span className="text-emerald-700">₹{totalPaid.toLocaleString('en-IN')}</span>
+                                        <span className="text-brand-muted">{pct}%</span>
+                                      </div>
+                                      <div className="w-full bg-brand-light h-2 rounded-full overflow-hidden">
+                                        <div 
+                                          className={`h-full rounded-full ${pct >= 100 ? 'bg-emerald-500' : 'bg-primary'}`}
+                                          style={{ width: `${Math.min(100, pct)}%` }}
+                                        />
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <span className="text-brand-muted italic text-[10px]">No Plan</span>
+                                  )}
+                                </td>
+                                <td className="py-3.5 px-4 font-bold">
+                                  {hasComm ? (
+                                    <span className={pending > 0 ? 'text-amber-700' : 'text-emerald-700'}>
+                                      ₹{pending.toLocaleString('en-IN')}
+                                    </span>
+                                  ) : (
+                                    <span className="text-brand-muted">—</span>
+                                  )}
+                                </td>
+                                <td className="py-3.5 px-4">
+                                  {hasComm ? (
+                                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                      comm.status === 'Completed'
+                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                        : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
+                                    }`}>
+                                      {comm.status || 'Active'}
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-[10px] font-medium">
+                                      Pending Setup
+                                    </span>
+                                  )}
+                                </td>
+                                <td className="py-3.5 px-5 text-right">
+                                  <div className="flex items-center justify-end gap-2">
+                                    <button
+                                      onClick={() => openCommissionWizard(st)}
+                                      className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center gap-1 shadow-sm ${
+                                        hasComm
+                                          ? 'bg-brand-light text-primary hover:bg-brand-light/80 border border-brand-border'
+                                          : 'bg-accent hover:bg-accent/90 text-primary'
+                                      }`}
+                                    >
+                                      {hasComm ? <Settings size={12} /> : <PlusCircle size={12} />}
+                                      <span>{hasComm ? 'Edit Plan' : 'Add Commission'}</span>
+                                    </button>
+                                    <button
+                                      onClick={() => handleOpenTeacherProfile(st)}
+                                      className="p-1.5 text-brand-muted hover:text-brand-dark hover:bg-brand-light rounded-lg transition-colors cursor-pointer"
+                                      title="View Profile Details"
+                                    >
+                                      <Eye size={14} />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+            );
+          })()}
 
           {/* TAB 4: PARENT REQUESTS TAB */}
           {activeTab === 'parents' && (
@@ -3216,6 +4281,116 @@ export default function AdminDashboard() {
 
 
 
+                {/* Commission & Placement Details Section (Shadow Teachers Only) */}
+                {selectedRecord.type === 'shadow_teachers' && (() => {
+                  const comm = selectedRecord.data.commission;
+                  const hasComm = !!comm;
+
+                  return (
+                    <div className="space-y-3 p-4 sm:p-5 bg-purple-50/50 border border-purple-200/80 rounded-2xl">
+                      <div className="flex justify-between items-center">
+                        <h4 className="font-serif text-sm font-bold text-primary flex items-center gap-1.5">
+                          <BadgePercent size={16} className="text-secondary" />
+                          Placement Commission &amp; Payment Schedule
+                        </h4>
+                        <button
+                          type="button"
+                          onClick={() => openCommissionWizard(selectedRecord.data)}
+                          className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer flex items-center gap-1"
+                        >
+                          {hasComm ? <Settings size={12} /> : <PlusCircle size={12} />}
+                          <span>{hasComm ? 'Edit Terms' : 'Add Commission'}</span>
+                        </button>
+                      </div>
+
+                      {hasComm ? (
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs bg-white p-3 rounded-xl border border-purple-100">
+                            <div>
+                              <span className="text-[10px] text-brand-muted uppercase font-bold block">Monthly Salary</span>
+                              <span className="font-bold text-brand-dark">₹{comm.monthlySalary?.toLocaleString('en-IN')}</span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-brand-muted uppercase font-bold block">Commission Rate</span>
+                              <span className="font-bold text-brand-dark">{comm.commissionPercentage}%</span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-brand-muted uppercase font-bold block">Total Commission</span>
+                              <span className="font-bold text-primary">₹{comm.totalCommission?.toLocaleString('en-IN')}</span>
+                            </div>
+                            <div>
+                              <span className="text-[10px] text-brand-muted uppercase font-bold block">Balance Pending</span>
+                              <span className={`font-bold ${comm.totalPending > 0 ? 'text-amber-700' : 'text-emerald-700'}`}>
+                                ₹{comm.totalPending?.toLocaleString('en-IN')}
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Installments List */}
+                          <div className="space-y-1.5">
+                            <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Installments ({comm.installments?.length || 0})</span>
+                            <div className="space-y-1.5">
+                              {(comm.installments || []).map((inst: any) => {
+                                const isOverdue = inst.status !== 'Paid' && inst.dueDate && inst.dueDate < new Date().toISOString().split('T')[0];
+                                const effectiveStatus = isOverdue ? 'Overdue' : inst.status;
+
+                                return (
+                                  <div key={inst.id} className="flex items-center justify-between p-2.5 bg-white border border-brand-border/80 rounded-xl text-xs">
+                                    <div className="space-y-0.5">
+                                      <div className="font-bold text-brand-dark">
+                                        Inst #{inst.installmentNumber} • {inst.month}
+                                      </div>
+                                      <div className="text-[10px] text-brand-muted">
+                                        Due: {inst.dueDate ? new Date(inst.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-3">
+                                      <div className="text-right">
+                                        <div className="font-bold text-primary">₹{inst.amount.toLocaleString('en-IN')}</div>
+                                        <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold ${
+                                          effectiveStatus === 'Paid'
+                                            ? 'bg-emerald-50 text-emerald-700'
+                                            : (effectiveStatus === 'Partially Paid'
+                                                ? 'bg-blue-50 text-blue-700'
+                                                : (effectiveStatus === 'Overdue' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700'))
+                                        }`}>
+                                          {effectiveStatus}
+                                        </span>
+                                      </div>
+                                      <button
+                                        type="button"
+                                        onClick={() => openPaymentLogger(selectedRecord.data, inst)}
+                                        className="px-2.5 py-1 bg-brand-light hover:bg-brand-light/80 text-primary font-bold text-[11px] rounded-lg border border-brand-border cursor-pointer transition-colors"
+                                      >
+                                        Update
+                                      </button>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="bg-white p-4 rounded-xl border border-dashed border-purple-200 text-center space-y-2">
+                          <p className="text-xs text-brand-muted">
+                            No placement commission details configured yet for {selectedRecord.data.name}.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => openCommissionWizard(selectedRecord.data)}
+                            className="px-4 py-2 bg-accent hover:bg-accent/90 text-primary font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer inline-flex items-center gap-1.5"
+                          >
+                            <PlusCircle size={14} />
+                            Add Commission Details
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 {/* Matchmaking Section (Parent Requests Only) */}
                 {(selectedRecord.type === 'parent_shadow_requests' || selectedRecord.type === 'parent_tutor_requests') && (
                   <div className="space-y-3 p-4 bg-brand-light/30 border border-brand-border rounded-2xl">
@@ -3680,6 +4855,545 @@ export default function AdminDashboard() {
                 )}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ─── COMMISSION SETUP / EDIT WIZARD MODAL ─────────────────── */}
+      {commissionModalOpen && (() => {
+        const numSalary = Number(commissionSalary) || 0;
+        const calcTotal = Math.round(numSalary * (commissionPercentage / 100));
+        const sumInstallments = commissionInstallments.reduce((sum, i) => sum + (Number(i.amount) || 0), 0);
+        const difference = calcTotal - sumInstallments;
+        const isBalanced = difference === 0 && calcTotal > 0;
+
+        const allTeachers = db?.shadow_teachers || [];
+
+        return (
+          <div className="fixed inset-0 bg-primary/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full border border-brand-border shadow-2xl text-left animate-fade-in-up space-y-6 my-8 max-h-[90vh] flex flex-col">
+              
+              {/* Modal Header */}
+              <div className="flex justify-between items-center pb-4 border-b border-brand-border shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-purple-100 text-primary rounded-2xl">
+                    <BadgePercent size={24} />
+                  </div>
+                  <div>
+                    <h3 className="font-serif text-xl font-bold text-primary">Commission Details &amp; Payment Schedule</h3>
+                    <p className="text-xs text-brand-muted font-medium">Configure one-time placement commission terms for Shadow Teacher</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setCommissionModalOpen(false)}
+                  className="p-2 text-brand-muted hover:text-brand-dark rounded-xl hover:bg-brand-light transition-colors cursor-pointer"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Modal Body (Scrollable) */}
+              <div className="space-y-6 overflow-y-auto flex-grow pr-1">
+
+                {/* Teacher Selector */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-brand-dark uppercase tracking-wider block">
+                    Shadow Teacher <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    value={commissionTeacherId}
+                    onChange={(e) => {
+                      const selId = e.target.value;
+                      setCommissionTeacherId(selId);
+                      const t = allTeachers.find((st: any) => st.id === selId || st.registration_id === selId);
+                      if (t && t.commission) {
+                        setCommissionSalary(t.commission.monthlySalary || 16000);
+                        setCommissionPercentage(t.commission.commissionPercentage || 40);
+                        setCommissionInstallmentCount(t.commission.numberOfInstallments || 2);
+                        setCommissionInstallments(t.commission.installments || generateDefaultInstallments(t.commission.totalCommission || 6400, 2));
+                        setCommissionNotes(t.commission.notes || '');
+                      }
+                    }}
+                    className="w-full p-3 bg-brand-light/40 border border-brand-border rounded-xl text-xs font-bold text-brand-dark focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary cursor-pointer"
+                  >
+                    <option value="">-- Select Shadow Teacher --</option>
+                    {allTeachers.map((st: any) => (
+                      <option key={st.id} value={st.id}>
+                        {st.name} ({st.registration_id || st.id}) • {st.city || 'No City'} • Status: {st.status} {st.commission ? '✓ (Plan exists)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Salary & Percentage Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  
+                  {/* Decided Monthly Salary */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-brand-dark uppercase tracking-wider block">
+                      Decided Monthly Salary (₹) <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 font-bold text-brand-muted text-sm">₹</span>
+                      <input
+                        type="number"
+                        value={commissionSalary}
+                        onChange={(e) => handleSalaryChange(e.target.value)}
+                        placeholder="e.g. 16000"
+                        className="w-full pl-8 pr-3 py-2.5 bg-brand-light/40 border border-brand-border rounded-xl text-xs font-bold text-brand-dark focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary"
+                      />
+                    </div>
+                    {/* Quick Presets */}
+                    <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                      <span className="text-[10px] text-brand-muted font-bold">Presets:</span>
+                      {[16000, 22000, 25000, 35000].map((amt) => (
+                        <button
+                          key={amt}
+                          type="button"
+                          onClick={() => handleSalaryChange(amt)}
+                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${
+                            Number(commissionSalary) === amt
+                              ? 'bg-primary text-white border-primary'
+                              : 'bg-brand-light text-brand-dark border-brand-border hover:bg-brand-light/80'
+                          }`}
+                        >
+                          ₹{(amt / 1000)}k
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Commission Percentage */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-brand-dark uppercase tracking-wider block">
+                      Commission Percentage (%) <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="flex items-center gap-2">
+                      {[40, 50].map((pct) => (
+                        <button
+                          key={pct}
+                          type="button"
+                          onClick={() => handlePercentageChange(pct)}
+                          className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                            commissionPercentage === pct
+                              ? 'bg-secondary text-white border-secondary shadow-sm'
+                              : 'bg-brand-light/60 text-brand-dark border-brand-border hover:bg-brand-light'
+                          }`}
+                        >
+                          {pct}% of Salary
+                        </button>
+                      ))}
+                      <div className="relative w-24">
+                        <input
+                          type="number"
+                          value={commissionPercentage}
+                          onChange={(e) => handlePercentageChange(Number(e.target.value) || 0)}
+                          placeholder="Custom %"
+                          className="w-full pr-6 pl-2.5 py-2.5 bg-brand-light/40 border border-brand-border rounded-xl text-xs font-bold text-brand-dark focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary text-center"
+                        />
+                        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-brand-muted">%</span>
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-brand-muted">
+                      Standard placement commission is typically 40% or 50% of the first month's salary.
+                    </p>
+                  </div>
+
+                </div>
+
+                {/* Auto-Calculated Total Commission Banner */}
+                <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200/80 rounded-2xl flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-bold text-purple-900 uppercase tracking-wider block">
+                      Total One-Time Commission (Payable by Teacher)
+                    </span>
+                    <span className="text-xs text-brand-muted font-medium">
+                      ₹{numSalary.toLocaleString('en-IN')} × {commissionPercentage}%
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-serif text-2xl font-black text-primary">
+                      ₹{calcTotal.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Payment Schedule & Installment Splitter */}
+                <div className="space-y-3">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <label className="text-xs font-bold text-brand-dark uppercase tracking-wider block">
+                      Payment Schedule &amp; Distribution
+                    </label>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[11px] text-brand-muted font-bold">Split into:</span>
+                      {[1, 2, 3, 4].map((count) => (
+                        <button
+                          key={count}
+                          type="button"
+                          onClick={() => handleInstallmentCountChange(count)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                            commissionInstallmentCount === count
+                              ? 'bg-primary text-white border-primary shadow-sm'
+                              : 'bg-brand-light text-brand-dark border-brand-border hover:bg-brand-light/80'
+                          }`}
+                        >
+                          {count === 1 ? 'Full' : `${count} Inst.`}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Installments Table / Editable Grid */}
+                  <div className="border border-brand-border rounded-2xl overflow-hidden shadow-xs">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-brand-light/60 text-brand-muted text-[10px] uppercase font-bold border-b border-brand-border">
+                          <th className="py-2.5 px-3">#</th>
+                          <th className="py-2.5 px-3">Target Month</th>
+                          <th className="py-2.5 px-3">Due Date</th>
+                          <th className="py-2.5 px-3">Amount (₹)</th>
+                          <th className="py-2.5 px-3">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-brand-border/60">
+                        {commissionInstallments.map((inst, idx) => (
+                          <tr key={inst.id || idx} className="hover:bg-brand-light/20">
+                            <td className="py-2.5 px-3 font-bold text-brand-muted">
+                              #{inst.installmentNumber}
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <input
+                                type="text"
+                                value={inst.month}
+                                onChange={(e) => handleInstallmentFieldChange(idx, 'month', e.target.value)}
+                                placeholder="e.g. September 2026"
+                                className="w-full p-1.5 bg-brand-light/40 border border-brand-border rounded-lg text-xs font-semibold text-brand-dark focus:bg-white"
+                              />
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <input
+                                type="date"
+                                value={inst.dueDate}
+                                onChange={(e) => handleInstallmentFieldChange(idx, 'dueDate', e.target.value)}
+                                className="w-full p-1.5 bg-brand-light/40 border border-brand-border rounded-lg text-xs font-mono text-brand-dark focus:bg-white"
+                              />
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <div className="relative">
+                                <span className="absolute left-2 top-1/2 -translate-y-1/2 text-brand-muted text-xs">₹</span>
+                                <input
+                                  type="number"
+                                  value={inst.amount}
+                                  onChange={(e) => handleInstallmentFieldChange(idx, 'amount', Number(e.target.value) || 0)}
+                                  className="w-full pl-5 pr-2 py-1.5 bg-brand-light/40 border border-brand-border rounded-lg text-xs font-bold text-primary focus:bg-white"
+                                />
+                              </div>
+                            </td>
+                            <td className="py-2.5 px-3">
+                              <select
+                                value={inst.status}
+                                onChange={(e) => handleInstallmentFieldChange(idx, 'status', e.target.value)}
+                                className="w-full p-1.5 bg-brand-light/40 border border-brand-border rounded-lg text-[11px] font-bold text-brand-dark focus:bg-white cursor-pointer"
+                              >
+                                <option value="Pending">Pending</option>
+                                <option value="Paid">Paid</option>
+                                <option value="Partially Paid">Partially Paid</option>
+                                <option value="Overdue">Overdue</option>
+                              </select>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Real-Time Live Sum Validation Indicator */}
+                  <div className={`p-3 rounded-xl text-xs font-bold flex items-center justify-between border ${
+                    isBalanced
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      : 'bg-rose-50 text-rose-800 border-rose-200'
+                  }`}>
+                    <div className="flex items-center gap-2">
+                      {isBalanced ? (
+                        <CheckCircle2 size={16} className="text-emerald-600" />
+                      ) : (
+                        <AlertTriangle size={16} className="text-rose-600" />
+                      )}
+                      <span>
+                        {isBalanced
+                          ? `Installment sum (₹${sumInstallments.toLocaleString('en-IN')}) exactly matches Total Commission ✓`
+                          : `Sum mismatch: Installments total ₹${sumInstallments.toLocaleString('en-IN')} (Difference: ${difference > 0 ? `+₹${difference.toLocaleString('en-IN')} remaining` : `-₹${Math.abs(difference).toLocaleString('en-IN')} excess`})`}
+                      </span>
+                    </div>
+                    {!isBalanced && (
+                      <button
+                        type="button"
+                        onClick={() => setCommissionInstallments(generateDefaultInstallments(calcTotal, commissionInstallmentCount))}
+                        className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[10px] font-bold cursor-pointer transition-colors"
+                      >
+                        Auto-Balance
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Email Notification Option */}
+                <div className="p-4 bg-brand-light/50 border border-brand-border rounded-2xl space-y-2">
+                  <label className="flex items-center gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={commissionSendEmail}
+                      onChange={(e) => setCommissionSendEmail(e.target.checked)}
+                      className="w-4 h-4 rounded text-primary focus:ring-secondary cursor-pointer"
+                    />
+                    <span className="text-xs font-bold text-brand-dark">
+                      Send branded confirmation email to Shadow Teacher with full payment schedule
+                    </span>
+                  </label>
+                  <p className="text-[11px] text-brand-muted pl-6.5">
+                    An official email will be sent to the teacher outlining their monthly salary, {commissionPercentage}% placement commission terms, and installment due dates.
+                  </p>
+                </div>
+
+                {/* Internal Notes */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-brand-dark uppercase tracking-wider block">
+                    Internal Notes / Terms (Optional)
+                  </label>
+                  <textarea
+                    rows={2}
+                    value={commissionNotes}
+                    onChange={(e) => setCommissionNotes(e.target.value)}
+                    placeholder="Any special remarks or placement conditions agreed with the teacher..."
+                    className="w-full p-3 bg-brand-light/40 border border-brand-border rounded-xl text-xs text-brand-dark focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary"
+                  />
+                </div>
+
+                {/* Error Banner */}
+                {commissionModalError && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 font-bold flex items-center gap-2">
+                    <AlertCircle size={14} className="shrink-0 text-rose-600" />
+                    <span>{commissionModalError}</span>
+                  </div>
+                )}
+
+              </div>
+
+              {/* Modal Footer */}
+              <div className="pt-4 border-t border-brand-border flex items-center justify-between gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setCommissionModalOpen(false)}
+                  disabled={savingCommission}
+                  className="px-4 py-2.5 border border-brand-border rounded-xl text-xs font-bold text-brand-muted hover:bg-brand-light cursor-pointer disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveCommissionPlan}
+                  disabled={savingCommission || !isBalanced}
+                  className="px-6 py-2.5 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold text-xs shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                >
+                  {savingCommission ? (
+                    <>
+                      <RefreshCw size={14} className="animate-spin" />
+                      <span>Saving Plan...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save size={14} />
+                      <span>Save Commission Plan</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* ─── INSTALLMENT PAYMENT LOGGER MODAL ─────────────────────── */}
+      {paymentModalOpen && paymentTargetTeacher && paymentTargetInstallment && (
+        <div className="fixed inset-0 bg-primary/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full border border-brand-border shadow-2xl text-left animate-fade-in-up space-y-5">
+            
+            {/* Modal Header */}
+            <div className="flex justify-between items-center pb-3 border-b border-brand-border">
+              <div className="flex items-center gap-3">
+                <div className="p-3 bg-emerald-100 text-emerald-800 rounded-2xl">
+                  <CreditCard size={22} />
+                </div>
+                <div>
+                  <h3 className="font-serif text-lg font-bold text-primary">Record Commission Payment</h3>
+                  <p className="text-xs text-brand-muted font-medium">
+                    {paymentTargetTeacher.name} ({paymentTargetTeacher.registration_id || paymentTargetTeacher.id})
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setPaymentModalOpen(false)}
+                className="p-1.5 text-brand-muted hover:text-brand-dark rounded-xl hover:bg-brand-light transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Installment Summary */}
+            <div className="p-3.5 bg-brand-light/50 border border-brand-border rounded-2xl flex items-center justify-between text-xs">
+              <div>
+                <span className="font-bold text-brand-dark block">
+                  Installment #{paymentTargetInstallment.installmentNumber} ({paymentTargetInstallment.month})
+                </span>
+                <span className="text-[10px] text-brand-muted">
+                  Due: {paymentTargetInstallment.dueDate ? new Date(paymentTargetInstallment.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="text-[10px] text-brand-muted uppercase font-bold block">Scheduled Due</span>
+                <span className="font-serif font-black text-sm text-primary">
+                  ₹{paymentTargetInstallment.amount.toLocaleString('en-IN')}
+                </span>
+              </div>
+            </div>
+
+            {/* Form Fields */}
+            <div className="space-y-4 text-xs">
+              
+              {/* Payment Status */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider block">
+                  Payment Status
+                </label>
+                <select
+                  value={paymentStatus}
+                  onChange={(e) => setPaymentStatus(e.target.value as any)}
+                  className="w-full p-2.5 bg-brand-light/40 border border-brand-border rounded-xl text-xs font-bold text-brand-dark focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary cursor-pointer"
+                >
+                  <option value="Paid">Paid (Full Payment Received)</option>
+                  <option value="Partially Paid">Partially Paid</option>
+                  <option value="Pending">Pending (Not Yet Received)</option>
+                  <option value="Overdue">Overdue</option>
+                </select>
+              </div>
+
+              {/* Amount Paid & Date */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider block">
+                    Amount Paid (₹)
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-brand-muted font-bold text-xs">₹</span>
+                    <input
+                      type="number"
+                      value={paymentAmount}
+                      onChange={(e) => setPaymentAmount(e.target.value)}
+                      className="w-full pl-6 pr-2.5 py-2 bg-brand-light/40 border border-brand-border rounded-xl text-xs font-bold text-brand-dark focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider block">
+                    Payment Date
+                  </label>
+                  <input
+                    type="date"
+                    value={paymentDate}
+                    onChange={(e) => setPaymentDate(e.target.value)}
+                    className="w-full p-2 bg-brand-light/40 border border-brand-border rounded-xl text-xs font-mono text-brand-dark focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary"
+                  />
+                </div>
+              </div>
+
+              {/* Method & Ref */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider block">
+                    Payment Method
+                  </label>
+                  <select
+                    value={paymentMethod}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    className="w-full p-2 bg-brand-light/40 border border-brand-border rounded-xl text-xs font-semibold text-brand-dark focus:bg-white focus:outline-none cursor-pointer"
+                  >
+                    <option value="UPI">UPI / GPay / PhonePe</option>
+                    <option value="Bank Transfer">Bank Transfer / NEFT</option>
+                    <option value="Cash">Cash</option>
+                    <option value="Cheque">Cheque</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider block">
+                    Txn Ref / UTR # (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    value={paymentRef}
+                    onChange={(e) => setPaymentRef(e.target.value)}
+                    placeholder="e.g. 428192839120"
+                    className="w-full p-2 bg-brand-light/40 border border-brand-border rounded-xl text-xs text-brand-dark focus:bg-white focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Installment Notes */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider block">
+                  Remarks / Note
+                </label>
+                <input
+                  type="text"
+                  value={paymentNotes}
+                  onChange={(e) => setPaymentNotes(e.target.value)}
+                  placeholder="e.g. Received via GPay from Teacher"
+                  className="w-full p-2 bg-brand-light/40 border border-brand-border rounded-xl text-xs text-brand-dark focus:bg-white focus:outline-none"
+                />
+              </div>
+
+              {/* Error Banner */}
+              {paymentModalError && (
+                <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-[11px] text-rose-800 font-bold">
+                  {paymentModalError}
+                </div>
+              )}
+
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex justify-end items-center gap-3 pt-2 border-t border-brand-border">
+              <button
+                type="button"
+                onClick={() => setPaymentModalOpen(false)}
+                disabled={savingPayment}
+                className="px-4 py-2 border border-brand-border rounded-xl text-xs font-bold text-brand-muted hover:bg-brand-light cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSavePayment}
+                disabled={savingPayment}
+                className="px-5 py-2 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold text-xs shadow-md flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-all"
+              >
+                {savingPayment ? (
+                  <>
+                    <RefreshCw size={13} className="animate-spin" />
+                    <span>Updating...</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckSquare size={13} />
+                    <span>Save Payment Status</span>
+                  </>
+                )}
+              </button>
+            </div>
+
           </div>
         </div>
       )}

@@ -3,7 +3,7 @@ import { supabase } from './supabase';
 interface SendEmailParams {
   to: string;
   subject: string;
-  type: 'registration' | 'status_change' | 'payment_receipt' | 'match_ready' | 'placement_confirmed' | 'contact_alert' | 'contact_receipt';
+  type: 'registration' | 'status_change' | 'payment_receipt' | 'match_ready' | 'placement_confirmed' | 'contact_alert' | 'contact_receipt' | 'commission_details';
   bodyHtml: string;
 }
 
@@ -206,4 +206,101 @@ export async function sendSMS({ to, message, type }: SendSMSParams): Promise<{ s
   console.log(`Type: ${type}`);
   console.log(`Content: "${message}"`);
   return { success: true };
+}
+
+/**
+ * Sends a structured, branded email notification to a Shadow Teacher detailing their
+ * agreed monthly salary, commission percentage, total one-time commission, and installment schedule.
+ */
+export async function sendCommissionNotificationEmail({
+  to,
+  teacherName,
+  monthlySalary,
+  commissionPercentage,
+  totalCommission,
+  installments
+}: {
+  to: string;
+  teacherName: string;
+  monthlySalary: number;
+  commissionPercentage: number;
+  totalCommission: number;
+  installments: Array<{
+    installmentNumber: number;
+    month: string;
+    dueDate?: string;
+    amount: number;
+    status: string;
+  }>;
+}): Promise<{ success: boolean; error?: string; id?: string }> {
+  const installmentRowsHtml = installments.map(inst => `
+    <tr>
+      <td style="padding: 10px 14px; border-bottom: 1px solid #E6E2EB; font-size: 13px; color: #2D253A; font-weight: bold;">Installment ${inst.installmentNumber} (${inst.month})</td>
+      <td style="padding: 10px 14px; border-bottom: 1px solid #E6E2EB; font-size: 13px; color: #2D253A;">${inst.dueDate ? new Date(inst.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : inst.month}</td>
+      <td style="padding: 10px 14px; border-bottom: 1px solid #E6E2EB; font-size: 13px; color: #3B2A6B; font-weight: bold;">₹${inst.amount.toLocaleString('en-IN')}</td>
+      <td style="padding: 10px 14px; border-bottom: 1px solid #E6E2EB; font-size: 12px;">
+        <span style="display: inline-block; padding: 3px 8px; border-radius: 6px; font-weight: bold; background-color: ${inst.status === 'Paid' ? '#D1FAE5; color: #065F46' : '#FEF3C7; color: #92400E'};">${inst.status}</span>
+      </td>
+    </tr>
+  `).join('');
+
+  const bodyHtml = `
+    <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Placement Commission Details &amp; Payment Schedule</h2>
+    
+    <p style="margin: 0 0 16px 0; font-size: 14px; color: #2D253A;">Dear <strong>${teacherName}</strong>,</p>
+    
+    <p style="margin: 0 0 16px 0; font-size: 14px; color: #555555; line-height: 1.6;">
+      Your Shadow Teacher placement has been successfully confirmed. As per the agreed placement terms, your one-time placement commission details are outlined below:
+    </p>
+
+    <div style="background-color: #F8F6FA; border: 1px solid #E6E2EB; border-radius: 12px; padding: 18px 20px; margin-bottom: 24px;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 6px 0; font-size: 13px; color: #6A5B7C; width: 45%;">Decided Monthly Salary:</td>
+          <td style="padding: 6px 0; font-size: 14px; color: #2D253A; font-weight: bold;">₹${monthlySalary.toLocaleString('en-IN')} / month</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px 0; font-size: 13px; color: #6A5B7C;">Commission Percentage:</td>
+          <td style="padding: 6px 0; font-size: 14px; color: #2D253A; font-weight: bold;">${commissionPercentage}%</td>
+        </tr>
+        <tr>
+          <td style="padding: 6px 0; font-size: 13px; color: #6A5B7C; border-top: 1px solid #E6E2EB;">Total One-Time Commission:</td>
+          <td style="padding: 6px 0; font-size: 16px; color: #3B2A6B; font-weight: 900; border-top: 1px solid #E6E2EB;">₹${totalCommission.toLocaleString('en-IN')}</td>
+        </tr>
+      </table>
+    </div>
+
+    <h3 style="color: #3B2A6B; font-size: 15px; margin: 0 0 12px 0;">Agreed Payment Schedule</h3>
+    
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; border: 1px solid #E6E2EB; border-radius: 8px; overflow: hidden;">
+      <thead>
+        <tr style="background-color: #3B2A6B; color: #ffffff; text-align: left;">
+          <th style="padding: 10px 14px; font-size: 12px; text-transform: uppercase;">Installment</th>
+          <th style="padding: 10px 14px; font-size: 12px; text-transform: uppercase;">Due Date</th>
+          <th style="padding: 10px 14px; font-size: 12px; text-transform: uppercase;">Amount</th>
+          <th style="padding: 10px 14px; font-size: 12px; text-transform: uppercase;">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${installmentRowsHtml}
+      </tbody>
+    </table>
+
+    <p style="margin: 0 0 16px 0; font-size: 13px; color: #6A5B7C; line-height: 1.5;">
+      Please note that the above commission amount and payment schedule are applicable as per the agreed placement terms. For any queries or payment confirmation, please reply directly to this email or contact support.
+    </p>
+
+    <p style="margin: 24px 0 0 0; font-size: 14px; color: #2D253A;">
+      Warm regards,<br />
+      <strong>Pratibha Mishra &amp; The Shadow Bridge Team</strong><br />
+      <span style="font-size: 12px; color: #6A5B7C;">theshadowbridge.com</span>
+    </p>
+  `;
+
+  return sendEmail({
+    to,
+    subject: 'Placement Commission Details & Payment Schedule — The Shadow Bridge',
+    type: 'commission_details',
+    bodyHtml
+  });
 }

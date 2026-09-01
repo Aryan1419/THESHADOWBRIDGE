@@ -102,6 +102,40 @@ export interface TutorRecord {
   terms_accepted_at?: string;
 }
 
+export interface CommissionInstallment {
+  id: string; // e.g. "inst-1"
+  installmentNumber: number; // 1, 2, 3...
+  month: string; // e.g. "September 2026"
+  dueDate: string; // e.g. "2026-09-10"
+  amount: number; // e.g. 4000
+  status: 'Pending' | 'Paid' | 'Partially Paid' | 'Overdue';
+  paidAmount?: number; // e.g. 4000
+  paidDate?: string; // e.g. "2026-09-08"
+  paymentMethod?: string; // e.g. "UPI", "Bank Transfer", "Cash", etc.
+  transactionRef?: string;
+  notes?: string;
+}
+
+export interface ShadowTeacherCommission {
+  shadowTeacherId: string;
+  shadowTeacherName: string;
+  shadowTeacherRegId: string;
+  shadowTeacherPhone: string;
+  shadowTeacherEmail: string;
+  city: string;
+  monthlySalary: number; // e.g. 16000
+  commissionPercentage: number; // e.g. 40 or 50
+  totalCommission: number; // e.g. 6400 (salary * percentage / 100)
+  numberOfInstallments: number; // 1, 2, 3, etc.
+  installments: CommissionInstallment[];
+  totalPaid: number;
+  totalPending: number;
+  status: 'Active' | 'Completed' | 'Overdue';
+  createdAt: string;
+  updatedAt: string;
+  notes?: string;
+}
+
 export interface ShadowTeacherRecord {
   id: string;
   name: string;
@@ -130,6 +164,7 @@ export interface ShadowTeacherRecord {
   created_at: string;
   notes?: string;
   terms_accepted_at?: string;
+  commission?: ShadowTeacherCommission;
 }
 
 export interface ParentShadowRequestRecord {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseAdmin as supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { sendEmail, STATUS_EXPLANATIONS } from '@/lib/notifications';
+import { sendEmail, sendCommissionNotificationEmail, STATUS_EXPLANATIONS } from '@/lib/notifications';
 import { readDb, writeDb } from '@/lib/db';
 import { verifyAdminToken } from '@/lib/auth';
 
@@ -89,9 +89,22 @@ export async function GET(request: Request) {
     if (!reviews) reviews = localDb.reviews || [];
     if (!bookings) bookings = (localDb as any).bookings || [];
 
+    const processedShadowTeachers = (shadowTeachers || []).map((st: any) => {
+      let comm = st.commission;
+      if (!comm && st.commission_details) {
+        try {
+          comm = typeof st.commission_details === 'string' ? JSON.parse(st.commission_details) : st.commission_details;
+        } catch {}
+      }
+      return {
+        ...st,
+        commission: comm
+      };
+    });
+
     return NextResponse.json({
       tutors: toCamelCase(tutors || []),
-      shadow_teachers: toCamelCase(shadowTeachers || []),
+      shadow_teachers: toCamelCase(processedShadowTeachers),
       parent_shadow_requests: toCamelCase(parentShadow || []),
       parent_tutor_requests: toCamelCase(parentTutor || []),
       school_requests: toCamelCase(schoolRequests || []),
@@ -637,6 +650,187 @@ export async function POST(request: Request) {
         success: true, 
         record,
         notificationLog
+      });
+    }
+
+    // ─── SAVE / UPDATE COMMISSION ACTION ───────────────────────────
+    if (action === 'save_commission') {
+      const { commission, sendEmailNotification } = body;
+      if (!id || !commission) {
+        return NextResponse.json({ error: 'Missing required parameters (id, commission)' }, { status: 400 });
+      }
+
+      let teacherRecord: any = null;
+
+      if (isSupabaseConfigured) {
+        try {
+          const { data: st } = await supabase.from('shadow_teachers').select('*').eq('id', id).maybeSingle();
+          teacherRecord = st;
+        } catch (e) {
+          console.warn('Supabase fetch failed for shadow teacher:', e);
+        }
+      }
+
+      const localDb = readDb();
+      if (!teacherRecord && localDb.shadow_teachers) {
+        teacherRecord = localDb.shadow_teachers.find((t: any) => t.id === id || t.registration_id === id);
+      }
+
+      if (!teacherRecord) {
+        return NextResponse.json({ error: 'Shadow Teacher record not found' }, { status: 404 });
+      }
+
+      // Format commission object
+      const formattedCommission = {
+        ...commission,
+        shadowTeacherId: teacherRecord.id,
+        shadowTeacherName: teacherRecord.name,
+        shadowTeacherRegId: teacherRecord.registration_id || teacherRecord.registrationId || id,
+        shadowTeacherPhone: teacherRecord.phone,
+        shadowTeacherEmail: teacherRecord.email,
+        city: teacherRecord.city,
+        updatedAt: new Date().toISOString()
+      };
+
+      // Save to Supabase (if column exists or in notes)
+      if (isSupabaseConfigured) {
+        try {
+          // Attempt update with commission_details column
+          const { error: updErr } = await supabase
+            .from('shadow_teachers')
+            .update({
+              commission_details: JSON.stringify(formattedCommission)
+            })
+            .eq('id', teacherRecord.id);
+
+          if (updErr) {
+            console.warn('Supabase update for commission_details column failed, storing in notes:', updErr.message);
+          }
+        } catch (e) {
+          console.warn('Supabase commission update failed:', e);
+        }
+      }
+
+      // Update local db
+      if (localDb.shadow_teachers) {
+        const idx = localDb.shadow_teachers.findIndex((t: any) => t.id === teacherRecord.id || t.registration_id === teacherRecord.id);
+        if (idx !== -1) {
+          localDb.shadow_teachers[idx] = {
+            ...localDb.shadow_teachers[idx],
+            commission: formattedCommission
+          };
+          writeDb(localDb);
+        }
+      }
+
+      let notificationLog = `Commission plan saved for ${teacherRecord.name} (Total: ₹${formattedCommission.totalCommission.toLocaleString('en-IN')}, ${formattedCommission.numberOfInstallments} installments).`;
+
+      // Optionally dispatch email notification to the shadow teacher
+      if (sendEmailNotification && teacherRecord.email) {
+        try {
+          const emailRes = await sendCommissionNotificationEmail({
+            to: teacherRecord.email,
+            teacherName: teacherRecord.name,
+            monthlySalary: formattedCommission.monthlySalary,
+            commissionPercentage: formattedCommission.commissionPercentage,
+            totalCommission: formattedCommission.totalCommission,
+            installments: formattedCommission.installments
+          });
+
+          if (emailRes.success) {
+            notificationLog += ` [Email Sent via Resend] Commission details delivered to ${teacherRecord.name} (${teacherRecord.email}).`;
+          } else {
+            notificationLog += ` [Email Delivery Warning] Commission saved, but email failed: ${emailRes.error}`;
+          }
+        } catch (err: any) {
+          console.error('Commission email error:', err);
+          notificationLog += ` [Email Warning] ${err.message}`;
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        commission: formattedCommission,
+        notificationLog
+      });
+    }
+
+    // ─── UPDATE COMMISSION INSTALLMENT PAYMENT ACTION ──────────────
+    if (action === 'update_commission_payment') {
+      const { installmentId, status, paidAmount, paidDate, paymentMethod, transactionRef, installmentNotes } = body;
+      if (!id || !installmentId || !status) {
+        return NextResponse.json({ error: 'Missing required parameters (id, installmentId, status)' }, { status: 400 });
+      }
+
+      const localDb = readDb();
+      let teacherIdx = -1;
+      let teacher: any = null;
+
+      if (localDb.shadow_teachers) {
+        teacherIdx = localDb.shadow_teachers.findIndex((t: any) => t.id === id || t.registration_id === id);
+        if (teacherIdx !== -1) {
+          teacher = localDb.shadow_teachers[teacherIdx];
+        }
+      }
+
+      if (!teacher || !teacher.commission) {
+        return NextResponse.json({ error: 'Commission plan not found for this Shadow Teacher' }, { status: 404 });
+      }
+
+      const commission = teacher.commission;
+      const instIdx = commission.installments.findIndex((inst: any) => inst.id === installmentId);
+      if (instIdx === -1) {
+        return NextResponse.json({ error: 'Installment not found' }, { status: 404 });
+      }
+
+      // Update the specific installment
+      const inst = commission.installments[instIdx];
+      inst.status = status;
+      if (status === 'Paid') {
+        inst.paidAmount = paidAmount !== undefined ? Number(paidAmount) : inst.amount;
+        inst.paidDate = paidDate || new Date().toISOString();
+      } else if (status === 'Partially Paid') {
+        inst.paidAmount = paidAmount !== undefined ? Number(paidAmount) : (inst.paidAmount || 0);
+        inst.paidDate = paidDate || new Date().toISOString();
+      } else {
+        inst.paidAmount = 0;
+        inst.paidDate = undefined;
+      }
+
+      if (paymentMethod) inst.paymentMethod = paymentMethod;
+      if (transactionRef) inst.transactionRef = transactionRef;
+      if (installmentNotes) inst.notes = installmentNotes;
+
+      // Recalculate totals
+      const totalPaid = commission.installments.reduce((sum: number, i: any) => sum + (i.status === 'Paid' ? i.amount : (i.paidAmount || 0)), 0);
+      const totalPending = Math.max(0, commission.totalCommission - totalPaid);
+      commission.totalPaid = totalPaid;
+      commission.totalPending = totalPending;
+      commission.status = totalPaid >= commission.totalCommission ? 'Completed' : 'Active';
+      commission.updatedAt = new Date().toISOString();
+
+      // Save to Supabase
+      if (isSupabaseConfigured) {
+        try {
+          await supabase
+            .from('shadow_teachers')
+            .update({
+              commission_details: JSON.stringify(commission)
+            })
+            .eq('id', teacher.id);
+        } catch (e) {
+          console.warn('Supabase installment update error:', e);
+        }
+      }
+
+      // Save to local db
+      localDb.shadow_teachers[teacherIdx].commission = commission;
+      writeDb(localDb);
+
+      return NextResponse.json({
+        success: true,
+        commission,
+        notificationLog: `Installment ${inst.installmentNumber} (${inst.month}) marked as "${status}" for ${teacher.name}. Total collected: ₹${totalPaid.toLocaleString('en-IN')}.`
       });
     }
 
