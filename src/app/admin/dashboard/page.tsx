@@ -1,17 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, Users, User, GraduationCap, ClipboardList, Settings, LogOut,
   RefreshCw, Search, Filter, ShieldCheck, Mail, Phone, MapPin, Calendar,
-  CheckCircle, X, XCircle, ChevronRight, FileText, AlertCircle, Save, Info, Sparkles, CreditCard,
-  Star, CheckCircle2, MessageSquare, Reply, Send, MailCheck, MessageSquareQuote, CornerDownRight, Trash2, AlertTriangle, ExternalLink, Menu, School
+  CheckCircle, X, XCircle, ChevronRight, ChevronLeft, FileText, AlertCircle, Save, Info, Sparkles, CreditCard,
+  Star, CheckCircle2, MessageSquare, Reply, Send, MailCheck, MessageSquareQuote, CornerDownRight, Trash2, AlertTriangle, ExternalLink, Menu, School,
+  Bell, Eye, Briefcase
 } from 'lucide-react';
 
 import { DatabaseSchema, TutorRecord, ShadowTeacherRecord, ParentShadowRequestRecord, ParentTutorRequestRecord } from '@/lib/db';
+import { areNearbyLocalities } from '@/lib/constants';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -77,6 +79,17 @@ export default function AdminDashboard() {
   const [isRejectingReview, setIsRejectingReview] = useState<boolean>(false);
   const [loadingReviews, setLoadingReviews] = useState<boolean>(false);
 
+  // ─── LOCATION-BASED SHADOW TEACHER ALERT STATE ───────────────────
+  type LocationAlert = {
+    parentRequest: any;
+    exactMatches: any[];
+    nearbyMatches: any[];
+    cityOnlyMatches: any[];
+  };
+  const [locationAlerts, setLocationAlerts] = useState<LocationAlert[]>([]);
+  const [activeAlertIndex, setActiveAlertIndex] = useState(0);
+  const [showLocationAlert, setShowLocationAlert] = useState(false);
+
   // Authentication guard check
   useEffect(() => {
     const token = localStorage.getItem('admin_token');
@@ -139,6 +152,154 @@ export default function AdminDashboard() {
       setLoadingReviews(false);
     }
   };
+
+  // ─── LOCATION-BASED SHADOW TEACHER MATCHING LOGIC ────────────────
+  // Runs after db is loaded. Finds parent shadow requests with location
+  // matches among available shadow teachers. Skips dismissed alerts.
+  useEffect(() => {
+    if (!db) return;
+
+    const parentRequests = db.parent_shadow_requests || [];
+    const shadowTeachers = db.shadow_teachers || [];
+
+    // Read dismissed alert IDs from localStorage
+    let dismissedIds: string[] = [];
+    try {
+      dismissedIds = JSON.parse(localStorage.getItem('dismissed_location_alerts') || '[]');
+    } catch { dismissedIds = []; }
+
+    // Only consider early-stage parent requests that haven't been dismissed
+    const eligibleStatuses = ['Consultation Booked', 'Consultation Completed', 'Registration Submitted', 'Requirement Analysis'];
+    const candidateRequests = parentRequests.filter((pr: any) => {
+      const prId = pr.id || pr.registration_id;
+      if (dismissedIds.includes(prId)) return false;
+      const status = (pr.status || '').trim();
+      return eligibleStatuses.includes(status);
+    });
+
+    if (candidateRequests.length === 0) return;
+
+    // Only consider shadow teachers not already Active or Rejected
+    const availableStatuses = ['Interview Awaiting', 'Interview Scheduled', 'Shortlisted', 'Onboarding'];
+    const availableTeachers = shadowTeachers.filter((st: any) =>
+      availableStatuses.includes((st.status || '').trim())
+    );
+
+    if (availableTeachers.length === 0) return;
+
+    const alerts: LocationAlert[] = [];
+
+    for (const pr of candidateRequests) {
+      const prAny = pr as any;
+      const parentCity = (prAny.city || '').trim();
+      const parentHomeLocation = (prAny.home_location || prAny.homeLocation || '').trim();
+      const parentSchoolLocation = (prAny.school_location || prAny.schoolLocation || '').trim();
+
+      if (!parentCity) continue;
+
+      const exactMatches: any[] = [];
+      const nearbyMatches: any[] = [];
+      const cityOnlyMatches: any[] = [];
+      const addedTeacherIds = new Set<string>();
+
+      // For each available shadow teacher in the same city
+      for (const st of availableTeachers) {
+        const stAny = st as any;
+        const teacherCity = (stAny.city || '').trim();
+        if (teacherCity.toLowerCase() !== parentCity.toLowerCase()) continue;
+
+        const teacherLocations = (stAny.preferred_locations || stAny.preferredLocations || '')
+          .split(',')
+          .map((l: string) => l.trim())
+          .filter((l: string) => l && l !== 'Other (please specify)');
+
+        const teacherId = stAny.id || stAny.registration_id;
+        let matched = false;
+
+        // Check for exact location match
+        if (parentHomeLocation || parentSchoolLocation) {
+          for (const tLoc of teacherLocations) {
+            const tLocLower = tLoc.toLowerCase();
+            if (
+              (parentHomeLocation && (tLocLower.includes(parentHomeLocation.toLowerCase()) || parentHomeLocation.toLowerCase().includes(tLocLower))) ||
+              (parentSchoolLocation && (tLocLower.includes(parentSchoolLocation.toLowerCase()) || parentSchoolLocation.toLowerCase().includes(tLocLower)))
+            ) {
+              if (!addedTeacherIds.has(teacherId)) {
+                exactMatches.push(st);
+                addedTeacherIds.add(teacherId);
+                matched = true;
+              }
+              break;
+            }
+          }
+
+          // Check for nearby match if not already exact
+          if (!matched) {
+            for (const tLoc of teacherLocations) {
+              if (
+                (parentHomeLocation && areNearbyLocalities(parentCity, parentHomeLocation, tLoc)) ||
+                (parentSchoolLocation && areNearbyLocalities(parentCity, parentSchoolLocation, tLoc))
+              ) {
+                if (!addedTeacherIds.has(teacherId)) {
+                  nearbyMatches.push(st);
+                  addedTeacherIds.add(teacherId);
+                  matched = true;
+                }
+                break;
+              }
+            }
+          }
+        }
+
+        // City-only match (when parent has no specific locality yet, or teacher didn't match exact/nearby)
+        if (!matched && !addedTeacherIds.has(teacherId)) {
+          cityOnlyMatches.push(st);
+          addedTeacherIds.add(teacherId);
+        }
+      }
+
+      // Only create an alert if there are exact or nearby matches,
+      // OR if the parent has no home_location yet and there are city-level matches
+      const hasLocationData = Boolean(parentHomeLocation || parentSchoolLocation);
+      if (exactMatches.length > 0 || nearbyMatches.length > 0 || (!hasLocationData && cityOnlyMatches.length > 0)) {
+        alerts.push({
+          parentRequest: pr,
+          exactMatches,
+          nearbyMatches,
+          cityOnlyMatches: hasLocationData ? [] : cityOnlyMatches,
+        });
+      }
+    }
+
+    if (alerts.length > 0) {
+      setLocationAlerts(alerts);
+      setActiveAlertIndex(0);
+      setShowLocationAlert(true);
+    }
+  }, [db]);
+
+  // Dismiss a location alert and persist to localStorage
+  const handleDismissLocationAlert = useCallback((parentRequestId: string) => {
+    try {
+      const dismissed: string[] = JSON.parse(localStorage.getItem('dismissed_location_alerts') || '[]');
+      if (!dismissed.includes(parentRequestId)) {
+        dismissed.push(parentRequestId);
+        localStorage.setItem('dismissed_location_alerts', JSON.stringify(dismissed));
+      }
+    } catch {
+      localStorage.setItem('dismissed_location_alerts', JSON.stringify([parentRequestId]));
+    }
+
+    setLocationAlerts(prev => {
+      const updated = prev.filter(a => (a.parentRequest.id || a.parentRequest.registration_id) !== parentRequestId);
+      if (updated.length === 0) {
+        setShowLocationAlert(false);
+      } else {
+        setActiveAlertIndex(i => Math.min(i, updated.length - 1));
+      }
+      return updated;
+    });
+  }, []);
 
   const handleReviewAction = async (reviewId: string, action: 'approve' | 'reject' | 'edit', extraData?: { reviewText?: string; rejectionNote?: string }) => {
     setUpdating(true);
@@ -3522,6 +3683,262 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* ─── LOCATION-BASED SHADOW TEACHER ALERT MODAL ───────────── */}
+      <AnimatePresence>
+        {showLocationAlert && locationAlerts.length > 0 && (() => {
+          const alert = locationAlerts[activeAlertIndex];
+          if (!alert) return null;
+          const pr = alert.parentRequest;
+          const parentName = pr.parent_name || pr.parentName || 'Unknown Parent';
+          const parentCity = pr.city || 'N/A';
+          const parentHome = pr.home_location || pr.homeLocation || '';
+          const parentSchool = pr.school_location || pr.schoolLocation || '';
+          const regId = pr.registration_id || pr.id || '';
+          const hasLocationData = Boolean(parentHome || parentSchool);
+          const totalMatches = alert.exactMatches.length + alert.nearbyMatches.length + alert.cityOnlyMatches.length;
+
+          const renderTeacherCard = (st: any, matchType: string) => {
+            const stName = st.name || 'Unknown';
+            const stRegId = st.registration_id || st.id || '';
+            const stLocations = (st.preferred_locations || st.preferredLocations || 'N/A').replace(/,/g, ', ');
+            const stStatus = st.status || 'N/A';
+            const stExperience = st.experience || 'N/A';
+            const stPhone = st.phone || 'N/A';
+            const stSpecialNeeds = st.special_needs_exp || st.specialNeedsExp || 'N/A';
+            const stComfortAreas = (st.comfortable_areas || st.comfortableAreas || '').replace(/,/g, ', ') || 'N/A';
+
+            return (
+              <div key={st.id || stRegId} className="bg-white rounded-xl border border-brand-border p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-sm text-primary">{stName}</span>
+                      <span className="text-[10px] font-mono bg-brand-light text-brand-muted px-1.5 py-0.5 rounded">{stRegId}</span>
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        stStatus === 'Shortlisted' ? 'bg-emerald-100 text-emerald-800' :
+                        stStatus === 'Onboarding' ? 'bg-blue-100 text-blue-800' :
+                        stStatus === 'Interview Scheduled' ? 'bg-amber-100 text-amber-800' :
+                        'bg-purple-100 text-purple-800'
+                      }`}>{stStatus}</span>
+                    </div>
+                    <div className="mt-2 space-y-1">
+                      <p className="text-xs text-brand-muted flex items-center gap-1.5">
+                        <MapPin size={11} className="text-accent shrink-0" />
+                        <span className="truncate">{stLocations}</span>
+                      </p>
+                      <p className="text-xs text-brand-muted flex items-center gap-1.5">
+                        <Briefcase size={11} className="text-accent shrink-0" />
+                        <span>{stExperience} • Special Needs: {stSpecialNeeds}</span>
+                      </p>
+                      <p className="text-xs text-brand-muted flex items-center gap-1.5">
+                        <Phone size={11} className="text-accent shrink-0" />
+                        <span>{stPhone}</span>
+                      </p>
+                      {stComfortAreas !== 'N/A' && (
+                        <p className="text-xs text-brand-muted flex items-center gap-1.5">
+                          <ShieldCheck size={11} className="text-accent shrink-0" />
+                          <span className="truncate">{stComfortAreas}</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSelectedRecord({ type: 'shadow_teachers', data: st });
+                      setEditStatus(stStatus);
+                      setEditNotes(st.notes || '');
+                    }}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-[11px] font-bold shrink-0 cursor-pointer transition-colors"
+                  >
+                    <Eye size={12} />
+                    <span>View Profile</span>
+                  </button>
+                </div>
+              </div>
+            );
+          };
+
+          return (
+            <motion.div
+              key="location-alert-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+              style={{ backgroundColor: 'rgba(30, 20, 50, 0.7)', backdropFilter: 'blur(4px)' }}
+            >
+              <motion.div
+                initial={{ scale: 0.92, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.92, opacity: 0, y: 20 }}
+                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col"
+              >
+                {/* Header */}
+                <div className="bg-gradient-to-r from-primary to-secondary px-6 py-4 text-white relative">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                      <Bell size={20} className="text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-lg font-black tracking-tight">🔔 New Parent Requirement — Location Match</h2>
+                      <p className="text-white/80 text-xs font-medium mt-0.5">
+                        {totalMatches} Shadow {totalMatches === 1 ? 'Teacher' : 'Teachers'} found
+                        {hasLocationData ? ' matching the parent\'s location' : ' in the same city'}
+                      </p>
+                    </div>
+                  </div>
+                  {locationAlerts.length > 1 && (
+                    <div className="absolute top-4 right-5 flex items-center gap-2">
+                      <button
+                        onClick={() => setActiveAlertIndex(i => Math.max(0, i - 1))}
+                        disabled={activeAlertIndex === 0}
+                        className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center disabled:opacity-30 cursor-pointer transition-colors"
+                      >
+                        <ChevronLeft size={14} />
+                      </button>
+                      <span className="text-xs font-bold text-white/90">{activeAlertIndex + 1} / {locationAlerts.length}</span>
+                      <button
+                        onClick={() => setActiveAlertIndex(i => Math.min(locationAlerts.length - 1, i + 1))}
+                        disabled={activeAlertIndex === locationAlerts.length - 1}
+                        className="w-7 h-7 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center disabled:opacity-30 cursor-pointer transition-colors"
+                      >
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Parent Info Card */}
+                <div className="px-6 pt-4 pb-3">
+                  <div className="bg-brand-light/60 rounded-xl border border-brand-border p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <User size={14} className="text-primary" />
+                      <span className="text-xs font-bold text-primary uppercase tracking-wider">Parent Requirement</span>
+                      <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">{regId}</span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+                      <p className="text-xs text-brand-dark"><span className="font-semibold">Parent:</span> {parentName}</p>
+                      <p className="text-xs text-brand-dark"><span className="font-semibold">City:</span> {parentCity}</p>
+                      {parentHome && (
+                        <p className="text-xs text-brand-dark flex items-center gap-1">
+                          <span className="font-semibold">Home Area:</span>
+                          <span className="text-primary font-bold">{parentHome}</span>
+                        </p>
+                      )}
+                      {parentSchool && (
+                        <p className="text-xs text-brand-dark flex items-center gap-1">
+                          <span className="font-semibold">School Area:</span>
+                          <span className="text-primary font-bold">{parentSchool}</span>
+                        </p>
+                      )}
+                      {!hasLocationData && (
+                        <p className="text-xs text-amber-700 font-medium col-span-2 flex items-center gap-1">
+                          <Info size={11} />
+                          <span>Specific locality not yet submitted — showing all teachers in {parentCity}</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Matched Teachers List */}
+                <div className="flex-1 overflow-y-auto px-6 pb-4 space-y-4">
+                  {alert.exactMatches.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle size={14} className="text-emerald-600" />
+                        <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
+                          Exact Location Match ({alert.exactMatches.length})
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        {alert.exactMatches.map((st: any) => renderTeacherCard(st, 'exact'))}
+                      </div>
+                    </div>
+                  )}
+
+                  {alert.nearbyMatches.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <MapPin size={14} className="text-blue-600" />
+                        <span className="text-xs font-bold text-blue-800 uppercase tracking-wider">
+                          Nearby Location Match ({alert.nearbyMatches.length})
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        {alert.nearbyMatches.map((st: any) => renderTeacherCard(st, 'nearby'))}
+                      </div>
+                    </div>
+                  )}
+
+                  {alert.cityOnlyMatches.length > 0 && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-2">
+                        <MapPin size={14} className="text-purple-600" />
+                        <span className="text-xs font-bold text-purple-800 uppercase tracking-wider">
+                          Same City — {parentCity} ({alert.cityOnlyMatches.length})
+                        </span>
+                      </div>
+                      <div className="space-y-2">
+                        {alert.cityOnlyMatches.slice(0, 5).map((st: any) => renderTeacherCard(st, 'city'))}
+                        {alert.cityOnlyMatches.length > 5 && (
+                          <p className="text-xs text-brand-muted text-center font-medium py-1">
+                            + {alert.cityOnlyMatches.length - 5} more teachers in {parentCity}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {totalMatches === 0 && (
+                    <div className="text-center py-6 text-brand-muted text-sm">
+                      No matching Shadow Teachers found.
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer Actions */}
+                <div className="border-t border-brand-border px-6 py-3 bg-brand-light/30 flex items-center justify-between gap-3">
+                  <button
+                    onClick={() => {
+                      setShowLocationAlert(false);
+                      setActiveTab('shadows');
+                      setFilterCity(parentCity);
+                    }}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-xs font-bold cursor-pointer transition-colors"
+                  >
+                    <Users size={13} />
+                    <span>View All Shadow Teachers</span>
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => {
+                        setShowLocationAlert(false);
+                        setActiveTab('parents');
+                        setParentSubTab('shadow');
+                      }}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-secondary/10 hover:bg-secondary/20 text-secondary rounded-xl text-xs font-bold cursor-pointer transition-colors"
+                    >
+                      <Eye size={13} />
+                      <span>View Parent Request</span>
+                    </button>
+                    <button
+                      onClick={() => handleDismissLocationAlert(pr.id || pr.registration_id)}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-brand-dark/10 hover:bg-brand-dark/20 text-brand-dark rounded-xl text-xs font-bold cursor-pointer transition-colors"
+                    >
+                      <X size={13} />
+                      <span>Dismiss</span>
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          );
+        })()}
+      </AnimatePresence>
+
     </div>
   );
 }
