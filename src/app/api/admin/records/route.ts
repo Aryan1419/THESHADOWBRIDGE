@@ -41,6 +41,29 @@ function toCamelCase(obj: any): any {
   return obj;
 }
 
+// Helper functions to embed and extract commission from shadow teacher notes
+function extractCommissionFromNotes(notes?: string | null): { userNotes: string; commission: any | null } {
+  if (!notes) return { userNotes: '', commission: null };
+  const match = notes.match(/\[COMMISSION_DATA\]([\s\S]*?)\[\/COMMISSION_DATA\]/);
+  if (match) {
+    try {
+      const commission = JSON.parse(match[1]);
+      const userNotes = notes.replace(/\[COMMISSION_DATA\][\s\S]*?\[\/COMMISSION_DATA\]/, '').trim();
+      return { userNotes, commission };
+    } catch (e) {
+      console.warn('Failed to parse commission from notes:', e);
+    }
+  }
+  return { userNotes: notes, commission: null };
+}
+
+function embedCommissionInNotes(existingNotes?: string | null, commissionObj?: any | null): string {
+  const cleanNotes = (existingNotes || '').replace(/\[COMMISSION_DATA\][\s\S]*?\[\/COMMISSION_DATA\]/, '').trim();
+  if (!commissionObj) return cleanNotes;
+  const commissionTag = `[COMMISSION_DATA]${JSON.stringify(commissionObj)}[/COMMISSION_DATA]`;
+  return cleanNotes ? `${cleanNotes}\n\n${commissionTag}` : commissionTag;
+}
+
 export async function GET(request: Request) {
   try {
     const authHeader = request.headers.get('Authorization') || '';
@@ -50,7 +73,15 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized access' }, { status: 401 });
     }
 
-    let tutors = null, shadowTeachers = null, parentShadow = null, parentTutor = null, schoolRequests = null, notifications = null, contacts = null, reviews = null, bookings = null;
+    let tutors = null;
+    let shadowTeachers = null;
+    let parentShadow = null;
+    let parentTutor = null;
+    let schoolRequests = null;
+    let contacts = null;
+    let notifications = null;
+    let reviews = null;
+    let bookings = null;
 
     if (isSupabaseConfigured) {
       try {
@@ -91,13 +122,29 @@ export async function GET(request: Request) {
 
     const processedShadowTeachers = (shadowTeachers || []).map((st: any) => {
       let comm = st.commission;
+      let cleanNotes = st.notes || '';
+      
+      // 1. Check direct commission_details column
       if (!comm && st.commission_details) {
         try {
           comm = typeof st.commission_details === 'string' ? JSON.parse(st.commission_details) : st.commission_details;
         } catch {}
       }
+      
+      // 2. Check embedded commission in notes
+      if (!comm && st.notes) {
+        const extracted = extractCommissionFromNotes(st.notes);
+        if (extracted.commission) {
+          comm = extracted.commission;
+          cleanNotes = extracted.userNotes;
+        }
+      } else if (st.notes) {
+        cleanNotes = (st.notes || '').replace(/\[COMMISSION_DATA\][\s\S]*?\[\/COMMISSION_DATA\]/, '').trim();
+      }
+
       return {
         ...st,
+        notes: cleanNotes,
         commission: comm
       };
     });
@@ -453,7 +500,19 @@ export async function POST(request: Request) {
         updates.status = status;
       }
       if (notes !== undefined) {
-        updates.notes = notes;
+        let finalNotes = notes;
+        if (type === 'shadow_teachers' && isSupabaseConfigured) {
+          try {
+            const { data: existingST } = await supabase.from('shadow_teachers').select('notes').eq('id', id).maybeSingle();
+            if (existingST && existingST.notes) {
+              const extracted = extractCommissionFromNotes(existingST.notes);
+              if (extracted.commission) {
+                finalNotes = embedCommissionInNotes(notes, extracted.commission);
+              }
+            }
+          } catch (e) {}
+        }
+        updates.notes = finalNotes;
       }
       if (body.therapistAssigned !== undefined || body.therapist_assigned !== undefined) {
         updates.therapist_assigned = body.therapistAssigned || body.therapist_assigned;
@@ -474,6 +533,20 @@ export async function POST(request: Request) {
       }
 
       const record = toCamelCase(updatedRecord);
+
+      if (type === 'shadow_teachers' && updatedRecord) {
+        let comm = updatedRecord.commission || updatedRecord.commission_details;
+        if (typeof comm === 'string') {
+          try { comm = JSON.parse(comm); } catch {}
+        }
+        const extracted = extractCommissionFromNotes(updatedRecord.notes);
+        if (extracted.commission) {
+          comm = extracted.commission;
+          record.notes = extracted.userNotes;
+        }
+        record.commission = comm;
+      }
+
       const regId = updatedRecord.registration_id || record.registrationId || record.id || '';
       const notificationUser = record.name || record.parentName || 'User';
       
@@ -692,22 +765,33 @@ export async function POST(request: Request) {
         updatedAt: new Date().toISOString()
       };
 
-      // Save to Supabase (if column exists or in notes)
+      // Save to Supabase
       if (isSupabaseConfigured) {
+        // 1. Attempt update with commission_details column (if exists)
         try {
-          // Attempt update with commission_details column
-          const { error: updErr } = await supabase
+          await supabase
             .from('shadow_teachers')
             .update({
               commission_details: JSON.stringify(formattedCommission)
             })
             .eq('id', teacherRecord.id);
+        } catch (e) {}
 
-          if (updErr) {
-            console.warn('Supabase update for commission_details column failed, storing in notes:', updErr.message);
+        // 2. ALWAYS update notes with embedded commission in Supabase to guarantee Postgres persistence
+        try {
+          const newNotes = embedCommissionInNotes(teacherRecord.notes, formattedCommission);
+          const { error: notesErr } = await supabase
+            .from('shadow_teachers')
+            .update({
+              notes: newNotes
+            })
+            .eq('id', teacherRecord.id);
+
+          if (notesErr) {
+            console.error('Supabase notes update error:', notesErr.message);
           }
         } catch (e) {
-          console.warn('Supabase commission update failed:', e);
+          console.error('Supabase notes exception:', e);
         }
       }
 
@@ -717,7 +801,8 @@ export async function POST(request: Request) {
         if (idx !== -1) {
           localDb.shadow_teachers[idx] = {
             ...localDb.shadow_teachers[idx],
-            commission: formattedCommission
+            commission: formattedCommission,
+            notes: (teacherRecord.notes || '').replace(/\[COMMISSION_DATA\][\s\S]*?\[\/COMMISSION_DATA\]/, '').trim()
           };
           writeDb(localDb);
         }
@@ -762,22 +847,40 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Missing required parameters (id, installmentId, status)' }, { status: 400 });
       }
 
-      const localDb = readDb();
-      let teacherIdx = -1;
-      let teacher: any = null;
-
-      if (localDb.shadow_teachers) {
-        teacherIdx = localDb.shadow_teachers.findIndex((t: any) => t.id === id || t.registration_id === id);
-        if (teacherIdx !== -1) {
-          teacher = localDb.shadow_teachers[teacherIdx];
+      let currentTeacher: any = null;
+      if (isSupabaseConfigured) {
+        try {
+          const { data: st } = await supabase.from('shadow_teachers').select('*').eq('id', id).maybeSingle();
+          currentTeacher = st;
+        } catch (e) {
+          console.warn('Supabase fetch failed for shadow teacher:', e);
         }
       }
 
-      if (!teacher || !teacher.commission) {
+      const localDb = readDb();
+      if (!currentTeacher && localDb.shadow_teachers) {
+        currentTeacher = localDb.shadow_teachers.find((t: any) => t.id === id || t.registration_id === id);
+      }
+
+      if (!currentTeacher) {
+        return NextResponse.json({ error: 'Shadow Teacher not found' }, { status: 404 });
+      }
+
+      let commission = currentTeacher.commission;
+      if (!commission && currentTeacher.commission_details) {
+        try {
+          commission = typeof currentTeacher.commission_details === 'string' ? JSON.parse(currentTeacher.commission_details) : currentTeacher.commission_details;
+        } catch {}
+      }
+      if (!commission && currentTeacher.notes) {
+        const extracted = extractCommissionFromNotes(currentTeacher.notes);
+        commission = extracted.commission;
+      }
+
+      if (!commission) {
         return NextResponse.json({ error: 'Commission plan not found for this Shadow Teacher' }, { status: 404 });
       }
 
-      const commission = teacher.commission;
       const instIdx = commission.installments.findIndex((inst: any) => inst.id === installmentId);
       if (instIdx === -1) {
         return NextResponse.json({ error: 'Installment not found' }, { status: 404 });
@@ -817,20 +920,39 @@ export async function POST(request: Request) {
             .update({
               commission_details: JSON.stringify(commission)
             })
-            .eq('id', teacher.id);
+            .eq('id', currentTeacher.id);
+        } catch (e) {}
+
+        try {
+          const newNotes = embedCommissionInNotes(currentTeacher.notes, commission);
+          await supabase
+            .from('shadow_teachers')
+            .update({
+              notes: newNotes
+            })
+            .eq('id', currentTeacher.id);
         } catch (e) {
-          console.warn('Supabase installment update error:', e);
+          console.error('Supabase notes update exception:', e);
         }
       }
 
       // Save to local db
-      localDb.shadow_teachers[teacherIdx].commission = commission;
-      writeDb(localDb);
+      if (localDb.shadow_teachers) {
+        const idx = localDb.shadow_teachers.findIndex((t: any) => t.id === currentTeacher.id || t.registration_id === currentTeacher.id);
+        if (idx !== -1) {
+          localDb.shadow_teachers[idx] = {
+            ...localDb.shadow_teachers[idx],
+            commission: commission,
+            notes: (currentTeacher.notes || '').replace(/\[COMMISSION_DATA\][\s\S]*?\[\/COMMISSION_DATA\]/, '').trim()
+          };
+          writeDb(localDb);
+        }
+      }
 
       return NextResponse.json({
         success: true,
         commission,
-        notificationLog: `Installment ${inst.installmentNumber} (${inst.month}) marked as "${status}" for ${teacher.name}. Total collected: ₹${totalPaid.toLocaleString('en-IN')}.`
+        notificationLog: `Installment ${inst.installmentNumber} (${inst.month}) marked as "${status}" for ${currentTeacher.name}. Total collected: ₹${totalPaid.toLocaleString('en-IN')}.`
       });
     }
 
