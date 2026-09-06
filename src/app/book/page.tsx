@@ -202,7 +202,18 @@ function BookConsultationForm() {
       // 1. Create Order via Backend API
       const orderRes = await fetch('/api/payments/create-order', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          amount: 99,
+          parentName: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          city: formData.city,
+          preferredLocation: finalLocation,
+          childAge: formData.childAge,
+          requirement: formData.requirement,
+          type: 'consultation'
+        })
       });
 
       if (!orderRes.ok) {

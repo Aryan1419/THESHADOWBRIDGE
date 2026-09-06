@@ -66,7 +66,15 @@ export default function SchoolsPage() {
       const orderRes = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 199 })
+        body: JSON.stringify({ 
+          amount: 199,
+          parentName: contactName || schoolName,
+          phone: phone,
+          email: email,
+          city: city,
+          serviceNeeded: 'School Consultation',
+          type: 'school_consultation'
+        })
       });
 
       const orderData = await orderRes.json();

@@ -1170,6 +1170,7 @@ export default function AdminDashboard() {
   const getPaymentsList = () => {
     if (!db) return [];
     const list: any[] = [];
+    const processedKeys = new Set<string>();
 
     const isRecordWaived = (r: any) => {
       const ps = (r.paymentStatus || r.payment_status || '').toLowerCase();
@@ -1182,6 +1183,18 @@ export default function AdminDashboard() {
              payId.includes('THERAPY99');
     };
 
+    const findBookingForRecord = (r: any) => {
+      const regId = r.registration_id || r.registrationId || '';
+      const email = (r.email || '').toLowerCase().trim();
+      const phone = (r.phone || '').trim();
+      return (db.bookings || []).find((b: any) => {
+        if (regId && (b.booking_id === regId || b.registration_id === regId)) return true;
+        if (email && (b.email || '').toLowerCase().trim() === email) return true;
+        if (phone && (b.phone || '').trim() === phone) return true;
+        return false;
+      });
+    };
+
     const getRealPaymentId = (r: any, isPlacement: boolean, isWaived: boolean) => {
       if (isWaived) {
         const notesStr = ((r.notes || '') + ' ' + (r.message || '')).toUpperCase();
@@ -1191,11 +1204,19 @@ export default function AdminDashboard() {
         return 'N/A (VIP Outreach)';
       }
       
-      const pid = isPlacement 
+      let pid = isPlacement 
         ? (r.placementPaymentId || r.placement_payment_id || r.razorpayPaymentId || r.razorpay_payment_id)
         : (r.razorpayPaymentId || r.razorpay_payment_id);
       
       if (pid && (pid.startsWith('pay_') || pid.startsWith('PAY_'))) return pid;
+
+      // Fallback: check matching booking in db.bookings
+      if (!isPlacement) {
+        const matchedBk = findBookingForRecord(r);
+        if (matchedBk && matchedBk.razorpay_payment_id && (matchedBk.razorpay_payment_id.startsWith('pay_') || matchedBk.razorpay_payment_id.startsWith('PAY_'))) {
+          return matchedBk.razorpay_payment_id;
+        }
+      }
 
       const notesStr = (r.notes || '') + ' ' + (r.message || '');
       const match = notesStr.match(/(pay_[a-zA-Z0-9]+)/i);
@@ -1213,11 +1234,19 @@ export default function AdminDashboard() {
         return 'N/A (VIP Outreach)';
       }
 
-      const oid = isPlacement
+      let oid = isPlacement
         ? (r.placementOrderId || r.placement_order_id || r.razorpayOrderId || r.razorpay_order_id)
         : (r.razorpayOrderId || r.razorpay_order_id);
 
       if (oid && (oid.startsWith('order_') || oid.startsWith('ORDER_'))) return oid;
+
+      // Fallback: check matching booking in db.bookings
+      if (!isPlacement) {
+        const matchedBk = findBookingForRecord(r);
+        if (matchedBk && matchedBk.razorpay_order_id && (matchedBk.razorpay_order_id.startsWith('order_') || matchedBk.razorpay_order_id.startsWith('ORDER_'))) {
+          return matchedBk.razorpay_order_id;
+        }
+      }
 
       const notesStr = (r.notes || '') + ' ' + (r.message || '');
       const match = notesStr.match(/(order_[a-zA-Z0-9]+)/i);
@@ -1226,12 +1255,18 @@ export default function AdminDashboard() {
       return 'N/A (No Order ID)';
     };
 
-    db.parent_shadow_requests.forEach(r => {
+    // 1. Parent Shadow Requests
+    (db.parent_shadow_requests || []).forEach(r => {
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
         const isWaived = isRecordWaived(r);
         const paymentId = getRealPaymentId(r, false, isWaived);
         const orderId = getRealOrderId(r, false, isWaived);
-        const isRealSuccess = !isWaived && paymentId.startsWith('pay_');
+        const isRealSuccess = !isWaived && (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_'));
+
+        const key = `${r.registration_id || r.id}-cons`;
+        processedKeys.add(key);
+        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
+        if (r.registration_id) processedKeys.add(r.registration_id);
 
         list.push({
           id: r.id + '-cons',
@@ -1253,18 +1288,22 @@ export default function AdminDashboard() {
         });
       }
       if ((r as any).placementPaid || (r as any).placement_paid) {
-        const placementAmt = Number((r as any).placementAmount || 5000);
+        const placementAmt = Number((r as any).placementAmount || (r as any).placement_amount || 5000);
         const pidStr = (r as any).placementPaymentId || (r as any).placement_payment_id || '';
         const notesStr = ((r as any).notes || '').toUpperCase();
         const isPlacementWaived = pidStr.includes('HI5000') || notesStr.includes('HI5000') || pidStr === 'N/A (VIP HI5000)';
 
         const paymentId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealPaymentId(r, true, false);
         const orderId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealOrderId(r, true, false);
-        const isRealSuccess = !isPlacementWaived && paymentId.startsWith('pay_');
+        const isRealSuccess = !isPlacementWaived && (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_'));
+
+        const key = `${r.registration_id || r.id}-place`;
+        processedKeys.add(key);
+        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
 
         list.push({
           id: r.id + '-place',
-          date: (r as any).placementPaidAt || r.created_at,
+          date: (r as any).placementPaidAt || (r as any).placement_paid_at || r.created_at,
           regId: r.registration_id,
           parentName: r.parentName || (r as any).parent_name,
           childName: r.childName || (r as any).child_name,
@@ -1283,12 +1322,18 @@ export default function AdminDashboard() {
       }
     });
 
-    db.parent_tutor_requests.forEach(r => {
+    // 2. Parent Tutor Requests
+    (db.parent_tutor_requests || []).forEach(r => {
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
         const isWaived = isRecordWaived(r);
         const paymentId = getRealPaymentId(r, false, isWaived);
         const orderId = getRealOrderId(r, false, isWaived);
-        const isRealSuccess = !isWaived && paymentId.startsWith('pay_');
+        const isRealSuccess = !isWaived && (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_'));
+
+        const key = `${r.registration_id || r.id}-cons`;
+        processedKeys.add(key);
+        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
+        if (r.registration_id) processedKeys.add(r.registration_id);
 
         list.push({
           id: r.id + '-cons',
@@ -1310,18 +1355,22 @@ export default function AdminDashboard() {
         });
       }
       if ((r as any).placementPaid || (r as any).placement_paid) {
-        const placementAmt = Number((r as any).placementAmount || 3000);
+        const placementAmt = Number((r as any).placementAmount || (r as any).placement_amount || 3000);
         const pidStr = (r as any).placementPaymentId || (r as any).placement_payment_id || '';
         const notesStr = ((r as any).notes || '').toUpperCase();
         const isPlacementWaived = pidStr.includes('HI5000') || notesStr.includes('HI5000') || pidStr === 'N/A (VIP HI5000)';
 
         const paymentId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealPaymentId(r, true, false);
         const orderId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealOrderId(r, true, false);
-        const isRealSuccess = !isPlacementWaived && paymentId.startsWith('pay_');
+        const isRealSuccess = !isPlacementWaived && (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_'));
+
+        const key = `${r.registration_id || r.id}-place`;
+        processedKeys.add(key);
+        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
 
         list.push({
           id: r.id + '-place',
-          date: (r as any).placementPaidAt || r.created_at,
+          date: (r as any).placementPaidAt || (r as any).placement_paid_at || r.created_at,
           regId: r.registration_id,
           parentName: r.parentName || (r as any).parent_name,
           childName: r.childName || (r as any).child_name,
@@ -1340,13 +1389,19 @@ export default function AdminDashboard() {
       }
     });
 
+    // 3. Parent Therapy Requests
     (db.parent_therapy_requests || []).forEach(r => {
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
         const isWaived = isRecordWaived(r);
         const paymentId = getRealPaymentId(r, false, isWaived);
         const orderId = getRealOrderId(r, false, isWaived);
-        const isRealSuccess = !isWaived && paymentId.startsWith('pay_');
+        const isRealSuccess = !isWaived && (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_'));
         const thType = (r as any).therapyType || (r as any).therapy_type || 'Therapy';
+
+        const key = `${r.registration_id || r.id}-cons`;
+        processedKeys.add(key);
+        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
+        if (r.registration_id) processedKeys.add(r.registration_id);
 
         list.push({
           id: r.id + '-cons',
@@ -1368,6 +1423,101 @@ export default function AdminDashboard() {
         });
       }
     });
+
+    // 4. School Requests (Consultation ₹199 & Placement ₹5,000)
+    (db.school_requests || []).forEach(r => {
+      if ((r as any).consultationPaid || (r as any).consultation_paid) {
+        const paymentId = (r as any).razorpayPaymentId || (r as any).razorpay_payment_id || 'N/A';
+        const orderId = (r as any).razorpayOrderId || (r as any).razorpay_order_id || 'N/A';
+        const isRealSuccess = paymentId.startsWith('pay_');
+        const key = `${r.registration_id || r.id}-sch-cons`;
+        processedKeys.add(key);
+        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
+
+        list.push({
+          id: r.id + '-sch-cons',
+          date: r.created_at,
+          regId: r.registration_id,
+          parentName: (r as any).schoolName || (r as any).school_name || (r as any).contactName || (r as any).contact_name,
+          childName: `School (${(r as any).teachersCount || (r as any).teachers_count || 1} Shadow Teachers)`,
+          phone: r.phone,
+          email: r.email,
+          type: 'School Consultation Fee',
+          amount: isRealSuccess ? '₹199' : '₹199 (Unverified)',
+          numericAmount: isRealSuccess ? 199 : 0,
+          originalFee: 199,
+          paymentId,
+          orderId,
+          status: isRealSuccess ? 'SUCCESS' : 'UNVERIFIED',
+          isWaived: false,
+          isRealSuccess
+        });
+      }
+      if ((r as any).placementPaid || (r as any).placement_paid) {
+        const paymentId = (r as any).placementPaymentId || (r as any).placement_payment_id || 'N/A';
+        const orderId = (r as any).placementOrderId || (r as any).placement_order_id || 'N/A';
+        const isRealSuccess = paymentId.startsWith('pay_');
+        const amt = Number((r as any).placementAmount || (r as any).placement_amount || 5000);
+        const key = `${r.registration_id || r.id}-sch-place`;
+        processedKeys.add(key);
+        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
+
+        list.push({
+          id: r.id + '-sch-place',
+          date: (r as any).placementPaidAt || (r as any).placement_paid_at || r.created_at,
+          regId: r.registration_id,
+          parentName: (r as any).schoolName || (r as any).school_name || (r as any).contactName || (r as any).contact_name,
+          childName: `School Placement`,
+          phone: r.phone,
+          email: r.email,
+          type: 'School Placement Fee',
+          amount: isRealSuccess ? `₹${amt.toLocaleString()}` : '₹0 (Unverified)',
+          numericAmount: isRealSuccess ? amt : 0,
+          originalFee: amt,
+          paymentId,
+          orderId,
+          status: isRealSuccess ? 'SUCCESS' : 'UNVERIFIED',
+          isWaived: false,
+          isRealSuccess
+        });
+      }
+    });
+
+    // 5. Standalone Bookings from /book or Webhook Backup
+    (db.bookings || []).forEach(b => {
+      const payId = b.razorpay_payment_id || b.razorpayPaymentId || '';
+      const orderId = b.razorpay_order_id || b.razorpayOrderId || '';
+      const bId = b.booking_id || b.id || '';
+
+      // Skip if already captured through parent requests above
+      if (processedKeys.has(bId) || (payId && processedKeys.has(payId))) {
+        return;
+      }
+
+      const isWaived = (b.payment_status || '').includes('waived') || payId.includes('VIP') || payId.includes('SHADOW100') || payId.includes('THERAPY99');
+      const isRealSuccess = !isWaived && (payId.startsWith('pay_') || payId.startsWith('PAY_'));
+      const amt = Number(b.amount || 99);
+
+      list.push({
+        id: b.id + '-bk',
+        date: b.created_at,
+        regId: bId,
+        parentName: b.name,
+        childName: b.child_age ? `Age ${b.child_age}` : 'Consultation Client',
+        phone: b.phone,
+        email: b.email,
+        type: `Consultation Fee (${b.requirement || 'Shadow Teacher'})`,
+        amount: isWaived ? '₹0 (Waived)' : (isRealSuccess ? `₹${amt}` : `₹${amt} (Unverified)`),
+        numericAmount: isRealSuccess ? amt : 0,
+        originalFee: amt,
+        paymentId: isWaived ? 'N/A (VIP Outreach)' : (payId || 'N/A (No Razorpay ID)'),
+        orderId: isWaived ? 'N/A (VIP Outreach)' : (orderId || 'N/A (No Order ID)'),
+        status: isWaived ? 'WAIVED (Outreach Code)' : (isRealSuccess ? 'SUCCESS' : 'UNVERIFIED'),
+        isWaived,
+        isRealSuccess
+      });
+    });
+
     return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   };
 

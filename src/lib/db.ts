@@ -6,16 +6,28 @@ const DB_FILE = path.join(DB_DIR, 'db.json');
 
 export interface ConsultationBooking {
   id: string;
+  booking_id?: string;
   name: string;
   phone: string;
   email: string;
   city: string;
-  childAge: string;
+  childAge?: string;
+  child_age?: string;
   requirement: string;
-  message: string;
-  paymentStatus: 'pending' | 'paid';
+  message?: string;
+  preferredLocation?: string;
+  preferred_location?: string;
+  paymentStatus?: 'pending' | 'paid' | string;
+  payment_status?: string;
   amount: number;
-  createdAt: string;
+  razorpayPaymentId?: string;
+  razorpay_payment_id?: string;
+  razorpayOrderId?: string;
+  razorpay_order_id?: string;
+  razorpaySignature?: string;
+  razorpay_signature?: string;
+  createdAt?: string;
+  created_at?: string;
 }
 
 export interface ParentRegistration {

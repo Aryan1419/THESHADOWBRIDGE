@@ -24,15 +24,48 @@ export async function POST(request: Request) {
 
     const receiptId = `rcpt_${Math.random().toString(36).substring(2, 10)}`;
 
+    const defaultPurpose = reqAmount === 99 
+      ? 'The Shadow Bridge Diagnostic Child Assessment Consultation Fee' 
+      : 'The Shadow Bridge Program Placement Vetting Fee';
+
+    const orderNotes: Record<string, string> = {
+      purpose: (body.purpose || body.notes?.purpose || defaultPurpose).substring(0, 250),
+      ...(body.notes || {})
+    };
+
+    if (body.regId || body.registrationId || body.registration_id) {
+      orderNotes.regId = String(body.regId || body.registrationId || body.registration_id).substring(0, 50);
+    }
+    if (body.parentName || body.name || body.contactName) {
+      orderNotes.parentName = String(body.parentName || body.name || body.contactName).substring(0, 100);
+    }
+    if (body.phone || body.contact) {
+      orderNotes.phone = String(body.phone || body.contact).substring(0, 25);
+    }
+    if (body.email) {
+      orderNotes.email = String(body.email).substring(0, 100);
+    }
+    if (body.city) {
+      orderNotes.city = String(body.city).substring(0, 50);
+    }
+    if (body.preferredLocation || body.preferred_location) {
+      orderNotes.preferredLocation = String(body.preferredLocation || body.preferred_location).substring(0, 100);
+    }
+    if (body.serviceNeeded || body.serviceType || body.requirement) {
+      orderNotes.serviceNeeded = String(body.serviceNeeded || body.serviceType || body.requirement).substring(0, 100);
+    }
+    if (body.childAge || body.child_age) {
+      orderNotes.childAge = String(body.childAge || body.child_age).substring(0, 25);
+    }
+    if (body.type) {
+      orderNotes.type = String(body.type).substring(0, 50);
+    }
+
     const order = await razorpay.orders.create({
       amount: amountInPaise,
       currency: 'INR',
       receipt: receiptId,
-      notes: {
-        purpose: reqAmount === 99 
-          ? 'The Shadow Bridge Diagnostic Child Assessment Consultation Fee' 
-          : 'The Shadow Bridge Program Placement Vetting Fee'
-      }
+      notes: orderNotes
     });
 
     return NextResponse.json({

@@ -118,7 +118,15 @@ function PlacementFeeContent() {
       const orderRes = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: feeAmount })
+        body: JSON.stringify({ 
+          amount: feeAmount,
+          regId: record.registration_id,
+          parentName: record.parent_name || record.parentName || '',
+          phone: record.phone || '',
+          email: record.email || '',
+          serviceNeeded: gatedStatus?.subType === 'tutor' ? 'Special Needs Tutor' : 'Shadow Teacher',
+          type: 'placement'
+        })
       });
 
       const orderData = await orderRes.json();

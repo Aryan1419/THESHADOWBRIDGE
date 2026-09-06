@@ -92,7 +92,15 @@ export default function ParentConsultationStep1() {
       const orderRes = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 99 })
+        body: JSON.stringify({ 
+          amount: 99,
+          parentName: parentName.trim(),
+          phone: phone.trim(),
+          email: email.trim().toLowerCase(),
+          city: city.trim(),
+          serviceNeeded,
+          type: 'parent_consultation'
+        })
       });
 
       const orderData = await orderRes.json();

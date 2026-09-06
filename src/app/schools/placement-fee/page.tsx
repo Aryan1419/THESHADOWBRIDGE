@@ -56,7 +56,15 @@ function SchoolPlacementFeeContent() {
       const orderRes = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: 5000 })
+        body: JSON.stringify({ 
+          amount: 5000,
+          regId: record.registration_id,
+          parentName: record.school_name || record.contact_name,
+          phone: record.phone,
+          email: record.email,
+          serviceNeeded: 'School Shadow Teacher Placement',
+          type: 'school_placement'
+        })
       });
 
       const orderData = await orderRes.json();
