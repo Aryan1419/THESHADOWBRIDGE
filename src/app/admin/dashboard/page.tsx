@@ -1857,8 +1857,12 @@ export default function AdminDashboard() {
                     </div>
 
                     {thisMonthInstallments.length > 0 ? (
-                      <div className="overflow-x-auto border-t border-brand-border/60">
-                        <table className="w-full text-left border-collapse text-xs">
+                      <div className="relative border-t border-brand-border/60">
+                        <div className="px-4 py-1.5 bg-purple-50/50 text-[10px] text-purple-800 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                          <span>↔ Swipe horizontally to view all columns</span>
+                        </div>
+                        <div className="overflow-x-auto overscroll-x-contain pb-1">
+                          <table className="w-full min-w-[650px] text-left border-collapse text-xs">
                           <thead>
                             <tr className="bg-brand-light/40 text-brand-muted text-[10px] uppercase font-bold border-b border-brand-border">
                               <th className="py-2.5 px-5">Shadow Teacher</th>
@@ -1911,6 +1915,7 @@ export default function AdminDashboard() {
                             })}
                           </tbody>
                         </table>
+                        </div>
                       </div>
                     ) : (
                       <div className="p-6 text-center text-xs text-brand-muted">
@@ -1936,8 +1941,12 @@ export default function AdminDashboard() {
                   ) : recentRegistrations.length === 0 ? (
                     <div className="p-12 text-center text-brand-muted">No submissions found.</div>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-xs border-collapse">
+                    <div className="relative">
+                      <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                        <span>↔ Swipe horizontally to view all columns</span>
+                      </div>
+                      <div className="overflow-x-auto overscroll-x-contain pb-1">
+                        <table className="w-full min-w-[700px] text-left text-xs border-collapse">
                         <thead>
                           <tr className="bg-brand-light/60 border-b border-brand-border text-primary font-bold">
                             <th className="p-4">Date</th>
@@ -1983,6 +1992,7 @@ export default function AdminDashboard() {
                           ))}
                         </tbody>
                       </table>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -2090,8 +2100,12 @@ export default function AdminDashboard() {
                 ) : getFilteredTutors().length === 0 ? (
                   <div className="p-12 text-center text-brand-muted">No tutors match the criteria.</div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs border-collapse">
+                  <div className="relative">
+                    <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                      <span>↔ Swipe horizontally to view all columns</span>
+                    </div>
+                    <div className="overflow-x-auto overscroll-x-contain pb-1">
+                      <table className="w-full min-w-[850px] text-left text-xs border-collapse">
                       <thead>
                         <tr className="bg-brand-light/60 border-b border-brand-border text-primary font-bold">
                           <th className="p-4">Reg ID</th>
@@ -2155,6 +2169,7 @@ export default function AdminDashboard() {
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 )}
               </div>
@@ -2279,8 +2294,12 @@ export default function AdminDashboard() {
                 ) : getFilteredShadows().length === 0 ? (
                   <div className="p-12 text-center text-brand-muted">No shadow teachers match the criteria.</div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs border-collapse">
+                  <div className="relative">
+                    <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                      <span>↔ Swipe horizontally to view all columns</span>
+                    </div>
+                    <div className="overflow-x-auto overscroll-x-contain pb-1">
+                      <table className="w-full min-w-[850px] text-left text-xs border-collapse">
                       <thead>
                         <tr className="bg-brand-light/60 border-b border-brand-border text-primary font-bold">
                           <th className="p-4">Reg ID</th>
@@ -2347,6 +2366,7 @@ export default function AdminDashboard() {
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 )}
               </div>
@@ -2635,8 +2655,12 @@ export default function AdminDashboard() {
                       </button>
                     </div>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse">
+                    <div className="relative">
+                      <div className="px-4 py-1.5 bg-purple-50/60 text-[10px] text-purple-900 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                        <span>↔ Swipe horizontally to view all columns</span>
+                      </div>
+                      <div className="overflow-x-auto overscroll-x-contain pb-1">
+                        <table className="w-full min-w-[950px] text-left border-collapse">
                         <thead>
                           <tr className="bg-brand-light/50 text-brand-muted text-[11px] uppercase tracking-wider font-bold border-b border-brand-border">
                             <th className="py-3.5 px-5">Shadow Teacher</th>
@@ -2732,6 +2756,7 @@ export default function AdminDashboard() {
                           })}
                         </tbody>
                       </table>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -2758,8 +2783,12 @@ export default function AdminDashboard() {
                       No Shadow Teachers found matching your filters.
                     </div>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse">
+                    <div className="relative">
+                      <div className="px-4 py-1.5 bg-purple-50/60 text-[10px] text-purple-900 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                        <span>↔ Swipe horizontally to view all columns</span>
+                      </div>
+                      <div className="overflow-x-auto overscroll-x-contain pb-1">
+                        <table className="w-full min-w-[1000px] text-left border-collapse">
                         <thead>
                           <tr className="bg-brand-light/50 text-brand-muted text-[11px] uppercase tracking-wider font-bold border-b border-brand-border">
                             <th className="py-3.5 px-5">Shadow Teacher</th>
@@ -2876,6 +2905,7 @@ export default function AdminDashboard() {
                           })}
                         </tbody>
                       </table>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -3004,8 +3034,12 @@ export default function AdminDashboard() {
                 ) : getFilteredParentRequests().length === 0 ? (
                   <div className="p-12 text-center text-brand-muted">No parent requests match the criteria.</div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs border-collapse">
+                  <div className="relative">
+                    <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                      <span>↔ Swipe horizontally to view all columns</span>
+                    </div>
+                    <div className="overflow-x-auto overscroll-x-contain pb-1">
+                      <table className="w-full min-w-[950px] text-left text-xs border-collapse">
                       <thead>
                         <tr className="bg-brand-light/60 border-b border-brand-border text-primary font-bold">
                           <th className="p-4">Reg ID</th>
@@ -3129,6 +3163,7 @@ export default function AdminDashboard() {
                          ))}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 )}
               </div>
@@ -3316,8 +3351,12 @@ export default function AdminDashboard() {
                   }
 
                   return (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-xs border-collapse">
+                    <div className="relative">
+                      <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                        <span>↔ Swipe horizontally to view all columns</span>
+                      </div>
+                      <div className="overflow-x-auto overscroll-x-contain pb-1">
+                        <table className="w-full min-w-[950px] text-left text-xs border-collapse">
                         <thead>
                           <tr className="bg-brand-light/60 border-b border-brand-border text-primary font-bold">
                             <th className="p-4">Reg ID</th>
@@ -3411,6 +3450,7 @@ export default function AdminDashboard() {
                           })}
                         </tbody>
                       </table>
+                      </div>
                     </div>
                   );
                 })()}
@@ -3438,8 +3478,12 @@ export default function AdminDashboard() {
                 ) : (!db?.bookings || db.bookings.length === 0) ? (
                   <div className="p-12 text-center text-brand-muted">No consultation bookings logged yet.</div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs border-collapse">
+                  <div className="relative">
+                    <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                      <span>↔ Swipe horizontally to view all columns</span>
+                    </div>
+                    <div className="overflow-x-auto overscroll-x-contain pb-1">
+                      <table className="w-full min-w-[850px] text-left text-xs border-collapse">
                       <thead>
                         <tr className="bg-brand-light/60 border-b border-brand-border text-primary font-bold">
                           <th className="p-4">Booking ID</th>
@@ -3545,6 +3589,7 @@ export default function AdminDashboard() {
                         })}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 )}
               </div>
@@ -3628,8 +3673,12 @@ export default function AdminDashboard() {
                   ) : paymentsList.length === 0 ? (
                     <div className="p-12 text-center text-brand-muted">No successful transactions found.</div>
                   ) : (
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left text-xs border-collapse">
+                    <div className="relative">
+                      <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                        <span>↔ Swipe horizontally to view all columns</span>
+                      </div>
+                      <div className="overflow-x-auto overscroll-x-contain pb-1">
+                        <table className="w-full min-w-[950px] text-left text-xs border-collapse">
                         <thead>
                           <tr className="bg-brand-light/60 border-b border-brand-border text-primary font-bold">
                             <th className="p-4">Transaction Date</th>
@@ -3693,6 +3742,7 @@ export default function AdminDashboard() {
                           ))}
                         </tbody>
                       </table>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -3743,53 +3793,60 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
-              <div className="overflow-x-auto rounded-2xl border border-brand-border">
+              <div className="relative rounded-2xl border border-brand-border overflow-hidden">
                 {(!db?.notifications || db.notifications.length === 0) ? (
                   <div className="p-12 text-center text-brand-muted">No notifications logged yet.</div>
                 ) : (
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="bg-brand-light border-b border-brand-border font-bold text-brand-dark uppercase tracking-wider text-[10px]">
-                        <th className="p-4">Recipient</th>
-                        <th className="p-4">Type</th>
-                        <th className="p-4">Subject</th>
-                        <th className="p-4">Status</th>
-                        <th className="p-4">Log Details / Error</th>
-                        <th className="p-4">Timestamp</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-brand-border font-medium text-brand-dark font-mono">
-                      {db.notifications.map((notif: any) => {
-                        const isSent = notif.status === 'sent';
-                        return (
-                          <tr key={notif.id} className="hover:bg-brand-light/30 transition-colors">
-                            <td className="p-4 font-bold font-sans">{notif.recipient}</td>
-                            <td className="p-4 font-sans">
-                              <span className="px-2 py-0.5 bg-brand-light text-primary border border-brand-border/60 rounded-full text-[9px] font-bold uppercase">
-                                {notif.type}
-                              </span>
-                            </td>
-                            <td className="p-4 font-serif text-brand-dark">{notif.subject}</td>
-                            <td className="p-4 font-sans">
-                              <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase inline-flex items-center gap-1 ${
-                                isSent 
-                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
-                                  : 'bg-rose-50 text-rose-700 border border-rose-200'
-                              }`}>
-                                {isSent ? 'Sent' : 'Failed'}
-                              </span>
-                            </td>
-                            <td className="p-4 max-w-xs truncate text-[11px] text-brand-muted font-sans">
-                              {notif.errorMessage || '-'}
-                            </td>
-                            <td className="p-4 text-brand-muted font-sans">
-                              {formatDateTime(notif.createdAt)}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                  <div>
+                    <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                      <span>↔ Swipe horizontally to view all columns</span>
+                    </div>
+                    <div className="overflow-x-auto overscroll-x-contain pb-1">
+                      <table className="w-full min-w-[750px] text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-brand-light border-b border-brand-border font-bold text-brand-dark uppercase tracking-wider text-[10px]">
+                          <th className="p-4">Recipient</th>
+                          <th className="p-4">Type</th>
+                          <th className="p-4">Subject</th>
+                          <th className="p-4">Status</th>
+                          <th className="p-4">Log Details / Error</th>
+                          <th className="p-4">Timestamp</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-brand-border font-medium text-brand-dark font-mono">
+                        {db.notifications.map((notif: any) => {
+                          const isSent = notif.status === 'sent';
+                          return (
+                            <tr key={notif.id} className="hover:bg-brand-light/30 transition-colors">
+                              <td className="p-4 font-bold font-sans">{notif.recipient}</td>
+                              <td className="p-4 font-sans">
+                                <span className="px-2 py-0.5 bg-brand-light text-primary border border-brand-border/60 rounded-full text-[9px] font-bold uppercase">
+                                  {notif.type}
+                                </span>
+                              </td>
+                              <td className="p-4 font-serif text-brand-dark">{notif.subject}</td>
+                              <td className="p-4 font-sans">
+                                <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase inline-flex items-center gap-1 ${
+                                  isSent 
+                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                                    : 'bg-rose-50 text-rose-700 border border-rose-200'
+                                }`}>
+                                  {isSent ? 'Sent' : 'Failed'}
+                                </span>
+                              </td>
+                              <td className="p-4 max-w-xs truncate text-[11px] text-brand-muted font-sans">
+                                {notif.errorMessage || '-'}
+                              </td>
+                              <td className="p-4 text-brand-muted font-sans">
+                                {formatDateTime(notif.createdAt)}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -4001,8 +4058,12 @@ export default function AdminDashboard() {
                 ) : (db?.contacts || []).length === 0 ? (
                   <div className="p-12 text-center text-brand-muted">No contact messages received yet.</div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs border-collapse">
+                  <div className="relative">
+                    <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                      <span>↔ Swipe horizontally to view all columns</span>
+                    </div>
+                    <div className="overflow-x-auto overscroll-x-contain pb-1">
+                      <table className="w-full min-w-[850px] text-left text-xs border-collapse">
                       <thead>
                         <tr className="bg-brand-light/60 border-b border-brand-border text-primary font-bold">
                           <th className="p-4">Submitted Date</th>
@@ -4117,6 +4178,7 @@ export default function AdminDashboard() {
                           })}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 )}
               </div>
@@ -4165,8 +4227,12 @@ export default function AdminDashboard() {
                 </div>
               ) : (
                 <div className="bg-white border border-brand-border rounded-3xl shadow-sm overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                  <div className="relative">
+                    <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                      <span>↔ Swipe horizontally to view all columns</span>
+                    </div>
+                    <div className="overflow-x-auto overscroll-x-contain pb-1">
+                      <table className="w-full min-w-[850px] text-left border-collapse">
                       <thead>
                         <tr className="bg-brand-light/60 border-b border-brand-border text-[10px] text-brand-muted uppercase font-bold tracking-wider">
                           <th className="p-4">Submitted Date</th>
@@ -4276,6 +4342,7 @@ export default function AdminDashboard() {
                         })}
                       </tbody>
                     </table>
+                    </div>
                   </div>
                 </div>
               )}
@@ -5194,8 +5261,12 @@ export default function AdminDashboard() {
                   </div>
 
                   {/* Installments Table / Editable Grid */}
-                  <div className="border border-brand-border rounded-2xl overflow-hidden shadow-xs">
-                    <table className="w-full text-left border-collapse text-xs">
+                  <div className="border border-brand-border rounded-2xl overflow-hidden shadow-xs relative">
+                    <div className="px-3 py-1 bg-purple-50 text-[10px] text-purple-900 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                      <span>↔ Swipe to edit all installment fields</span>
+                    </div>
+                    <div className="overflow-x-auto overscroll-x-contain pb-1">
+                      <table className="w-full min-w-[550px] text-left border-collapse text-xs">
                       <thead>
                         <tr className="bg-brand-light/60 text-brand-muted text-[10px] uppercase font-bold border-b border-brand-border">
                           <th className="py-2.5 px-3">#</th>
@@ -5255,6 +5326,7 @@ export default function AdminDashboard() {
                         ))}
                       </tbody>
                     </table>
+                    </div>
                   </div>
 
                   {/* Real-Time Live Sum Validation Indicator */}
