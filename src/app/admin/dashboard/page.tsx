@@ -9,7 +9,8 @@ import {
   RefreshCw, Search, Filter, ShieldCheck, Mail, Phone, MapPin, Calendar,
   CheckCircle, X, XCircle, ChevronRight, ChevronLeft, FileText, AlertCircle, Save, Info, Sparkles, CreditCard,
   Star, CheckCircle2, MessageSquare, Reply, Send, MailCheck, MessageSquareQuote, CornerDownRight, Trash2, AlertTriangle, ExternalLink, Menu, School,
-  Bell, Eye, Briefcase, BadgePercent, DollarSign, Wallet, TrendingUp, CheckSquare, PlusCircle, Clock3, CalendarDays, Percent
+  Bell, Eye, Briefcase, BadgePercent, DollarSign, Wallet, TrendingUp, CheckSquare, PlusCircle, Clock3, CalendarDays, Percent,
+  BarChart3, ArrowRight
 } from 'lucide-react';
 
 import { DatabaseSchema, TutorRecord, ShadowTeacherRecord, ParentShadowRequestRecord, ParentTutorRequestRecord } from '@/lib/db';
@@ -94,6 +95,7 @@ export default function AdminDashboard() {
   const [commissionSelectedMonth, setCommissionSelectedMonth] = useState<string>('current');
   const [commissionSearchQuery, setCommissionSearchQuery] = useState('');
   const [commissionStatusFilter, setCommissionStatusFilter] = useState<'All' | 'Pending' | 'Paid' | 'Partially Paid' | 'Overdue'>('All');
+  const [commissionViewMode, setCommissionViewMode] = useState<'detailed' | 'summary'>('detailed');
 
   // Commission Wizard Setup / Edit Modal
   const [commissionModalOpen, setCommissionModalOpen] = useState(false);
@@ -1070,6 +1072,11 @@ export default function AdminDashboard() {
     const now = new Date();
     const currentMonthStr = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
+    const monthNames = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+
     // Extract unique months
     const monthSet = new Set<string>();
     monthSet.add(currentMonthStr);
@@ -1118,6 +1125,102 @@ export default function AdminDashboard() {
       return sum + Math.max(0, remaining);
     }, 0);
 
+    // Compute Summary Breakdown for All Recorded Months
+    const summaryMap = new Map<string, {
+      month: string;
+      year: number;
+      monthIndex: number;
+      totalExpected: number;
+      totalReceived: number;
+      totalPending: number;
+      installmentsCount: number;
+      paidCount: number;
+      partiallyPaidCount: number;
+      pendingCount: number;
+      overdueCount: number;
+      teachers: Set<string>;
+      teacherNames: string[];
+      teacherCount: number;
+    }>();
+
+    allInstallments.forEach(({ teacher, installment }) => {
+      let mStr = installment.month ? installment.month.trim() : '';
+      if (!mStr && installment.dueDate) {
+        const d = new Date(installment.dueDate);
+        if (!isNaN(d.getTime())) {
+          mStr = d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+        }
+      }
+      if (!mStr) mStr = 'Unscheduled';
+
+      let yr = now.getFullYear();
+      let mIdx = 0;
+      if (mStr !== 'Unscheduled') {
+        const parts = mStr.split(' ');
+        if (parts.length >= 2) {
+          const foundIdx = monthNames.findIndex(mn => mn.toLowerCase() === parts[0].toLowerCase());
+          if (foundIdx !== -1) mIdx = foundIdx;
+          const parsedYr = parseInt(parts[1], 10);
+          if (!isNaN(parsedYr)) yr = parsedYr;
+        }
+      }
+
+      if (!summaryMap.has(mStr)) {
+        summaryMap.set(mStr, {
+          month: mStr,
+          year: yr,
+          monthIndex: mIdx,
+          totalExpected: 0,
+          totalReceived: 0,
+          totalPending: 0,
+          installmentsCount: 0,
+          paidCount: 0,
+          partiallyPaidCount: 0,
+          pendingCount: 0,
+          overdueCount: 0,
+          teachers: new Set<string>(),
+          teacherNames: [],
+          teacherCount: 0,
+        });
+      }
+
+      const item = summaryMap.get(mStr)!;
+      const amt = Number(installment.amount) || 0;
+      const paid = installment.status === 'Paid' ? amt : (installment.status === 'Partially Paid' ? (Number(installment.paidAmount) || 0) : 0);
+      const isInstOverdue = installment.status !== 'Paid' && ((installment.dueDate && installment.dueDate < todayIso) || installment.status === 'Overdue');
+
+      item.totalExpected += amt;
+      item.totalReceived += paid;
+      item.installmentsCount += 1;
+
+      if (installment.status === 'Paid') {
+        item.paidCount += 1;
+      } else if (isInstOverdue) {
+        item.overdueCount += 1;
+      } else if (installment.status === 'Partially Paid') {
+        item.partiallyPaidCount += 1;
+      } else {
+        item.pendingCount += 1;
+      }
+
+      if (teacher && teacher.id && !item.teachers.has(teacher.id)) {
+        item.teachers.add(teacher.id);
+        if (teacher.name) item.teacherNames.push(teacher.name);
+        item.teacherCount = item.teachers.size;
+      }
+    });
+
+    const allMonthsSummary = Array.from(summaryMap.values())
+      .map(item => ({
+        ...item,
+        totalPending: Math.max(0, item.totalExpected - item.totalReceived),
+        collectionRate: item.totalExpected > 0 ? Math.round((item.totalReceived / item.totalExpected) * 100) : 0,
+      }))
+      .sort((a, b) => {
+        if (a.year !== b.year) return a.year - b.year;
+        return a.monthIndex - b.monthIndex;
+      });
+
     return {
       activeMonth,
       availableMonths: Array.from(monthSet),
@@ -1127,7 +1230,8 @@ export default function AdminDashboard() {
       totalPending,
       overdueCount: overdueList.length,
       totalOverdueAmount,
-      currentMonthStr
+      currentMonthStr,
+      allMonthsSummary,
     };
   };
 
@@ -2412,6 +2516,49 @@ export default function AdminDashboard() {
               return true;
             });
 
+            // Month names and year derivation for direct Month/Year Quick Jump
+            const monthNames = [
+              'January', 'February', 'March', 'April', 'May', 'June',
+              'July', 'August', 'September', 'October', 'November', 'December'
+            ];
+            const currentRealYear = new Date().getFullYear();
+            const currentRealMonth = new Date().toLocaleDateString('en-US', { month: 'long' });
+
+            let activeJumpMonth = currentRealMonth;
+            let activeJumpYear = currentRealYear;
+
+            if (stats.activeMonth && stats.activeMonth !== 'all') {
+              const parts = stats.activeMonth.split(' ');
+              if (parts.length >= 2) {
+                if (monthNames.includes(parts[0])) activeJumpMonth = parts[0];
+                const parsedYr = parseInt(parts[1], 10);
+                if (!isNaN(parsedYr)) activeJumpYear = parsedYr;
+              }
+            }
+
+            // Summary view filtering by search & status
+            const filteredMonthsSummary = stats.allMonthsSummary.filter((m) => {
+              if (commissionSearchQuery) {
+                const q = commissionSearchQuery.toLowerCase();
+                const matchesMonth = m.month.toLowerCase().includes(q);
+                const matchesTeachers = m.teacherNames.some(name => name.toLowerCase().includes(q));
+                if (!matchesMonth && !matchesTeachers) return false;
+              }
+              if (commissionStatusFilter !== 'All') {
+                if (commissionStatusFilter === 'Paid') return m.totalPending === 0 && m.totalExpected > 0;
+                if (commissionStatusFilter === 'Pending') return m.pendingCount > 0 || m.partiallyPaidCount > 0;
+                if (commissionStatusFilter === 'Partially Paid') return m.partiallyPaidCount > 0;
+                if (commissionStatusFilter === 'Overdue') return m.overdueCount > 0;
+              }
+              return true;
+            });
+
+            // All-Time Summary Totals
+            const allTimeSummaryExpected = stats.allMonthsSummary.reduce((sum, m) => sum + m.totalExpected, 0);
+            const allTimeSummaryReceived = stats.allMonthsSummary.reduce((sum, m) => sum + m.totalReceived, 0);
+            const allTimeSummaryPending = Math.max(0, allTimeSummaryExpected - allTimeSummaryReceived);
+            const allTimeSummaryInstallments = stats.allMonthsSummary.reduce((sum, m) => sum + m.installmentsCount, 0);
+
             return (
               <div className="space-y-8 animate-fade-in-up">
                 
@@ -2463,14 +2610,107 @@ export default function AdminDashboard() {
                   </div>
                 )}
 
-                {/* Period Selector & Search Filter Bar */}
+                {/* Period Selector, Quick Jump, View Toggle & Search Filter Bar */}
                 <div className="bg-white p-5 rounded-3xl border border-brand-border/60 shadow-sm space-y-4">
+                  
+                  {/* Row 1: View Mode Switcher (Detailed vs Summary) + Month & Year Quick Jump Dropdowns */}
+                  <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center gap-4 pb-4 border-b border-brand-border/50">
+                    
+                    {/* View Mode Toggle Tabs */}
+                    <div className="flex items-center gap-1.5 p-1 bg-brand-light/80 rounded-2xl border border-brand-border/60 self-start sm:self-auto">
+                      <button
+                        onClick={() => setCommissionViewMode('detailed')}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                          commissionViewMode === 'detailed'
+                            ? 'bg-primary text-white shadow-sm'
+                            : 'text-brand-dark hover:text-primary hover:bg-white/60'
+                        }`}
+                      >
+                        <Calendar size={14} />
+                        <span>Monthly Breakdown View</span>
+                      </button>
+                      <button
+                        onClick={() => setCommissionViewMode('summary')}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-2 ${
+                          commissionViewMode === 'summary'
+                            ? 'bg-primary text-white shadow-sm'
+                            : 'text-brand-dark hover:text-primary hover:bg-white/60'
+                        }`}
+                      >
+                        <BarChart3 size={14} />
+                        <span>All-Months Summary View</span>
+                        {stats.allMonthsSummary.length > 0 && (
+                          <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono font-bold ${
+                            commissionViewMode === 'summary' ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary'
+                          }`}>
+                            {stats.allMonthsSummary.length}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Direct Month & Year Quick Jump Dropdowns */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="text-[11px] font-bold text-brand-muted uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+                        <CalendarDays size={14} className="text-secondary" />
+                        Quick Jump:
+                      </span>
+                      
+                      {/* Month Dropdown */}
+                      <select
+                        value={activeJumpMonth}
+                        onChange={(e) => {
+                          const newM = e.target.value;
+                          setCommissionSelectedMonth(`${newM} ${activeJumpYear}`);
+                        }}
+                        className="px-3 py-2 bg-brand-light/50 border border-brand-border rounded-xl text-xs font-bold text-brand-dark focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary cursor-pointer"
+                        title="Jump directly to month"
+                      >
+                        {monthNames.map((m) => (
+                          <option key={m} value={m}>
+                            {m}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Year Dropdown (2026 onwards with no artificial limit) */}
+                      <select
+                        value={activeJumpYear}
+                        onChange={(e) => {
+                          const newY = e.target.value;
+                          setCommissionSelectedMonth(`${activeJumpMonth} ${newY}`);
+                        }}
+                        className="px-3 py-2 bg-brand-light/50 border border-brand-border rounded-xl text-xs font-bold text-brand-dark focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary cursor-pointer"
+                        title="Jump directly to year"
+                      >
+                        {Array.from({ length: 10 }, (_, i) => 2026 + i).map((yr) => (
+                          <option key={yr} value={yr}>
+                            {yr}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Reset to Current Month Button */}
+                      {commissionSelectedMonth !== 'current' && (
+                        <button
+                          onClick={() => setCommissionSelectedMonth('current')}
+                          className="px-3 py-2 bg-brand-light hover:bg-brand-light/80 text-brand-dark font-bold text-xs rounded-xl transition-colors cursor-pointer border border-brand-border/60 flex items-center gap-1 shrink-0"
+                          title="Jump back to current month"
+                        >
+                          <RefreshCw size={12} className="text-secondary" />
+                          <span>Current</span>
+                        </button>
+                      )}
+                    </div>
+
+                  </div>
+
+                  {/* Row 2: Month Navigation Pills & Search / Status Filters */}
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     {/* Month Tabs */}
                     <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-thin">
                       <span className="text-[11px] font-bold text-brand-muted uppercase tracking-wider shrink-0 flex items-center gap-1.5 mr-1">
-                        <CalendarDays size={14} className="text-secondary" />
-                        Month:
+                        Active Period:
                       </span>
                       <button
                         onClick={() => setCommissionSelectedMonth('current')}
@@ -2516,7 +2756,7 @@ export default function AdminDashboard() {
                         <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-brand-muted" />
                         <input
                           type="text"
-                          placeholder="Search teacher, city, ID..."
+                          placeholder="Search teacher, city, month, ID..."
                           value={commissionSearchQuery}
                           onChange={(e) => setCommissionSearchQuery(e.target.value)}
                           className="w-full pl-9 pr-3 py-2 bg-brand-light/40 border border-brand-border rounded-xl text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary"
@@ -2535,16 +2775,19 @@ export default function AdminDashboard() {
                       </select>
                     </div>
                   </div>
+
                 </div>
 
-                {/* Top Monthly Metric Cards */}
+                {/* Top Metric Cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                   
-                  {/* Expected This Month */}
+                  {/* Expected Card */}
                   <div className="bg-white p-5 sm:p-6 rounded-3xl border border-brand-border/80 shadow-sm space-y-2 relative overflow-hidden">
                     <div className="flex justify-between items-center text-brand-muted">
                       <span className="text-[11px] uppercase font-bold tracking-wider">
-                        {commissionSelectedMonth === 'all' ? 'All-Time Expected' : `Expected (${stats.activeMonth})`}
+                        {commissionViewMode === 'summary' 
+                          ? 'All-Time Expected' 
+                          : (commissionSelectedMonth === 'all' ? 'All-Time Expected' : `Expected (${stats.activeMonth})`)}
                       </span>
                       <div className="p-2.5 bg-purple-50 text-purple-700 rounded-2xl">
                         <TrendingUp size={18} />
@@ -2552,19 +2795,23 @@ export default function AdminDashboard() {
                     </div>
                     <div className="space-y-0.5">
                       <h3 className="font-serif text-2xl sm:text-3xl font-black text-primary">
-                        ₹{stats.totalExpected.toLocaleString('en-IN')}
+                        ₹{(commissionViewMode === 'summary' ? allTimeSummaryExpected : stats.totalExpected).toLocaleString('en-IN')}
                       </h3>
                       <p className="text-[11px] text-brand-muted font-medium">
-                        Across {stats.matchingInstallments.length} installment(s)
+                        {commissionViewMode === 'summary'
+                          ? `Across ${allTimeSummaryInstallments} scheduled installment(s)`
+                          : `Across ${stats.matchingInstallments.length} installment(s)`}
                       </p>
                     </div>
                   </div>
 
-                  {/* Received This Month */}
+                  {/* Received / Collected Card */}
                   <div className="bg-white p-5 sm:p-6 rounded-3xl border border-brand-border/80 shadow-sm space-y-2 relative overflow-hidden">
                     <div className="flex justify-between items-center text-brand-muted">
                       <span className="text-[11px] uppercase font-bold tracking-wider">
-                        {commissionSelectedMonth === 'all' ? 'Total Collected' : `Received (${stats.activeMonth})`}
+                        {commissionViewMode === 'summary' 
+                          ? 'Total All-Time Collected' 
+                          : (commissionSelectedMonth === 'all' ? 'Total Collected' : `Received (${stats.activeMonth})`)}
                       </span>
                       <div className="p-2.5 bg-emerald-50 text-emerald-700 rounded-2xl">
                         <CheckCircle2 size={18} />
@@ -2572,19 +2819,23 @@ export default function AdminDashboard() {
                     </div>
                     <div className="space-y-0.5">
                       <h3 className="font-serif text-2xl sm:text-3xl font-black text-emerald-700">
-                        ₹{stats.totalReceived.toLocaleString('en-IN')}
+                        ₹{(commissionViewMode === 'summary' ? allTimeSummaryReceived : stats.totalReceived).toLocaleString('en-IN')}
                       </h3>
                       <p className="text-[11px] text-emerald-600 font-medium">
-                        {stats.totalExpected > 0 ? Math.round((stats.totalReceived / stats.totalExpected) * 100) : 0}% collected
+                        {commissionViewMode === 'summary'
+                          ? (allTimeSummaryExpected > 0 ? Math.round((allTimeSummaryReceived / allTimeSummaryExpected) * 100) : 0)
+                          : (stats.totalExpected > 0 ? Math.round((stats.totalReceived / stats.totalExpected) * 100) : 0)}% collected
                       </p>
                     </div>
                   </div>
 
-                  {/* Pending This Month */}
+                  {/* Pending Balance Card */}
                   <div className="bg-white p-5 sm:p-6 rounded-3xl border border-brand-border/80 shadow-sm space-y-2 relative overflow-hidden">
                     <div className="flex justify-between items-center text-brand-muted">
                       <span className="text-[11px] uppercase font-bold tracking-wider">
-                        {commissionSelectedMonth === 'all' ? 'Total Outstanding' : `Pending (${stats.activeMonth})`}
+                        {commissionViewMode === 'summary' 
+                          ? 'Total All-Time Outstanding' 
+                          : (commissionSelectedMonth === 'all' ? 'Total Outstanding' : `Pending (${stats.activeMonth})`)}
                       </span>
                       <div className="p-2.5 bg-amber-50 text-amber-700 rounded-2xl">
                         <Clock3 size={18} />
@@ -2592,7 +2843,7 @@ export default function AdminDashboard() {
                     </div>
                     <div className="space-y-0.5">
                       <h3 className="font-serif text-2xl sm:text-3xl font-black text-amber-700">
-                        ₹{stats.totalPending.toLocaleString('en-IN')}
+                        ₹{(commissionViewMode === 'summary' ? allTimeSummaryPending : stats.totalPending).toLocaleString('en-IN')}
                       </h3>
                       <p className="text-[11px] text-amber-600 font-medium">
                         Awaiting payment clearance
@@ -2600,7 +2851,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
 
-                  {/* Overdue Total */}
+                  {/* Overdue Total Card */}
                   <div className="bg-white p-5 sm:p-6 rounded-3xl border border-brand-border/80 shadow-sm space-y-2 relative overflow-hidden">
                     <div className="flex justify-between items-center text-brand-muted">
                       <span className="text-[11px] uppercase font-bold tracking-wider">Overdue Installments</span>
@@ -2620,146 +2871,321 @@ export default function AdminDashboard() {
 
                 </div>
 
-                {/* 1. MONTHLY EXPECTED INSTALLMENTS BREAKDOWN TABLE */}
-                <div className="bg-white rounded-3xl border border-brand-border/80 shadow-sm overflow-hidden space-y-4">
-                  <div className="p-5 sm:p-6 border-b border-brand-border/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                    <div>
-                      <h3 className="font-serif text-lg font-bold text-primary flex items-center gap-2">
-                        <Calendar size={18} className="text-secondary" />
-                        Installments Scheduled for {stats.activeMonth}
-                      </h3>
-                      <p className="text-xs text-brand-muted mt-0.5">
-                        Specific commission installments expected or due in {stats.activeMonth}.
-                      </p>
-                    </div>
-                    <span className="px-3 py-1 bg-purple-50 text-purple-800 border border-purple-200 rounded-xl text-xs font-bold">
-                      {filteredMonthlyInstallments.length} Installment(s)
-                    </span>
-                  </div>
-
-                  {filteredMonthlyInstallments.length === 0 ? (
-                    <div className="p-12 text-center space-y-3">
-                      <div className="w-12 h-12 rounded-2xl bg-brand-light flex items-center justify-center mx-auto text-brand-muted">
-                        <CalendarDays size={24} />
+                {/* VIEW 1: SUMMARY LIST VIEW (ALL MONTHS AT A GLANCE) */}
+                {commissionViewMode === 'summary' && (
+                  <div className="bg-white rounded-3xl border border-brand-border/80 shadow-sm overflow-hidden space-y-4 animate-fade-in-up">
+                    <div className="p-5 sm:p-6 border-b border-brand-border/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                      <div>
+                        <h3 className="font-serif text-lg font-bold text-primary flex items-center gap-2">
+                          <BarChart3 size={18} className="text-secondary" />
+                          Monthly Commission Summary (All Months Overview)
+                        </h3>
+                        <p className="text-xs text-brand-muted mt-0.5">
+                          High-level revenue tracking, expected commission, collections, and status for every recorded month.
+                        </p>
                       </div>
-                      <h4 className="font-bold text-brand-dark text-sm">No Installments Scheduled for {stats.activeMonth}</h4>
-                      <p className="text-xs text-brand-muted max-w-sm mx-auto">
-                        There are no shadow teacher commission installments due in this month matching your search.
-                      </p>
-                      <button
-                        onClick={() => openCommissionWizard()}
-                        className="mt-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
-                      >
-                        <PlusCircle size={14} />
-                        Add New Commission
-                      </button>
+                      <span className="px-3 py-1 bg-purple-50 text-purple-800 border border-purple-200 rounded-xl text-xs font-bold">
+                        {filteredMonthsSummary.length} Month(s) with Records
+                      </span>
                     </div>
-                  ) : (
-                    <div className="relative">
-                      <div className="px-4 py-1.5 bg-purple-50/60 text-[10px] text-purple-900 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
-                        <span>↔ Swipe horizontally to view all columns</span>
-                      </div>
-                      <div className="overflow-x-auto overscroll-x-contain pb-1">
-                        <table className="w-full min-w-[950px] text-left border-collapse">
-                        <thead>
-                          <tr className="bg-brand-light/50 text-brand-muted text-[11px] uppercase tracking-wider font-bold border-b border-brand-border">
-                            <th className="py-3.5 px-5">Shadow Teacher</th>
-                            <th className="py-3.5 px-4">Location</th>
-                            <th className="py-3.5 px-4">Decided Salary</th>
-                            <th className="py-3.5 px-4">Rate (%)</th>
-                            <th className="py-3.5 px-4">Installment</th>
-                            <th className="py-3.5 px-4">Due Date</th>
-                            <th className="py-3.5 px-4">Amount Due</th>
-                            <th className="py-3.5 px-4">Payment Status</th>
-                            <th className="py-3.5 px-5 text-right">Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-brand-border/60 text-xs">
-                          {filteredMonthlyInstallments.map(({ teacher, installment }) => {
-                            const isOverdue = installment.status !== 'Paid' && installment.dueDate && installment.dueDate < new Date().toISOString().split('T')[0];
-                            const effectiveStatus = isOverdue ? 'Overdue' : installment.status;
 
-                            return (
-                              <tr key={`${teacher.id}-${installment.id}`} className="hover:bg-brand-light/30 transition-colors">
-                                <td className="py-3.5 px-5">
-                                  <div className="font-bold text-primary">{teacher.name}</div>
-                                  <div className="text-[10px] text-brand-muted font-mono">{teacher.registration_id || teacher.id}</div>
-                                </td>
-                                <td className="py-3.5 px-4 text-brand-dark font-medium">
-                                  {teacher.city || '—'}
-                                </td>
-                                <td className="py-3.5 px-4 text-brand-dark font-bold">
-                                  ₹{(teacher.commission?.monthlySalary || 0).toLocaleString('en-IN')}
-                                </td>
-                                <td className="py-3.5 px-4 text-brand-dark font-medium">
-                                  {teacher.commission?.commissionPercentage || 40}%
-                                </td>
-                                <td className="py-3.5 px-4 font-semibold text-brand-dark">
-                                  Inst #{installment.installmentNumber}
-                                  <span className="block text-[10px] text-brand-muted">{installment.month}</span>
-                                </td>
-                                <td className="py-3.5 px-4 text-brand-dark">
-                                  {installment.dueDate ? (
-                                    <span className={`font-mono text-[11px] ${isOverdue ? 'text-rose-700 font-bold' : ''}`}>
-                                      {new Date(installment.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
-                                    </span>
-                                  ) : '—'}
-                                </td>
-                                <td className="py-3.5 px-4 font-black text-primary text-sm">
-                                  ₹{installment.amount.toLocaleString('en-IN')}
-                                </td>
+                    {filteredMonthsSummary.length === 0 ? (
+                      <div className="p-12 text-center space-y-3">
+                        <div className="w-12 h-12 rounded-2xl bg-brand-light flex items-center justify-center mx-auto text-brand-muted">
+                          <CalendarDays size={24} />
+                        </div>
+                        <h4 className="font-bold text-brand-dark text-sm">No Monthly Commission Records Found</h4>
+                        <p className="text-xs text-brand-muted max-w-sm mx-auto">
+                          There are no commission plans or installments recorded matching your filter.
+                        </p>
+                        <button
+                          onClick={() => openCommissionWizard()}
+                          className="mt-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
+                        >
+                          <PlusCircle size={14} />
+                          Setup New Commission
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <div className="px-4 py-1.5 bg-purple-50/60 text-[10px] text-purple-900 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                          <span>↔ Swipe horizontally to view all columns</span>
+                        </div>
+                        <div className="overflow-x-auto overscroll-x-contain pb-1">
+                          <table className="w-full min-w-[950px] text-left border-collapse">
+                            <thead>
+                              <tr className="bg-brand-light/50 text-brand-muted text-[11px] uppercase tracking-wider font-bold border-b border-brand-border">
+                                <th className="py-3.5 px-5">Month / Period</th>
+                                <th className="py-3.5 px-4">Shadow Teachers</th>
+                                <th className="py-3.5 px-4">Total Expected</th>
+                                <th className="py-3.5 px-4">Total Collected</th>
+                                <th className="py-3.5 px-4">Pending Balance</th>
+                                <th className="py-3.5 px-4">Collection Rate</th>
+                                <th className="py-3.5 px-4">Installments Breakdown</th>
+                                <th className="py-3.5 px-5 text-right">Action</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-brand-border/60 text-xs">
+                              {filteredMonthsSummary.map((row) => {
+                                const isCurrent = row.month.toLowerCase() === stats.currentMonthStr.toLowerCase();
+                                return (
+                                  <tr key={row.month} className="hover:bg-brand-light/30 transition-colors">
+                                    <td className="py-3.5 px-5">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-bold text-primary text-sm">{row.month}</span>
+                                        {isCurrent && (
+                                          <span className="px-2 py-0.5 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-[10px] font-bold">
+                                            Current Month
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="text-[10px] text-brand-muted font-mono mt-0.5">
+                                        {row.installmentsCount} scheduled installment(s)
+                                      </div>
+                                    </td>
+                                    <td className="py-3.5 px-4 text-brand-dark font-medium">
+                                      <div className="font-bold text-brand-dark">{row.teacherCount} Teacher(s)</div>
+                                      {row.teacherNames.length > 0 && (
+                                        <div className="text-[10px] text-brand-muted truncate max-w-[150px]" title={row.teacherNames.join(', ')}>
+                                          {row.teacherNames.slice(0, 2).join(', ')}{row.teacherNames.length > 2 ? ` +${row.teacherNames.length - 2} more` : ''}
+                                        </div>
+                                      )}
+                                    </td>
+                                    <td className="py-3.5 px-4 font-bold text-brand-dark">
+                                      ₹{row.totalExpected.toLocaleString('en-IN')}
+                                    </td>
+                                    <td className="py-3.5 px-4 font-bold text-emerald-700">
+                                      ₹{row.totalReceived.toLocaleString('en-IN')}
+                                    </td>
+                                    <td className="py-3.5 px-4 font-bold text-amber-700">
+                                      ₹{row.totalPending.toLocaleString('en-IN')}
+                                    </td>
+                                    <td className="py-3.5 px-4 min-w-[130px]">
+                                      <div className="space-y-1">
+                                        <div className="flex justify-between text-[10px] font-bold">
+                                          <span className={row.collectionRate === 100 ? 'text-emerald-700' : 'text-primary'}>
+                                            {row.collectionRate}%
+                                          </span>
+                                        </div>
+                                        <div className="w-full bg-brand-light h-2 rounded-full overflow-hidden">
+                                          <div
+                                            className={`h-full rounded-full ${row.collectionRate >= 100 ? 'bg-emerald-500' : 'bg-primary'}`}
+                                            style={{ width: `${Math.min(100, row.collectionRate)}%` }}
+                                          />
+                                        </div>
+                                      </div>
+                                    </td>
+                                    <td className="py-3.5 px-4">
+                                      <div className="flex items-center gap-1.5 flex-wrap">
+                                        {row.paidCount > 0 && (
+                                          <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[10px] font-bold">
+                                            {row.paidCount} Paid
+                                          </span>
+                                        )}
+                                        {row.partiallyPaidCount > 0 && (
+                                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-[10px] font-bold">
+                                            {row.partiallyPaidCount} Partial
+                                          </span>
+                                        )}
+                                        {row.pendingCount > 0 && (
+                                          <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-[10px] font-bold">
+                                            {row.pendingCount} Pending
+                                          </span>
+                                        )}
+                                        {row.overdueCount > 0 && (
+                                          <span className="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-[10px] font-bold">
+                                            {row.overdueCount} Overdue
+                                          </span>
+                                        )}
+                                      </div>
+                                    </td>
+                                    <td className="py-3.5 px-5 text-right">
+                                      <button
+                                        onClick={() => {
+                                          setCommissionSelectedMonth(row.month);
+                                          setCommissionViewMode('detailed');
+                                        }}
+                                        className="px-3.5 py-1.5 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-sm inline-flex items-center gap-1.5"
+                                      >
+                                        <span>View Details</span>
+                                        <ArrowRight size={13} />
+                                      </button>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                            <tfoot>
+                              <tr className="bg-brand-light/70 font-bold text-xs text-brand-dark border-t border-brand-border">
+                                <td className="py-3.5 px-5">Total (Filtered Months)</td>
                                 <td className="py-3.5 px-4">
-                                  <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold ${
-                                    effectiveStatus === 'Paid'
-                                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                      : (effectiveStatus === 'Partially Paid'
-                                          ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                                          : (effectiveStatus === 'Overdue'
-                                              ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                                              : 'bg-amber-50 text-amber-700 border border-amber-200'))
-                                  }`}>
-                                    {effectiveStatus}
-                                  </span>
-                                  {installment.paidDate && (
-                                    <span className="block text-[9px] text-emerald-600 font-mono mt-0.5">
-                                      Paid on {new Date(installment.paidDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
-                                    </span>
-                                  )}
+                                  {new Set(filteredMonthsSummary.flatMap(r => r.teacherNames)).size} Teachers
                                 </td>
-                                <td className="py-3.5 px-5 text-right">
-                                  <div className="flex items-center justify-end gap-2">
-                                    <button
-                                      onClick={() => openPaymentLogger(teacher, installment)}
-                                      className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-sm flex items-center gap-1"
-                                    >
-                                      <CheckSquare size={13} />
-                                      <span>Update Status</span>
-                                    </button>
-                                    <button
-                                      onClick={() => openCommissionWizard(teacher)}
-                                      className="p-1.5 text-brand-muted hover:text-brand-dark hover:bg-brand-light rounded-lg transition-colors cursor-pointer"
-                                      title="Edit Commission Plan"
-                                    >
-                                      <Settings size={14} />
-                                    </button>
-                                    <button
-                                      onClick={() => handleOpenTeacherProfile(teacher)}
-                                      className="p-1.5 text-brand-muted hover:text-brand-dark hover:bg-brand-light rounded-lg transition-colors cursor-pointer"
-                                      title="View Shadow Teacher Profile"
-                                    >
-                                      <Eye size={14} />
-                                    </button>
-                                  </div>
+                                <td className="py-3.5 px-4 text-primary">
+                                  ₹{filteredMonthsSummary.reduce((acc, r) => acc + r.totalExpected, 0).toLocaleString('en-IN')}
+                                </td>
+                                <td className="py-3.5 px-4 text-emerald-700">
+                                  ₹{filteredMonthsSummary.reduce((acc, r) => acc + r.totalReceived, 0).toLocaleString('en-IN')}
+                                </td>
+                                <td className="py-3.5 px-4 text-amber-700">
+                                  ₹{filteredMonthsSummary.reduce((acc, r) => acc + r.totalPending, 0).toLocaleString('en-IN')}
+                                </td>
+                                <td className="py-3.5 px-4" colSpan={3}>
+                                  <span className="text-[11px] text-brand-muted">
+                                    {filteredMonthsSummary.reduce((acc, r) => acc + r.installmentsCount, 0)} total scheduled installment(s)
+                                  </span>
                                 </td>
                               </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                            </tfoot>
+                          </table>
+                        </div>
                       </div>
+                    )}
+                  </div>
+                )}
+
+                {/* VIEW 2: MONTHLY EXPECTED INSTALLMENTS BREAKDOWN TABLE */}
+                {commissionViewMode === 'detailed' && (
+                  <div className="bg-white rounded-3xl border border-brand-border/80 shadow-sm overflow-hidden space-y-4 animate-fade-in-up">
+                    <div className="p-5 sm:p-6 border-b border-brand-border/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                      <div>
+                        <h3 className="font-serif text-lg font-bold text-primary flex items-center gap-2">
+                          <Calendar size={18} className="text-secondary" />
+                          Installments Scheduled for {stats.activeMonth}
+                        </h3>
+                        <p className="text-xs text-brand-muted mt-0.5">
+                          Specific commission installments expected or due in {stats.activeMonth}.
+                        </p>
+                      </div>
+                      <span className="px-3 py-1 bg-purple-50 text-purple-800 border border-purple-200 rounded-xl text-xs font-bold">
+                        {filteredMonthlyInstallments.length} Installment(s)
+                      </span>
                     </div>
-                  )}
-                </div>
+
+                    {filteredMonthlyInstallments.length === 0 ? (
+                      <div className="p-12 text-center space-y-3">
+                        <div className="w-12 h-12 rounded-2xl bg-brand-light flex items-center justify-center mx-auto text-brand-muted">
+                          <CalendarDays size={24} />
+                        </div>
+                        <h4 className="font-bold text-brand-dark text-sm">No Installments Scheduled for {stats.activeMonth}</h4>
+                        <p className="text-xs text-brand-muted max-w-sm mx-auto">
+                          There are no shadow teacher commission installments due in this month matching your search.
+                        </p>
+                        <button
+                          onClick={() => openCommissionWizard()}
+                          className="mt-2 px-4 py-2 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl transition-all cursor-pointer inline-flex items-center gap-1.5"
+                        >
+                          <PlusCircle size={14} />
+                          Add New Commission
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <div className="px-4 py-1.5 bg-purple-50/60 text-[10px] text-purple-900 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                          <span>↔ Swipe horizontally to view all columns</span>
+                        </div>
+                        <div className="overflow-x-auto overscroll-x-contain pb-1">
+                          <table className="w-full min-w-[950px] text-left border-collapse">
+                          <thead>
+                            <tr className="bg-brand-light/50 text-brand-muted text-[11px] uppercase tracking-wider font-bold border-b border-brand-border">
+                              <th className="py-3.5 px-5">Shadow Teacher</th>
+                              <th className="py-3.5 px-4">Location</th>
+                              <th className="py-3.5 px-4">Decided Salary</th>
+                              <th className="py-3.5 px-4">Rate (%)</th>
+                              <th className="py-3.5 px-4">Installment</th>
+                              <th className="py-3.5 px-4">Due Date</th>
+                              <th className="py-3.5 px-4">Amount Due</th>
+                              <th className="py-3.5 px-4">Payment Status</th>
+                              <th className="py-3.5 px-5 text-right">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-brand-border/60 text-xs">
+                            {filteredMonthlyInstallments.map(({ teacher, installment }) => {
+                              const isOverdue = installment.status !== 'Paid' && installment.dueDate && installment.dueDate < new Date().toISOString().split('T')[0];
+                              const effectiveStatus = isOverdue ? 'Overdue' : installment.status;
+
+                              return (
+                                <tr key={`${teacher.id}-${installment.id}`} className="hover:bg-brand-light/30 transition-colors">
+                                  <td className="py-3.5 px-5">
+                                    <div className="font-bold text-primary">{teacher.name}</div>
+                                    <div className="text-[10px] text-brand-muted font-mono">{teacher.registration_id || teacher.id}</div>
+                                  </td>
+                                  <td className="py-3.5 px-4 text-brand-dark font-medium">
+                                    {teacher.city || '—'}
+                                  </td>
+                                  <td className="py-3.5 px-4 text-brand-dark font-bold">
+                                    ₹{(teacher.commission?.monthlySalary || 0).toLocaleString('en-IN')}
+                                  </td>
+                                  <td className="py-3.5 px-4 text-brand-dark font-medium">
+                                    {teacher.commission?.commissionPercentage || 40}%
+                                  </td>
+                                  <td className="py-3.5 px-4 font-semibold text-brand-dark">
+                                    Inst #{installment.installmentNumber}
+                                    <span className="block text-[10px] text-brand-muted">{installment.month}</span>
+                                  </td>
+                                  <td className="py-3.5 px-4 text-brand-dark">
+                                    {installment.dueDate ? (
+                                      <span className={`font-mono text-[11px] ${isOverdue ? 'text-rose-700 font-bold' : ''}`}>
+                                        {new Date(installment.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                      </span>
+                                    ) : '—'}
+                                  </td>
+                                  <td className="py-3.5 px-4 font-black text-primary text-sm">
+                                    ₹{installment.amount.toLocaleString('en-IN')}
+                                  </td>
+                                  <td className="py-3.5 px-4">
+                                    <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                                      effectiveStatus === 'Paid'
+                                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                        : (effectiveStatus === 'Partially Paid'
+                                            ? 'bg-blue-50 text-blue-700 border border-blue-200'
+                                            : (effectiveStatus === 'Overdue'
+                                                ? 'bg-rose-50 text-rose-700 border border-rose-200'
+                                                : 'bg-amber-50 text-amber-700 border border-amber-200'))
+                                    }`}>
+                                      {effectiveStatus}
+                                    </span>
+                                    {installment.paidDate && (
+                                      <span className="block text-[9px] text-emerald-600 font-mono mt-0.5">
+                                        Paid on {new Date(installment.paidDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="py-3.5 px-5 text-right">
+                                    <div className="flex items-center justify-end gap-2">
+                                      <button
+                                        onClick={() => openPaymentLogger(teacher, installment)}
+                                        className="px-3 py-1.5 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-xl transition-all cursor-pointer shadow-sm flex items-center gap-1"
+                                      >
+                                        <CheckSquare size={13} />
+                                        <span>Update Status</span>
+                                      </button>
+                                      <button
+                                        onClick={() => openCommissionWizard(teacher)}
+                                        className="p-1.5 text-brand-muted hover:text-brand-dark hover:bg-brand-light rounded-lg transition-colors cursor-pointer"
+                                        title="Edit Commission Plan"
+                                      >
+                                        <Settings size={14} />
+                                      </button>
+                                      <button
+                                        onClick={() => handleOpenTeacherProfile(teacher)}
+                                        className="p-1.5 text-brand-muted hover:text-brand-dark hover:bg-brand-light rounded-lg transition-colors cursor-pointer"
+                                        title="View Shadow Teacher Profile"
+                                      >
+                                        <Eye size={14} />
+                                      </button>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {/* 2. ALL PLACED SHADOW TEACHERS COMMISSION REGISTRY */}
                 <div className="bg-white rounded-3xl border border-brand-border/80 shadow-sm overflow-hidden space-y-4">
