@@ -163,7 +163,7 @@ ADMIN_NOTIFICATION_EMAIL=support@theshadowbridge.com
    ```
 
 4. **Open in browser**:
-   Navigate to [http://localhost:3000](http://localhost:3000) to view the application.
+   Navigate to (https://www.theshadowbridge.com/) to view the application.
 
 ---
 
