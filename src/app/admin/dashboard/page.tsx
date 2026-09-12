@@ -2794,7 +2794,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <div className="space-y-0.5">
-                      <h3 className="font-serif text-2xl sm:text-3xl font-black text-primary">
+                      <h3 className="font-sans text-2xl sm:text-3xl font-black tracking-tight text-primary">
                         ₹{(commissionViewMode === 'summary' ? allTimeSummaryExpected : stats.totalExpected).toLocaleString('en-IN')}
                       </h3>
                       <p className="text-[11px] text-brand-muted font-medium">
@@ -2818,7 +2818,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <div className="space-y-0.5">
-                      <h3 className="font-serif text-2xl sm:text-3xl font-black text-emerald-700">
+                      <h3 className="font-sans text-2xl sm:text-3xl font-black tracking-tight text-emerald-700">
                         ₹{(commissionViewMode === 'summary' ? allTimeSummaryReceived : stats.totalReceived).toLocaleString('en-IN')}
                       </h3>
                       <p className="text-[11px] text-emerald-600 font-medium">
@@ -2842,7 +2842,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <div className="space-y-0.5">
-                      <h3 className="font-serif text-2xl sm:text-3xl font-black text-amber-700">
+                      <h3 className="font-sans text-2xl sm:text-3xl font-black tracking-tight text-amber-700">
                         ₹{(commissionViewMode === 'summary' ? allTimeSummaryPending : stats.totalPending).toLocaleString('en-IN')}
                       </h3>
                       <p className="text-[11px] text-amber-600 font-medium">
@@ -2860,7 +2860,7 @@ export default function AdminDashboard() {
                       </div>
                     </div>
                     <div className="space-y-0.5">
-                      <h3 className="font-serif text-2xl sm:text-3xl font-black text-rose-700">
+                      <h3 className="font-sans text-2xl sm:text-3xl font-black tracking-tight text-rose-700">
                         ₹{stats.totalOverdueAmount.toLocaleString('en-IN')}
                       </h3>
                       <p className="text-[11px] text-rose-600 font-medium">
@@ -3622,7 +3622,7 @@ export default function AdminDashboard() {
                     <span>Total Inquiries</span>
                     <School size={16} className="text-primary" />
                   </div>
-                  <div className="text-2xl font-black text-primary font-serif">
+                  <div className="text-2xl font-black text-primary font-sans tracking-tight">
                     {db?.school_requests?.length || 0}
                   </div>
                 </div>
@@ -3632,7 +3632,7 @@ export default function AdminDashboard() {
                     <span>Booking Fee Paid</span>
                     <CreditCard size={16} className="text-emerald-600" />
                   </div>
-                  <div className="text-2xl font-black text-emerald-700 font-serif">
+                  <div className="text-2xl font-black text-emerald-700 font-sans tracking-tight">
                     {(db?.school_requests || []).filter((r: any) => r.consultationPaid || r.consultation_paid).length}
                   </div>
                 </div>
@@ -3642,7 +3642,7 @@ export default function AdminDashboard() {
                     <span>Placement Fee Paid</span>
                     <CheckCircle2 size={16} className="text-purple-600" />
                   </div>
-                  <div className="text-2xl font-black text-purple-700 font-serif">
+                  <div className="text-2xl font-black text-purple-700 font-sans tracking-tight">
                     {(db?.school_requests || []).filter((r: any) => r.placementPaid || r.placement_paid).length}
                   </div>
                 </div>
@@ -3652,7 +3652,7 @@ export default function AdminDashboard() {
                     <span>Active Support</span>
                     <ShieldCheck size={16} className="text-secondary" />
                   </div>
-                  <div className="text-2xl font-black text-secondary font-serif">
+                  <div className="text-2xl font-black text-secondary font-sans tracking-tight">
                     {(db?.school_requests || []).filter((r: any) => (r.status || '').includes('Support Started') || (r.status || '').includes('Active')).length}
                   </div>
                 </div>
@@ -5655,7 +5655,7 @@ export default function AdminDashboard() {
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="font-serif text-2xl font-black text-primary">
+                    <span className="font-sans text-2xl font-black tracking-tight text-primary">
                       ₹{calcTotal.toLocaleString('en-IN')}
                     </span>
                   </div>
@@ -5900,7 +5900,7 @@ export default function AdminDashboard() {
               </div>
               <div className="text-right">
                 <span className="text-[10px] text-brand-muted uppercase font-bold block">Scheduled Due</span>
-                <span className="font-serif font-black text-sm text-primary">
+                <span className="font-sans font-black text-sm text-primary">
                   ₹{paymentTargetInstallment.amount.toLocaleString('en-IN')}
                 </span>
               </div>
