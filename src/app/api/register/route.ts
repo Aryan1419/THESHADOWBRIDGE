@@ -236,62 +236,6 @@ export async function POST(request: Request) {
       const isTherapyCoupon = cleanPromoCode === 'THERAPY99' && isTherapy;
       const isVipCode = isShadowVip || isTherapyCoupon;
 
-      // Check if parent already registered across shadow, tutor, or therapy requests
-      const { data: existingShadow } = await supabase
-        .from('parent_shadow_requests')
-        .select('*')
-        .or(`email.ilike.${cleanEmail},phone.ilike.%${cleanPhoneDigits}%`)
-        .maybeSingle();
-
-      const { data: existingTutor } = await supabase
-        .from('parent_tutor_requests')
-        .select('*')
-        .or(`email.ilike.${cleanEmail},phone.ilike.%${cleanPhoneDigits}%`)
-        .maybeSingle();
-
-      const { data: existingTherapy } = await supabase
-        .from('parent_therapy_requests')
-        .select('*')
-        .or(`email.ilike.${cleanEmail},phone.ilike.%${cleanPhoneDigits}%`)
-        .maybeSingle();
-
-      const existingRecord = isTherapy ? existingTherapy : (existingShadow || existingTutor);
-      
-      // If VIP / Coupon code is used on existing record, upgrade status to Consultation Completed
-      if (existingRecord && isVipCode && (existingRecord.status === 'Consultation Booked' || !existingRecord.consultation_paid)) {
-        const targetTable = isTherapy ? 'parent_therapy_requests' : (existingShadow ? 'parent_shadow_requests' : 'parent_tutor_requests');
-        const codeNote = isTherapyCoupon ? 'Upgraded via Coupon THERAPY99' : 'Upgraded via VIP Code SHADOW100';
-        await supabase
-          .from(targetTable)
-          .update({
-            status: 'Consultation Completed',
-            consultation_paid: true,
-            notes: (existingRecord.notes || '') + ` | ${codeNote}`
-          })
-          .eq('id', existingRecord.id);
-
-        const targetRegId = existingRecord.registration_id;
-        return NextResponse.json({
-          success: true,
-          isVip: true,
-          registration_id: targetRegId,
-          redirectUrl: `/register/parent/form?regId=${encodeURIComponent(targetRegId)}`,
-          status: 'Consultation Completed',
-          message: isTherapyCoupon ? 'THERAPY99 Coupon applied! Therapy registration unlocked.' : 'VIP Access Code applied! Registration form unlocked.'
-        });
-      }
-
-      if (existingRecord && (existingRecord.consultation_paid || existingRecord.status !== 'Consultation Booked')) {
-        return NextResponse.json({
-          success: true,
-          alreadyPaid: true,
-          registration_id: existingRecord.registration_id,
-          redirectUrl: `/register/parent/form?regId=${encodeURIComponent(existingRecord.registration_id)}`,
-          status: existingRecord.status,
-          message: 'Consultation fee has already been paid for this parent account.'
-        });
-      }
-
       // Verify Razorpay payment if NOT using VIP / Coupon promo code
       if (!isVipCode) {
         if (!razorpayPaymentId || !razorpayOrderId || !razorpaySignature) {

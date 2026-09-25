@@ -82,6 +82,7 @@ export async function GET(request: Request) {
     let notifications = null;
     let reviews = null;
     let bookings = null;
+    let parentTherapy = null;
 
     if (isSupabaseConfigured) {
       try {
@@ -89,6 +90,7 @@ export async function GET(request: Request) {
         const { data: st } = await supabase.from('shadow_teachers').select('*');
         const { data: ps } = await supabase.from('parent_shadow_requests').select('*');
         const { data: pt } = await supabase.from('parent_tutor_requests').select('*');
+        const { data: pth } = await supabase.from('parent_therapy_requests').select('*');
         const { data: sch } = await supabase.from('school_requests').select('*');
         const { data: c } = await supabase.from('contacts').select('*').order('created_at', { ascending: false });
         const { data: n } = await supabase.from('notifications_log').select('*').order('created_at', { ascending: false });
@@ -99,6 +101,7 @@ export async function GET(request: Request) {
         shadowTeachers = st;
         parentShadow = ps;
         parentTutor = pt;
+        parentTherapy = pth;
         schoolRequests = sch;
         contacts = c;
         notifications = n;
@@ -114,6 +117,7 @@ export async function GET(request: Request) {
     if (!shadowTeachers) shadowTeachers = localDb.shadow_teachers || [];
     if (!parentShadow) parentShadow = localDb.parent_shadow_requests || [];
     if (!parentTutor) parentTutor = localDb.parent_tutor_requests || [];
+    if (!parentTherapy) parentTherapy = localDb.parent_therapy_requests || [];
     if (!schoolRequests) schoolRequests = localDb.school_requests || [];
     if (!contacts) contacts = (localDb as any).contacts || [];
     if (!notifications) notifications = localDb.notifications || [];
@@ -154,6 +158,7 @@ export async function GET(request: Request) {
       shadow_teachers: toCamelCase(processedShadowTeachers),
       parent_shadow_requests: toCamelCase(parentShadow || []),
       parent_tutor_requests: toCamelCase(parentTutor || []),
+      parent_therapy_requests: toCamelCase(parentTherapy || []),
       school_requests: toCamelCase(schoolRequests || []),
       contacts: toCamelCase(contacts || []),
       notifications: toCamelCase(notifications || []),
@@ -201,6 +206,15 @@ export async function POST(request: Request) {
       }
 
       if (isSupabaseConfigured) {
+        // Fetch record first to identify linked registration_id / booking_id for cascade cleanup
+        const { data: targetData } = await supabase
+          .from(type)
+          .select('*')
+          .eq('id', id)
+          .maybeSingle();
+
+        const linkedId = targetData?.booking_id || targetData?.registration_id;
+
         const { error: delErr } = await supabase
           .from(type)
           .delete()
@@ -210,6 +224,19 @@ export async function POST(request: Request) {
           console.error(`Supabase deletion error on table ${type} (ID: ${id}):`, delErr);
           return NextResponse.json({ error: `Database deletion failed: ${delErr.message}` }, { status: 500 });
         }
+
+        // Cascade delete corresponding linked entries across other tables
+        if (linkedId) {
+          if (type === 'bookings') {
+            await Promise.allSettled([
+              supabase.from('parent_shadow_requests').delete().eq('registration_id', linkedId),
+              supabase.from('parent_tutor_requests').delete().eq('registration_id', linkedId),
+              supabase.from('parent_therapy_requests').delete().eq('registration_id', linkedId)
+            ]);
+          } else if (type === 'parent_shadow_requests' || type === 'parent_tutor_requests' || type === 'parent_therapy_requests') {
+            await supabase.from('bookings').delete().eq('booking_id', linkedId);
+          }
+        }
       }
 
       // Also clean up local db file if present
@@ -217,8 +244,8 @@ export async function POST(request: Request) {
         const localDb = readDb();
         if ((localDb as any)[type]) {
           (localDb as any)[type] = (localDb as any)[type].filter((item: any) => item.id !== id);
-          writeDb(localDb);
         }
+        writeDb(localDb);
       } catch (fileErr) {
         console.warn('Local file DB sync on delete skipped:', fileErr);
       }
