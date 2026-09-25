@@ -71,6 +71,27 @@ export async function GET(request: Request) {
       return NextResponse.json({ success: true, role: 'shadow', record: toCamelCase(shadow) });
     }
 
+    // Look up in Parent Therapy Requests
+    try {
+      const { data: parentTherapy } = await supabase
+        .from('parent_therapy_requests')
+        .select('*')
+        .eq('registration_id', regId)
+        .maybeSingle();
+
+      if (parentTherapy) {
+        return NextResponse.json({ 
+          success: true, 
+          role: 'parent', 
+          subType: 'therapy', 
+          feeAmount: 3000,
+          record: toCamelCase({ ...parentTherapy, feeAmount: 3000 })
+        });
+      }
+    } catch (err) {
+      console.warn('Supabase lookup failed for parent_therapy_requests in GET:', err);
+    }
+
     // Look up in Parent Shadow Requests
     const { data: parentShadow } = await supabase
       .from('parent_shadow_requests')
@@ -93,7 +114,8 @@ export async function GET(request: Request) {
         success: true, 
         role: 'parent', 
         subType: 'shadow', 
-        record: toCamelCase(parentShadow),
+        feeAmount: 5000,
+        record: toCamelCase({ ...parentShadow, feeAmount: 5000 }),
         matchedCandidate
       });
     }
@@ -120,7 +142,8 @@ export async function GET(request: Request) {
         success: true, 
         role: 'parent', 
         subType: 'tutor', 
-        record: toCamelCase(parentTutor),
+        feeAmount: 3000,
+        record: toCamelCase({ ...parentTutor, feeAmount: 3000 }),
         matchedCandidate
       });
     }
@@ -334,7 +357,6 @@ export async function POST(request: Request) {
         email: cleanEmail,
         city: resolvedCity,
         child_name: 'Pending Registration Form',
-        child_grade: 'Pending Registration Form',
         status: finalStatus,
         consultation_paid: true,
         registration_id: generatedId,
@@ -346,13 +368,19 @@ export async function POST(request: Request) {
       };
 
       if (isTherapy) {
+        parentRecord.child_age = 'Pending Registration Form';
         parentRecord.therapy_type = therapyTypeSelected;
         parentRecord.challenges = 'Pending Registration Form';
         parentRecord.goals = 'Pending Registration Form';
+        parentRecord.placement_amount = 3000;
       } else if (isShadow) {
+        parentRecord.child_grade = 'Pending Registration Form';
         parentRecord.relationship = 'Mother';
+        parentRecord.placement_amount = 5000;
       } else {
+        parentRecord.child_grade = 'Pending Registration Form';
         parentRecord.tutor_type = 'Academic Tuition/Subjects';
+        parentRecord.placement_amount = 3000;
       }
 
       const { error: pErr } = await supabase.from(parentTable).insert([parentRecord]);
@@ -371,7 +399,7 @@ export async function POST(request: Request) {
           parentName,
           phone,
           email: cleanEmail,
-          city: 'Delhi NCR',
+          city: resolvedCity,
           childName: 'Pending Registration Form',
           therapyType: therapyTypeSelected,
           challenges: 'Pending Registration Form',
@@ -468,7 +496,6 @@ export async function POST(request: Request) {
       const missing: string[] = [];
       if (!regId) missing.push('Registration ID or Booking ID');
       if (!childName || !childName.trim()) missing.push("Child's Name");
-      if (!childGrade || !childGrade.trim()) missing.push("Class / Grade");
 
       if (missing.length > 0) {
         return NextResponse.json({ error: `Please fill in required details: ${missing.join(', ')}.` }, { status: 400 });
@@ -483,6 +510,17 @@ export async function POST(request: Request) {
       let pt: any = null;
       let pth: any = null;
 
+      try {
+        const { data: pthData } = await supabase
+          .from('parent_therapy_requests')
+          .select('*')
+          .or(`registration_id.ilike.%${cleanRegId}%,notes.ilike.%${cleanRegId}%`)
+          .maybeSingle();
+        pth = pthData;
+      } catch (e) {
+        console.warn('Supabase query failed for parent_therapy_requests:', e);
+      }
+
       const { data: psData } = await supabase
         .from('parent_shadow_requests')
         .select('*')
@@ -490,26 +528,13 @@ export async function POST(request: Request) {
         .maybeSingle();
       ps = psData;
 
-      if (!ps) {
+      if (!ps && !pth) {
         const { data: ptData } = await supabase
           .from('parent_tutor_requests')
           .select('*')
           .or(`registration_id.ilike.%${cleanRegId}%,notes.ilike.%${cleanRegId}%`)
           .maybeSingle();
         pt = ptData;
-      }
-
-      if (!ps && !pt) {
-        try {
-          const { data: pthData } = await supabase
-            .from('parent_therapy_requests')
-            .select('*')
-            .or(`registration_id.ilike.%${cleanRegId}%,notes.ilike.%${cleanRegId}%`)
-            .maybeSingle();
-          pth = pthData;
-        } catch (e) {
-          console.warn('Supabase query failed for parent_therapy_requests:', e);
-        }
       }
 
       // Check local db.json fallback for therapy requests
@@ -522,8 +547,15 @@ export async function POST(request: Request) {
         }
       }
 
-      let parentRecord = ps || pt || pth;
-      let targetTable = ps ? 'parent_shadow_requests' : (pt ? 'parent_tutor_requests' : 'parent_therapy_requests');
+      // Detect if ps was actually a therapy booking (e.g. notes contains Therapy, city is Online, or therapy fields submitted)
+      const isActuallyTherapy = Boolean(
+        pth || 
+        (data.therapyType && !pt) || 
+        (ps && ((ps.notes || '').toLowerCase().includes('therapy') || (ps.city || '').toLowerCase().includes('online') || ps.therapy_type))
+      );
+
+      let parentRecord = pth || (isActuallyTherapy ? ps : (ps || pt));
+      let targetTable = isActuallyTherapy ? 'parent_therapy_requests' : (ps ? 'parent_shadow_requests' : (pt ? 'parent_tutor_requests' : 'parent_therapy_requests'));
 
       // If missing, check bookings table and auto-create appropriate request row
       if (!parentRecord) {
@@ -535,7 +567,7 @@ export async function POST(request: Request) {
 
         if (bk) {
           const reqStr = (bk.requirement || '').toLowerCase();
-          const isTherapy = reqStr.includes('therapy');
+          const isTherapy = reqStr.includes('therapy') || reqStr.includes('parent training') || Boolean(data.therapyType);
           const isTutor = !isTherapy && reqStr.includes('tutor');
           targetTable = isTherapy ? 'parent_therapy_requests' : (isTutor ? 'parent_tutor_requests' : 'parent_shadow_requests');
           const generatedRegId = bk.booking_id || cleanRegId || `SB-${year}-${randomNumericId()}`;
@@ -545,12 +577,8 @@ export async function POST(request: Request) {
             parent_name: bk.name || 'Parent',
             phone: bk.phone,
             email: bk.email,
-            city: isTherapy ? 'Delhi NCR' : (bk.city || 'Delhi NCR'),
+            city: isTherapy ? 'Online / PAN India' : (bk.city || 'Delhi NCR'),
             child_name: childName.trim(),
-            child_dob: childAge || '',
-            child_gender: childGender || 'Boy',
-            child_grade: childGrade ? childGrade.trim() : 'Preschool',
-            home_location: homeLocation || bk.city || 'Delhi NCR',
             status: 'Registration Submitted',
             consultation_paid: true,
             registration_id: generatedRegId,
@@ -559,19 +587,31 @@ export async function POST(request: Request) {
           };
 
           if (isTherapy) {
+            newRecord.child_age = childAge || childGrade || 'Pending Consultation';
             newRecord.therapy_type = data.therapyType || 'ABA Therapy';
             newRecord.diagnosis = diagnosis || '';
             newRecord.challenges = difficulties || data.challenges || '';
             newRecord.goals = data.goals || '';
+            newRecord.placement_amount = 3000;
           } else if (isTutor) {
+            newRecord.child_dob = childAge || '';
+            newRecord.child_gender = childGender || 'Boy';
+            newRecord.child_grade = childGrade ? childGrade.trim() : 'Preschool';
+            newRecord.home_location = homeLocation || bk.city || 'Delhi NCR';
             newRecord.tutor_type = tutorType || 'Academic Tuition/Subjects';
             newRecord.subjects = Array.isArray(subjects) ? subjects.join(', ') : (subjects || '');
+            newRecord.placement_amount = 3000;
           } else {
+            newRecord.child_dob = childAge || '';
+            newRecord.child_gender = childGender || 'Boy';
+            newRecord.child_grade = childGrade ? childGrade.trim() : 'Preschool';
+            newRecord.home_location = homeLocation || bk.city || 'Delhi NCR';
             newRecord.relationship = 'Mother';
             newRecord.school_location = schoolLocation || '';
             newRecord.has_diagnosis = hasDiagnosis || 'No';
             newRecord.diagnosis = diagnosis || '';
             newRecord.difficulties = Array.isArray(difficulties) ? difficulties.join(', ') : (difficulties || '');
+            newRecord.placement_amount = 5000;
           }
 
           try {
@@ -590,7 +630,7 @@ export async function POST(request: Request) {
               parentName: newRecord.parent_name,
               phone: newRecord.phone,
               email: newRecord.email,
-              city: 'Delhi NCR',
+              city: 'Online / PAN India',
               childName: newRecord.child_name,
               therapyType: newRecord.therapy_type,
               challenges: newRecord.challenges,
@@ -607,7 +647,7 @@ export async function POST(request: Request) {
             success: true,
             registration_id: generatedRegId,
             status: 'Registration Submitted',
-            nextStep: 'placement_fee',
+            nextStep: isTherapy ? 'therapy_fee' : 'placement_fee',
             record: toCamelCase(newRecord)
           });
         }
@@ -621,6 +661,67 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Please complete your consultation call first before submitting this form.' }, { status: 403 });
       }
 
+      if (isActuallyTherapy) {
+        const therapyRecord: any = {
+          id: pth?.id || ('parent-therapy-' + randomId()),
+          parent_name: parentRecord.parent_name || parentRecord.parentName || 'Parent',
+          phone: parentRecord.phone,
+          email: parentRecord.email,
+          city: parentRecord.city || 'Online / PAN India',
+          child_name: childName,
+          child_age: childAge || childGrade || '',
+          child_gender: childGender || 'Boy',
+          diagnosis: diagnosis || '',
+          challenges: Array.isArray(difficulties) ? difficulties.join(', ') : (difficulties || data.challenges || ''),
+          goals: data.goals || '',
+          therapy_type: data.therapyType || parentRecord.therapy_type || 'ABA Online Therapy (PAN India)',
+          preferred_days: data.preferredDays || 'Mon, Wed, Fri',
+          preferred_time: data.preferredTime || 'Morning (9 AM - 12 PM)',
+          status: 'Registration Submitted',
+          consultation_paid: true,
+          placement_paid: false,
+          placement_amount: 3000,
+          registration_id: cleanRegId,
+          notes: additionalNotes || parentRecord.notes || '',
+          created_at: parentRecord.created_at || createdAt
+        };
+
+        if (pth) {
+          await supabase.from('parent_therapy_requests').update(therapyRecord).eq('id', pth.id);
+        } else {
+          await supabase.from('parent_therapy_requests').insert([therapyRecord]);
+          // Clean up misplaced parent_shadow_requests record
+          if (ps && ps.id) {
+            try {
+              await supabase.from('parent_shadow_requests').delete().eq('id', ps.id);
+            } catch (e) {}
+          }
+        }
+
+        // Update local db.json
+        const localDb = readDb();
+        if (!localDb.parent_therapy_requests) localDb.parent_therapy_requests = [];
+        const idx = localDb.parent_therapy_requests.findIndex((s: any) => s.registration_id === cleanRegId || s.id === therapyRecord.id);
+        if (idx !== -1) {
+          localDb.parent_therapy_requests[idx] = {
+            ...localDb.parent_therapy_requests[idx],
+            ...toCamelCase(therapyRecord)
+          };
+        } else {
+          localDb.parent_therapy_requests.push(toCamelCase(therapyRecord));
+        }
+        writeDb(localDb);
+
+        return NextResponse.json({
+          success: true,
+          registration_id: cleanRegId,
+          status: 'Registration Submitted',
+          nextStep: 'therapy_fee',
+          record: toCamelCase(therapyRecord)
+        });
+      }
+
+      // For Shadow or Tutor
       const updates: any = {
         child_name: childName,
         child_dob: childAge || '',
@@ -630,14 +731,7 @@ export async function POST(request: Request) {
         status: 'Registration Submitted'
       };
 
-      if (pth || targetTable === 'parent_therapy_requests') {
-        updates.diagnosis = diagnosis || '';
-        updates.challenges = Array.isArray(difficulties) ? difficulties.join(', ') : (difficulties || data.challenges || '');
-        updates.goals = data.goals || '';
-        if (data.therapyType) updates.therapy_type = data.therapyType;
-        if (data.preferredDays) updates.preferred_days = data.preferredDays;
-        if (data.preferredTime) updates.preferred_time = data.preferredTime;
-      } else if (ps) {
+      if (ps) {
         updates.school_location = schoolLocation || '';
         updates.has_diagnosis = hasDiagnosis || 'No';
         updates.diagnosis = diagnosis || '';
@@ -658,28 +752,6 @@ export async function POST(request: Request) {
           .eq('id', parentRecord.id);
       } catch (e) {
         console.warn(`Supabase update failed for ${targetTable}:`, e);
-      }
-
-      // Update local db.json
-      if (pth || targetTable === 'parent_therapy_requests') {
-        const localDb = readDb();
-        if (localDb.parent_therapy_requests) {
-          const idx = localDb.parent_therapy_requests.findIndex((s: any) => s.registration_id === cleanRegId || s.id === parentRecord.id);
-          if (idx !== -1) {
-            localDb.parent_therapy_requests[idx] = {
-              ...localDb.parent_therapy_requests[idx],
-              childName,
-              childAge,
-              diagnosis: diagnosis || '',
-              challenges: updates.challenges,
-              goals: updates.goals,
-              preferredDays: data.preferredDays,
-              preferredTime: data.preferredTime,
-              status: 'Registration Form Submitted'
-            };
-            writeDb(localDb);
-          }
-        }
       }
 
       return NextResponse.json({

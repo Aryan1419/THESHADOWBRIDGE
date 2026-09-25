@@ -184,13 +184,15 @@ function GatedRegistrationContent() {
       <div className="text-center max-w-2xl mx-auto mb-10">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-wider mb-4 border border-primary/20">
           <Sparkles size={14} className="text-secondary" />
-          Step 4 of 5 • Parent Registration Form
+          {isTherapy ? 'Step 4 of 5 • Therapy Registration Form' : 'Step 4 of 5 • Parent Registration Form'}
         </div>
         <h1 className="font-serif text-3xl sm:text-4xl font-bold text-primary mb-3">
-          Detailed Child Registration Form
+          {isTherapy ? 'Therapy Registration & Child Details' : 'Detailed Child Registration Form'}
         </h1>
         <p className="text-brand-muted text-sm sm:text-base leading-relaxed">
-          Provide your child's specific developmental, academic, and support requirements.
+          {isTherapy 
+            ? "Provide your child's specific developmental details, therapy goals, and session preferences."
+            : "Provide your child's specific developmental, academic, and support requirements."}
         </p>
       </div>
 
@@ -540,7 +542,7 @@ function GatedRegistrationContent() {
                 <span>Submitting Registration Form...</span>
               ) : (
                 <>
-                  <span>{isTherapy ? 'Save & Proceed to Therapy Booking Payment' : 'Save & Proceed to Placement Fee Payment'}</span>
+                  <span>{isTherapy ? 'Save & Proceed to Therapy Booking Payment (₹3,000)' : 'Save & Proceed to Placement Fee Payment'}</span>
                   <ArrowRight size={18} />
                 </>
               )}

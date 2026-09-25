@@ -36,17 +36,21 @@ export async function GET(request: Request) {
     let serviceType = 'Shadow Teacher';
     let subType = 'shadow';
 
-    // 1. Search in parent_shadow_requests
+    // 1. Search in parent_therapy_requests
     if (cleanRegId) {
-      const { data: ps } = await supabase
-        .from('parent_shadow_requests')
-        .select('*')
-        .ilike('registration_id', `%${cleanRegId}%`)
-        .maybeSingle();
-      if (ps) {
-        record = ps;
-        serviceType = 'Shadow Teacher';
-        subType = 'shadow';
+      try {
+        const { data: pth } = await supabase
+          .from('parent_therapy_requests')
+          .select('*')
+          .ilike('registration_id', `%${cleanRegId}%`)
+          .maybeSingle();
+        if (pth) {
+          record = pth;
+          serviceType = 'Home & Online Therapy Sessions';
+          subType = 'therapy';
+        }
+      } catch (e) {
+        console.warn('Supabase query failed for parent_therapy_requests in gated-check:', e);
       }
     }
 
@@ -64,21 +68,26 @@ export async function GET(request: Request) {
       }
     }
 
-    // 3. Search in parent_therapy_requests if not found
+    // 3. Search in parent_shadow_requests if not found
     if (!record && cleanRegId) {
-      try {
-        const { data: pth } = await supabase
-          .from('parent_therapy_requests')
-          .select('*')
-          .ilike('registration_id', `%${cleanRegId}%`)
-          .maybeSingle();
-        if (pth) {
-          record = pth;
-          serviceType = 'Home Therapy Sessions';
+      const { data: ps } = await supabase
+        .from('parent_shadow_requests')
+        .select('*')
+        .ilike('registration_id', `%${cleanRegId}%`)
+        .maybeSingle();
+      if (ps) {
+        record = ps;
+        const notesLower = (ps.notes || '').toLowerCase();
+        const cityLower = (ps.city || '').toLowerCase();
+        const isTherapyInShadow = notesLower.includes('therapy') || notesLower.includes('parent training') || cityLower.includes('online') || Boolean(ps.therapy_type);
+        
+        if (isTherapyInShadow) {
+          serviceType = 'Home & Online Therapy Sessions';
           subType = 'therapy';
+        } else {
+          serviceType = 'Shadow Teacher';
+          subType = 'shadow';
         }
-      } catch (e) {
-        console.warn('Supabase query failed for parent_therapy_requests in gated-check:', e);
       }
     }
 
@@ -92,7 +101,7 @@ export async function GET(request: Request) {
         );
         if (pth) {
           record = pth;
-          serviceType = 'Home Therapy Sessions';
+          serviceType = 'Home & Online Therapy Sessions';
           subType = 'therapy';
         }
       }
@@ -108,53 +117,77 @@ export async function GET(request: Request) {
       if (bk) {
         record = bk;
         const reqStr = (bk.requirement || '').toLowerCase();
-        const isTherapy = reqStr.includes('therapy');
+        const isTherapy = reqStr.includes('therapy') || reqStr.includes('parent training');
         const isTutor = !isTherapy && reqStr.includes('tutor');
-        serviceType = isTherapy ? 'Home Therapy Sessions' : (isTutor ? 'Home Tutor' : 'Shadow Teacher');
+        serviceType = isTherapy ? 'Home & Online Therapy Sessions' : (isTutor ? 'Home Tutor' : 'Shadow Teacher');
         subType = isTherapy ? 'therapy' : (isTutor ? 'tutor' : 'shadow');
       }
     }
 
-    // 4. Contact lookup if regId was not provided or not matched
+    // 6. Contact lookup if regId was not provided or not matched
     if (!record && cleanContact) {
-      const { data: ps } = await supabase
-        .from('parent_shadow_requests')
-        .select('*')
-        .or(`email.ilike.${cleanContact},phone.ilike.%${cleanPhoneDigits}%`)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
+      // Check therapy first
+      try {
+        const { data: pth } = await supabase
+          .from('parent_therapy_requests')
+          .select('*')
+          .or(`email.ilike.${cleanContact},phone.ilike.%${cleanPhoneDigits}%`)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+        if (pth) {
+          record = pth;
+          serviceType = 'Home & Online Therapy Sessions';
+          subType = 'therapy';
+        }
+      } catch (e) {}
 
-      if (ps) {
-        record = ps;
-        serviceType = 'Shadow Teacher';
-        subType = 'shadow';
-      } else {
-        const { data: pt } = await supabase
-          .from('parent_tutor_requests')
+      if (!record) {
+        const { data: ps } = await supabase
+          .from('parent_shadow_requests')
           .select('*')
           .or(`email.ilike.${cleanContact},phone.ilike.%${cleanPhoneDigits}%`)
           .order('created_at', { ascending: false })
           .limit(1)
           .maybeSingle();
 
-        if (pt) {
-          record = pt;
-          serviceType = 'Home Tutor';
-          subType = 'tutor';
+        if (ps) {
+          record = ps;
+          const notesLower = (ps.notes || '').toLowerCase();
+          const cityLower = (ps.city || '').toLowerCase();
+          const isTherapyInShadow = notesLower.includes('therapy') || notesLower.includes('parent training') || cityLower.includes('online') || Boolean(ps.therapy_type);
+          serviceType = isTherapyInShadow ? 'Home & Online Therapy Sessions' : 'Shadow Teacher';
+          subType = isTherapyInShadow ? 'therapy' : 'shadow';
         } else {
-          const { data: bk } = await supabase
-            .from('bookings')
+          const { data: pt } = await supabase
+            .from('parent_tutor_requests')
             .select('*')
             .or(`email.ilike.${cleanContact},phone.ilike.%${cleanPhoneDigits}%`)
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
 
-          if (bk) {
-            record = bk;
-            serviceType = bk.requirement?.toLowerCase().includes('tutor') ? 'Home Tutor' : 'Shadow Teacher';
-            subType = bk.requirement?.toLowerCase().includes('tutor') ? 'tutor' : 'shadow';
+          if (pt) {
+            record = pt;
+            serviceType = 'Home Tutor';
+            subType = 'tutor';
+          } else {
+            const { data: bk } = await supabase
+              .from('bookings')
+              .select('*')
+              .or(`email.ilike.${cleanContact},phone.ilike.%${cleanPhoneDigits}%`)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (bk) {
+              record = bk;
+              const reqStr = (bk.requirement || '').toLowerCase();
+              const isTherapy = reqStr.includes('therapy') || reqStr.includes('parent training');
+              const isTutor = !isTherapy && reqStr.includes('tutor');
+              serviceType = isTherapy ? 'Home & Online Therapy Sessions' : (isTutor ? 'Home Tutor' : 'Shadow Teacher');
+              subType = isTherapy ? 'therapy' : (isTutor ? 'tutor' : 'shadow');
+            }
           }
         }
       }

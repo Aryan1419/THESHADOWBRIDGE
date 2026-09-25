@@ -355,7 +355,10 @@ function PlacementFeeContent() {
                       : (isShadow ? 'Shadow Teacher Placement' : 'Home Tutor Placement')}
                   </span>
                   <h2 className="font-serif text-xl font-bold text-primary">{record?.parentName || 'Parent'}</h2>
-                  <p className="text-xs text-brand-muted">Child: <strong>{record?.childName || 'Child'}</strong> ({record?.childGrade || 'Grade'})</p>
+                  <p className="text-xs text-brand-muted">
+                    Child: <strong>{record?.childName || 'Child'}</strong>
+                    {(record?.childGrade || record?.childAge || record?.child_age) ? ` (${record?.childGrade || record?.childAge || record?.child_age})` : ''}
+                  </p>
                 </div>
 
                 <div className="text-right">

@@ -323,19 +323,19 @@ export async function POST(request: Request) {
     if (action === 'mark_consultation_completed') {
       const { bookingId, regId, email, phone } = body;
 
-      // Find in parent_shadow_requests, parent_tutor_requests, and bookings
+      // Find in parent_therapy_requests, parent_shadow_requests, parent_tutor_requests, and bookings
       let targetRecord: any = null;
       let targetTable = '';
 
       if (regId) {
-        const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('registration_id', regId).maybeSingle();
-        if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+        const { data: pth } = await supabase.from('parent_therapy_requests').select('*').eq('registration_id', regId).maybeSingle();
+        if (pth) { targetRecord = pth; targetTable = 'parent_therapy_requests'; }
         else {
-          const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('registration_id', regId).maybeSingle();
-          if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+          const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('registration_id', regId).maybeSingle();
+          if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
           else {
-            const { data: pth } = await supabase.from('parent_therapy_requests').select('*').eq('registration_id', regId).maybeSingle();
-            if (pth) { targetRecord = pth; targetTable = 'parent_therapy_requests'; }
+            const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('registration_id', regId).maybeSingle();
+            if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
           }
         }
       }
@@ -343,16 +343,33 @@ export async function POST(request: Request) {
       if (!targetRecord && bookingId) {
         const { data: bk } = await supabase.from('bookings').select('*').eq('booking_id', bookingId).maybeSingle();
         if (bk) {
-          // find linked parent record by email or phone
+          const reqStr = (bk.requirement || '').toLowerCase();
+          const isTherapy = reqStr.includes('therapy') || reqStr.includes('parent training');
+          const isTutor = !isTherapy && reqStr.includes('tutor');
           const cleanEmail = bk.email ? bk.email.trim().toLowerCase() : '';
-          const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('email', cleanEmail).maybeSingle();
-          if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
-          else {
+
+          if (isTherapy) {
+            const { data: pth } = await supabase.from('parent_therapy_requests').select('*').eq('email', cleanEmail).maybeSingle();
+            if (pth) { targetRecord = pth; targetTable = 'parent_therapy_requests'; }
+          } else if (isTutor) {
             const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('email', cleanEmail).maybeSingle();
             if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+          } else {
+            const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('email', cleanEmail).maybeSingle();
+            if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+          }
+
+          // Fallback search across all tables if still not found
+          if (!targetRecord) {
+            const { data: pth } = await supabase.from('parent_therapy_requests').select('*').eq('email', cleanEmail).maybeSingle();
+            if (pth) { targetRecord = pth; targetTable = 'parent_therapy_requests'; }
             else {
-              const { data: pth } = await supabase.from('parent_therapy_requests').select('*').eq('email', cleanEmail).maybeSingle();
-              if (pth) { targetRecord = pth; targetTable = 'parent_therapy_requests'; }
+              const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('email', cleanEmail).maybeSingle();
+              if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+              else {
+                const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('email', cleanEmail).maybeSingle();
+                if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+              }
             }
           }
         }
@@ -367,30 +384,48 @@ export async function POST(request: Request) {
         await supabase.from('bookings').update({ message: 'Consultation Completed' }).eq('booking_id', bookingId);
       }
 
-      // If targetRecord is still missing, create a linked parent_shadow_requests record for legacy bookings
+      // If targetRecord is still missing, create a linked parent record for legacy bookings
       if (!targetRecord && bookingId) {
         const { data: bk } = await supabase.from('bookings').select('*').eq('booking_id', bookingId).maybeSingle();
         if (bk) {
           const genRegId = `SB-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-          const isTutor = bk.requirement?.toLowerCase().includes('tutor');
-          const targetTab = isTutor ? 'parent_tutor_requests' : 'parent_shadow_requests';
+          const reqStr = (bk.requirement || '').toLowerCase();
+          const isTherapy = reqStr.includes('therapy') || reqStr.includes('parent training');
+          const isTutor = !isTherapy && reqStr.includes('tutor');
+          const targetTab = isTherapy ? 'parent_therapy_requests' : (isTutor ? 'parent_tutor_requests' : 'parent_shadow_requests');
           
           const newParent: any = {
-            id: (isTutor ? 'parent-tutor-' : 'parent-shadow-') + Math.random().toString(36).substring(2, 9),
+            id: (isTherapy ? 'parent-therapy-' : (isTutor ? 'parent-tutor-' : 'parent-shadow-')) + Math.random().toString(36).substring(2, 9),
             parent_name: bk.name || 'Parent',
             phone: bk.phone,
             email: bk.email,
-            city: bk.city || 'Delhi NCR',
+            city: isTherapy ? 'Online / PAN India' : (bk.city || 'Delhi NCR'),
             child_name: 'Pending Consultation',
-            child_grade: 'Pending Consultation',
             status: 'Consultation Completed',
             consultation_paid: true,
             registration_id: genRegId,
             notes: `Linked Booking ID: ${bookingId}`
           };
 
+          if (isTherapy) {
+            newParent.child_age = 'Pending Consultation';
+            newParent.therapy_type = bk.requirement?.includes(':') ? bk.requirement.split(':')[1].trim() : 'ABA Online Therapy (PAN India)';
+            newParent.challenges = 'Pending Consultation';
+            newParent.goals = 'Pending Consultation';
+            newParent.placement_amount = 3000;
+          } else if (isTutor) {
+            newParent.child_grade = 'Pending Consultation';
+            newParent.tutor_type = 'Academic Tuition/Subjects';
+            newParent.placement_amount = 3000;
+          } else {
+            newParent.child_grade = 'Pending Consultation';
+            newParent.relationship = 'Mother';
+            newParent.placement_amount = 5000;
+          }
+
           const { data: createdP } = await supabase.from(targetTab).insert([newParent]).select().single();
           if (createdP) targetRecord = createdP;
+          targetTable = targetTab;
         }
       }
 
@@ -398,6 +433,7 @@ export async function POST(request: Request) {
       const recipientEmail = email || targetRecord?.email;
       const parentName = targetRecord?.parent_name || targetRecord?.parentName || 'Parent';
       const actualRegId = regId || targetRecord?.registration_id || '';
+      const isTherapyRecord = targetTable === 'parent_therapy_requests';
 
       if (recipientEmail) {
         const host = request.headers.get('host') || 'localhost:3000';
@@ -406,18 +442,20 @@ export async function POST(request: Request) {
 
         sendEmail({
           to: recipientEmail,
-          subject: `Consultation Completed - Registration Form Unlocked [${actualRegId}]`,
+          subject: isTherapyRecord 
+            ? `Therapy Consultation Completed - Registration Form Unlocked [${actualRegId}]` 
+            : `Consultation Completed - Registration Form Unlocked [${actualRegId}]`,
           type: 'status_change',
           bodyHtml: `
             <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
             <p style="margin: 0 0 16px 0;">Thank you for taking the time to complete your 1-on-1 assessment consultation call with Founder Pratibha Mishra!</p>
-            <p style="margin: 0 0 16px 0;">We have marked your consultation as <strong>Completed</strong>. Your detailed Child Registration Form is now fully unlocked.</p>
+            <p style="margin: 0 0 16px 0;">We have marked your consultation as <strong>Completed</strong>. Your detailed ${isTherapyRecord ? 'Therapy' : 'Child'} Registration Form is now fully unlocked.</p>
             
             <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 20px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
-              <h3 style="margin: 0 0 8px 0; color: #3B2A6B; font-size: 16px; font-family: Georgia, serif;">Next Step: Fill Child Registration Form</h3>
+              <h3 style="margin: 0 0 8px 0; color: #3B2A6B; font-size: 16px; font-family: Georgia, serif;">Next Step: Fill ${isTherapyRecord ? 'Therapy' : 'Child'} Registration Form</h3>
               <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: bold; color: #3B2A6B;">Your Unique ID: <span style="font-family: monospace; color: #B0206B; font-size: 16px;">${actualRegId}</span></p>
-              <p style="margin: 0 0 16px 0; font-size: 13px; color: #6A5B7C;">Please provide your child's specific developmental and school details to proceed with educator matching.</p>
-              <a href="${formLink}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Open Child Registration Form →</a>
+              <p style="margin: 0 0 16px 0; font-size: 13px; color: #6A5B7C;">Please provide your child's specific developmental details, therapy goals, and schedule preferences to finalize therapist allocation.</p>
+              <a href="${formLink}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Open Registration Form →</a>
             </div>
 
             <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 16px 20px; border-radius: 4px; font-size: 13px; color: #5C4300; line-height: 1.6;">
@@ -441,11 +479,15 @@ export async function POST(request: Request) {
       let targetTable = '';
 
       if (regId) {
-        const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('registration_id', regId).maybeSingle();
-        if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+        const { data: pth } = await supabase.from('parent_therapy_requests').select('*').eq('registration_id', regId).maybeSingle();
+        if (pth) { targetRecord = pth; targetTable = 'parent_therapy_requests'; }
         else {
-          const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('registration_id', regId).maybeSingle();
-          if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+          const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('registration_id', regId).maybeSingle();
+          if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+          else {
+            const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('registration_id', regId).maybeSingle();
+            if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+          }
         }
       }
 
@@ -453,11 +495,15 @@ export async function POST(request: Request) {
         const { data: bk } = await supabase.from('bookings').select('*').eq('booking_id', bookingId).maybeSingle();
         if (bk) {
           const cleanEmail = bk.email ? bk.email.trim().toLowerCase() : '';
-          const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('email', cleanEmail).maybeSingle();
-          if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+          const { data: pth } = await supabase.from('parent_therapy_requests').select('*').eq('email', cleanEmail).maybeSingle();
+          if (pth) { targetRecord = pth; targetTable = 'parent_therapy_requests'; }
           else {
-            const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('email', cleanEmail).maybeSingle();
-            if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+            const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('email', cleanEmail).maybeSingle();
+            if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+            else {
+              const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('email', cleanEmail).maybeSingle();
+              if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+            }
           }
         }
       }
