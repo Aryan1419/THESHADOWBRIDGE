@@ -104,7 +104,7 @@ function PlacementFeeContent() {
 
   const isShadow = gatedStatus?.subType === 'shadow';
   const isTherapy = gatedStatus?.subType === 'therapy' || gatedStatus?.serviceType?.toLowerCase().includes('therapy');
-  const feeAmount = (isShadow || isTherapy) ? 5000 : 3000;
+  const feeAmount = isShadow ? 5000 : 3000;
   const isRegistrationSubmitted = gatedStatus?.isRegistrationSubmitted;
   const record = gatedStatus?.record;
 
@@ -114,24 +114,26 @@ function PlacementFeeContent() {
     setPaymentError(null);
 
     try {
-      // 1. Create Razorpay order for placement fee
+      // 1. Create Razorpay order for fee
       const orderRes = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           amount: feeAmount,
-          regId: record.registration_id,
+          regId: record.registration_id || record.registrationId,
           parentName: record.parent_name || record.parentName || '',
           phone: record.phone || '',
           email: record.email || '',
-          serviceNeeded: gatedStatus?.subType === 'tutor' ? 'Special Needs Tutor' : 'Shadow Teacher',
-          type: 'placement'
+          serviceNeeded: isTherapy 
+            ? (record.therapy_type || record.therapyType || 'Pediatric Therapy') 
+            : (gatedStatus?.subType === 'tutor' ? 'Special Needs Tutor' : 'Shadow Teacher'),
+          type: isTherapy ? 'therapy_booking' : 'placement'
         })
       });
 
       const orderData = await orderRes.json();
       if (!orderRes.ok || !orderData.success) {
-        throw new Error(orderData.error || 'Failed to initialize placement payment order.');
+        throw new Error(orderData.error || 'Failed to initialize payment order.');
       }
 
       // 2. Load Razorpay script
@@ -155,7 +157,9 @@ function PlacementFeeContent() {
         amount: orderAmount,
         currency: 'INR',
         name: 'The Shadow Bridge',
-        description: `Placement Fee (₹${feeAmount.toLocaleString('en-IN')}) - ${cleanRegId(regId)}`,
+        description: isTherapy
+          ? `Therapy Booking Fee (₹${feeAmount.toLocaleString('en-IN')}) - ${cleanRegId(regId)}`
+          : `Placement Fee (₹${feeAmount.toLocaleString('en-IN')}) - ${cleanRegId(regId)}`,
         image: '/favicon-192.png',
         order_id: orderId,
         handler: async function (response: any) {
@@ -174,7 +178,7 @@ function PlacementFeeContent() {
 
             const vData = await verifyRes.json();
             if (!verifyRes.ok || !vData.success) {
-              throw new Error(vData.error || 'Failed to confirm placement payment.');
+              throw new Error(vData.error || 'Failed to confirm payment.');
             }
 
             confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
@@ -189,7 +193,7 @@ function PlacementFeeContent() {
         modal: {
           ondismiss: function () {
             setLoadingPayment(false);
-            setPaymentError('⚠️ Payment Cancelled: The placement fee payment window was closed before completion. No money was deducted. You can retry when ready.');
+            setPaymentError('⚠️ Payment Cancelled: The payment window was closed before completion. No money was deducted. You can retry when ready.');
           }
         },
         prefill: {
@@ -212,7 +216,7 @@ function PlacementFeeContent() {
 
     } catch (err: any) {
       console.error(err);
-      setPaymentError(err.message || 'An error occurred during placement fee payment.');
+      setPaymentError(err.message || 'An error occurred during payment processing.');
       setLoadingPayment(false);
     }
   };
@@ -222,7 +226,7 @@ function PlacementFeeContent() {
   if (loadingCheck) {
     return (
       <section className="pt-32 pb-16 text-center text-sm font-bold text-primary flex-grow">
-        Verifying Placement Fee Access...
+        Verifying Fee Access...
       </section>
     );
   }
@@ -233,17 +237,19 @@ function PlacementFeeContent() {
       <div className="text-center max-w-2xl mx-auto mb-10">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-wider mb-4 border border-primary/20">
           <Sparkles size={14} className="text-secondary" />
-          Step 5 of 5 • Onboarding Placement Fee
+          {isTherapy ? 'Step 5 of 5 • Therapy Booking & Onboarding Fee' : 'Step 5 of 5 • Onboarding Placement Fee'}
         </div>
         <h1 className="font-serif text-3xl sm:text-4xl font-bold text-primary mb-3">
-          Lock In Your Educator Placement
+          {isTherapy ? 'Confirm Your Therapy Booking' : 'Lock In Your Educator Placement'}
         </h1>
         <p className="text-brand-muted text-sm sm:text-base leading-relaxed">
-          Complete the placement onboarding fee to initiate background-verified candidate matchmaking for your child.
+          {isTherapy
+            ? 'Complete the therapy booking fee to confirm your session slots and assign certified pediatric therapists.'
+            : 'Complete the placement onboarding fee to initiate background-verified candidate matchmaking for your child.'}
         </p>
       </div>
 
-      {/* PLACEMENT PAYMENT SUCCESS SCREEN */}
+      {/* PAYMENT SUCCESS SCREEN */}
       {placementSuccess ? (
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}
@@ -255,9 +261,11 @@ function PlacementFeeContent() {
           </div>
 
           <div>
-            <h2 className="font-serif text-2xl font-bold text-primary">Placement Onboarding Confirmed!</h2>
+            <h2 className="font-serif text-2xl font-bold text-primary">
+              {isTherapy ? 'Therapy Booking Confirmed!' : 'Placement Onboarding Confirmed!'}
+            </h2>
             <p className="text-sm text-brand-muted mt-2">
-              Thank you, {record?.parentName || 'Parent'}. Your placement fee payment has been received successfully.
+              Thank you, {record?.parentName || 'Parent'}. Your {isTherapy ? 'therapy booking fee' : 'placement fee'} payment has been received successfully.
             </p>
           </div>
 
@@ -268,10 +276,10 @@ function PlacementFeeContent() {
             </div>
             <div className="flex justify-between border-b border-brand-border pb-2">
               <span className="text-brand-muted font-bold">Updated Status:</span>
-              <span className="font-bold text-emerald-600">{placementSuccess.status}</span>
+              <span className="font-bold text-emerald-600">{placementSuccess.status || (isTherapy ? 'Therapy Matching in Progress' : 'Matching in Progress')}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-brand-muted font-bold">Placement Fee Paid:</span>
+              <span className="text-brand-muted font-bold">{isTherapy ? 'Therapy Booking Fee Paid:' : 'Placement Fee Paid:'}</span>
               <span className="font-bold text-brand-dark">₹{feeAmount.toLocaleString('en-IN')}</span>
             </div>
           </div>
@@ -279,9 +287,13 @@ function PlacementFeeContent() {
           <div className="bg-primary/5 border border-primary/20 rounded-2xl p-5 text-left text-xs sm:text-sm leading-relaxed space-y-2">
             <p className="font-bold text-primary flex items-center gap-1.5">
               <Info size={16} />
-              Matchmaking Active:
+              {isTherapy ? 'Therapy Scheduling Active:' : 'Matchmaking Active:'}
             </p>
-            <p>Our clinical mentors are now pairing background-verified candidate profiles for <strong>{record?.childName || 'your child'}</strong>. Candidate profiles will be posted directly to your dashboard.</p>
+            <p>
+              {isTherapy
+                ? `Our clinical team is assigning certified pediatric therapists for ${record?.childName || 'your child'}. We will reach out to coordinate session dates and timings.`
+                : `Our clinical mentors are now pairing background-verified candidate profiles for ${record?.childName || 'your child'}. Candidate profiles will be posted directly to your dashboard.`}
+            </p>
           </div>
 
           <div className="flex justify-center pt-2">
@@ -295,7 +307,7 @@ function PlacementFeeContent() {
           </div>
         </motion.div>
       ) : (
-        /* GATED LOCK CHECK OR PLACEMENT FEE CHECKOUT CARD */
+        /* GATED LOCK CHECK OR FEE CHECKOUT CARD */
         <>
           {!isRegistrationSubmitted ? (
             <motion.div
@@ -311,9 +323,11 @@ function PlacementFeeContent() {
                 <span className="px-3 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-full text-xs font-bold uppercase tracking-wider inline-block mb-3">
                   Registration Form Required First
                 </span>
-                <h2 className="font-serif text-2xl font-bold text-primary">Placement Fee Locked</h2>
+                <h2 className="font-serif text-2xl font-bold text-primary">
+                  {isTherapy ? 'Therapy Booking Locked' : 'Placement Fee Locked'}
+                </h2>
                 <p className="text-sm text-brand-muted mt-3 leading-relaxed">
-                  Please submit Step 4 (Child Registration Form) after your consultation before accessing the placement fee payment.
+                  Please submit Step 4 (Child Registration Form) after your consultation before accessing the {isTherapy ? 'therapy booking payment' : 'placement fee payment'}.
                 </p>
               </div>
 
@@ -336,7 +350,9 @@ function PlacementFeeContent() {
               <div className="flex justify-between items-center border-b border-brand-border pb-4">
                 <div>
                   <span className="px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full text-xs font-bold uppercase tracking-wider inline-block mb-2">
-                    {isShadow ? 'Shadow Teacher Placement' : 'Home Tutor Placement'}
+                    {isTherapy 
+                      ? 'Pediatric Therapy Booking' 
+                      : (isShadow ? 'Shadow Teacher Placement' : 'Home Tutor Placement')}
                   </span>
                   <h2 className="font-serif text-xl font-bold text-primary">{record?.parentName || 'Parent'}</h2>
                   <p className="text-xs text-brand-muted">Child: <strong>{record?.childName || 'Child'}</strong> ({record?.childGrade || 'Grade'})</p>
@@ -350,11 +366,15 @@ function PlacementFeeContent() {
 
               <div className="bg-brand-light p-6 rounded-2xl border border-brand-border space-y-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-bold text-brand-dark">Placement Onboarding Fee</span>
+                  <span className="text-sm font-bold text-brand-dark">
+                    {isTherapy ? 'Therapy Booking & Onboarding Fee' : 'Placement Onboarding Fee'}
+                  </span>
                   <span className="font-serif font-extrabold text-2xl text-primary">₹{feeAmount.toLocaleString('en-IN')}</span>
                 </div>
                 <p className="text-xs text-brand-muted leading-relaxed">
-                  Separate from initial ₹99 consultation fee. Payable after consultation & registration form submission before candidate trial matching begins.
+                  {isTherapy 
+                    ? 'Separate from initial ₹99 consultation fee. Payable after consultation & registration form submission to confirm therapist allocation and session schedules.'
+                    : 'Separate from initial ₹99 consultation fee. Payable after consultation & registration form submission before candidate trial matching begins.'}
                 </p>
               </div>
 
@@ -362,7 +382,7 @@ function PlacementFeeContent() {
               <div className="p-4 bg-purple-50/60 border border-purple-200/80 rounded-2xl space-y-2 text-left">
                 <label className="block text-xs font-bold text-purple-950 flex items-center gap-1.5">
                   <Sparkles size={14} className="text-secondary" />
-                  <span>Have a Placement Promo / VIP Code?</span>
+                  <span>{isTherapy ? 'Have a Therapy Promo / Discount Code?' : 'Have a Placement Promo / VIP Code?'}</span>
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -381,7 +401,11 @@ function PlacementFeeContent() {
                     {applyingPromo ? 'Applying...' : 'Apply Code'}
                   </button>
                 </div>
-                <p className="text-[11px] text-purple-800">Enter your authorized promo code to waive or discount the placement onboarding fee.</p>
+                <p className="text-[11px] text-purple-800">
+                  {isTherapy
+                    ? 'Enter your promo code if provided by our advisory team.'
+                    : 'Enter your authorized promo code to waive or discount the placement onboarding fee.'}
+                </p>
               </div>
 
               {paymentError && (
@@ -401,7 +425,11 @@ function PlacementFeeContent() {
                 ) : (
                   <>
                     <CreditCard size={18} />
-                    <span>Pay ₹{feeAmount.toLocaleString('en-IN')} & Lock Placement Match</span>
+                    <span>
+                      {isTherapy 
+                        ? `Pay ₹${feeAmount.toLocaleString('en-IN')} & Confirm Therapy Booking`
+                        : `Pay ₹${feeAmount.toLocaleString('en-IN')} & Lock Placement Match`}
+                    </span>
                   </>
                 )}
               </button>

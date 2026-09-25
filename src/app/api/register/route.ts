@@ -286,14 +286,15 @@ export async function POST(request: Request) {
       const generatedId = `SB-${year}-${randomNumericId()}`;
       const bookingId = generatedId; // Single unified ID across all tables
       const isShadow = !isTherapy && serviceNeeded.toLowerCase().includes('shadow');
-      const finalStatus = isVipCode ? 'Consultation Completed' : 'Consultation Booked';
+      // Status is ALWAYS 'Consultation Booked' on initial booking (even with promo code, consultation call must be conducted)
+      const finalStatus = 'Consultation Booked';
       const therapyTypeSelected = data.therapyType || (serviceNeeded.includes(':') ? serviceNeeded.split(':')[1].trim() : 'ABA Therapy');
 
       const paymentStatus = isTherapyCoupon ? 'waived_therapy99' : (isShadowVip ? 'waived_shadow100' : 'paid');
       const promoPaymentId = isTherapyCoupon ? 'COUPON-THERAPY99' : (isShadowVip ? 'VIP-SHADOW100' : razorpayPaymentId);
       const promoOrderId = isTherapyCoupon ? 'COUPON-THERAPY99' : (isShadowVip ? 'VIP-SHADOW100' : razorpayOrderId);
       const promoSignature = isTherapyCoupon ? 'COUPON-THERAPY99' : (isShadowVip ? 'VIP-SHADOW100' : razorpaySignature);
-      const bookingMessage = isTherapyCoupon ? 'Step 1 Therapy Fee Waived via THERAPY99' : (isShadowVip ? 'Step 1 VIP Access Unlocked via SHADOW100' : 'Step 1 Consultation Booked');
+      const bookingMessage = isTherapyCoupon ? 'Step 1 Therapy Booking (Fee Waived via THERAPY99)' : (isShadowVip ? 'Step 1 Consultation Booked (Fee Waived via SHADOW100)' : 'Step 1 Consultation Booked');
       const recordNotes = isTherapyCoupon
         ? `Therapy Fee Waived via Code THERAPY99 | Unified ID: ${generatedId}`
         : (isShadowVip ? `VIP Access via Code SHADOW100 | Unified ID: ${generatedId}` : `Unified ID: ${generatedId}`);
@@ -453,7 +454,7 @@ export async function POST(request: Request) {
         isVip: isVipCode,
         registration_id: generatedId, 
         booking_id: bookingId, 
-        redirectUrl: `/register/parent/form?regId=${encodeURIComponent(generatedId)}`,
+        redirectUrl: `/check-status?regId=${encodeURIComponent(generatedId)}`,
         record: toCamelCase(parentRecord) 
       });
     }

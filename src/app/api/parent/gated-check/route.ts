@@ -183,16 +183,16 @@ export async function GET(request: Request) {
 
     const getStatusIndex = (st: string) => {
       const sLower = (st || '').toLowerCase();
-      if (sLower.includes('matching') || sLower.includes('proposed') || sLower.includes('shortlisted') || sLower.includes('onboarding') || sLower.includes('active') || sLower.includes('support started')) return 4;
-      if (sLower.includes('placement fee paid') || sLower.includes('placement paid')) return 3;
-      if (sLower.includes('submitted') || sLower.includes('details saved')) return 2;
-      if (sLower.includes('completed') || sLower.includes('introduction') || sLower.includes('analysis') || sLower.includes('unlocked') || sLower.includes('vip')) return 1;
+      if (sLower.includes('matching') || sLower.includes('proposed') || sLower.includes('shortlisted') || sLower.includes('onboarding') || sLower.includes('active') || sLower.includes('support started') || sLower.includes('allocation')) return 4;
+      if (sLower.includes('fee paid') || sLower.includes('placement paid')) return 3;
+      if (sLower.includes('submitted') || sLower.includes('details saved') || sLower.includes('form submitted')) return 2;
+      if (sLower.includes('completed') || sLower.includes('introduction') || sLower.includes('analysis') || sLower.includes('unlocked')) return 1;
       if (sLower.includes('booked')) return 0;
       return 0;
     };
 
     const statusIdx = getStatusIndex(currentStatus);
-    const isConsultationCompleted = statusIdx >= 1 || isVipRecord || isConsultationPaid || currentStatus.toLowerCase().includes('completed');
+    const isConsultationCompleted = statusIdx >= 1;
 
     // Explicit payment boolean check (DECOUPLED FROM STATUS LABEL TEXT)
     const isPlacementPaid = Boolean(
@@ -201,34 +201,39 @@ export async function GET(request: Request) {
       Boolean(record.placement_payment_id) ||
       Boolean(record.placementPaymentId) ||
       (record.notes || '').includes('Placement Fee Paid') ||
-      (record.message || '').includes('Placement Fee Paid')
+      (record.notes || '').includes('Therapy Fee Paid') ||
+      (record.message || '').includes('Placement Fee Paid') ||
+      (record.message || '').includes('Therapy Fee Paid')
     );
 
     // Registration submitted check (has child details OR beyond consultation booked)
     const hasChildDetails = Boolean(
-      (record.child_name && record.child_name !== 'Pending Registration Form') ||
-      (record.child_grade && record.child_grade !== 'Pending Registration Form') ||
-      (record.childName && record.childName !== 'Pending Registration Form') ||
+      (record.child_name && record.child_name !== 'Pending Registration Form' && record.child_name !== 'Pending Consultation') ||
+      (record.child_grade && record.child_grade !== 'Pending Registration Form' && record.child_grade !== 'Pending Consultation') ||
+      (record.childName && record.childName !== 'Pending Registration Form' && record.childName !== 'Pending Consultation') ||
       (record.notes || '').includes('Registration Form')
     );
-    const isRegistrationSubmitted = hasChildDetails || statusIdx >= 2 || isPlacementPaid;
+    const isRegistrationSubmitted = (hasChildDetails && statusIdx >= 1) || statusIdx >= 2 || isPlacementPaid;
+    const feeAmount = subType === 'shadow' ? 5000 : 3000;
 
     return NextResponse.json({
       success: true,
       role: 'parent',
       subType,
       serviceType,
-      currentStatus: isVipRecord && currentStatus === 'Consultation Booked' ? 'Consultation Completed' : currentStatus,
-      statusIdx: isConsultationCompleted ? Math.max(statusIdx, 1) : statusIdx,
-      isConsultationPaid: true,
+      currentStatus,
+      statusIdx,
+      feeAmount,
+      isConsultationPaid,
       isVip: isVipRecord,
-      isConsultationCompleted: true,
+      isConsultationCompleted,
       isRegistrationSubmitted,
       isPlacementPaid,
       record: toCamelCase({
         ...record,
         placement_paid: isPlacementPaid,
-        placementPaid: isPlacementPaid
+        placementPaid: isPlacementPaid,
+        feeAmount
       })
     });
   } catch (error: any) {

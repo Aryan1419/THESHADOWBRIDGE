@@ -333,6 +333,10 @@ export async function POST(request: Request) {
         else {
           const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('registration_id', regId).maybeSingle();
           if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+          else {
+            const { data: pth } = await supabase.from('parent_therapy_requests').select('*').eq('registration_id', regId).maybeSingle();
+            if (pth) { targetRecord = pth; targetTable = 'parent_therapy_requests'; }
+          }
         }
       }
 
@@ -346,6 +350,10 @@ export async function POST(request: Request) {
           else {
             const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('email', cleanEmail).maybeSingle();
             if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+            else {
+              const { data: pth } = await supabase.from('parent_therapy_requests').select('*').eq('email', cleanEmail).maybeSingle();
+              if (pth) { targetRecord = pth; targetTable = 'parent_therapy_requests'; }
+            }
           }
         }
       }

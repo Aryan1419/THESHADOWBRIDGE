@@ -78,13 +78,7 @@ export default function ParentConsultationStep1() {
         }
 
         confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
-        const redirectTarget = regData.redirectUrl || `/register/parent/form?regId=${encodeURIComponent(regData.registration_id)}`;
-        
-        setTimeout(() => {
-          router.push(redirectTarget);
-        }, 1200);
-
-        setBookingSuccess({ ...regData, isVipRedirect: true });
+        setBookingSuccess(regData);
         return;
       }
 

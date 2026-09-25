@@ -169,17 +169,10 @@ function GatedRegistrationContent() {
   };
 
   const isConsultationCompleted = Boolean(
-    gatedStatus && (
-      gatedStatus.isConsultationCompleted ||
-      gatedStatus.isVip ||
-      (gatedStatus.record?.notes || '').toUpperCase().includes('SHADOW100') ||
-      (gatedStatus.record?.notes || '').toUpperCase().includes('THERAPY99') ||
-      (gatedStatus.record?.message || '').toUpperCase().includes('SHADOW100') ||
-      (gatedStatus.record?.message || '').toUpperCase().includes('THERAPY99') ||
-      (gatedStatus.record?.payment_status || '').toLowerCase().includes('waived') ||
-      gatedStatus.record?.status === 'Consultation Completed' ||
-      gatedStatus.record
-    )
+    gatedStatus &&
+    gatedStatus.isConsultationCompleted &&
+    (gatedStatus.statusIdx !== undefined ? gatedStatus.statusIdx >= 1 : true) &&
+    !gatedStatus.currentStatus?.toLowerCase().includes('booked')
   );
   const isShadow = gatedStatus?.subType === 'shadow';
   const isTherapy = gatedStatus?.subType === 'therapy' || (gatedStatus?.serviceType || '').toLowerCase().includes('therapy');
@@ -197,7 +190,7 @@ function GatedRegistrationContent() {
           Detailed Child Registration Form
         </h1>
         <p className="text-brand-muted text-sm sm:text-base leading-relaxed">
-          Provide your child's specific developmental, academic, and school placement requirements.
+          Provide your child's specific developmental, academic, and support requirements.
         </p>
       </div>
 
@@ -249,6 +242,51 @@ function GatedRegistrationContent() {
               {loadingCheck ? 'Verifying Consultation Access...' : 'Unlock Registration Form'}
             </button>
           </form>
+        </motion.div>
+      )}
+
+      {/* LOCKED CONSULTATION PENDING CARD */}
+      {gatedStatus && !isConsultationCompleted && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-xl mx-auto bg-white rounded-3xl p-8 border border-brand-border shadow-xl text-center space-y-6"
+        >
+          <div className="w-16 h-16 bg-amber-100 text-amber-800 rounded-full flex items-center justify-center mx-auto shadow-inner">
+            <Lock size={32} />
+          </div>
+
+          <div className="space-y-2">
+            <span className="px-3 py-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-full text-xs font-bold uppercase tracking-wider inline-block mb-1">
+              Consultation Pending Call
+            </span>
+            <h2 className="font-serif text-2xl font-bold text-primary">
+              1-on-1 Consultation Call in Progress
+            </h2>
+            <p className="text-sm text-brand-muted leading-relaxed max-w-md mx-auto">
+              Your consultation booking has been recorded under Registration ID <strong className="text-primary font-mono">{gatedStatus.record?.registrationId || gatedStatus.record?.registration_id}</strong>.
+            </p>
+          </div>
+
+          <div className="bg-brand-light p-5 rounded-2xl border border-brand-border text-left text-xs sm:text-sm space-y-2.5">
+            <p className="font-bold text-primary flex items-center gap-1.5">
+              <Info size={16} className="text-secondary" />
+              What Happens Next:
+            </p>
+            <p className="text-brand-dark leading-relaxed">
+              Founder &amp; Lead Mentor Pratibha Mishra will phone you directly to conduct your diagnostic consultation. Once completed by the mentor, this registration form will unlock automatically.
+            </p>
+          </div>
+
+          <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              href={`/check-status?regId=${encodeURIComponent(gatedStatus.record?.registrationId || gatedStatus.record?.registration_id || '')}`}
+              className="px-6 py-3 bg-secondary hover:bg-secondary/90 text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2"
+            >
+              <span>Track Status on Dashboard</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
         </motion.div>
       )}
 
@@ -502,7 +540,7 @@ function GatedRegistrationContent() {
                 <span>Submitting Registration Form...</span>
               ) : (
                 <>
-                  <span>Proceed to Placement Fee Payment</span>
+                  <span>{isTherapy ? 'Save & Proceed to Therapy Booking Payment' : 'Save & Proceed to Placement Fee Payment'}</span>
                   <ArrowRight size={18} />
                 </>
               )}

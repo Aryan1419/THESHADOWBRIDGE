@@ -147,11 +147,10 @@ function BookConsultationForm() {
           throw new Error(data.error || 'Failed to apply coupon/access code.');
         }
 
-        confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
-        const redirectTarget = data.redirectUrl || `/register/parent/form?regId=${encodeURIComponent(data.registration_id)}`;
-        setTimeout(() => {
-          router.push(redirectTarget);
-        }, 1000);
+        const assignedId = data.registration_id || data.booking_id;
+        setReceiptCode(assignedId);
+        setStep(3);
+        triggerConfetti();
       } catch (err: any) {
         console.error(err);
         setPaymentError(err.message || 'Error processing coupon/access code.');
@@ -645,13 +644,13 @@ function BookConsultationForm() {
                       ) : isTherapyCouponValid ? (
                         <>
                           <Sparkles size={16} />
-                          <span>Claim Free Therapy Booking &amp; Continue</span>
+                          <span>Claim Free Therapy Consultation &amp; Book</span>
                           <ArrowRight size={16} />
                         </>
                       ) : isShadowVipValid ? (
                         <>
                           <Sparkles size={16} />
-                          <span>Unlock &amp; Go to Child Registration Form</span>
+                          <span>Apply VIP Code &amp; Book Consultation</span>
                           <ArrowRight size={16} />
                         </>
                       ) : (
@@ -750,9 +749,14 @@ function BookConsultationForm() {
                 >
                   <CheckCircle className="mx-auto text-emerald-600 animate-bounce" size={56} />
                   <div className="space-y-2">
-                    <h2 className="font-serif font-black text-primary text-2xl">Consultation Confirmed!</h2>
+                    <h2 className="font-serif font-black text-primary text-2xl">
+                      {isWaivedCode ? 'Consultation Booked (Fee Waived)!' : 'Consultation Confirmed!'}
+                    </h2>
                     <p className="text-sm text-brand-muted">
-                      Your payment of ₹99 was processed successfully. Receipt code: <span className="font-mono font-bold text-accent">{receiptCode}</span>
+                      {isWaivedCode 
+                        ? 'Your consultation booking has been registered successfully.' 
+                        : 'Your payment of ₹99 was processed successfully.'}
+                      {' '}Unique ID: <span className="font-mono font-bold text-accent">{receiptCode}</span>
                     </p>
                   </div>
 
@@ -760,19 +764,29 @@ function BookConsultationForm() {
                     <p className="border-b border-brand-border/60 pb-2 font-bold text-primary">Assessment Details</p>
                     <p className="text-brand-dark"><strong>Parent Name:</strong> {formData.name}</p>
                     <p className="text-brand-dark"><strong>Phone Number:</strong> {formData.phone}</p>
-                    <p className="text-brand-dark"><strong>City Branch:</strong> {formData.city}</p>
+                    <p className="text-brand-dark"><strong>City:</strong> {formData.city || (isTherapyBooking ? 'Online / PAN India' : 'Delhi NCR')}</p>
                     {finalLocation && <p className="text-brand-dark"><strong>Preferred Area:</strong> {finalLocation}</p>}
                     <p className="text-brand-dark"><strong>Requirement:</strong> {formData.requirement}</p>
+                    <p className="text-brand-dark"><strong>Status:</strong> <span className="text-emerald-700 font-bold">Consultation Booked (Call Pending)</span></p>
                   </div>
 
-                  <p className="text-xs text-brand-muted max-w-md mx-auto">
-                    A call slot will be assigned and our Lead Mentor Pratibha Mishra will phone you on the registered contact details within 12 hours.
-                  </p>
+                  <div className="bg-primary/5 border border-primary/20 rounded-2xl p-4 max-w-md mx-auto text-xs text-brand-dark leading-relaxed text-left space-y-1.5">
+                    <p className="font-bold text-primary">What happens next?</p>
+                    <p>1. Lead Mentor Pratibha Mishra will phone you on <strong>{formData.phone}</strong> to conduct your 1-on-1 assessment consultation.</p>
+                    <p>2. Once the consultation call is marked complete by the mentor, your detailed Child Registration Form will unlock automatically on your status dashboard.</p>
+                  </div>
 
-                  <div className="pt-4 flex justify-center">
+                  <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+                    <Link
+                      href={`/check-status?regId=${encodeURIComponent(receiptCode)}`}
+                      className="px-6 py-3 bg-secondary hover:bg-secondary/90 text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-2"
+                    >
+                      <span>Check Status Dashboard</span>
+                      <ArrowRight size={14} />
+                    </Link>
                     <Link
                       href="/"
-                      className="px-8 py-3.5 bg-primary text-white hover:bg-primary/95 rounded-xl font-bold text-sm transition-all shadow-md"
+                      className="px-6 py-3 bg-white border border-brand-border hover:bg-brand-light text-primary rounded-xl font-bold text-xs transition-all flex items-center justify-center"
                     >
                       Back to Homepage
                     </Link>

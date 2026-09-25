@@ -3537,7 +3537,7 @@ export default function AdminDashboard() {
                             <td className="p-4 text-center">
                               {(() => {
                                 const isPaid = Boolean((r as any).placementPaid || (r as any).placement_paid);
-                                const amount = (r as any).placementAmount || (r as any).placement_amount || ((parentSubTab === 'shadow' || parentSubTab === 'therapy') ? 5000 : 3000);
+                                const amount = (r as any).placementAmount || (r as any).placement_amount || (parentSubTab === 'shadow' ? 5000 : 3000);
                                 return (
                                   <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                                     isPaid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
