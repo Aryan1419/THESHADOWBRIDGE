@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     default: "The Shadow Bridge | Trained Shadow Teachers & Home Tutors",
     template: "%s | The Shadow Bridge"
   },
-  description: "Connecting families with professionally trained Shadow Teachers and Home Tutors in Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune. Special education, behavior support, and inclusive learning assistance.",
+  description: "Connect with trained Shadow Teachers, Home Tutors & Therapists for special needs children across Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune.",
   keywords: [
     "shadow teacher",
     "home tutor",

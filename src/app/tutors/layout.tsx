@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Special Needs Home Tutors | Academic & Behavioral Tutoring in Delhi NCR, Hyderabad, Bangalore, Ahmedabad, Pune',
-  description: 'Apply as a Home Tutor for academic subjects and special needs support. Verified home tutoring placements in Delhi NCR, Hyderabad, Bangalore, Ahmedabad & Pune.',
+  description: 'Join The Shadow Bridge as a Special Needs Home Tutor. Verified student placements across Delhi NCR, Hyderabad, Bangalore, Ahmedabad & Pune.',
   keywords: ['home tutor jobs', 'special needs home tutor', 'academic tutor vacancy', 'private tutor registration', 'Delhi NCR home tutor', 'Hyderabad home tutor', 'Bangalore tutor', 'Ahmedabad tutor', 'Pune tutor'],
   alternates: {
     canonical: 'https://www.theshadowbridge.com/tutors',

@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 const THERAPY_TITLES: Record<string, { title: string; description: string }> = {
   'aba-online-therapy': {
     title: 'ABA Online Therapy (PAN India) | 1-on-1 Video Sessions',
-    description: 'Live 1-on-1 video ABA therapy & behavioral coaching for children across all states of India. Certified therapists, individualized goals, and parent coaching.'
+    description: 'Live 1-on-1 video ABA therapy and behavioral coaching for children across India. Certified therapists, individualized goals, and parent coaching.'
   },
   'online-parent-training': {
     title: 'Online Parent Training (PAN India) | Professional ABA Coaching',

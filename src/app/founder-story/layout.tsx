@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Why I Started The Shadow Bridge | Founder's Story by Pratibha Mishra",
-  description: "Learn why Founder Pratibha Mishra created The Shadow Bridge to connect families of neurodivergent children with background-verified Shadow Teachers and Special Needs Tutors.",
+  description: "Discover why Pratibha Mishra founded The Shadow Bridge to connect neurodivergent children with verified Shadow Teachers and Special Needs Home Tutors.",
   alternates: {
     canonical: "https://www.theshadowbridge.com/founder-story"
   },
