@@ -60,10 +60,10 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "https://www.theshadowbridge.com/favicon-512.png",
-        width: 512,
-        height: 512,
-        alt: "The Shadow Bridge - Shadow Teachers & Special Education Tutors"
+        url: "https://www.theshadowbridge.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "The Shadow Bridge - Certified Shadow Teachers & Special Education Tutors"
       }
     ]
   },
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "The Shadow Bridge | Shadow Teachers & Tutors",
     description: "Connecting families with verified Shadow Teachers & Special Education Tutors in Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune.",
-    images: ["https://www.theshadowbridge.com/favicon-512.png"]
+    images: ["https://www.theshadowbridge.com/og-image.png"]
   },
   robots: {
     index: true,

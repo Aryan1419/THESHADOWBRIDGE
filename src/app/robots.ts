@@ -14,6 +14,7 @@ export default function robots(): MetadataRoute.Robots {
           '/dashboard/*',
           '/register/parent/form',
           '/register/parent/placement-fee',
+          '/register/parent/therapy-fee',
           '/schools/form',
           '/schools/placement-fee',
         ],
