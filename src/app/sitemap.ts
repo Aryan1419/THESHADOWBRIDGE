@@ -36,12 +36,31 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${baseUrl}/testimonials`, priority: 0.7, changeFrequency: 'monthly' as const },
     { url: `${baseUrl}/leave-review`, priority: 0.6, changeFrequency: 'monthly' as const },
     { url: `${baseUrl}/check-status`, priority: 0.6, changeFrequency: 'weekly' as const },
+    { url: `${baseUrl}/resources`, priority: 0.9, changeFrequency: 'weekly' as const },
     { url: `${baseUrl}/terms`, priority: 0.4, changeFrequency: 'yearly' as const },
     { url: `${baseUrl}/privacy`, priority: 0.4, changeFrequency: 'yearly' as const },
   ];
 
+  const resourceSlugs = [
+    'what-is-a-shadow-teacher',
+    'shadow-teacher-cost-by-city',
+    'shadow-teacher-vs-special-educator',
+    'aba-therapy-for-autism',
+    'home-tutor-vs-shadow-teacher',
+    'online-parent-training-explained',
+    'how-matching-works',
+    'professional-vetting-process',
+  ];
+
   const therapyRoutes = therapySlugs.map((slug) => ({
     url: `${baseUrl}/therapies/${slug}`,
+    lastModified: currentDate,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
+
+  const resourceRoutes = resourceSlugs.map((slug) => ({
+    url: `${baseUrl}/resources/${slug}`,
     lastModified: currentDate,
     changeFrequency: 'monthly' as const,
     priority: 0.8,
@@ -53,6 +72,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: currentDate,
     })),
     ...therapyRoutes,
+    ...resourceRoutes,
   ];
 }
 

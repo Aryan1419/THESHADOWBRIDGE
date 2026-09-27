@@ -64,6 +64,7 @@ export default function Footer() {
               <li><Link href="/founder-story" className="hover:text-accent transition-colors font-bold text-amber-300">Why I Started (Founder Story)</Link></li>
               <li><Link href="/about" className="hover:text-accent transition-colors">About Us</Link></li>
               <li><Link href="/services" className="hover:text-accent transition-colors">Services</Link></li>
+              <li><Link href="/resources" className="hover:text-accent transition-colors font-bold text-amber-200">Resources &amp; Guides</Link></li>
               <li><Link href="/schools" className="hover:text-accent transition-colors font-bold text-pink-300">Collaboration — Schools (NEW)</Link></li>
               <li><Link href="/check-status" className="hover:text-accent transition-colors font-bold text-accent">Check Application Status</Link></li>
               <li><Link href="/testimonials" className="hover:text-accent transition-colors">Testimonials</Link></li>

@@ -172,6 +172,70 @@ export default function ForShadowTeachers() {
         </div>
       </section>
 
+      {/* Resource & Knowledge Guides Section */}
+      <section className="py-12 bg-purple-50/40 border-t border-brand-border/80">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-xs font-bold text-secondary uppercase tracking-wider bg-pink-100 px-3 py-1 rounded-full border border-pink-200">
+              Essential Guides
+            </span>
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary">
+              Shadow Teaching &amp; Classroom Support Resources
+            </h2>
+            <p className="text-gray-600 text-xs sm:text-sm">
+              Explore in-depth articles on classroom integration, educator roles, and fee structures.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+            <Link
+              href="/resources/what-is-a-shadow-teacher"
+              className="p-5 rounded-2xl bg-white border border-brand-border hover:border-primary/40 hover:shadow-md transition-all space-y-2 group"
+            >
+              <h3 className="font-serif text-base font-bold text-primary group-hover:text-secondary transition-colors">
+                What is a Shadow Teacher?
+              </h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Understand in-classroom assistance, managing sensory needs, and fostering child independence.
+              </p>
+              <div className="pt-2 text-xs font-bold text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                Read Guide <ArrowRight size={13} />
+              </div>
+            </Link>
+
+            <Link
+              href="/resources/shadow-teacher-vs-special-educator"
+              className="p-5 rounded-2xl bg-white border border-brand-border hover:border-primary/40 hover:shadow-md transition-all space-y-2 group"
+            >
+              <h3 className="font-serif text-base font-bold text-primary group-hover:text-secondary transition-colors">
+                Shadow Teacher vs Special Educator
+              </h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Compare classroom integration support with individualized academic special education instruction.
+              </p>
+              <div className="pt-2 text-xs font-bold text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                Read Guide <ArrowRight size={13} />
+              </div>
+            </Link>
+
+            <Link
+              href="/resources/shadow-teacher-cost-by-city"
+              className="p-5 rounded-2xl bg-white border border-brand-border hover:border-primary/40 hover:shadow-md transition-all space-y-2 group"
+            >
+              <h3 className="font-serif text-base font-bold text-primary group-hover:text-secondary transition-colors">
+                Shadow Teacher Costs &amp; Fees
+              </h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Learn how our transparent placement-based fee structure works across all 5 operational cities.
+              </p>
+              <div className="pt-2 text-xs font-bold text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                Read Guide <ArrowRight size={13} />
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Large CTA Section */}
       <section className="py-16 bg-gradient-to-b from-white to-[#F7F5FC] text-center border-t border-brand-border">
         <div className="max-w-4xl mx-auto px-4 space-y-6">

@@ -302,6 +302,55 @@ export default function TherapiesLandingPage() {
         </div>
       </section>
 
+      {/* Therapy Guides & Educational Resources */}
+      <section className="py-12 bg-purple-50/40 border-t border-brand-border/80">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-xs font-bold text-secondary uppercase tracking-wider bg-pink-100 px-3 py-1 rounded-full border border-pink-200">
+              Clinical &amp; Parent Resources
+            </span>
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-primary">
+              Learn More About Therapy Approaches &amp; Parent Training
+            </h2>
+            <p className="text-gray-600 text-xs sm:text-sm">
+              Read comprehensive clinical breakdowns on autism interventions and home coaching strategies.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+            <Link
+              href="/resources/aba-therapy-for-autism"
+              className="p-5 rounded-2xl bg-white border border-brand-border hover:border-primary/40 hover:shadow-md transition-all space-y-2 group"
+            >
+              <h3 className="font-serif text-base font-bold text-primary group-hover:text-secondary transition-colors">
+                What is ABA Therapy, and How Does It Help Autism?
+              </h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Understand how structured positive reinforcement develops functional communication and daily independence.
+              </p>
+              <div className="pt-2 text-xs font-bold text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                Read Guide <ArrowRight size={13} />
+              </div>
+            </Link>
+
+            <Link
+              href="/resources/online-parent-training-explained"
+              className="p-5 rounded-2xl bg-white border border-brand-border hover:border-primary/40 hover:shadow-md transition-all space-y-2 group"
+            >
+              <h3 className="font-serif text-base font-bold text-primary group-hover:text-secondary transition-colors">
+                What is Online Parent Training, and Who Is It For?
+              </h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Discover how virtual coaching equips parents with meltdown strategies, visual routines, and home therapy reinforcement.
+              </p>
+              <div className="pt-2 text-xs font-bold text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                Read Guide <ArrowRight size={13} />
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <Footer />
     </div>
   );

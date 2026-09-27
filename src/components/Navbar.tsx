@@ -69,6 +69,7 @@ export default function Navbar() {
       ]
     },
     { name: 'Services', path: '/services', badge: null },
+    { name: 'Resources', path: '/resources', badge: 'Guides' },
     { name: 'Check Status', path: '/check-status', badge: 'Status Lookup', highlight: true },
     { name: 'Testimonials', path: '/testimonials', badge: null },
     { name: 'Leave a Review', path: '/leave-review', badge: 'New' },
@@ -274,6 +275,25 @@ export default function Navbar() {
                         <div className="flex items-center gap-2 shrink-0">
                           <span className="px-2 py-0.5 bg-purple-100 text-purple-900 border border-purple-200 text-[9px] font-bold rounded-md uppercase tracking-wider">
                             NEW
+                          </span>
+                          <ArrowRight size={14} className="text-brand-muted/70 opacity-60" />
+                        </div>
+                      </Link>
+
+                      {/* Resources / Guides Hub Link */}
+                      <Link
+                        href="/resources"
+                        onClick={() => setIsOpen(false)}
+                        className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all border ${
+                          pathname?.startsWith('/resources')
+                            ? 'bg-purple-50 text-purple-950 border-purple-200'
+                            : 'bg-brand-light/40 hover:bg-purple-50/50 text-brand-dark border-purple-100/80 hover:border-purple-200'
+                        }`}
+                      >
+                        <span className="font-bold">Resources &amp; Guides</span>
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="px-2 py-0.5 bg-purple-100 text-purple-900 border border-purple-200 text-[9px] font-bold rounded-md uppercase tracking-wider">
+                            Guides
                           </span>
                           <ArrowRight size={14} className="text-brand-muted/70 opacity-60" />
                         </div>

@@ -159,6 +159,52 @@ export default function ForTutors() {
         </div>
       </section>
 
+      {/* Related Resources Section */}
+      <section className="py-12 bg-purple-50/40 border-t border-brand-border/80">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="text-center max-w-xl mx-auto space-y-2">
+            <span className="text-xs font-bold text-secondary uppercase tracking-wider bg-pink-100 px-3 py-1 rounded-full border border-pink-200">
+              Parent &amp; Educator Guides
+            </span>
+            <h2 className="font-serif text-2xl font-bold text-primary">
+              Learn More About Special Needs Tutoring
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            <Link
+              href="/resources/home-tutor-vs-shadow-teacher"
+              className="p-5 rounded-2xl bg-white border border-brand-border hover:border-primary/40 hover:shadow-md transition-all space-y-2 group"
+            >
+              <h3 className="font-serif text-base font-bold text-primary group-hover:text-secondary transition-colors">
+                Home Tutor vs Shadow Teacher
+              </h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Determine whether your child needs home academic reinforcement or in-school behavioral assistance.
+              </p>
+              <div className="pt-2 text-xs font-bold text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                Read Guide <ArrowRight size={13} />
+              </div>
+            </Link>
+
+            <Link
+              href="/resources/professional-vetting-process"
+              className="p-5 rounded-2xl bg-white border border-brand-border hover:border-primary/40 hover:shadow-md transition-all space-y-2 group"
+            >
+              <h3 className="font-serif text-base font-bold text-primary group-hover:text-secondary transition-colors">
+                Educator Qualifications &amp; Vetting
+              </h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Learn how qualifications, certifications, and experience are verified during intake review.
+              </p>
+              <div className="pt-2 text-xs font-bold text-primary flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                Read Guide <ArrowRight size={13} />
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Large CTA Section */}
       <section className="py-16 bg-gradient-to-b from-white to-[#F7F5FC] text-center border-t border-brand-border">
         <div className="max-w-4xl mx-auto px-4 space-y-6">
