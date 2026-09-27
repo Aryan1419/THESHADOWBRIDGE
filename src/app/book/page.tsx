@@ -116,7 +116,7 @@ function BookConsultationForm() {
     e.preventDefault();
 
     if (isSchoolCodeOnParent) {
-      setPaymentError('Code SCHOOL199 is only valid for School Collaboration on the /schools page.');
+      setPaymentError('This code is only valid for School Collaboration on the /schools page.');
       return;
     }
 
@@ -629,7 +629,7 @@ function BookConsultationForm() {
                       {isSchoolCodeOnParent && (
                         <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2 mt-1">
                           <ShieldAlert size={14} className="text-rose-600 shrink-0" />
-                          <span>Code SCHOOL199 is only valid for School Collaboration on /schools.</span>
+                          <span>This code is only valid for School Collaboration on /schools.</span>
                         </div>
                       )}
                       {cleanPromoCode && !isWaivedCode && !isTherapyUsingShadowCode && !isShadowUsingTherapyCode && !isSchoolCodeOnParent && (

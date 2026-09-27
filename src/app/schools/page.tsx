@@ -633,7 +633,7 @@ export default function SchoolsPage() {
                     <div className="flex gap-2">
                       <input
                         type="text"
-                        placeholder="Enter code (e.g. SCHOOL199)"
+                        placeholder="Enter promo code (if you have one)"
                         value={promoCode}
                         onChange={(e) => {
                           setPromoCode(e.target.value.toUpperCase());

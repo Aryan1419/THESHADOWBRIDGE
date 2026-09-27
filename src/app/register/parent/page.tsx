@@ -49,7 +49,7 @@ export default function ParentConsultationStep1() {
     }
 
     if (isSchoolCodeEntered) {
-      setErrorMsg('Code SCHOOL199 is only valid for School Collaboration on /schools.');
+      setErrorMsg('This code is only valid for School Collaboration on the /schools page.');
       return;
     }
 
@@ -457,7 +457,7 @@ export default function ParentConsultationStep1() {
                       className="mt-2 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2"
                     >
                       <AlertCircle size={16} className="text-rose-600 flex-shrink-0" />
-                      <span>Code SCHOOL199 is only valid for School Collaboration on /schools.</span>
+                      <span>This code is only valid for School Collaboration on /schools.</span>
                     </motion.div>
                   )}
                   {cleanPromoCode && !isVipCode && !isTherapyCodeEntered && !isSchoolCodeEntered && (

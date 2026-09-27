@@ -222,7 +222,7 @@ export async function POST(request: Request) {
       // Strict validation: THERAPY99 is ONLY for Therapy; SHADOW100 is ONLY for Shadow Teachers & Tutors; SCHOOL199 is ONLY for School Collaboration
       if (cleanPromoCode === 'SCHOOL199') {
         return NextResponse.json({
-          error: 'Code SCHOOL199 is only valid for School Collaboration on the /schools page.'
+          error: 'This code is only valid for School Collaboration on the /schools page.'
         }, { status: 400 });
       }
 
