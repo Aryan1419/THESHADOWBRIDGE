@@ -68,14 +68,24 @@ function GatedRegistrationContent() {
 
       setGatedStatus(data);
       if (data.record) {
-        if (data.record.childName && data.record.childName !== 'Pending Consultation') {
+        if (data.record.childName && data.record.childName !== 'Pending Consultation' && data.record.childName !== 'Pending Registration Form') {
           setChildName(data.record.childName);
         }
-        if (data.record.childGrade && data.record.childGrade !== 'Pending Consultation') {
+        if (data.record.childGrade && data.record.childGrade !== 'Pending Consultation' && data.record.childGrade !== 'Pending Registration Form') {
           setChildGrade(data.record.childGrade);
+        } else if (data.record.childAge && data.record.childAge !== 'Pending Registration Form') {
+          setChildGrade(data.record.childAge);
+          setChildAge(data.record.childAge);
         }
         if (data.record.schoolLocation) setSchoolLocation(data.record.schoolLocation);
         if (data.record.homeLocation) setHomeLocation(data.record.homeLocation);
+        if (data.record.therapyType || data.record.therapy_type) {
+          setTherapyType(data.record.therapyType || data.record.therapy_type);
+        } else if ((data.record.requirement || '').toLowerCase().includes('parent training')) {
+          setTherapyType('Online Parent Training (PAN India)');
+        } else if ((data.record.requirement || '').toLowerCase().includes('online')) {
+          setTherapyType('ABA Online Therapy (PAN India)');
+        }
       }
     } catch (err: any) {
       console.error(err);
@@ -175,7 +185,16 @@ function GatedRegistrationContent() {
     !gatedStatus.currentStatus?.toLowerCase().includes('booked')
   );
   const isShadow = gatedStatus?.subType === 'shadow';
-  const isTherapy = gatedStatus?.subType === 'therapy' || (gatedStatus?.serviceType || '').toLowerCase().includes('therapy');
+  const isTherapy = gatedStatus?.subType === 'therapy' || 
+    (gatedStatus?.serviceType || '').toLowerCase().includes('therapy') ||
+    (gatedStatus?.serviceType || '').toLowerCase().includes('parent training');
+
+  const isOnlineTherapy = therapyType.includes('Online') || 
+    therapyType.includes('PAN India') || 
+    therapyType.includes('Parent Training') ||
+    (gatedStatus?.record?.therapyType || gatedStatus?.record?.therapy_type || '').includes('Online') ||
+    (gatedStatus?.record?.therapyType || gatedStatus?.record?.therapy_type || '').includes('PAN India') ||
+    (gatedStatus?.record?.therapyType || gatedStatus?.record?.therapy_type || '').includes('Parent Training');
 
   return (
     <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full flex-grow">
@@ -412,8 +431,16 @@ function GatedRegistrationContent() {
             {isTherapy && (
               <div className="space-y-4 pt-2">
                 <h3 className="font-serif text-lg font-bold text-primary border-b border-brand-border pb-2 flex items-center justify-between">
-                  <span>Home Therapy Specific Details</span>
-                  <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-900 border border-purple-200">Delhi NCR Only</span>
+                  <span>{isOnlineTherapy ? 'Online Therapy & Coaching Details' : 'Home Therapy Specific Details'}</span>
+                  {isOnlineTherapy ? (
+                    <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-200 flex items-center gap-1">
+                      <span>🌐</span> <span>PAN-India / Online</span>
+                    </span>
+                  ) : (
+                    <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-900 border border-purple-200">
+                      Delhi NCR Only
+                    </span>
+                  )}
                 </h3>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -426,13 +453,15 @@ function GatedRegistrationContent() {
                       onChange={(e) => setTherapyType(e.target.value)}
                       className="w-full px-4 py-3 bg-purple-50/50 border border-purple-200 rounded-xl text-sm font-bold text-purple-950 focus:outline-none focus:ring-2 focus:ring-secondary/30"
                     >
-                      <option value="ABA Therapy">ABA Therapy (Applied Behavior Analysis)</option>
-                      <option value="Speech Therapy">Speech &amp; Language Therapy</option>
-                      <option value="Occupational Therapy">Occupational Therapy (OT)</option>
-                      <option value="Special Education">Special Education</option>
-                      <option value="Behavior Therapy">Pediatric Behavior Therapy</option>
-                      <option value="Physical Therapy">Physical Therapy (Physiotherapy)</option>
-                      <option value="Play Therapy">Play Therapy</option>
+                      <option value="Online Parent Training (PAN India)">🌐 Online Parent Training (PAN India)</option>
+                      <option value="ABA Online Therapy (PAN India)">🌐 ABA Online Therapy (PAN India)</option>
+                      <option value="ABA Therapy">ABA Therapy (In-Home - Delhi NCR)</option>
+                      <option value="Speech Therapy">Speech &amp; Language Therapy (In-Home)</option>
+                      <option value="Occupational Therapy">Occupational Therapy (OT - In-Home)</option>
+                      <option value="Special Education">Special Education (In-Home)</option>
+                      <option value="Behavior Therapy">Pediatric Behavior Therapy (In-Home)</option>
+                      <option value="Physical Therapy">Physical Therapy (Physiotherapy - In-Home)</option>
+                      <option value="Play Therapy">Play Therapy (In-Home)</option>
                       <option value="Counseling & Psychological Support">Counseling &amp; Psychological Support</option>
                     </select>
                   </div>

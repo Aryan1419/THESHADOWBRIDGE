@@ -3377,7 +3377,7 @@ export default function AdminDashboard() {
                           : 'text-brand-muted hover:text-brand-dark'
                       }`}
                     >
-                      Therapy Requests (Delhi NCR)
+                      Therapy Requests (PAN India / Delhi NCR)
                     </button>
                   </div>
                 </div>
@@ -4902,6 +4902,21 @@ export default function AdminDashboard() {
                         <div className="col-span-2"><strong>Tutoring Help:</strong> {selectedRecord.data.tutorType}</div>
                         {selectedRecord.data.tutorType === 'Other' && <div className="col-span-2"><strong>Tutoring Details:</strong> {selectedRecord.data.otherTutorType}</div>}
                         <div className="col-span-2"><strong>Subjects Needed:</strong> {selectedRecord.data.subjects}</div>
+                      </>
+                    )}
+
+                    {/* Parent Therapy Requests specific */}
+                    {selectedRecord.type === 'parent_therapy_requests' && (
+                      <>
+                        <div className="col-span-2"><strong>Therapy Type:</strong> <span className="text-purple-900 font-bold">{selectedRecord.data.therapyType || selectedRecord.data.therapy_type}</span></div>
+                        <div><strong>Child Age:</strong> {selectedRecord.data.childAge || selectedRecord.data.child_age}</div>
+                        <div><strong>Child Gender:</strong> {selectedRecord.data.childGender || selectedRecord.data.child_gender}</div>
+                        <div className="col-span-2"><strong>Diagnosis / Condition:</strong> {selectedRecord.data.diagnosis || 'None'}</div>
+                        <div className="col-span-2"><strong>Challenges:</strong> {selectedRecord.data.challenges || selectedRecord.data.difficulties}</div>
+                        <div className="col-span-2"><strong>Goals:</strong> {selectedRecord.data.goals}</div>
+                        <div><strong>Preferred Days:</strong> {selectedRecord.data.preferredDays || selectedRecord.data.preferred_days}</div>
+                        <div><strong>Preferred Time:</strong> {selectedRecord.data.preferredTime || selectedRecord.data.preferred_time}</div>
+                        <div className="col-span-2"><strong>Assigned Therapist:</strong> <span className="text-emerald-800 font-semibold">{selectedRecord.data.therapist_assigned || selectedRecord.data.therapistAssigned || 'Not Assigned'}</span></div>
                       </>
                     )}
 

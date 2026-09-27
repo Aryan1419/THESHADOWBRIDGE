@@ -498,7 +498,8 @@ export default function CheckStatusPage() {
                     );
 
                     const isTherapy = recordData?.subType === 'therapy' || 
-                      (record.therapyType || record.therapy_type || record.requirement || record.serviceType || '').toLowerCase().includes('therapy');
+                      (record.therapyType || record.therapy_type || record.requirement || record.serviceType || '').toLowerCase().includes('therapy') ||
+                      (record.therapyType || record.therapy_type || record.requirement || record.serviceType || '').toLowerCase().includes('parent training');
                     const isShadow = !isTherapy && (
                       recordData?.subType === 'shadow' || 
                       (record.requirement || record.serviceType || '').toLowerCase().includes('shadow')

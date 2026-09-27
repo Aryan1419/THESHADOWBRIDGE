@@ -255,7 +255,7 @@ export async function POST(request: Request) {
       const isShadow = !isTherapy && serviceNeeded.toLowerCase().includes('shadow');
       // Status is ALWAYS 'Consultation Booked' on initial booking (even with promo code, consultation call must be conducted)
       const finalStatus = 'Consultation Booked';
-      const therapyTypeSelected = data.therapyType || (serviceNeeded.includes(':') ? serviceNeeded.split(':')[1].trim() : 'ABA Therapy');
+      const therapyTypeSelected = data.therapyType || (serviceNeeded.includes(':') ? serviceNeeded.split(':')[1].trim() : (serviceNeeded.toLowerCase().includes('parent training') ? 'Online Parent Training (PAN India)' : (serviceNeeded.toLowerCase().includes('online') ? 'ABA Online Therapy (PAN India)' : 'ABA Therapy')));
 
       const paymentStatus = isTherapyCoupon ? 'waived_therapy99' : (isShadowVip ? 'waived_shadow100' : 'paid');
       const promoPaymentId = isTherapyCoupon ? 'COUPON-THERAPY99' : (isShadowVip ? 'VIP-SHADOW100' : razorpayPaymentId);
@@ -266,7 +266,8 @@ export async function POST(request: Request) {
         ? `Therapy Fee Waived via Code THERAPY99 | Unified ID: ${generatedId}`
         : (isShadowVip ? `VIP Access via Code SHADOW100 | Unified ID: ${generatedId}` : `Unified ID: ${generatedId}`);
 
-      const resolvedCity = city || (isTherapy && (therapyTypeSelected.includes('PAN India') || therapyTypeSelected.includes('Online')) ? 'Online / PAN India' : 'Delhi NCR');
+      const isOnline = isTherapy && (therapyTypeSelected.includes('PAN India') || therapyTypeSelected.includes('Online') || therapyTypeSelected.includes('Parent Training'));
+      const resolvedCity = (city && city !== 'Delhi NCR') ? city : (isOnline ? (city || 'Online / PAN India') : (city || 'Delhi NCR'));
 
       // Insert into bookings table
       const bookingData = {
@@ -618,7 +619,7 @@ export async function POST(request: Request) {
           diagnosis: diagnosis || '',
           challenges: Array.isArray(difficulties) ? difficulties.join(', ') : (difficulties || data.challenges || ''),
           goals: data.goals || '',
-          therapy_type: data.therapyType || parentRecord.therapy_type || 'ABA Online Therapy (PAN India)',
+          therapy_type: data.therapyType || parentRecord.therapy_type || ((parentRecord.requirement || '').toLowerCase().includes('parent training') ? 'Online Parent Training (PAN India)' : 'ABA Online Therapy (PAN India)'),
           preferred_days: data.preferredDays || 'Mon, Wed, Fri',
           preferred_time: data.preferredTime || 'Morning (9 AM - 12 PM)',
           status: 'Registration Submitted',

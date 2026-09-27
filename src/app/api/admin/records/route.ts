@@ -436,7 +436,9 @@ export async function POST(request: Request) {
 
           if (isTherapy) {
             newParent.child_age = 'Pending Consultation';
-            newParent.therapy_type = bk.requirement?.includes(':') ? bk.requirement.split(':')[1].trim() : 'ABA Online Therapy (PAN India)';
+            newParent.therapy_type = bk.requirement?.includes(':') 
+              ? bk.requirement.split(':')[1].trim() 
+              : (reqStr.includes('parent training') ? 'Online Parent Training (PAN India)' : 'ABA Online Therapy (PAN India)');
             newParent.challenges = 'Pending Consultation';
             newParent.goals = 'Pending Consultation';
             newParent.placement_amount = 3000;
