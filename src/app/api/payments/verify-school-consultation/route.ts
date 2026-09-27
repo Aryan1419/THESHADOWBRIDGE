@@ -9,6 +9,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { 
       formData,
+      promoCode,
       razorpayPaymentId,
       razorpayOrderId,
       razorpaySignature
@@ -18,19 +19,31 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing required school consultation form data' }, { status: 400 });
     }
 
-    // Verify Razorpay signature if provided
-    const secret = process.env.RAZORPAY_KEY_SECRET || '';
-    if (secret && razorpayOrderId && razorpayPaymentId && razorpaySignature) {
-      const generatedSignature = crypto
-        .createHmac('sha256', secret)
-        .update(razorpayOrderId + '|' + razorpayPaymentId)
-        .digest('hex');
+    const cleanPromoCode = (promoCode || '').trim().toUpperCase();
+    const isSchoolWaiver = cleanPromoCode === 'SCHOOL199';
 
-      if (generatedSignature !== razorpaySignature) {
-        return NextResponse.json(
-          { error: 'Transaction authenticity validation failed. Signature mismatch.' },
-          { status: 400 }
-        );
+    if (cleanPromoCode && !isSchoolWaiver) {
+      return NextResponse.json(
+        { error: `Code "${cleanPromoCode}" is not valid for School Collaboration.` },
+        { status: 400 }
+      );
+    }
+
+    // Verify Razorpay signature if NOT using fee-waiver promo code
+    if (!isSchoolWaiver) {
+      const secret = process.env.RAZORPAY_KEY_SECRET || '';
+      if (secret && razorpayOrderId && razorpayPaymentId && razorpaySignature) {
+        const generatedSignature = crypto
+          .createHmac('sha256', secret)
+          .update(razorpayOrderId + '|' + razorpayPaymentId)
+          .digest('hex');
+
+        if (generatedSignature !== razorpaySignature) {
+          return NextResponse.json(
+            { error: 'Transaction authenticity validation failed. Signature mismatch.' },
+            { status: 400 }
+          );
+        }
       }
     }
 
@@ -38,6 +51,10 @@ export async function POST(request: Request) {
     const randomCode = Math.floor(1000 + Math.random() * 9000).toString();
     const registrationId = `SCH-2026-${randomCode}`;
     const createdAt = new Date().toISOString();
+
+    const notesWithPromo = isSchoolWaiver
+      ? (formData.notes ? `${formData.notes} | Fee Waived via SCHOOL199` : 'Fee Waived via SCHOOL199')
+      : (formData.notes || '');
 
     const recordPayload = {
       registration_id: registrationId,
@@ -52,14 +69,14 @@ export async function POST(request: Request) {
       specific_grades: Array.isArray(formData.specificGrades) ? formData.specificGrades.join(', ') : (formData.specificGrades || ''),
       teachers_count: Number(formData.teachersCount || 1),
       start_date: formData.startDate || '',
-      notes: formData.notes || '',
+      notes: notesWithPromo,
       status: 'Consultation Booked',
       consultation_paid: true,
-      consultation_amount: 199,
+      consultation_amount: isSchoolWaiver ? 0 : 199,
       placement_paid: false,
       placement_amount: 5000,
-      razorpay_payment_id: razorpayPaymentId || 'PAID-199-DIRECT',
-      razorpay_order_id: razorpayOrderId || 'ORD-199-DIRECT',
+      razorpay_payment_id: isSchoolWaiver ? 'WAIVED-SCHOOL199' : (razorpayPaymentId || 'PAID-199-DIRECT'),
+      razorpay_order_id: isSchoolWaiver ? 'WAIVED-SCHOOL199' : (razorpayOrderId || 'ORD-199-DIRECT'),
       created_at: createdAt
     };
 
@@ -100,6 +117,10 @@ export async function POST(request: Request) {
     const schoolName = formData.schoolName;
     const contactName = formData.contactName;
 
+    const paymentStatusText = isSchoolWaiver
+      ? '₹0.00 (Waived 100% via Promo Code SCHOOL199)'
+      : `₹199.00 (Razorpay ID: ${razorpayPaymentId || 'Verified'})`;
+
     await Promise.allSettled([
       sendEmail({
         to: schoolEmail,
@@ -116,7 +137,7 @@ export async function POST(request: Request) {
               <strong>School:</strong> ${schoolName}<br />
               <strong>Teachers Required:</strong> ${formData.teachersCount || 1}<br />
               <strong>Classes / Grades:</strong> ${recordPayload.specific_grades || recordPayload.levels_required}<br />
-              <strong>Consultation Fee Paid:</strong> ₹199.00 (Razorpay ID: ${razorpayPaymentId || 'Verified'})<br />
+              <strong>Consultation Fee:</strong> ${paymentStatusText}<br />
               <strong>Date Submitted:</strong> ${new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
             </p>
           </div>
@@ -132,11 +153,11 @@ export async function POST(request: Request) {
 
       sendEmail({
         to: 'theshadowbridgesupport@gmail.com',
-        subject: `NEW SCHOOL CONSULTATION BOOKED: ${schoolName} [${registrationId}]`,
+        subject: `NEW SCHOOL CONSULTATION BOOKED: ${schoolName} [${registrationId}]${isSchoolWaiver ? ' (Waived via SCHOOL199)' : ''}`,
         type: 'contact_alert',
         bodyHtml: `
           <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New School Consultation Requirement Submitted</h2>
-          <p style="margin: 0 0 16px 0;">A school has booked a consultation call and paid the ₹199 booking fee.</p>
+          <p style="margin: 0 0 16px 0;">A school has booked a consultation call ${isSchoolWaiver ? 'with the ₹199 fee waived via <strong>SCHOOL199</strong>' : 'and paid the ₹199 booking fee'}.</p>
 
           <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
             <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${registrationId}</p>
@@ -147,8 +168,8 @@ export async function POST(request: Request) {
             <p style="margin: 0 0 8px 0;"><strong>City & Area:</strong> ${formData.city} - ${formData.preferredLocation}</p>
             <p style="margin: 0 0 8px 0;"><strong>Shadow Teachers Count:</strong> ${formData.teachersCount}</p>
             <p style="margin: 0 0 8px 0;"><strong>Specific Grades:</strong> ${recordPayload.specific_grades}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Notes:</strong> ${formData.notes || 'None'}</p>
-            <p style="margin: 0;"><strong>Payment:</strong> ₹199 Paid (${razorpayPaymentId || 'Verified'})</p>
+            <p style="margin: 0 0 8px 0;"><strong>Notes:</strong> ${recordPayload.notes || 'None'}</p>
+            <p style="margin: 0;"><strong>Payment:</strong> ${paymentStatusText}</p>
           </div>
 
           <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to review and manage this school request.</p>

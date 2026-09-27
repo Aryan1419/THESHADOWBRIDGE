@@ -86,8 +86,10 @@ function BookConsultationForm() {
   // STRICT SEPARATION:
   // THERAPY99 is ONLY valid for Therapy / Online services
   // SHADOW100 is ONLY valid for Shadow Teacher and Home Tutor requests
+  // SCHOOL199 is ONLY valid for School Collaboration (/schools)
   const isTherapyCouponValid = isTherapyBooking && cleanPromoCode === 'THERAPY99';
   const isShadowVipValid = !isTherapyBooking && cleanPromoCode === 'SHADOW100';
+  const isSchoolCodeOnParent = cleanPromoCode === 'SCHOOL199';
   const isWaivedCode = isTherapyCouponValid || isShadowVipValid;
 
   const isTherapyUsingShadowCode = isTherapyBooking && cleanPromoCode === 'SHADOW100';
@@ -112,6 +114,11 @@ function BookConsultationForm() {
 
   const handleDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (isSchoolCodeOnParent) {
+      setPaymentError('Code SCHOOL199 is only valid for School Collaboration on the /schools page.');
+      return;
+    }
 
     if (isTherapyUsingShadowCode) {
       setPaymentError('This code is not valid for Therapy bookings.');
@@ -619,7 +626,13 @@ function BookConsultationForm() {
                           <span>This code is not valid for Shadow Teacher or Home Tutor requests.</span>
                         </div>
                       )}
-                      {cleanPromoCode && !isWaivedCode && !isTherapyUsingShadowCode && !isShadowUsingTherapyCode && (
+                      {isSchoolCodeOnParent && (
+                        <div className="p-2.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2 mt-1">
+                          <ShieldAlert size={14} className="text-rose-600 shrink-0" />
+                          <span>Code SCHOOL199 is only valid for School Collaboration on /schools.</span>
+                        </div>
+                      )}
+                      {cleanPromoCode && !isWaivedCode && !isTherapyUsingShadowCode && !isShadowUsingTherapyCode && !isSchoolCodeOnParent && (
                         <div className="p-2.5 bg-amber-50 border border-amber-200 text-amber-900 rounded-xl text-xs font-medium flex items-center gap-2 mt-1">
                           <Info size={14} className="text-amber-700 shrink-0" />
                           <span>Invalid or unrecognized code. Please check and try again.</span>

@@ -219,7 +219,13 @@ export async function POST(request: Request) {
       const isTherapy = serviceNeeded.toLowerCase().includes('therapy') || serviceNeeded.toLowerCase().includes('parent training');
       const isShadowOrTutor = !isTherapy;
 
-      // Strict validation: THERAPY99 is ONLY for Therapy; SHADOW100 is ONLY for Shadow Teachers & Tutors
+      // Strict validation: THERAPY99 is ONLY for Therapy; SHADOW100 is ONLY for Shadow Teachers & Tutors; SCHOOL199 is ONLY for School Collaboration
+      if (cleanPromoCode === 'SCHOOL199') {
+        return NextResponse.json({
+          error: 'Code SCHOOL199 is only valid for School Collaboration on the /schools page.'
+        }, { status: 400 });
+      }
+
       if (cleanPromoCode === 'THERAPY99' && !isTherapy) {
         return NextResponse.json({
           error: 'This coupon code is not valid for Shadow Teacher or Home Tutor requests.'

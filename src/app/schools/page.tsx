@@ -32,6 +32,11 @@ export default function SchoolsPage() {
   const [startDate, setStartDate] = useState('');
   const [notes, setNotes] = useState('');
 
+  // Promo Code State
+  const [promoCode, setPromoCode] = useState('');
+  const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successData, setSuccessData] = useState<{ registrationId: string } | null>(null);
@@ -51,6 +56,32 @@ export default function SchoolsPage() {
     );
   };
 
+  const handleApplyPromo = () => {
+    const code = promoCode.trim().toUpperCase();
+    if (!code) {
+      setPromoError('Please enter a promo code');
+      return;
+    }
+    if (code === 'SCHOOL199') {
+      setAppliedPromo('SCHOOL199');
+      setPromoError(null);
+    } else if (code === 'SHADOW100' || code === 'THERAPY99') {
+      setPromoError(`Code "${code}" is only valid for parent bookings, not School Collaboration.`);
+      setAppliedPromo(null);
+    } else {
+      setPromoError('Invalid promo code for School Collaboration.');
+      setAppliedPromo(null);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setAppliedPromo(null);
+    setPromoCode('');
+    setPromoError(null);
+  };
+
+  const isFeeWaived = appliedPromo === 'SCHOOL199' || promoCode.trim().toUpperCase() === 'SCHOOL199';
+
   const handleSubmitConsultation = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!schoolName.trim() || !contactName.trim() || !email.trim() || !phone.trim()) {
@@ -60,6 +91,49 @@ export default function SchoolsPage() {
 
     setLoading(true);
     setErrorMsg(null);
+
+    // If SCHOOL199 fee waiver is applied, bypass Razorpay and submit directly
+    if (isFeeWaived) {
+      try {
+        const verifyRes = await fetch('/api/payments/verify-school-consultation', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            formData: {
+              schoolName: schoolName.trim(),
+              contactName: contactName.trim(),
+              designation,
+              email: email.trim(),
+              phone: phone.trim(),
+              city: city.trim(),
+              preferredLocation: preferredLocation.trim(),
+              levelsRequired,
+              specificGrades,
+              teachersCount,
+              startDate,
+              notes
+            },
+            promoCode: 'SCHOOL199',
+            razorpayPaymentId: 'WAIVED-SCHOOL199',
+            razorpayOrderId: 'WAIVED-SCHOOL199',
+            razorpaySignature: 'WAIVED-SCHOOL199'
+          })
+        });
+
+        const verifyData = await verifyRes.json();
+        if (!verifyRes.ok || !verifyData.success) {
+          throw new Error(verifyData.error || 'Failed to submit school consultation.');
+        }
+
+        setSuccessData({ registrationId: verifyData.registrationId });
+      } catch (err: any) {
+        console.error('School Consultation Submission Error:', err);
+        setErrorMsg(err.message || 'Submission failed. Please contact support.');
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
 
     try {
       // 1. Create Razorpay order for ₹199 school consultation fee
@@ -551,6 +625,77 @@ export default function SchoolsPage() {
                     />
                   </div>
 
+                  {/* Promo / Waiver Code Section */}
+                  <div className="p-4 bg-brand-light/50 border border-brand-border rounded-2xl space-y-3">
+                    <label className="block text-xs font-bold text-primary">
+                      Have a Fee-Waiver / Promo Code?
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Enter code (e.g. SCHOOL199)"
+                        value={promoCode}
+                        onChange={(e) => {
+                          setPromoCode(e.target.value.toUpperCase());
+                          if (promoError) setPromoError(null);
+                        }}
+                        disabled={!!appliedPromo}
+                        className="flex-1 p-3 border border-brand-border rounded-xl text-xs bg-white font-mono uppercase tracking-wider focus:ring-2 focus:ring-primary/40 focus:outline-none text-brand-dark"
+                      />
+                      {appliedPromo ? (
+                        <button
+                          type="button"
+                          onClick={handleRemovePromo}
+                          className="px-4 py-3 bg-rose-50 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold hover:bg-rose-100 transition-all cursor-pointer"
+                        >
+                          Remove
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleApplyPromo}
+                          className="px-5 py-3 bg-primary text-white rounded-xl text-xs font-bold hover:bg-primary/90 transition-all cursor-pointer shadow-xs"
+                        >
+                          Apply
+                        </button>
+                      )}
+                    </div>
+
+                    {promoError && (
+                      <p className="text-xs font-bold text-rose-600 flex items-center gap-1.5">
+                        ⚠️ {promoError}
+                      </p>
+                    )}
+
+                    {appliedPromo === 'SCHOOL199' && (
+                      <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold flex items-center justify-between">
+                        <span>🎉 Fee-waiver code <strong>SCHOOL199</strong> applied!</span>
+                        <span className="bg-emerald-600 text-white text-[10px] px-2 py-0.5 rounded-full font-black">100% OFF</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Fee Summary */}
+                  <div className="p-4 bg-white border border-brand-border rounded-2xl space-y-2">
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-brand-muted font-medium">Consultation Booking Fee</span>
+                      <span className="font-bold text-primary">
+                        {isFeeWaived ? (
+                          <span className="flex items-center gap-2">
+                            <span className="line-through text-brand-muted">₹199</span>
+                            <span className="text-emerald-600 font-extrabold">₹0 (Waived)</span>
+                          </span>
+                        ) : (
+                          '₹199'
+                        )}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-[11px] text-brand-muted border-t border-brand-border/40 pt-2">
+                      <span>Placement Fee (Payable after teacher shortlist)</span>
+                      <span>₹5,000 (Later)</span>
+                    </div>
+                  </div>
+
                   <div className="p-4 bg-brand-light/60 border border-brand-border rounded-2xl text-[11px] text-brand-muted leading-relaxed">
                     By submitting this form, you agree to be contacted by The Shadow Bridge team for consultation and candidate alignment.
                   </div>
@@ -562,6 +707,11 @@ export default function SchoolsPage() {
                   >
                     {loading ? (
                       <span>Processing Consultation Order...</span>
+                    ) : isFeeWaived ? (
+                      <>
+                        <Building2 size={18} />
+                        <span>Submit School Requirement (Fee Waived ₹0)</span>
+                      </>
                     ) : (
                       <>
                         <PhoneCall size={18} />

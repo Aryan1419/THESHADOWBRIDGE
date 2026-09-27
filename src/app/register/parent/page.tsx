@@ -39,11 +39,17 @@ export default function ParentConsultationStep1() {
   const cleanPromoCode = promoCode.trim().toUpperCase();
   const isVipCode = cleanPromoCode === 'SHADOW100';
   const isTherapyCodeEntered = cleanPromoCode === 'THERAPY99';
+  const isSchoolCodeEntered = cleanPromoCode === 'SCHOOL199';
 
   const handleConsultationPayment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!parentName.trim() || !phone.trim() || !email.trim() || !city.trim()) {
       setErrorMsg('Please fill in all required fields.');
+      return;
+    }
+
+    if (isSchoolCodeEntered) {
+      setErrorMsg('Code SCHOOL199 is only valid for School Collaboration on /schools.');
       return;
     }
 
@@ -444,7 +450,17 @@ export default function ParentConsultationStep1() {
                       <span>This code is not valid for Shadow Teacher or Home Tutor requests.</span>
                     </motion.div>
                   )}
-                  {cleanPromoCode && !isVipCode && !isTherapyCodeEntered && (
+                  {isSchoolCodeEntered && (
+                    <motion.div 
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="mt-2 p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs font-medium flex items-center gap-2"
+                    >
+                      <AlertCircle size={16} className="text-rose-600 flex-shrink-0" />
+                      <span>Code SCHOOL199 is only valid for School Collaboration on /schools.</span>
+                    </motion.div>
+                  )}
+                  {cleanPromoCode && !isVipCode && !isTherapyCodeEntered && !isSchoolCodeEntered && (
                     <p className="text-[11px] text-amber-700 font-semibold mt-1">
                       Invalid or unrecognized code. Please check and try again.
                     </p>

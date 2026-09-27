@@ -1283,8 +1283,10 @@ export default function AdminDashboard() {
       return ps.includes('waived') || 
              notesStr.includes('SHADOW100') || 
              notesStr.includes('THERAPY99') || 
+             notesStr.includes('SCHOOL199') || 
              payId.includes('SHADOW100') || 
-             payId.includes('THERAPY99');
+             payId.includes('THERAPY99') || 
+             payId.includes('SCHOOL199');
     };
 
     const findBookingForRecord = (r: any) => {
@@ -1533,6 +1535,8 @@ export default function AdminDashboard() {
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
         const paymentId = (r as any).razorpayPaymentId || (r as any).razorpay_payment_id || 'N/A';
         const orderId = (r as any).razorpayOrderId || (r as any).razorpay_order_id || 'N/A';
+        const notesStr = ((r as any).notes || '').toUpperCase();
+        const isWaived = paymentId.includes('SCHOOL199') || notesStr.includes('SCHOOL199') || (r as any).consultation_amount === 0 || (r as any).consultationAmount === 0;
         const isRealSuccess = paymentId.startsWith('pay_');
         const key = `${r.registration_id || r.id}-sch-cons`;
         processedKeys.add(key);
@@ -1547,13 +1551,13 @@ export default function AdminDashboard() {
           phone: r.phone,
           email: r.email,
           type: 'School Consultation Fee',
-          amount: isRealSuccess ? '₹199' : '₹199 (Unverified)',
+          amount: isWaived ? '₹0 (Waived via SCHOOL199)' : (isRealSuccess ? '₹199' : '₹199 (Unverified)'),
           numericAmount: isRealSuccess ? 199 : 0,
           originalFee: 199,
           paymentId,
           orderId,
-          status: isRealSuccess ? 'SUCCESS' : 'UNVERIFIED',
-          isWaived: false,
+          status: isWaived ? 'WAIVED' : (isRealSuccess ? 'SUCCESS' : 'UNVERIFIED'),
+          isWaived,
           isRealSuccess
         });
       }
@@ -3825,15 +3829,30 @@ export default function AdminDashboard() {
                                   <div className="text-[11px] text-brand-muted">{r.levelsRequired || r.levels_required || 'General'}</div>
                                 </td>
                                 <td className="p-4 text-center whitespace-nowrap">
-                                  {isConsultPaid ? (
-                                    <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase">
-                                      ₹99 Paid
-                                    </span>
-                                  ) : (
-                                    <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase">
-                                      Pending
-                                    </span>
-                                  )}
+                                  {(() => {
+                                    const payId = (r.razorpayPaymentId || r.razorpay_payment_id || '').toUpperCase();
+                                    const notesStr = (r.notes || '').toUpperCase();
+                                    const isWaived = payId.includes('SCHOOL199') || notesStr.includes('SCHOOL199') || r.consultation_amount === 0 || r.consultationAmount === 0;
+                                    if (isWaived) {
+                                      return (
+                                        <span className="px-2 py-0.5 rounded-full bg-purple-100 border border-purple-300 text-purple-800 text-[10px] font-black uppercase">
+                                          Waived (SCHOOL199)
+                                        </span>
+                                      );
+                                    }
+                                    if (isConsultPaid) {
+                                      return (
+                                        <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase">
+                                          ₹199 Paid
+                                        </span>
+                                      );
+                                    }
+                                    return (
+                                      <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase">
+                                        Pending
+                                      </span>
+                                    );
+                                  })()}
                                 </td>
                                 <td className="p-4 text-center whitespace-nowrap">
                                   {isPlacePaid ? (
@@ -4061,7 +4080,7 @@ export default function AdminDashboard() {
                       </div>
                       <p className="text-3xl font-black text-purple-950 mt-2">{totalWaivedCount} <span className="text-sm font-semibold text-purple-800">Records</span></p>
                       <p className="text-[11px] text-purple-800 font-bold mt-1">
-                        ₹{totalWaivedValue.toLocaleString()} Value Waived (SHADOW100 / THERAPY99)
+                        ₹{totalWaivedValue.toLocaleString()} Value Waived (SHADOW100 / THERAPY99 / SCHOOL199)
                       </p>
                     </div>
 

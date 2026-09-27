@@ -7,6 +7,10 @@ export async function POST(request: Request) {
     const { regId, contact, promoCode } = body;
 
     const cleanPromoCode = (promoCode || '').trim().toUpperCase();
+    if (cleanPromoCode === 'SCHOOL199') {
+      return NextResponse.json({ error: 'Code SCHOOL199 is only valid for School Collaboration on the /schools page.' }, { status: 400 });
+    }
+
     const isShadowVip = cleanPromoCode === 'SHADOW100';
     const isTherapyCoupon = cleanPromoCode === 'THERAPY99';
     if (!isShadowVip && !isTherapyCoupon) {
