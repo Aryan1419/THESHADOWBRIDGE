@@ -291,7 +291,7 @@ export default function CheckStatusPage() {
                     className="w-full pl-9 pr-4 py-3 bg-brand-light/50 border border-brand-border rounded-xl text-sm font-semibold text-brand-dark placeholder-brand-muted focus:outline-none focus:ring-2 focus:ring-primary/30 uppercase"
                   />
                 </div>
-                <p className="text-[11px] text-brand-muted mt-1.5">Found in your consultation or registration confirmation email.</p>
+                <p className="text-xs text-brand-muted mt-1.5">Found in your consultation or registration confirmation email.</p>
               </div>
 
               <div>
@@ -311,7 +311,7 @@ export default function CheckStatusPage() {
                     className="w-full pl-10 pr-4 py-3 bg-brand-light/50 border border-brand-border rounded-xl text-sm font-semibold text-brand-dark placeholder-brand-muted focus:outline-none focus:ring-2 focus:ring-primary/30"
                   />
                 </div>
-                <p className="text-[11px] text-brand-muted mt-1.5">Must match the phone or email provided during registration.</p>
+                <p className="text-xs text-brand-muted mt-1.5">Must match the phone or email provided during registration.</p>
               </div>
 
               {errorMsg && (
@@ -399,7 +399,7 @@ export default function CheckStatusPage() {
                 </div>
 
                 <div className="bg-primary/5 border border-primary/20 px-5 py-3 rounded-2xl text-center sm:text-right">
-                  <p className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Current Status</p>
+                  <p className="text-xs font-bold text-brand-muted uppercase tracking-wider">Current Status</p>
                   <p className="text-lg font-extrabold text-primary font-serif mt-0.5">{currentStatus}</p>
                 </div>
               </div>
@@ -423,7 +423,7 @@ export default function CheckStatusPage() {
                     <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-2xl p-6 mb-8 shadow-sm">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div>
-                          <span className="px-3 py-1 bg-purple-100 text-purple-900 border border-purple-300 text-[10px] font-extrabold uppercase rounded-full tracking-wider flex items-center gap-1.5 w-max mb-2">
+                          <span className="px-3 py-1 bg-purple-100 text-purple-900 border border-purple-300 text-xs font-extrabold uppercase rounded-full tracking-wider flex items-center gap-1.5 w-max mb-2">
                             <Ticket size={12} className="text-secondary" />
                             Have a VIP Access Code?
                           </span>
@@ -452,7 +452,7 @@ export default function CheckStatusPage() {
                               {vipLoading ? 'Applying...' : 'Unlock Form'}
                             </button>
                           </div>
-                          <p className="text-[10px] text-brand-muted font-medium text-left">Please enter code in <strong>ALL CAPS</strong>.</p>
+                          <p className="text-xs text-brand-muted font-medium text-left">Please enter code in <strong>ALL CAPS</strong>.</p>
                         </form>
                       </div>
 
@@ -515,7 +515,7 @@ export default function CheckStatusPage() {
                           <div className="bg-gradient-to-r from-amber-50 to-purple-50 border-2 border-purple-200 rounded-2xl p-6 shadow-sm">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                               <div>
-                                <span className="px-3 py-1 bg-purple-100 text-purple-900 border border-purple-300 text-[10px] font-extrabold uppercase rounded-full tracking-wider">
+                                <span className="px-3 py-1 bg-purple-100 text-purple-900 border border-purple-300 text-xs font-extrabold uppercase rounded-full tracking-wider">
                                   ⏳ Step 1 • 1-on-1 Consultation Call Pending
                                 </span>
                                 <h3 className="font-serif text-lg font-bold text-primary mt-2">
@@ -534,7 +534,7 @@ export default function CheckStatusPage() {
                           <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-200 rounded-2xl p-6 shadow-md">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                               <div>
-                                <span className="px-3 py-1 bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold uppercase rounded-full tracking-wider">
+                                <span className="px-3 py-1 bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs font-extrabold uppercase rounded-full tracking-wider">
                                   ✓ Step 4 • Registration Form Unlocked
                                 </span>
                                 <h3 className="font-serif text-lg font-bold text-emerald-950 mt-2">
@@ -561,7 +561,7 @@ export default function CheckStatusPage() {
                           <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-6 shadow-md">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                               <div>
-                                <span className="px-3 py-1 bg-amber-200 text-amber-950 border border-amber-400 text-[10px] font-extrabold uppercase rounded-full tracking-wider flex items-center gap-1.5 w-fit">
+                                <span className="px-3 py-1 bg-amber-200 text-amber-950 border border-amber-400 text-xs font-extrabold uppercase rounded-full tracking-wider flex items-center gap-1.5 w-fit">
                                   <Sparkles size={12} className="text-amber-700" />
                                   <span>{isTherapy ? 'Step 5 • Therapy Booking Fee Pending' : 'Step 5 • Placement Onboarding Fee Pending'}</span>
                                 </span>
@@ -591,7 +591,7 @@ export default function CheckStatusPage() {
                                 ✓
                               </div>
                               <div>
-                                <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-900 text-[10px] font-extrabold uppercase rounded-full tracking-wider border border-emerald-300">
+                                <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-900 text-xs font-extrabold uppercase rounded-full tracking-wider border border-emerald-300">
                                   {isTherapy ? 'Therapy Booking Confirmed' : 'Placement Payment Confirmed'}
                                 </span>
                                 <h3 className="font-serif text-lg font-bold text-emerald-950 mt-1">
@@ -650,7 +650,7 @@ export default function CheckStatusPage() {
                         }`}
                       >
                         <div className="flex items-center justify-between mb-2">
-                          <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
+                          <span className={`text-xs font-extrabold uppercase px-2 py-0.5 rounded-full ${
                             isCurrent ? 'bg-white/20 text-white' : isCompleted ? 'bg-emerald-200 text-emerald-900' : 'bg-brand-border/40 text-brand-muted'
                           }`}>
                             Step {idx + 1}
@@ -663,7 +663,7 @@ export default function CheckStatusPage() {
                         <h4 className={`text-xs font-bold leading-tight ${isCurrent ? 'text-white' : 'text-brand-dark'}`}>
                           {step.name}
                         </h4>
-                        <p className={`text-[11px] mt-1 leading-snug ${isCurrent ? 'text-white/80' : 'text-brand-muted'}`}>
+                        <p className={`text-xs mt-1 leading-snug ${isCurrent ? 'text-white/80' : 'text-brand-muted'}`}>
                           {step.desc}
                         </p>
                       </div>
@@ -683,19 +683,19 @@ export default function CheckStatusPage() {
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-brand-dark">
                       <div className="bg-white p-4 rounded-2xl border border-brand-border">
-                        <p className="text-[10px] font-bold text-brand-muted uppercase">Candidate Name</p>
+                        <p className="text-xs font-bold text-brand-muted uppercase">Candidate Name</p>
                         <p className="font-bold text-sm text-primary mt-0.5">{matchedCandidate.name}</p>
                       </div>
                       <div className="bg-white p-4 rounded-2xl border border-brand-border">
-                        <p className="text-[10px] font-bold text-brand-muted uppercase">Qualifications</p>
+                        <p className="text-xs font-bold text-brand-muted uppercase">Qualifications</p>
                         <p className="font-bold text-sm text-primary mt-0.5">{matchedCandidate.qualification}</p>
                       </div>
                       <div className="bg-white p-4 rounded-2xl border border-brand-border">
-                        <p className="text-[10px] font-bold text-brand-muted uppercase">Teaching Experience</p>
+                        <p className="text-xs font-bold text-brand-muted uppercase">Teaching Experience</p>
                         <p className="font-bold text-sm text-primary mt-0.5">{matchedCandidate.experience}</p>
                       </div>
                       <div className="bg-white p-4 rounded-2xl border border-brand-border">
-                        <p className="text-[10px] font-bold text-brand-muted uppercase">Specialization</p>
+                        <p className="text-xs font-bold text-brand-muted uppercase">Specialization</p>
                         <p className="font-bold text-sm text-primary mt-0.5">{matchedCandidate.specialization || 'Special Education'}</p>
                       </div>
                     </div>

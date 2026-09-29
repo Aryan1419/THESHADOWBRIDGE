@@ -149,11 +149,11 @@ export default function TestimonialCarousel() {
                   {isShadowTeacher ? '👩‍👦' : '👨‍👧'}
                 </div>
                 <div className="text-left">
-                  <h4 className="font-serif font-bold text-primary text-base">
+                  <h3 className="font-serif font-bold text-primary text-base">
                     {t.parent_name}
-                    {t.child_first_name && <span className="text-[11px] font-normal text-brand-muted block font-sans">Parent of {t.child_first_name}</span>}
-                  </h4>
-                  <p className="text-[12px] text-brand-muted font-sans font-medium">
+                    {t.child_first_name && <span className="text-xs font-normal text-brand-muted block font-sans">Parent of {t.child_first_name}</span>}
+                  </h3>
+                  <p className="text-xs text-brand-muted font-sans font-medium">
                     {t.service_type} &bull; <span className="font-semibold text-accent">{t.city}</span>
                   </p>
                 </div>
@@ -195,11 +195,11 @@ export default function TestimonialCarousel() {
                 {testimonials[index].service_type === 'Shadow Teacher' ? '👩‍👦' : '👨‍👧'}
               </div>
               <div className="text-left">
-                <h4 className="font-serif font-bold text-primary text-base">
+                <h3 className="font-serif font-bold text-primary text-base">
                   {testimonials[index].parent_name}
-                  {testimonials[index].child_first_name && <span className="text-[11px] font-normal text-brand-muted block font-sans">Parent of {testimonials[index].child_first_name}</span>}
-                </h4>
-                <p className="text-[12px] text-brand-muted font-sans font-medium">
+                  {testimonials[index].child_first_name && <span className="text-xs font-normal text-brand-muted block font-sans">Parent of {testimonials[index].child_first_name}</span>}
+                </h3>
+                <p className="text-xs text-brand-muted font-sans font-medium">
                   {testimonials[index].service_type} &bull; <span className="font-semibold text-accent">{testimonials[index].city}</span>
                 </p>
               </div>
@@ -219,8 +219,8 @@ export default function TestimonialCarousel() {
             <ChevronLeft size={20} />
           </button>
           
-          {/* Navigation Dots */}
-          <div className="flex gap-2">
+          {/* Navigation Dots with accessible 24x24px touch targets */}
+          <div className="flex items-center gap-1">
             {testimonials.map((_, i) => (
               <button
                 key={i}
@@ -228,11 +228,15 @@ export default function TestimonialCarousel() {
                   setDirection(i > index ? 1 : -1);
                   setIndex(i);
                 }}
-                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 cursor-pointer ${
-                  i === index ? 'bg-primary w-6' : 'bg-brand-border'
-                }`}
+                className="w-6 h-6 flex items-center justify-center cursor-pointer"
                 aria-label={`Go to slide ${i + 1}`}
-              />
+              >
+                <span
+                  className={`h-2.5 rounded-full transition-all duration-300 block ${
+                    i === index ? 'bg-primary w-6' : 'bg-brand-border w-2.5'
+                  }`}
+                />
+              </button>
             ))}
           </div>
 

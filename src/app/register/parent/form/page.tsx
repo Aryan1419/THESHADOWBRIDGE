@@ -433,11 +433,11 @@ function GatedRegistrationContent() {
                 <h3 className="font-serif text-lg font-bold text-primary border-b border-brand-border pb-2 flex items-center justify-between">
                   <span>{isOnlineTherapy ? 'Online Therapy & Coaching Details' : 'Home Therapy Specific Details'}</span>
                   {isOnlineTherapy ? (
-                    <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-200 flex items-center gap-1">
+                    <span className="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-200 flex items-center gap-1">
                       <span>🌐</span> <span>PAN-India / Online</span>
                     </span>
                   ) : (
-                    <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-900 border border-purple-200">
+                    <span className="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-900 border border-purple-200">
                       Delhi NCR Only
                     </span>
                   )}

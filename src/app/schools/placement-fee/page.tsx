@@ -177,7 +177,7 @@ function SchoolPlacementFeeContent() {
                     <Lock size={24} />
                   </div>
                   <div>
-                    <span className="px-2.5 py-0.5 bg-emerald-200 text-emerald-900 rounded-full text-[10px] font-black uppercase tracking-wider">
+                    <span className="px-2.5 py-0.5 bg-emerald-200 text-emerald-900 rounded-full text-xs font-black uppercase tracking-wider">
                       Registration Unlocked!
                     </span>
                     <h2 className="font-serif text-2xl font-black text-emerald-950 mt-1">
@@ -195,7 +195,7 @@ function SchoolPlacementFeeContent() {
                       <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">One-time Placement Fee</p>
                       <p className="text-3xl font-black text-primary mt-1">₹ 5,000/-</p>
                     </div>
-                    <span className="text-[10px] text-brand-muted font-semibold bg-brand-light px-2.5 py-1 rounded-md border border-brand-border">
+                    <span className="text-xs text-brand-muted font-semibold bg-brand-light px-2.5 py-1 rounded-md border border-brand-border">
                       Non-refundable
                     </span>
                   </div>
@@ -228,7 +228,7 @@ function SchoolPlacementFeeContent() {
                     )}
                   </button>
 
-                  <div className="pt-2 flex items-center justify-center gap-4 text-[11px] text-brand-muted font-medium">
+                  <div className="pt-2 flex items-center justify-center gap-4 text-xs text-brand-muted font-medium">
                     <span>Payment Methods:</span>
                     <span className="font-bold text-primary">UPI</span> •
                     <span className="font-bold text-primary">Card</span> •

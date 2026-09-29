@@ -35,7 +35,7 @@ export default function TermsConditions() {
           <article className="prose-terms space-y-8 text-left">
 
             {/* Intro */}
-            <p className="text-brand-muted text-sm sm:text-[15px] leading-relaxed">
+            <p className="text-brand-muted text-sm sm:text-sm leading-relaxed">
               Please read these Terms &amp; Conditions (&quot;Terms&quot;) carefully before using the website and services offered by The Shadow Bridge (&quot;we,&quot; &quot;us,&quot; &quot;our,&quot; &quot;the Platform&quot;). By accessing our website, registering as a Parent, Tutor, or Shadow Teacher, or using any of our services, you (&quot;User,&quot; &quot;you&quot;) agree to be bound by these Terms. If you do not agree, please do not use the Platform.
             </p>
 

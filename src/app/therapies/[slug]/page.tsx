@@ -436,7 +436,7 @@ export default function TherapyDetailPage() {
             <span className="text-primary font-bold">{detail.name}</span>
           </nav>
 
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 border border-purple-200 text-purple-950 text-[11px] font-extrabold uppercase">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 border border-purple-200 text-purple-950 text-xs font-extrabold uppercase">
             <Sparkles size={12} className="text-secondary" />
             <span>{slug.includes('online') ? '🌐 PAN INDIA (ONLINE SERVICE)' : '📍 Delhi NCR Home Session'}</span>
           </div>

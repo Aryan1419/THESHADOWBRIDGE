@@ -151,7 +151,7 @@ export default function Faqs() {
                     <div className="flex items-center gap-3">
                       <HelpCircle className="text-accent flex-shrink-0" size={20} />
                       <div>
-                        <span className="text-[10px] uppercase font-bold text-accent tracking-widest block mb-0.5">{faq.category}</span>
+                        <span className="text-xs uppercase font-bold text-accent tracking-widest block mb-0.5">{faq.category}</span>
                         <span>{faq.question}</span>
                       </div>
                     </div>

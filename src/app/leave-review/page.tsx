@@ -262,7 +262,7 @@ export default function LeaveReviewPage() {
                   <label className="block text-xs font-bold text-brand-dark">
                     Your Review / Experience <span className="text-rose-500">*</span>
                   </label>
-                  <span className={`text-[10px] font-mono font-bold ${
+                  <span className={`text-xs font-mono font-bold ${
                     reviewText.length > 1000 ? 'text-rose-600' : 'text-brand-muted'
                   }`}>
                     {reviewText.length}/1000 chars

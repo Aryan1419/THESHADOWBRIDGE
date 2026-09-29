@@ -113,7 +113,7 @@ export default function TherapiesLandingPage() {
               <div className="inline-flex flex-wrap items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-100 border border-purple-200 text-purple-950 text-xs font-extrabold tracking-wider">
                 <Sparkles size={13} className="text-secondary" />
                 <span>Pediatric Therapies &amp; Behavioral Care</span>
-                <span className="px-2 py-0.5 rounded-full bg-secondary text-white text-[9px] font-black uppercase">PAN INDIA &amp; DELHI NCR</span>
+                <span className="px-2 py-0.5 rounded-full bg-secondary text-white text-xs font-black uppercase">PAN INDIA &amp; DELHI NCR</span>
               </div>
 
               <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-black text-primary leading-tight tracking-tight">
@@ -171,7 +171,7 @@ export default function TherapiesLandingPage() {
                     🌐
                   </div>
                   <div>
-                    <span className="text-[10px] font-extrabold text-secondary uppercase tracking-wider">Comprehensive Therapy Care</span>
+                    <span className="text-xs font-extrabold text-secondary uppercase tracking-wider">Comprehensive Therapy Care</span>
                     <h3 className="font-serif text-lg font-bold text-primary">PAN India &amp; Delhi NCR</h3>
                   </div>
                 </div>
@@ -228,7 +228,7 @@ export default function TherapiesLandingPage() {
                       <div className="w-12 h-12 rounded-2xl bg-brand-light text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all shadow-xs">
                         <IconComp size={22} />
                       </div>
-                      <span className="px-2.5 py-0.5 rounded-full bg-brand-light text-primary text-[10px] font-extrabold uppercase border border-brand-border">
+                      <span className="px-2.5 py-0.5 rounded-full bg-brand-light text-primary text-xs font-extrabold uppercase border border-brand-border">
                         {t.badge}
                       </span>
                     </div>
@@ -253,7 +253,7 @@ export default function TherapiesLandingPage() {
                     </Link>
                     <Link
                       href={`/book?service=therapy&type=${t.slug}`}
-                      className="px-3 py-1.5 bg-primary text-white rounded-xl font-bold text-[11px] hover:bg-primary/90 transition-all"
+                      className="px-3 py-1.5 bg-primary text-white rounded-xl font-bold text-xs hover:bg-primary/90 transition-all"
                     >
                       Book ₹99
                     </Link>

@@ -225,13 +225,13 @@ function DashboardContent() {
   // Static Fallback Configuration (Demo Mode)
   const demoConfig = {
     parent: {
-      accentColor: 'text-[#B0206B]',
+      accentColor: 'text-secondary',
       accentBg: 'bg-[#B0206B]/10',
       accentBorder: 'border-[#B0206B]',
       accentBtn: 'bg-[#B0206B] hover:bg-[#B0206B]/90',
       accentDot: 'bg-[#B0206B]',
       ringColor: 'ring-[#B0206B]/30',
-      accentHover: 'hover:text-[#B0206B]',
+      accentHover: 'hover:text-secondary',
       welcomeName: 'Meera Sharma',
       welcomeMessage: 'Thank you for scheduling a child assessment with Pratibha Mishra. We are here to support your family\'s inclusive education path.',
       details: {
@@ -254,13 +254,13 @@ function DashboardContent() {
       ]
     },
     shadow: {
-      accentColor: 'text-[#C89B3C]',
+      accentColor: 'text-accent',
       accentBg: 'bg-[#C89B3C]/10',
       accentBorder: 'border-[#C89B3C]',
       accentBtn: 'bg-[#C89B3C] hover:bg-[#C89B3C]/90',
       accentDot: 'bg-[#C89B3C]',
       ringColor: 'ring-[#C89B3C]/30',
-      accentHover: 'hover:text-[#C89B3C]',
+      accentHover: 'hover:text-accent',
       welcomeName: 'Priya Nair',
       welcomeMessage: 'Thank you for applying to be a part of our inclusive special education team. We appreciate your dedication to supporting child development.',
       details: {
@@ -283,13 +283,13 @@ function DashboardContent() {
       ]
     },
     tutor: {
-      accentColor: 'text-[#3B2A6B]',
+      accentColor: 'text-primary',
       accentBg: 'bg-[#3B2A6B]/10',
       accentBorder: 'border-[#3B2A6B]',
       accentBtn: 'bg-[#3B2A6B] hover:bg-[#3B2A6B]/90',
       accentDot: 'bg-[#3B2A6B]',
       ringColor: 'ring-[#3B2A6B]/30',
-      accentHover: 'hover:text-[#3B2A6B]',
+      accentHover: 'hover:text-primary',
       welcomeName: 'Rohan Sen',
       welcomeMessage: 'Thank you for applying to join our academic home tutor team. We are excited to help you match with parents looking for structured support.',
       details: {
@@ -608,7 +608,7 @@ function DashboardContent() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-brand-muted">Current Status:</span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusBadge()}`}>
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${getStatusBadge()}`}>
                         {currentStatus}
                       </span>
                     </div>
@@ -629,7 +629,7 @@ function DashboardContent() {
                     </p>
                   </div>
                   <div className="mt-4 pt-2 border-t border-brand-border">
-                    <span className="text-[10px] text-brand-muted uppercase font-bold block mb-1">Current Action</span>
+                    <span className="text-xs text-brand-muted uppercase font-bold block mb-1">Current Action</span>
                     <span className={`inline-flex px-3 py-1.5 rounded-xl text-xs font-bold ${getStatusBadge()}`}>
                       {currentStatus}
                     </span>
@@ -656,7 +656,7 @@ function DashboardContent() {
                 </p>
 
                 <div className="pt-2 border-t border-brand-border/60 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-                  <span className="text-[10px] text-brand-muted font-bold uppercase tracking-wider">
+                  <span className="text-xs text-brand-muted font-bold uppercase tracking-wider">
                     *Expect updates via SMS within 24 hours
                   </span>
                   <button className={`px-4 py-2 text-white font-bold rounded-xl text-xs flex items-center gap-1 transition-all ${activeConf.accentBtn} cursor-pointer shadow-sm`}>
@@ -676,7 +676,7 @@ function DashboardContent() {
                       <UserCheck size={20} className="text-secondary" />
                       Proposed Candidate Match
                     </h3>
-                    <span className="bg-purple-50 text-purple-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-purple-100 uppercase">
+                    <span className="bg-purple-50 text-purple-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-purple-100 uppercase">
                       Match Ready
                     </span>
                   </div>
@@ -699,11 +699,11 @@ function DashboardContent() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-medium text-brand-dark">
                     <div className="bg-white p-3 border border-brand-border rounded-xl">
-                      <span className="text-[10px] text-brand-muted uppercase font-bold block mb-1">Specialization</span>
+                      <span className="text-xs text-brand-muted uppercase font-bold block mb-1">Specialization</span>
                       {dbRecord ? (matchedCandidate?.specialization || 'Clinical Behavior Support') : 'Autism Spectrum Support & ADHD Classroom Supervision'}
                     </div>
                     <div className="bg-white p-3 border border-brand-border rounded-xl">
-                      <span className="text-[10px] text-brand-muted uppercase font-bold block mb-1">Comfortable Areas</span>
+                      <span className="text-xs text-brand-muted uppercase font-bold block mb-1">Comfortable Areas</span>
                       {dbRecord ? (matchedCandidate?.comfortableAreas || matchedCandidate?.subjects || 'All Locations') : 'Madhapur, Kondapur, Jubilee Hills'}
                     </div>
                   </div>
@@ -734,11 +734,11 @@ function DashboardContent() {
                         </div>
                         <div className="flex justify-between">
                           <span className="text-brand-muted">Payment ID:</span>
-                          <span className="font-mono text-[11px] font-bold">{dbRecord.placementPaymentId}</span>
+                          <span className="font-mono text-xs font-bold">{dbRecord.placementPaymentId}</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-brand-muted">Status:</span>
-                          <span className="text-emerald-700 font-bold uppercase text-[10px]">Verified Transaction</span>
+                          <span className="text-emerald-700 font-bold uppercase text-xs">Verified Transaction</span>
                         </div>
                       </div>
                     </>
@@ -755,12 +755,12 @@ function DashboardContent() {
                       
                       <div className="bg-brand-light/30 p-4 rounded-2xl border border-brand-border/60 flex justify-between items-center">
                         <div className="space-y-0.5">
-                          <span className="text-[10px] text-brand-muted uppercase font-bold block">One-time Fee Amount</span>
+                          <span className="text-xs text-brand-muted uppercase font-bold block">One-time Fee Amount</span>
                           <span className="font-serif text-2xl font-black text-primary">
                             ₹{dbRecord ? (subType === 'shadow' ? '5,000' : '3,000') : '5,000'}
                           </span>
                         </div>
-                        <span className="text-[10px] text-[#B0206B] font-bold bg-[#B0206B]/5 px-2.5 py-1 rounded-lg border border-[#B0206B]/15 uppercase">
+                        <span className="text-xs text-secondary font-bold bg-[#B0206B]/5 px-2.5 py-1 rounded-lg border border-[#B0206B]/15 uppercase">
                           Non-refundable
                         </span>
                       </div>
@@ -824,7 +824,7 @@ function DashboardContent() {
                       
                       {/* Star Rating Input */}
                       <div className="space-y-1.5">
-                        <label className="text-[10px] text-brand-muted uppercase font-bold block">Star Rating</label>
+                        <label className="text-xs text-brand-muted uppercase font-bold block">Star Rating</label>
                         <div className="flex gap-1.5">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <button
@@ -846,9 +846,9 @@ function DashboardContent() {
 
                       {/* Optional Child First Name */}
                       <div className="space-y-1.5">
-                        <label className="text-[10px] text-brand-muted uppercase font-bold flex justify-between">
+                        <label className="text-xs text-brand-muted uppercase font-bold flex justify-between">
                           <span>Child's First Name (Optional)</span>
-                          <span className="text-[9px] lowercase font-normal italic">for privacy</span>
+                          <span className="text-xs lowercase font-normal italic">for privacy</span>
                         </label>
                         <input
                           type="text"
@@ -861,7 +861,7 @@ function DashboardContent() {
 
                       {/* Written Review */}
                       <div className="space-y-1.5">
-                        <label className="text-[10px] text-brand-muted uppercase font-bold block">Your Review</label>
+                        <label className="text-xs text-brand-muted uppercase font-bold block">Your Review</label>
                         <textarea
                           rows={4}
                           value={reviewText}
@@ -869,7 +869,7 @@ function DashboardContent() {
                           placeholder="How did the shadow teacher or home tutor support your child? What outcomes have you observed?"
                           className="w-full bg-brand-light border border-brand-border rounded-xl px-4 py-3 text-xs text-brand-dark focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent/30 font-medium resize-none"
                         ></textarea>
-                        <span className="text-[9px] text-brand-muted block text-right font-medium">
+                        <span className="text-xs text-brand-muted block text-right font-medium">
                           {reviewText.length} / 1000 characters (min 10)
                         </span>
                       </div>
@@ -882,7 +882,7 @@ function DashboardContent() {
                           onChange={(e) => setConsentPublic(e.target.checked)}
                           className="mt-0.5 rounded border-brand-border text-accent focus:ring-accent accent-accent"
                         />
-                        <span className="text-[11px] text-brand-muted leading-snug font-medium text-left">
+                        <span className="text-xs text-brand-muted leading-snug font-medium text-left">
                           I agree this review may be displayed publicly on The Shadow Bridge website.
                         </span>
                       </label>

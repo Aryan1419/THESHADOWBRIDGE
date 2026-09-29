@@ -35,10 +35,10 @@ export default function PrivacyPolicy() {
           <article className="prose-terms space-y-8 text-left">
 
             {/* Intro */}
-            <p className="text-brand-muted text-sm sm:text-[15px] leading-relaxed">
+            <p className="text-brand-muted text-sm sm:text-sm leading-relaxed">
               The Shadow Bridge (&quot;we,&quot; &quot;us,&quot; &quot;our,&quot; &quot;the Platform&quot;) is committed to protecting the privacy of the families, children, Tutors, and Shadow Teachers who use our services. This Privacy Policy explains what information we collect, why we collect it, how we use and protect it, and the choices you have. By using our website and services, you consent to the practices described here.
             </p>
-            <p className="text-brand-muted text-sm sm:text-[15px] leading-relaxed">
+            <p className="text-brand-muted text-sm sm:text-sm leading-relaxed">
               Because our services involve information about children, including sensitive details related to diagnoses and developmental needs, we treat this data with particular care. Please read this policy carefully.
             </p>
 

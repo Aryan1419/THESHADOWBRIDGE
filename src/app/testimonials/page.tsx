@@ -162,7 +162,7 @@ export default function Testimonials() {
                           <div>
                             <h4 className="font-serif font-bold text-primary text-base">
                               {review.parent_name}
-                              {review.child_first_name && <span className="text-[11px] font-normal text-brand-muted block font-sans">Parent of {review.child_first_name}</span>}
+                              {review.child_first_name && <span className="text-xs font-normal text-brand-muted block font-sans">Parent of {review.child_first_name}</span>}
                             </h4>
                             <p className="text-xs text-brand-muted font-sans font-medium">{review.service_type}</p>
                           </div>

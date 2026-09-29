@@ -140,7 +140,7 @@ export default function ShadowTeacherCostByCityPage() {
             
             {/* Step 1: Consultation */}
             <div className="bg-white rounded-2xl p-6 border-2 border-primary/20 shadow-xs space-y-4 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-primary text-white text-[11px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">
+              <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">
                 Step 1
               </div>
               <div className="flex items-center gap-3">
@@ -169,7 +169,7 @@ export default function ShadowTeacherCostByCityPage() {
 
             {/* Step 2: Placement */}
             <div className="bg-white rounded-2xl p-6 border-2 border-secondary/30 shadow-xs space-y-4 relative overflow-hidden">
-              <div className="absolute top-0 right-0 bg-secondary text-white text-[11px] font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">
+              <div className="absolute top-0 right-0 bg-secondary text-white text-xs font-bold px-3 py-1 rounded-bl-xl uppercase tracking-wider">
                 Step 2
               </div>
               <div className="flex items-center gap-3">

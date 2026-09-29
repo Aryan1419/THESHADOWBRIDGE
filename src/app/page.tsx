@@ -13,6 +13,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import TestimonialCarousel from '@/components/TestimonialCarousel';
 import FaqAccordion from '@/components/FaqAccordion';
+import Button from '@/components/ui/Button';
 
 export default function Home() {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -169,90 +170,58 @@ export default function Home() {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-16 lg:pt-40 lg:pb-24 overflow-hidden bg-gradient-to-b from-[#F7F5FC] to-white">
+      <section className="relative pt-28 pb-14 lg:pt-36 lg:pb-20 overflow-hidden bg-gradient-to-b from-[#F7F5FC] to-white">
         {/* Soft Background shapes */}
         <div className="absolute top-1/4 left-0 w-72 h-72 bg-secondary/5 rounded-full blur-3xl pointer-events-none"></div>
         <div className="absolute bottom-10 right-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
             
             {/* Left Column Text */}
-            <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold">
-                <Sparkles size={16} className="text-secondary" />
+            <div className="lg:col-span-6 space-y-5 text-center lg:text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
+                <Sparkles size={14} className="text-secondary" />
                 <span>Empowering Children to Blossom</span>
               </div>
               
-              <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-black text-primary leading-tight">
+              <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-black text-primary leading-[1.15]">
                 Exceptional Support. <br className="hidden sm:inline" />
                 <span className="text-gradient">Empowered Learning.</span> <br />
                 Independent Futures.
               </h1>
               
-              <p className="text-brand-muted text-lg sm:text-xl max-w-xl mx-auto lg:mx-0 leading-relaxed font-sans">
+              <p className="text-brand-muted text-base sm:text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed font-sans">
                 Connecting families with professionally trained Shadow Teachers and Home Tutors who provide the right support, guidance, and care every child deserves.
               </p>
 
-              {/* Buttons & Quick Service Shortcuts */}
-              <div className="space-y-4 pt-2">
+              {/* Primary Action Buttons */}
+              <div className="pt-2">
                 <div className="flex flex-col sm:flex-row gap-3.5 justify-center lg:justify-start">
-                  <Link
+                  <Button
+                    variant="primary"
+                    size="lg"
                     href="/services"
-                    className="btn-gradient px-7 py-4 rounded-full text-base font-bold text-center shadow-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2.5 text-white cursor-pointer"
+                    icon={<Compass size={20} />}
                   >
-                    <Compass size={20} className="shrink-0" />
-                    <span>EXPLORE SERVICES</span>
-                  </Link>
+                    EXPLORE SERVICES
+                  </Button>
 
-                  <Link
+                  <Button
+                    variant="outline"
+                    size="lg"
                     href="/book"
-                    className="px-7 py-4 rounded-full bg-white border-2 border-primary text-primary hover:bg-brand-light font-bold text-center transition-all flex items-center justify-center gap-2 shadow-md hover:scale-105 active:scale-95 cursor-pointer"
+                    icon={<PhoneCall size={18} className="text-secondary" />}
                   >
-                    <PhoneCall size={18} className="shrink-0 text-secondary" />
-                    <span>Book Consultation (₹99)</span>
-                  </Link>
-                </div>
-
-                {/* Quick Service Category Shortcuts */}
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1">
-                  <span className="text-xs font-bold text-brand-muted uppercase tracking-wider mr-1">Quick Explore:</span>
-                  <Link
-                    href="/shadow-teachers"
-                    className="px-3 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
-                  >
-                    <Users size={13} className="text-secondary" />
-                    <span>Shadow Teachers</span>
-                  </Link>
-                  <Link
-                    href="/tutors"
-                    className="px-3 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
-                  >
-                    <GraduationCap size={13} className="text-primary" />
-                    <span>Home Tutors</span>
-                  </Link>
-                  <Link
-                    href="/therapies"
-                    className="px-3 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
-                  >
-                    <Heart size={13} className="text-secondary" />
-                    <span>Therapy Sessions</span>
-                    <span className="bg-secondary/15 text-secondary text-[9px] font-black px-1.5 py-0.5 rounded-full">Delhi NCR</span>
-                  </Link>
-                  <Link
-                    href="/schools"
-                    className="px-3 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
-                  >
-                    <BookOpen size={13} className="text-accent" />
-                    <span>For Schools</span>
-                  </Link>
+                    Book Consultation (₹99)
+                  </Button>
                 </div>
               </div>
             </div>
 
             {/* Right Column Image */}
             <div className="lg:col-span-6 relative flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-[500px] h-[400px] sm:h-[500px]">
+              <div className="relative w-full max-w-[480px] h-[360px] sm:h-[460px]">
                 {/* Visual Frame */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-primary to-secondary rounded-3xl transform rotate-3 scale-[1.02] opacity-20"></div>
                 <div className="absolute inset-0 bg-white rounded-3xl overflow-hidden shadow-2xl border border-brand-border">
@@ -276,7 +245,7 @@ export default function Home() {
                     <Award size={24} className="text-accent" />
                   </div>
                   <div>
-                    <h3 className="font-serif font-black text-primary text-lg leading-none">11+ Years</h3>
+                    <h2 className="font-serif font-black text-primary text-lg leading-none">11+ Years</h2>
                     <p className="text-xs text-brand-muted font-medium mt-1">Experience in Special Education & Child Support.</p>
                   </div>
                 </motion.div>
@@ -393,9 +362,9 @@ export default function Home() {
                 </div>
                 {/* Floating Card */}
                 <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 bg-white px-6 py-4 rounded-xl border border-brand-border shadow-lg text-center w-[90%]">
-                  <h4 className="font-serif font-black text-primary text-base">Pratibha Mishra</h4>
+                  <h3 className="font-serif font-black text-primary text-base">Pratibha Mishra</h3>
                   <p className="text-xs text-accent font-bold mb-1">Founder & Lead Mentor</p>
-                  <p className="text-[10px] text-brand-muted font-medium">11+ Years in Special Education & Shadow Teacher Support</p>
+                  <p className="text-xs text-brand-muted font-medium">11+ Years in Special Education & Shadow Teacher Support</p>
                 </div>
               </div>
             </div>
@@ -510,6 +479,46 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Quick Explore Section (Relocated out of Hero for cleaner decision hierarchy) */}
+      <section className="py-8 bg-brand-light/60 border-b border-brand-border/60">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
+            <span className="text-xs font-bold text-brand-muted uppercase tracking-wider mr-1">
+              Quick Explore:
+            </span>
+            <Link
+              href="/shadow-teachers"
+              className="px-3.5 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
+            >
+              <Users size={14} className="text-secondary" />
+              <span>Shadow Teachers</span>
+            </Link>
+            <Link
+              href="/tutors"
+              className="px-3.5 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
+            >
+              <GraduationCap size={14} className="text-primary" />
+              <span>Home Tutors</span>
+            </Link>
+            <Link
+              href="/therapies"
+              className="px-3.5 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
+            >
+              <Heart size={14} className="text-secondary" />
+              <span>Therapy Sessions</span>
+              <span className="bg-secondary/15 text-secondary text-xs font-black px-1.5 py-0.5 rounded-full">Delhi NCR</span>
+            </Link>
+            <Link
+              href="/schools"
+              className="px-3.5 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
+            >
+              <BookOpen size={14} className="text-accent" />
+              <span>For Schools</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Services Section */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -541,12 +550,14 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="p-8 pt-0 mt-auto">
-                  <Link
+                  <Button
+                    variant="ghost"
+                    size="md"
                     href={srv.link}
-                    className="w-full inline-block text-center py-3 bg-brand-light hover:bg-primary hover:text-white font-bold text-primary rounded-xl transition-all"
+                    className="w-full"
                   >
                     {srv.btnText}
-                  </Link>
+                  </Button>
                 </div>
               </motion.div>
             ))}
@@ -569,18 +580,21 @@ export default function Home() {
           <TestimonialCarousel />
 
           <div className="text-center mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link
+            <Button
+              variant="outline"
+              size="md"
               href="/testimonials"
-              className="px-8 py-3.5 rounded-full border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold transition-all shadow-sm"
             >
               Read More Reviews
-            </Link>
-            <Link
+            </Button>
+            <Button
+              variant="ghost"
+              size="md"
               href="/leave-review"
-              className="px-8 py-3.5 rounded-full bg-brand-light border-2 border-brand-border text-secondary hover:border-secondary font-bold transition-all shadow-sm flex items-center gap-2"
+              icon={<Star size={16} className="text-accent fill-accent" />}
             >
-              <span>⭐ Leave a Review</span>
-            </Link>
+              Leave a Review
+            </Button>
           </div>
         </div>
       </section>
@@ -596,12 +610,14 @@ export default function Home() {
             Take the first step towards understanding your child's needs. Let's plan their inclusive pathway together.
           </p>
           <div className="pt-2">
-            <Link
+            <Button
+              variant="secondary"
+              size="lg"
               href="/book"
-              className="px-10 py-4 bg-white text-primary hover:bg-brand-light font-bold text-lg rounded-full inline-flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-lg"
+              className="bg-white text-primary hover:bg-brand-light font-black shadow-lg hover:scale-105 active:scale-95"
             >
               Book Now
-            </Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -609,12 +625,12 @@ export default function Home() {
       {/* Contact Section */}
       <section className="py-20 bg-white" id="contact">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
             
             {/* Contact Details Column */}
-            <div className="lg:col-span-5 space-y-8">
-              <div>
-                <h2 className="font-serif text-3xl sm:text-4xl font-extrabold text-primary mb-4">
+            <div className="lg:col-span-5 space-y-6">
+              <div className="space-y-3">
+                <h2 className="font-serif text-3xl sm:text-4xl font-extrabold text-primary">
                   Get In Touch
                 </h2>
                 <p className="text-brand-muted text-sm sm:text-base leading-relaxed">
@@ -622,15 +638,15 @@ export default function Home() {
                 </p>
               </div>
 
-              <div className="space-y-8">
-                <div className="flex gap-4">
-                  <div className="p-3 bg-brand-light rounded-xl text-primary flex-shrink-0 flex items-center justify-center w-12 h-12">
-                    <Send size={22} className="text-secondary" />
+              <div className="pt-1">
+                <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-brand-light/60 border border-brand-border/80">
+                  <div className="p-2.5 bg-white rounded-xl text-primary shadow-xs flex-shrink-0 flex items-center justify-center w-11 h-11 border border-brand-border">
+                    <Send size={20} className="text-secondary" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-brand-dark text-base">Email Support</h4>
-                    <p className="text-brand-muted text-sm font-semibold">
-                      <a href="mailto:theshadowbridgesupport@gmail.com" className="hover:text-accent transition-colors">
+                    <h3 className="font-bold text-brand-dark text-sm sm:text-base">Email Support</h3>
+                    <p className="text-brand-muted text-xs sm:text-sm font-semibold">
+                      <a href="mailto:theshadowbridgesupport@gmail.com" className="hover:text-secondary transition-colors break-all">
                         theshadowbridgesupport@gmail.com
                       </a>
                     </p>
@@ -738,14 +754,17 @@ export default function Home() {
                     ></textarea>
                   </div>
 
-                  <button
+                  <Button
                     type="submit"
+                    variant="primary"
+                    size="md"
                     disabled={loading}
-                    className="btn-gradient w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full py-3.5"
+                    icon={<Send size={16} />}
+                    iconPosition="right"
                   >
                     {loading ? 'Sending...' : 'Send Message'}
-                    <Send size={16} />
-                  </button>
+                  </Button>
                 </form>
               )}
             </div>

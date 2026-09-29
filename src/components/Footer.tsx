@@ -18,7 +18,7 @@ export default function Footer() {
                 <span className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-white leading-none animate-pulse">
                   The Shadow Bridge
                 </span>
-                <span className="text-[9px] text-accent font-semibold tracking-widest uppercase mt-1">
+                <span className="text-xs text-accent font-semibold tracking-normal mt-1">
                   by Pratibha Mishra
                 </span>
               </div>

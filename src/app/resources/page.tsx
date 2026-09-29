@@ -208,7 +208,7 @@ export default function ResourcesIndexPage() {
                 >
                   <div className="p-6 space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className={`text-[11px] font-bold px-3 py-1 rounded-full border ${article.badgeColor}`}>
+                      <span className={`text-xs font-bold px-3 py-1 rounded-full border ${article.badgeColor}`}>
                         {article.category}
                       </span>
                       <span className="flex items-center gap-1 text-xs text-gray-400 font-medium">

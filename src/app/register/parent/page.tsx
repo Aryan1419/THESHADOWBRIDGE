@@ -418,7 +418,7 @@ export default function ParentConsultationStep1() {
                       <Ticket size={14} className="text-accent" />
                       Have a VIP Access Code / Referral Code?
                     </span>
-                    <span className="text-[10px] text-brand-muted font-normal">Optional</span>
+                    <span className="text-xs text-brand-muted font-normal">Optional</span>
                   </label>
                   <div className="relative">
                     <input
@@ -429,7 +429,7 @@ export default function ParentConsultationStep1() {
                       className="w-full px-4 py-3 bg-brand-light/50 border border-brand-border rounded-xl text-sm font-mono font-bold text-primary placeholder-brand-muted focus:outline-none focus:ring-2 focus:ring-accent/40 uppercase"
                     />
                   </div>
-                  <p className="text-[11px] text-brand-muted mt-1 font-medium">Please enter your code in <strong>ALL CAPS</strong>.</p>
+                  <p className="text-xs text-brand-muted mt-1 font-medium">Please enter your code in <strong>ALL CAPS</strong>.</p>
                   {isVipCode && (
                     <motion.div 
                       initial={{ opacity: 0, y: -4 }}
@@ -461,7 +461,7 @@ export default function ParentConsultationStep1() {
                     </motion.div>
                   )}
                   {cleanPromoCode && !isVipCode && !isTherapyCodeEntered && !isSchoolCodeEntered && (
-                    <p className="text-[11px] text-amber-700 font-semibold mt-1">
+                    <p className="text-xs text-amber-700 font-semibold mt-1">
                       Invalid or unrecognized code. Please check and try again.
                     </p>
                   )}
@@ -486,12 +486,12 @@ export default function ParentConsultationStep1() {
                   {isVipCode ? (
                     <div className="flex flex-col items-end">
                       <span className="text-2xl font-extrabold text-emerald-600 font-serif">FREE</span>
-                      <span className="text-[10px] text-emerald-700 font-bold line-through">₹99</span>
+                      <span className="text-xs text-emerald-700 font-bold line-through">₹99</span>
                     </div>
                   ) : (
                     <>
                       <span className="text-2xl font-extrabold text-primary font-serif">₹99</span>
-                      <span className="text-[10px] text-brand-muted block font-bold">One-time fee</span>
+                      <span className="text-xs text-brand-muted block font-bold">One-time fee</span>
                     </>
                   )}
                 </div>

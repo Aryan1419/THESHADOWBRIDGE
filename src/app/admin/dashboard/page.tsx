@@ -1734,7 +1734,7 @@ export default function AdminDashboard() {
               </div>
               <div className="text-left">
                 <h2 className="font-serif font-black text-sm tracking-wide">The Shadow Bridge</h2>
-                <p className="text-[10px] text-white/50 font-bold uppercase tracking-wider">by Pratibha Mishra</p>
+                <p className="text-xs text-white/50 font-bold uppercase tracking-wider">by Pratibha Mishra</p>
               </div>
             </div>
             <button
@@ -1823,7 +1823,7 @@ export default function AdminDashboard() {
 
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <span className="text-xs font-bold text-brand-muted uppercase tracking-wider hidden sm:inline">Console Mode:</span>
-            <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 rounded-full text-[10px] uppercase flex items-center gap-1 shrink-0">
+            <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 font-bold border border-emerald-200 rounded-full text-xs uppercase flex items-center gap-1 shrink-0">
               <ShieldCheck size={10} />
               <span className="hidden sm:inline">Active Database Connected</span>
               <span className="sm:hidden">Live DB</span>
@@ -1866,7 +1866,7 @@ export default function AdminDashboard() {
                   <h4 className="text-xs font-bold text-brand-muted uppercase tracking-wider">Total Tutors</h4>
                   <div className="flex items-baseline gap-2 mt-2">
                     <span className="text-3xl font-black text-primary">{totalTutors}</span>
-                    <span className="text-[10px] text-brand-muted">Registered Tutors</span>
+                    <span className="text-xs text-brand-muted">Registered Tutors</span>
                   </div>
                 </div>
 
@@ -1875,7 +1875,7 @@ export default function AdminDashboard() {
                   <h4 className="text-xs font-bold text-brand-muted uppercase tracking-wider">Shadow Teachers</h4>
                   <div className="flex items-baseline gap-2 mt-2">
                     <span className="text-3xl font-black text-primary">{totalShadows}</span>
-                    <span className="text-[10px] text-brand-muted">Registered Shadows</span>
+                    <span className="text-xs text-brand-muted">Registered Shadows</span>
                   </div>
                 </div>
 
@@ -1884,7 +1884,7 @@ export default function AdminDashboard() {
                   <h4 className="text-xs font-bold text-brand-muted uppercase tracking-wider">Parent Requests</h4>
                   <div className="flex items-baseline gap-2 mt-2">
                     <span className="text-3xl font-black text-primary">{totalRequests}</span>
-                    <span className="text-[10px] text-brand-muted">
+                    <span className="text-xs text-brand-muted">
                       ({totalParentShadows} Shadow / {totalParentTutors} Tutor)
                     </span>
                   </div>
@@ -1896,7 +1896,7 @@ export default function AdminDashboard() {
                   </h4>
                   <div className="flex items-baseline gap-2 mt-2">
                     <span className="text-3xl font-black text-secondary">{newThisWeek}</span>
-                    <span className="text-[10px] text-brand-muted">New Submissions</span>
+                    <span className="text-xs text-brand-muted">New Submissions</span>
                   </div>
                 </div>
 
@@ -1947,32 +1947,32 @@ export default function AdminDashboard() {
 
                     <div className="px-5 sm:px-6 py-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
                       <div className="p-4 bg-brand-light/40 rounded-2xl border border-brand-border/60">
-                        <span className="text-[10px] text-brand-muted font-bold uppercase tracking-wider block">Expected Revenue</span>
+                        <span className="text-xs text-brand-muted font-bold uppercase tracking-wider block">Expected Revenue</span>
                         <span className="text-xl font-black text-primary mt-0.5 block">₹{stats.totalExpected.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-200/60">
-                        <span className="text-[10px] text-emerald-800 font-bold uppercase tracking-wider block">Collected</span>
+                        <span className="text-xs text-emerald-800 font-bold uppercase tracking-wider block">Collected</span>
                         <span className="text-xl font-black text-emerald-700 mt-0.5 block">₹{stats.totalReceived.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="p-4 bg-amber-50/60 rounded-2xl border border-amber-200/60">
-                        <span className="text-[10px] text-amber-800 font-bold uppercase tracking-wider block">Pending Balance</span>
+                        <span className="text-xs text-amber-800 font-bold uppercase tracking-wider block">Pending Balance</span>
                         <span className="text-xl font-black text-amber-700 mt-0.5 block">₹{stats.totalPending.toLocaleString('en-IN')}</span>
                       </div>
                       <div className="p-4 bg-rose-50/60 rounded-2xl border border-rose-200/60">
-                        <span className="text-[10px] text-rose-800 font-bold uppercase tracking-wider block">Overdue Installments</span>
+                        <span className="text-xs text-rose-800 font-bold uppercase tracking-wider block">Overdue Installments</span>
                         <span className="text-xl font-black text-rose-700 mt-0.5 block">{stats.overdueCount} ({`₹${stats.totalOverdueAmount.toLocaleString('en-IN')}`})</span>
                       </div>
                     </div>
 
                     {thisMonthInstallments.length > 0 ? (
                       <div className="relative border-t border-brand-border/60">
-                        <div className="px-4 py-1.5 bg-purple-50/50 text-[10px] text-purple-800 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                        <div className="px-4 py-1.5 bg-purple-50/50 text-xs text-purple-800 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
                           <span>↔ Swipe horizontally to view all columns</span>
                         </div>
                         <div className="overflow-x-auto overscroll-x-contain pb-1">
                           <table className="w-full min-w-[650px] text-left border-collapse text-xs">
                           <thead>
-                            <tr className="bg-brand-light/40 text-brand-muted text-[10px] uppercase font-bold border-b border-brand-border">
+                            <tr className="bg-brand-light/40 text-brand-muted text-xs uppercase font-bold border-b border-brand-border">
                               <th className="py-2.5 px-5">Shadow Teacher</th>
                               <th className="py-2.5 px-4">Installment</th>
                               <th className="py-2.5 px-4">Due Date</th>
@@ -1990,19 +1990,19 @@ export default function AdminDashboard() {
                                 <tr key={`${teacher.id}-${installment.id}`} className="hover:bg-brand-light/20">
                                   <td className="py-2.5 px-5">
                                     <div className="font-bold text-primary">{teacher.name}</div>
-                                    <div className="text-[10px] text-brand-muted font-mono">{teacher.registration_id} • {teacher.city}</div>
+                                    <div className="text-xs text-brand-muted font-mono">{teacher.registration_id} • {teacher.city}</div>
                                   </td>
                                   <td className="py-2.5 px-4 font-medium text-brand-dark">
                                     Inst #{installment.installmentNumber}
                                   </td>
-                                  <td className="py-2.5 px-4 font-mono text-[11px] text-brand-dark">
+                                  <td className="py-2.5 px-4 font-mono text-xs text-brand-dark">
                                     {installment.dueDate ? new Date(installment.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '—'}
                                   </td>
                                   <td className="py-2.5 px-4 font-black text-primary">
                                     ₹{installment.amount.toLocaleString('en-IN')}
                                   </td>
                                   <td className="py-2.5 px-4">
-                                    <span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                                    <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-bold ${
                                       effStatus === 'Paid'
                                         ? 'bg-emerald-50 text-emerald-700'
                                         : (effStatus === 'Partially Paid' ? 'bg-blue-50 text-blue-700' : (effStatus === 'Overdue' ? 'bg-rose-50 text-rose-700' : 'bg-amber-50 text-amber-700'))
@@ -2013,7 +2013,7 @@ export default function AdminDashboard() {
                                   <td className="py-2.5 px-5 text-right">
                                     <button
                                       onClick={() => openPaymentLogger(teacher, installment)}
-                                      className="px-2.5 py-1 bg-primary hover:bg-primary/90 text-white font-bold text-[10px] rounded-lg transition-all cursor-pointer shadow-sm"
+                                      className="px-2.5 py-1 bg-primary hover:bg-primary/90 text-white font-bold text-xs rounded-lg transition-all cursor-pointer shadow-sm"
                                     >
                                       Update
                                     </button>
@@ -2050,7 +2050,7 @@ export default function AdminDashboard() {
                     <div className="p-12 text-center text-brand-muted">No submissions found.</div>
                   ) : (
                     <div className="relative">
-                      <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                      <div className="px-4 py-1.5 bg-brand-light/60 text-xs text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
                         <span>↔ Swipe horizontally to view all columns</span>
                       </div>
                       <div className="overflow-x-auto overscroll-x-contain pb-1">
@@ -2074,12 +2074,12 @@ export default function AdminDashboard() {
                               <td className="p-4 font-bold">{r.parentName || r.name}</td>
                               <td className="p-4">{r.city}</td>
                               <td className="p-4">
-                                <span className="px-2 py-0.5 bg-brand-light border border-brand-border rounded-md text-[10px] font-bold text-primary uppercase">
+                                <span className="px-2 py-0.5 bg-brand-light border border-brand-border rounded-md text-xs font-bold text-primary uppercase">
                                   {r.typeLabel}
                                 </span>
                               </td>
                               <td className="p-4 text-center">
-                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusColor(r.status)}`}>
+                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${getStatusColor(r.status)}`}>
                                   {r.status}
                                 </span>
                               </td>
@@ -2091,7 +2091,7 @@ export default function AdminDashboard() {
                                     setEditMatchId((r as any).suggestedMatchId || '');
                                     setSelectedRecord({ type: r.typeCollection, data: r });
                                   }}
-                                  className="px-3 py-1 bg-primary text-white rounded-lg font-bold text-[10px] hover:bg-primary/95 transition-all cursor-pointer shadow-sm"
+                                  className="px-3 py-1 bg-primary text-white rounded-lg font-bold text-xs hover:bg-primary/95 transition-all cursor-pointer shadow-sm"
                                 >
                                   View
                                 </button>
@@ -2131,7 +2131,7 @@ export default function AdminDashboard() {
               {/* Filters Panel */}
               <div className="bg-white border border-brand-border p-4 rounded-2xl shadow-sm grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                  <span className="text-xs text-brand-muted uppercase font-bold flex items-center gap-1">
                     <Filter size={10} /> Filter City
                   </span>
                   <select
@@ -2149,7 +2149,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                  <span className="text-xs text-brand-muted uppercase font-bold flex items-center gap-1">
                     <Filter size={10} /> Filter Status
                   </span>
                   <select
@@ -2168,7 +2168,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                  <span className="text-xs text-brand-muted uppercase font-bold flex items-center gap-1">
                     <Filter size={10} /> Experience
                   </span>
                   <select
@@ -2185,7 +2185,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                  <span className="text-xs text-brand-muted uppercase font-bold flex items-center gap-1">
                     <Filter size={10} /> Subject Focus
                   </span>
                   <input
@@ -2209,7 +2209,7 @@ export default function AdminDashboard() {
                   <div className="p-12 text-center text-brand-muted">No tutors match the criteria.</div>
                 ) : (
                   <div className="relative">
-                    <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                    <div className="px-4 py-1.5 bg-brand-light/60 text-xs text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
                       <span>↔ Swipe horizontally to view all columns</span>
                     </div>
                     <div className="overflow-x-auto overscroll-x-contain pb-1">
@@ -2232,16 +2232,16 @@ export default function AdminDashboard() {
                             <td className="p-4 font-bold text-secondary">{r.registration_id}</td>
                             <td className="p-4">
                               <p className="font-bold">{r.name}</p>
-                              <p className="text-[10px] text-brand-muted">{r.phone} • {r.email}</p>
+                              <p className="text-xs text-brand-muted">{r.phone} • {r.email}</p>
                             </td>
                             <td className="p-4">{r.city}</td>
                             <td className="p-4">{r.experience}</td>
                             <td className="p-4 max-w-xs truncate">
                               <p className="font-bold">{r.subjects}</p>
-                              <p className="text-brand-muted text-[10px]">{r.grades}</p>
+                              <p className="text-brand-muted text-xs">{r.grades}</p>
                             </td>
                             <td className="p-4 text-center">
-                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusColor(r.status)}`}>
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${getStatusColor(r.status)}`}>
                                 {r.status}
                               </span>
                             </td>
@@ -2255,7 +2255,7 @@ export default function AdminDashboard() {
                                      setEditMatchId((r as any).suggestedMatchId || '');
                                      setSelectedRecord({ type: 'tutors', data: r });
                                    }}
-                                   className="px-3 py-1.5 border border-primary hover:bg-primary/5 text-primary rounded-xl font-bold text-[10px] transition-all cursor-pointer shadow-sm"
+                                   className="px-3 py-1.5 border border-primary hover:bg-primary/5 text-primary rounded-xl font-bold text-xs transition-all cursor-pointer shadow-sm"
                                  >
                                    View Details
                                  </button>
@@ -2306,7 +2306,7 @@ export default function AdminDashboard() {
               {/* Filters Panel */}
               <div className="bg-white border border-brand-border p-4 rounded-2xl shadow-sm grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                  <span className="text-xs text-brand-muted uppercase font-bold flex items-center gap-1">
                     <Filter size={10} /> Filter City
                   </span>
                   <select
@@ -2324,7 +2324,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                  <span className="text-xs text-brand-muted uppercase font-bold flex items-center gap-1">
                     <Filter size={10} /> Filter Status
                   </span>
                   <select
@@ -2343,7 +2343,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                  <span className="text-xs text-brand-muted uppercase font-bold flex items-center gap-1">
                     <Filter size={10} /> Special-Ed Exp
                   </span>
                   <select
@@ -2358,7 +2358,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                  <span className="text-xs text-brand-muted uppercase font-bold flex items-center gap-1">
                     <Filter size={10} /> Comfortable Area
                   </span>
                   <select
@@ -2375,7 +2375,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                  <span className="text-xs text-brand-muted uppercase font-bold flex items-center gap-1">
                     <Filter size={10} /> Experience Years
                   </span>
                   <select
@@ -2403,7 +2403,7 @@ export default function AdminDashboard() {
                   <div className="p-12 text-center text-brand-muted">No shadow teachers match the criteria.</div>
                 ) : (
                   <div className="relative">
-                    <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                    <div className="px-4 py-1.5 bg-brand-light/60 text-xs text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
                       <span>↔ Swipe horizontally to view all columns</span>
                     </div>
                     <div className="overflow-x-auto overscroll-x-contain pb-1">
@@ -2426,12 +2426,12 @@ export default function AdminDashboard() {
                             <td className="p-4 font-bold text-secondary">{r.registration_id}</td>
                             <td className="p-4">
                               <p className="font-bold">{r.name}</p>
-                              <p className="text-[10px] text-brand-muted">{r.phone} • {r.email}</p>
+                              <p className="text-xs text-brand-muted">{r.phone} • {r.email}</p>
                             </td>
                             <td className="p-4">{r.city}</td>
                             <td className="p-4">{r.qualification}</td>
                             <td className="p-4 text-center">
-                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                                 r.specialNeedsExp === 'Yes' ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-50 text-gray-600'
                               }`}>
                                 {r.specialNeedsExp}
@@ -2439,7 +2439,7 @@ export default function AdminDashboard() {
                             </td>
                             <td className="p-4 max-w-xs truncate">{r.comfortableAreas}</td>
                             <td className="p-4 text-center">
-                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusColor(r.status)}`}>
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${getStatusColor(r.status)}`}>
                                 {r.status}
                               </span>
                             </td>
@@ -2452,7 +2452,7 @@ export default function AdminDashboard() {
                                      setEditMatchId((r as any).suggestedMatchId || '');
                                      setSelectedRecord({ type: 'shadow_teachers', data: r });
                                    }}
-                                   className="px-3 py-1.5 border border-primary hover:bg-primary/5 text-primary rounded-xl font-bold text-[10px] transition-all cursor-pointer shadow-sm"
+                                   className="px-3 py-1.5 border border-primary hover:bg-primary/5 text-primary rounded-xl font-bold text-xs transition-all cursor-pointer shadow-sm"
                                  >
                                    View Details
                                  </button>
@@ -2644,7 +2644,7 @@ export default function AdminDashboard() {
                         <BarChart3 size={14} />
                         <span>All-Months Summary View</span>
                         {stats.allMonthsSummary.length > 0 && (
-                          <span className={`px-1.5 py-0.5 rounded-md text-[10px] font-mono font-bold ${
+                          <span className={`px-1.5 py-0.5 rounded-md text-xs font-mono font-bold ${
                             commissionViewMode === 'summary' ? 'bg-white/20 text-white' : 'bg-primary/10 text-primary'
                           }`}>
                             {stats.allMonthsSummary.length}
@@ -2655,7 +2655,7 @@ export default function AdminDashboard() {
 
                     {/* Direct Month & Year Quick Jump Dropdowns */}
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-[11px] font-bold text-brand-muted uppercase tracking-wider flex items-center gap-1.5 shrink-0">
+                      <span className="text-xs font-bold text-brand-muted uppercase tracking-wider flex items-center gap-1.5 shrink-0">
                         <CalendarDays size={14} className="text-secondary" />
                         Quick Jump:
                       </span>
@@ -2713,7 +2713,7 @@ export default function AdminDashboard() {
                   <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                     {/* Month Tabs */}
                     <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-thin">
-                      <span className="text-[11px] font-bold text-brand-muted uppercase tracking-wider shrink-0 flex items-center gap-1.5 mr-1">
+                      <span className="text-xs font-bold text-brand-muted uppercase tracking-wider shrink-0 flex items-center gap-1.5 mr-1">
                         Active Period:
                       </span>
                       <button
@@ -2788,7 +2788,7 @@ export default function AdminDashboard() {
                   {/* Expected Card */}
                   <div className="bg-white p-5 sm:p-6 rounded-3xl border border-brand-border/80 shadow-sm space-y-2 relative overflow-hidden">
                     <div className="flex justify-between items-center text-brand-muted">
-                      <span className="text-[11px] uppercase font-bold tracking-wider">
+                      <span className="text-xs uppercase font-bold tracking-wider">
                         {commissionViewMode === 'summary' 
                           ? 'All-Time Expected' 
                           : (commissionSelectedMonth === 'all' ? 'All-Time Expected' : `Expected (${stats.activeMonth})`)}
@@ -2801,7 +2801,7 @@ export default function AdminDashboard() {
                       <h3 className="font-sans text-2xl sm:text-3xl font-black tracking-tight text-primary">
                         ₹{(commissionViewMode === 'summary' ? allTimeSummaryExpected : stats.totalExpected).toLocaleString('en-IN')}
                       </h3>
-                      <p className="text-[11px] text-brand-muted font-medium">
+                      <p className="text-xs text-brand-muted font-medium">
                         {commissionViewMode === 'summary'
                           ? `Across ${allTimeSummaryInstallments} scheduled installment(s)`
                           : `Across ${stats.matchingInstallments.length} installment(s)`}
@@ -2812,7 +2812,7 @@ export default function AdminDashboard() {
                   {/* Received / Collected Card */}
                   <div className="bg-white p-5 sm:p-6 rounded-3xl border border-brand-border/80 shadow-sm space-y-2 relative overflow-hidden">
                     <div className="flex justify-between items-center text-brand-muted">
-                      <span className="text-[11px] uppercase font-bold tracking-wider">
+                      <span className="text-xs uppercase font-bold tracking-wider">
                         {commissionViewMode === 'summary' 
                           ? 'Total All-Time Collected' 
                           : (commissionSelectedMonth === 'all' ? 'Total Collected' : `Received (${stats.activeMonth})`)}
@@ -2825,7 +2825,7 @@ export default function AdminDashboard() {
                       <h3 className="font-sans text-2xl sm:text-3xl font-black tracking-tight text-emerald-700">
                         ₹{(commissionViewMode === 'summary' ? allTimeSummaryReceived : stats.totalReceived).toLocaleString('en-IN')}
                       </h3>
-                      <p className="text-[11px] text-emerald-600 font-medium">
+                      <p className="text-xs text-emerald-600 font-medium">
                         {commissionViewMode === 'summary'
                           ? (allTimeSummaryExpected > 0 ? Math.round((allTimeSummaryReceived / allTimeSummaryExpected) * 100) : 0)
                           : (stats.totalExpected > 0 ? Math.round((stats.totalReceived / stats.totalExpected) * 100) : 0)}% collected
@@ -2836,7 +2836,7 @@ export default function AdminDashboard() {
                   {/* Pending Balance Card */}
                   <div className="bg-white p-5 sm:p-6 rounded-3xl border border-brand-border/80 shadow-sm space-y-2 relative overflow-hidden">
                     <div className="flex justify-between items-center text-brand-muted">
-                      <span className="text-[11px] uppercase font-bold tracking-wider">
+                      <span className="text-xs uppercase font-bold tracking-wider">
                         {commissionViewMode === 'summary' 
                           ? 'Total All-Time Outstanding' 
                           : (commissionSelectedMonth === 'all' ? 'Total Outstanding' : `Pending (${stats.activeMonth})`)}
@@ -2849,7 +2849,7 @@ export default function AdminDashboard() {
                       <h3 className="font-sans text-2xl sm:text-3xl font-black tracking-tight text-amber-700">
                         ₹{(commissionViewMode === 'summary' ? allTimeSummaryPending : stats.totalPending).toLocaleString('en-IN')}
                       </h3>
-                      <p className="text-[11px] text-amber-600 font-medium">
+                      <p className="text-xs text-amber-600 font-medium">
                         Awaiting payment clearance
                       </p>
                     </div>
@@ -2858,7 +2858,7 @@ export default function AdminDashboard() {
                   {/* Overdue Total Card */}
                   <div className="bg-white p-5 sm:p-6 rounded-3xl border border-brand-border/80 shadow-sm space-y-2 relative overflow-hidden">
                     <div className="flex justify-between items-center text-brand-muted">
-                      <span className="text-[11px] uppercase font-bold tracking-wider">Overdue Installments</span>
+                      <span className="text-xs uppercase font-bold tracking-wider">Overdue Installments</span>
                       <div className="p-2.5 bg-rose-50 text-rose-700 rounded-2xl">
                         <AlertCircle size={18} />
                       </div>
@@ -2867,7 +2867,7 @@ export default function AdminDashboard() {
                       <h3 className="font-sans text-2xl sm:text-3xl font-black tracking-tight text-rose-700">
                         ₹{stats.totalOverdueAmount.toLocaleString('en-IN')}
                       </h3>
-                      <p className="text-[11px] text-rose-600 font-medium">
+                      <p className="text-xs text-rose-600 font-medium">
                         {stats.overdueCount} overdue installment(s)
                       </p>
                     </div>
@@ -2912,13 +2912,13 @@ export default function AdminDashboard() {
                       </div>
                     ) : (
                       <div className="relative">
-                        <div className="px-4 py-1.5 bg-purple-50/60 text-[10px] text-purple-900 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                        <div className="px-4 py-1.5 bg-purple-50/60 text-xs text-purple-900 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
                           <span>↔ Swipe horizontally to view all columns</span>
                         </div>
                         <div className="overflow-x-auto overscroll-x-contain pb-1">
                           <table className="w-full min-w-[950px] text-left border-collapse">
                             <thead>
-                              <tr className="bg-brand-light/50 text-brand-muted text-[11px] uppercase tracking-wider font-bold border-b border-brand-border">
+                              <tr className="bg-brand-light/50 text-brand-muted text-xs uppercase tracking-wider font-bold border-b border-brand-border">
                                 <th className="py-3.5 px-5">Month / Period</th>
                                 <th className="py-3.5 px-4">Shadow Teachers</th>
                                 <th className="py-3.5 px-4">Total Expected</th>
@@ -2938,19 +2938,19 @@ export default function AdminDashboard() {
                                       <div className="flex items-center gap-2">
                                         <span className="font-bold text-primary text-sm">{row.month}</span>
                                         {isCurrent && (
-                                          <span className="px-2 py-0.5 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-[10px] font-bold">
+                                          <span className="px-2 py-0.5 bg-secondary/10 text-secondary border border-secondary/20 rounded-full text-xs font-bold">
                                             Current Month
                                           </span>
                                         )}
                                       </div>
-                                      <div className="text-[10px] text-brand-muted font-mono mt-0.5">
+                                      <div className="text-xs text-brand-muted font-mono mt-0.5">
                                         {row.installmentsCount} scheduled installment(s)
                                       </div>
                                     </td>
                                     <td className="py-3.5 px-4 text-brand-dark font-medium">
                                       <div className="font-bold text-brand-dark">{row.teacherCount} Teacher(s)</div>
                                       {row.teacherNames.length > 0 && (
-                                        <div className="text-[10px] text-brand-muted truncate max-w-[150px]" title={row.teacherNames.join(', ')}>
+                                        <div className="text-xs text-brand-muted truncate max-w-[150px]" title={row.teacherNames.join(', ')}>
                                           {row.teacherNames.slice(0, 2).join(', ')}{row.teacherNames.length > 2 ? ` +${row.teacherNames.length - 2} more` : ''}
                                         </div>
                                       )}
@@ -2966,7 +2966,7 @@ export default function AdminDashboard() {
                                     </td>
                                     <td className="py-3.5 px-4 min-w-[130px]">
                                       <div className="space-y-1">
-                                        <div className="flex justify-between text-[10px] font-bold">
+                                        <div className="flex justify-between text-xs font-bold">
                                           <span className={row.collectionRate === 100 ? 'text-emerald-700' : 'text-primary'}>
                                             {row.collectionRate}%
                                           </span>
@@ -2982,22 +2982,22 @@ export default function AdminDashboard() {
                                     <td className="py-3.5 px-4">
                                       <div className="flex items-center gap-1.5 flex-wrap">
                                         {row.paidCount > 0 && (
-                                          <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[10px] font-bold">
+                                          <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-bold">
                                             {row.paidCount} Paid
                                           </span>
                                         )}
                                         {row.partiallyPaidCount > 0 && (
-                                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-[10px] font-bold">
+                                          <span className="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-xs font-bold">
                                             {row.partiallyPaidCount} Partial
                                           </span>
                                         )}
                                         {row.pendingCount > 0 && (
-                                          <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-[10px] font-bold">
+                                          <span className="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-xs font-bold">
                                             {row.pendingCount} Pending
                                           </span>
                                         )}
                                         {row.overdueCount > 0 && (
-                                          <span className="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-[10px] font-bold">
+                                          <span className="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold">
                                             {row.overdueCount} Overdue
                                           </span>
                                         )}
@@ -3035,7 +3035,7 @@ export default function AdminDashboard() {
                                   ₹{filteredMonthsSummary.reduce((acc, r) => acc + r.totalPending, 0).toLocaleString('en-IN')}
                                 </td>
                                 <td className="py-3.5 px-4" colSpan={3}>
-                                  <span className="text-[11px] text-brand-muted">
+                                  <span className="text-xs text-brand-muted">
                                     {filteredMonthsSummary.reduce((acc, r) => acc + r.installmentsCount, 0)} total scheduled installment(s)
                                   </span>
                                 </td>
@@ -3085,13 +3085,13 @@ export default function AdminDashboard() {
                       </div>
                     ) : (
                       <div className="relative">
-                        <div className="px-4 py-1.5 bg-purple-50/60 text-[10px] text-purple-900 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                        <div className="px-4 py-1.5 bg-purple-50/60 text-xs text-purple-900 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
                           <span>↔ Swipe horizontally to view all columns</span>
                         </div>
                         <div className="overflow-x-auto overscroll-x-contain pb-1">
                           <table className="w-full min-w-[950px] text-left border-collapse">
                           <thead>
-                            <tr className="bg-brand-light/50 text-brand-muted text-[11px] uppercase tracking-wider font-bold border-b border-brand-border">
+                            <tr className="bg-brand-light/50 text-brand-muted text-xs uppercase tracking-wider font-bold border-b border-brand-border">
                               <th className="py-3.5 px-5">Shadow Teacher</th>
                               <th className="py-3.5 px-4">Location</th>
                               <th className="py-3.5 px-4">Decided Salary</th>
@@ -3112,7 +3112,7 @@ export default function AdminDashboard() {
                                 <tr key={`${teacher.id}-${installment.id}`} className="hover:bg-brand-light/30 transition-colors">
                                   <td className="py-3.5 px-5">
                                     <div className="font-bold text-primary">{teacher.name}</div>
-                                    <div className="text-[10px] text-brand-muted font-mono">{teacher.registration_id || teacher.id}</div>
+                                    <div className="text-xs text-brand-muted font-mono">{teacher.registration_id || teacher.id}</div>
                                   </td>
                                   <td className="py-3.5 px-4 text-brand-dark font-medium">
                                     {teacher.city || '—'}
@@ -3125,11 +3125,11 @@ export default function AdminDashboard() {
                                   </td>
                                   <td className="py-3.5 px-4 font-semibold text-brand-dark">
                                     Inst #{installment.installmentNumber}
-                                    <span className="block text-[10px] text-brand-muted">{installment.month}</span>
+                                    <span className="block text-xs text-brand-muted">{installment.month}</span>
                                   </td>
                                   <td className="py-3.5 px-4 text-brand-dark">
                                     {installment.dueDate ? (
-                                      <span className={`font-mono text-[11px] ${isOverdue ? 'text-rose-700 font-bold' : ''}`}>
+                                      <span className={`font-mono text-xs ${isOverdue ? 'text-rose-700 font-bold' : ''}`}>
                                         {new Date(installment.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                                       </span>
                                     ) : '—'}
@@ -3138,7 +3138,7 @@ export default function AdminDashboard() {
                                     ₹{installment.amount.toLocaleString('en-IN')}
                                   </td>
                                   <td className="py-3.5 px-4">
-                                    <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                                    <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${
                                       effectiveStatus === 'Paid'
                                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                         : (effectiveStatus === 'Partially Paid'
@@ -3150,7 +3150,7 @@ export default function AdminDashboard() {
                                       {effectiveStatus}
                                     </span>
                                     {installment.paidDate && (
-                                      <span className="block text-[9px] text-emerald-600 font-mono mt-0.5">
+                                      <span className="block text-xs text-emerald-600 font-mono mt-0.5">
                                         Paid on {new Date(installment.paidDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
                                       </span>
                                     )}
@@ -3214,13 +3214,13 @@ export default function AdminDashboard() {
                     </div>
                   ) : (
                     <div className="relative">
-                      <div className="px-4 py-1.5 bg-purple-50/60 text-[10px] text-purple-900 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                      <div className="px-4 py-1.5 bg-purple-50/60 text-xs text-purple-900 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
                         <span>↔ Swipe horizontally to view all columns</span>
                       </div>
                       <div className="overflow-x-auto overscroll-x-contain pb-1">
                         <table className="w-full min-w-[1000px] text-left border-collapse">
                         <thead>
-                          <tr className="bg-brand-light/50 text-brand-muted text-[11px] uppercase tracking-wider font-bold border-b border-brand-border">
+                          <tr className="bg-brand-light/50 text-brand-muted text-xs uppercase tracking-wider font-bold border-b border-brand-border">
                             <th className="py-3.5 px-5">Shadow Teacher</th>
                             <th className="py-3.5 px-4">City</th>
                             <th className="py-3.5 px-4">Placement Status</th>
@@ -3246,14 +3246,14 @@ export default function AdminDashboard() {
                               <tr key={st.id} className="hover:bg-brand-light/30 transition-colors">
                                 <td className="py-3.5 px-5">
                                   <div className="font-bold text-primary">{st.name}</div>
-                                  <div className="text-[10px] text-brand-muted font-mono">{st.registration_id || st.id}</div>
-                                  <div className="text-[10px] text-brand-muted">{st.phone}</div>
+                                  <div className="text-xs text-brand-muted font-mono">{st.registration_id || st.id}</div>
+                                  <div className="text-xs text-brand-muted">{st.phone}</div>
                                 </td>
                                 <td className="py-3.5 px-4 font-medium text-brand-dark">
                                   {st.city || '—'}
                                 </td>
                                 <td className="py-3.5 px-4">
-                                  <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusColor(st.status)}`}>
+                                  <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold ${getStatusColor(st.status)}`}>
                                     {st.status}
                                   </span>
                                 </td>
@@ -3263,13 +3263,13 @@ export default function AdminDashboard() {
                                 <td className="py-3.5 px-4 font-black text-primary">
                                   {hasComm ? `₹${totalComm.toLocaleString('en-IN')}` : <span className="text-brand-muted italic">—</span>}
                                   {hasComm && (
-                                    <span className="block text-[10px] font-normal text-brand-muted">{comm.commissionPercentage}% rate ({comm.numberOfInstallments} inst)</span>
+                                    <span className="block text-xs font-normal text-brand-muted">{comm.commissionPercentage}% rate ({comm.numberOfInstallments} inst)</span>
                                   )}
                                 </td>
                                 <td className="py-3.5 px-4 min-w-[140px]">
                                   {hasComm ? (
                                     <div className="space-y-1">
-                                      <div className="flex justify-between text-[10px] font-bold">
+                                      <div className="flex justify-between text-xs font-bold">
                                         <span className="text-emerald-700">₹{totalPaid.toLocaleString('en-IN')}</span>
                                         <span className="text-brand-muted">{pct}%</span>
                                       </div>
@@ -3281,7 +3281,7 @@ export default function AdminDashboard() {
                                       </div>
                                     </div>
                                   ) : (
-                                    <span className="text-brand-muted italic text-[10px]">No Plan</span>
+                                    <span className="text-brand-muted italic text-xs">No Plan</span>
                                   )}
                                 </td>
                                 <td className="py-3.5 px-4 font-bold">
@@ -3295,7 +3295,7 @@ export default function AdminDashboard() {
                                 </td>
                                 <td className="py-3.5 px-4">
                                   {hasComm ? (
-                                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                    <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold ${
                                       comm.status === 'Completed'
                                         ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                         : 'bg-indigo-50 text-indigo-700 border border-indigo-200'
@@ -3303,7 +3303,7 @@ export default function AdminDashboard() {
                                       {comm.status || 'Active'}
                                     </span>
                                   ) : (
-                                    <span className="inline-flex px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-[10px] font-medium">
+                                    <span className="inline-flex px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-medium">
                                       Pending Setup
                                     </span>
                                   )}
@@ -3355,7 +3355,7 @@ export default function AdminDashboard() {
                   <div className="flex bg-brand-light p-1 rounded-xl">
                     <button
                       onClick={() => setParentSubTab('shadow')}
-                      className={`px-4 py-1.5 rounded-lg font-bold text-[10px] transition-all cursor-pointer ${
+                      className={`px-4 py-1.5 rounded-lg font-bold text-xs transition-all cursor-pointer ${
                         parentSubTab === 'shadow'
                           ? 'bg-primary text-white'
                           : 'text-brand-muted hover:text-brand-dark'
@@ -3365,7 +3365,7 @@ export default function AdminDashboard() {
                     </button>
                     <button
                       onClick={() => setParentSubTab('tutor')}
-                      className={`px-4 py-1.5 rounded-lg font-bold text-[10px] transition-all cursor-pointer ${
+                      className={`px-4 py-1.5 rounded-lg font-bold text-xs transition-all cursor-pointer ${
                         parentSubTab === 'tutor'
                           ? 'bg-primary text-white'
                           : 'text-brand-muted hover:text-brand-dark'
@@ -3375,7 +3375,7 @@ export default function AdminDashboard() {
                     </button>
                     <button
                       onClick={() => setParentSubTab('therapy')}
-                      className={`px-4 py-1.5 rounded-lg font-bold text-[10px] transition-all cursor-pointer ${
+                      className={`px-4 py-1.5 rounded-lg font-bold text-xs transition-all cursor-pointer ${
                         parentSubTab === 'therapy'
                           ? 'bg-purple-900 text-white'
                           : 'text-brand-muted hover:text-brand-dark'
@@ -3402,7 +3402,7 @@ export default function AdminDashboard() {
               {/* Filters Panel */}
               <div className="bg-white border border-brand-border p-4 rounded-2xl shadow-sm grid grid-cols-3 gap-4 max-w-xl">
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                  <span className="text-xs text-brand-muted uppercase font-bold flex items-center gap-1">
                     <Filter size={10} /> Filter City
                   </span>
                   <select
@@ -3420,7 +3420,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                  <span className="text-xs text-brand-muted uppercase font-bold flex items-center gap-1">
                     <Filter size={10} /> Filter Status
                   </span>
                   <select
@@ -3439,7 +3439,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                  <span className="text-xs text-brand-muted uppercase font-bold flex items-center gap-1">
                     <CreditCard size={10} /> Placement Fee
                   </span>
                   <select
@@ -3465,7 +3465,7 @@ export default function AdminDashboard() {
                   <div className="p-12 text-center text-brand-muted">No parent requests match the criteria.</div>
                 ) : (
                   <div className="relative">
-                    <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                    <div className="px-4 py-1.5 bg-brand-light/60 text-xs text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
                       <span>↔ Swipe horizontally to view all columns</span>
                     </div>
                     <div className="overflow-x-auto overscroll-x-contain pb-1">
@@ -3503,11 +3503,11 @@ export default function AdminDashboard() {
                             <td className="p-4 font-bold text-secondary">{r.registration_id}</td>
                             <td className="p-4">
                               <p className="font-bold">{r.parentName || (r as any).parent_name}</p>
-                              <p className="text-[10px] text-brand-muted">{r.phone} • {r.email}</p>
+                              <p className="text-xs text-brand-muted">{r.phone} • {r.email}</p>
                             </td>
                             <td className="p-4">
                               <p className="font-bold">{r.childName || (r as any).child_name}</p>
-                              <p className="text-brand-muted text-[10px]">{(r as any).childGrade || (r as any).child_grade || 'Preschool'} • DOB: {formatDate((r as any).childDob || (r as any).child_dob)}</p>
+                              <p className="text-brand-muted text-xs">{(r as any).childGrade || (r as any).child_grade || 'Preschool'} • DOB: {formatDate((r as any).childDob || (r as any).child_dob)}</p>
                             </td>
                             <td className="p-4">{r.city}</td>
                             
@@ -3543,7 +3543,7 @@ export default function AdminDashboard() {
                                 const isPaid = Boolean((r as any).placementPaid || (r as any).placement_paid);
                                 const amount = (r as any).placementAmount || (r as any).placement_amount || (parentSubTab === 'shadow' ? 5000 : 3000);
                                 return (
-                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                  <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                                     isPaid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
                                   }`}>
                                     {isPaid ? `Yes (₹${amount.toLocaleString()})` : 'No'}
@@ -3553,7 +3553,7 @@ export default function AdminDashboard() {
                             </td>
 
                             <td className="p-4 text-center">
-                              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${getStatusColor(r.status)}`}>
+                              <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${getStatusColor(r.status)}`}>
                                 {r.status}
                               </span>
                             </td>
@@ -3571,7 +3571,7 @@ export default function AdminDashboard() {
                                        data: r 
                                      });
                                    }}
-                                   className="px-3 py-1.5 border border-primary hover:bg-primary/5 text-primary rounded-xl font-bold text-[10px] transition-all cursor-pointer shadow-sm"
+                                   className="px-3 py-1.5 border border-primary hover:bg-primary/5 text-primary rounded-xl font-bold text-xs transition-all cursor-pointer shadow-sm"
                                  >
                                    View Details
                                  </button>
@@ -3782,7 +3782,7 @@ export default function AdminDashboard() {
 
                   return (
                     <div className="relative">
-                      <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                      <div className="px-4 py-1.5 bg-brand-light/60 text-xs text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
                         <span>↔ Swipe horizontally to view all columns</span>
                       </div>
                       <div className="overflow-x-auto overscroll-x-contain pb-1">
@@ -3813,20 +3813,20 @@ export default function AdminDashboard() {
                                 </td>
                                 <td className="p-4">
                                   <div className="font-bold text-primary text-sm">{r.schoolName || r.school_name}</div>
-                                  <div className="text-[11px] text-brand-muted mt-0.5">
+                                  <div className="text-xs text-brand-muted mt-0.5">
                                     {r.contactName || r.contact_name} {r.designation ? `(${r.designation})` : ''}
                                   </div>
                                 </td>
                                 <td className="p-4">
                                   <div className="font-semibold text-brand-dark">{r.phone}</div>
-                                  <div className="text-[11px] text-brand-muted">{r.email}</div>
+                                  <div className="text-xs text-brand-muted">{r.email}</div>
                                 </td>
                                 <td className="p-4 font-semibold text-brand-dark whitespace-nowrap">
                                   {r.city}
                                 </td>
                                 <td className="p-4">
                                   <div className="font-bold text-primary">{r.teachersCount || r.teachers_count || 1} Shadow Teacher(s)</div>
-                                  <div className="text-[11px] text-brand-muted">{r.levelsRequired || r.levels_required || 'General'}</div>
+                                  <div className="text-xs text-brand-muted">{r.levelsRequired || r.levels_required || 'General'}</div>
                                 </td>
                                 <td className="p-4 text-center whitespace-nowrap">
                                   {(() => {
@@ -3835,20 +3835,20 @@ export default function AdminDashboard() {
                                     const isWaived = payId.includes('SCHOOL199') || notesStr.includes('SCHOOL199') || r.consultation_amount === 0 || r.consultationAmount === 0;
                                     if (isWaived) {
                                       return (
-                                        <span className="px-2 py-0.5 rounded-full bg-purple-100 border border-purple-300 text-purple-800 text-[10px] font-black uppercase">
+                                        <span className="px-2 py-0.5 rounded-full bg-purple-100 border border-purple-300 text-purple-800 text-xs font-black uppercase">
                                           Waived (SCHOOL199)
                                         </span>
                                       );
                                     }
                                     if (isConsultPaid) {
                                       return (
-                                        <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-black uppercase">
+                                        <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-black uppercase">
                                           ₹199 Paid
                                         </span>
                                       );
                                     }
                                     return (
-                                      <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-[10px] font-black uppercase">
+                                      <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-black uppercase">
                                         Pending
                                       </span>
                                     );
@@ -3856,17 +3856,17 @@ export default function AdminDashboard() {
                                 </td>
                                 <td className="p-4 text-center whitespace-nowrap">
                                   {isPlacePaid ? (
-                                    <span className="px-2 py-0.5 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-[10px] font-black uppercase">
+                                    <span className="px-2 py-0.5 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-black uppercase">
                                       ₹5,000 Paid
                                     </span>
                                   ) : (
-                                    <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase">
+                                    <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold uppercase">
                                       Unpaid
                                     </span>
                                   )}
                                 </td>
                                 <td className="p-4 text-center whitespace-nowrap">
-                                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase border ${
+                                  <span className={`px-2.5 py-1 rounded-full text-xs font-extrabold uppercase border ${
                                     statusStr.includes('Support Started') ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
                                     statusStr.includes('Paid') ? 'bg-purple-50 border-purple-200 text-purple-700' :
                                     statusStr.includes('Closed') ? 'bg-slate-100 border-slate-200 text-slate-600' :
@@ -3924,7 +3924,7 @@ export default function AdminDashboard() {
                   <div className="p-12 text-center text-brand-muted">No consultation bookings logged yet.</div>
                 ) : (
                   <div className="relative">
-                    <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                    <div className="px-4 py-1.5 bg-brand-light/60 text-xs text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
                       <span>↔ Swipe horizontally to view all columns</span>
                     </div>
                     <div className="overflow-x-auto overscroll-x-contain pb-1">
@@ -3969,12 +3969,12 @@ export default function AdminDashboard() {
                                 {bk.requirement || 'Shadow Teacher'}
                               </td>
                               <td className="p-4 text-center">
-                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                                   ₹99 Paid
                                 </span>
                               </td>
                               <td className="p-4 text-center">
-                                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
+                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                                   isCompleted ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
                                   isDeclined ? 'bg-amber-50 text-amber-800 border border-amber-300' :
                                   'bg-yellow-50 text-yellow-800 border border-yellow-200'
@@ -3985,11 +3985,11 @@ export default function AdminDashboard() {
                               <td className="p-4 text-center">
                                 <div className="flex items-center justify-center gap-2">
                                   {isCompleted ? (
-                                    <span className="text-[10px] font-bold text-emerald-600 flex items-center justify-center gap-1">
+                                    <span className="text-xs font-bold text-emerald-600 flex items-center justify-center gap-1">
                                       <CheckCircle size={12} /> Form Unlocked
                                     </span>
                                   ) : isDeclined ? (
-                                    <span className="text-[10px] font-bold text-amber-700 flex items-center justify-center gap-1">
+                                    <span className="text-xs font-bold text-amber-700 flex items-center justify-center gap-1">
                                       <XCircle size={12} /> Declined
                                     </span>
                                   ) : (
@@ -3997,7 +3997,7 @@ export default function AdminDashboard() {
                                       <button
                                         onClick={() => handleMarkConsultationCompleted(bk)}
                                         disabled={updating}
-                                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-[10px] transition-all cursor-pointer shadow-sm disabled:opacity-50 flex items-center gap-1"
+                                        className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition-all cursor-pointer shadow-sm disabled:opacity-50 flex items-center gap-1"
                                         title="Mark Consultation Completed (Unlocks Form)"
                                       >
                                         <CheckCircle size={12} /> Mark Completed
@@ -4008,7 +4008,7 @@ export default function AdminDashboard() {
                                           setRejectReason('');
                                         }}
                                         disabled={updating}
-                                        className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-[10px] transition-all cursor-pointer shadow-sm disabled:opacity-50 flex items-center gap-1"
+                                        className="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-bold text-xs transition-all cursor-pointer shadow-sm disabled:opacity-50 flex items-center gap-1"
                                         title="Reject / Decline Consultation"
                                       >
                                         <XCircle size={12} /> Decline
@@ -4064,32 +4064,32 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="bg-emerald-50 border-2 border-emerald-200 rounded-2xl p-5 shadow-sm text-left relative overflow-hidden">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-extrabold text-emerald-800 uppercase tracking-wider">Real Revenue Collected</span>
+                      <span className="text-xs font-extrabold text-emerald-800 uppercase tracking-wider">Real Revenue Collected</span>
                       <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                     </div>
                     <p className="text-3xl font-black text-emerald-950 mt-2">₹{realRevenueTotal.toLocaleString()}</p>
-                    <p className="text-[11px] text-emerald-800 font-bold mt-1">
+                    <p className="text-xs text-emerald-800 font-bold mt-1">
                       {realPaymentsCount} Successful Razorpay {realPaymentsCount === 1 ? 'Payment' : 'Payments'}
                     </p>
                   </div>
 
                     <div className="bg-purple-50 border-2 border-purple-200 rounded-2xl p-5 shadow-sm text-left relative overflow-hidden">
                       <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-extrabold text-purple-800 uppercase tracking-wider">Total Waived (Promo / Outreach)</span>
+                        <span className="text-xs font-extrabold text-purple-800 uppercase tracking-wider">Total Waived (Promo / Outreach)</span>
                         <Sparkles size={16} className="text-purple-600" />
                       </div>
                       <p className="text-3xl font-black text-purple-950 mt-2">{totalWaivedCount} <span className="text-sm font-semibold text-purple-800">Records</span></p>
-                      <p className="text-[11px] text-purple-800 font-bold mt-1">
+                      <p className="text-xs text-purple-800 font-bold mt-1">
                         ₹{totalWaivedValue.toLocaleString()} Value Waived (SHADOW100 / THERAPY99 / SCHOOL199)
                       </p>
                     </div>
 
                   <div className="bg-brand-light/60 border border-brand-border rounded-2xl p-5 shadow-sm text-left">
                     <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-extrabold text-brand-muted uppercase tracking-wider">Total Ledger Activity</span>
+                      <span className="text-xs font-extrabold text-brand-muted uppercase tracking-wider">Total Ledger Activity</span>
                     </div>
                     <p className="text-3xl font-black text-primary mt-2">{paymentsList.length} <span className="text-sm font-semibold text-brand-muted">Entries</span></p>
-                    <p className="text-[11px] text-brand-muted font-bold mt-1">
+                    <p className="text-xs text-brand-muted font-bold mt-1">
                       {realPaymentsCount} Real + {totalWaivedCount} Waived
                     </p>
                   </div>
@@ -4119,7 +4119,7 @@ export default function AdminDashboard() {
                     <div className="p-12 text-center text-brand-muted">No successful transactions found.</div>
                   ) : (
                     <div className="relative">
-                      <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                      <div className="px-4 py-1.5 bg-brand-light/60 text-xs text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
                         <span>↔ Swipe horizontally to view all columns</span>
                       </div>
                       <div className="overflow-x-auto overscroll-x-contain pb-1">
@@ -4144,11 +4144,11 @@ export default function AdminDashboard() {
                               <td className="p-4 font-bold text-secondary">{p.regId}</td>
                               <td className="p-4">
                                 <p className="font-bold">{p.parentName}</p>
-                                <p className="text-[10px] text-brand-muted">{p.phone} • {p.email}</p>
+                                <p className="text-xs text-brand-muted">{p.phone} • {p.email}</p>
                               </td>
                               <td className="p-4 font-bold">{p.childName}</td>
                               <td className="p-4">
-                                <span className="px-2 py-0.5 bg-brand-light border border-brand-border rounded-md text-[10px] font-bold text-primary uppercase">
+                                <span className="px-2 py-0.5 bg-brand-light border border-brand-border rounded-md text-xs font-bold text-primary uppercase">
                                   {p.type}
                                 </span>
                               </td>
@@ -4163,10 +4163,10 @@ export default function AdminDashboard() {
                                   </span>
                                 )}
                               </td>
-                              <td className="p-4 font-mono text-[10px] text-brand-muted">{p.paymentId}</td>
-                              <td className="p-4 font-mono text-[10px] text-brand-muted">{p.orderId}</td>
+                              <td className="p-4 font-mono text-xs text-brand-muted">{p.paymentId}</td>
+                              <td className="p-4 font-mono text-xs text-brand-muted">{p.orderId}</td>
                               <td className="p-4 text-center">
-                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase flex items-center justify-center gap-1.5 w-fit mx-auto ${
+                                <span className={`px-2.5 py-1 rounded-full text-xs font-extrabold uppercase flex items-center justify-center gap-1.5 w-fit mx-auto ${
                                   p.isWaived 
                                     ? 'bg-purple-100 text-purple-900 border border-purple-300 shadow-xs' 
                                     : p.isRealSuccess
@@ -4243,13 +4243,13 @@ export default function AdminDashboard() {
                   <div className="p-12 text-center text-brand-muted">No notifications logged yet.</div>
                 ) : (
                   <div>
-                    <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                    <div className="px-4 py-1.5 bg-brand-light/60 text-xs text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
                       <span>↔ Swipe horizontally to view all columns</span>
                     </div>
                     <div className="overflow-x-auto overscroll-x-contain pb-1">
                       <table className="w-full min-w-[750px] text-left border-collapse text-xs">
                       <thead>
-                        <tr className="bg-brand-light border-b border-brand-border font-bold text-brand-dark uppercase tracking-wider text-[10px]">
+                        <tr className="bg-brand-light border-b border-brand-border font-bold text-brand-dark uppercase tracking-wider text-xs">
                           <th className="p-4">Recipient</th>
                           <th className="p-4">Type</th>
                           <th className="p-4">Subject</th>
@@ -4265,13 +4265,13 @@ export default function AdminDashboard() {
                             <tr key={notif.id} className="hover:bg-brand-light/30 transition-colors">
                               <td className="p-4 font-bold font-sans">{notif.recipient}</td>
                               <td className="p-4 font-sans">
-                                <span className="px-2 py-0.5 bg-brand-light text-primary border border-brand-border/60 rounded-full text-[9px] font-bold uppercase">
+                                <span className="px-2 py-0.5 bg-brand-light text-primary border border-brand-border/60 rounded-full text-xs font-bold uppercase">
                                   {notif.type}
                                 </span>
                               </td>
                               <td className="p-4 font-serif text-brand-dark">{notif.subject}</td>
                               <td className="p-4 font-sans">
-                                <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase inline-flex items-center gap-1 ${
+                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase inline-flex items-center gap-1 ${
                                   isSent 
                                     ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
                                     : 'bg-rose-50 text-rose-700 border border-rose-200'
@@ -4279,7 +4279,7 @@ export default function AdminDashboard() {
                                   {isSent ? 'Sent' : 'Failed'}
                                 </span>
                               </td>
-                              <td className="p-4 max-w-xs truncate text-[11px] text-brand-muted font-sans">
+                              <td className="p-4 max-w-xs truncate text-xs text-brand-muted font-sans">
                                 {notif.errorMessage || '-'}
                               </td>
                               <td className="p-4 text-brand-muted font-sans">
@@ -4324,7 +4324,7 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <h3 className="font-serif text-sm font-bold text-primary">Connected Integrations</h3>
-                      <p className="text-[10px] text-brand-muted font-medium">External APIs and database engines</p>
+                      <p className="text-xs text-brand-muted font-medium">External APIs and database engines</p>
                     </div>
                   </div>
 
@@ -4334,7 +4334,7 @@ export default function AdminDashboard() {
                         <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
                         <span className="font-bold text-brand-dark">Database Engine</span>
                       </div>
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 truncate">
+                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 truncate">
                         Supabase PostgreSQL (Active)
                       </span>
                     </div>
@@ -4344,7 +4344,7 @@ export default function AdminDashboard() {
                         <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
                         <span className="font-bold text-brand-dark">Email Dispatcher</span>
                       </div>
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 truncate">
+                      <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 truncate">
                         Resend API (Live Alerts)
                       </span>
                     </div>
@@ -4354,7 +4354,7 @@ export default function AdminDashboard() {
                         <div className="w-2 h-2 rounded-full bg-blue-500"></div>
                         <span className="font-bold text-brand-dark">Payment Gateway</span>
                       </div>
-                      <span className="text-[10px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 truncate">
+                      <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 truncate">
                         Razorpay API (₹99 &amp; Placement)
                       </span>
                     </div>
@@ -4364,7 +4364,7 @@ export default function AdminDashboard() {
                         <div className="w-2 h-2 rounded-full bg-purple-500"></div>
                         <span className="font-bold text-brand-dark">Admin Notification Email</span>
                       </div>
-                      <span className="text-[10px] font-mono font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 truncate">
+                      <span className="text-xs font-mono font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md border border-purple-200 truncate">
                         theshadowbridgesupport@gmail.com
                       </span>
                     </div>
@@ -4379,7 +4379,7 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <h3 className="font-serif text-sm font-bold text-primary">Business &amp; Fee Parameters</h3>
-                      <p className="text-[10px] text-brand-muted font-medium">Standard fees and coverage rules</p>
+                      <p className="text-xs text-brand-muted font-medium">Standard fees and coverage rules</p>
                     </div>
                   </div>
 
@@ -4401,7 +4401,7 @@ export default function AdminDashboard() {
 
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 bg-brand-light/40 rounded-xl border border-brand-border/40 gap-1.5">
                       <span className="font-bold text-brand-dark">Active Cities (5)</span>
-                      <span className="text-[10px] font-bold text-primary">
+                      <span className="text-xs font-bold text-primary">
                         Delhi NCR, Ahmedabad, Hyderabad, Bangalore, Pune
                       </span>
                     </div>
@@ -4415,7 +4415,7 @@ export default function AdminDashboard() {
                 <Info size={16} className="text-secondary shrink-0 mt-0.5" />
                 <div className="space-y-1">
                   <p className="font-bold text-primary">Environment-Controlled Configuration</p>
-                  <p className="text-brand-muted text-[11px] leading-relaxed">
+                  <p className="text-brand-muted text-xs leading-relaxed">
                     API secret keys, database credentials, and production settings are securely managed via environment variables. To update credentials or notification channels, update environment variables in your Vercel deployment project settings.
                   </p>
                 </div>
@@ -4458,7 +4458,7 @@ export default function AdminDashboard() {
 
                 <div className="flex items-center gap-3">
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                    <span className="text-xs text-brand-muted uppercase font-bold flex items-center gap-1">
                       <Filter size={10} /> City
                     </span>
                     <select
@@ -4476,7 +4476,7 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <span className="text-[10px] text-brand-muted uppercase font-bold flex items-center gap-1">
+                    <span className="text-xs text-brand-muted uppercase font-bold flex items-center gap-1">
                       <Filter size={10} /> Status
                     </span>
                     <select
@@ -4504,7 +4504,7 @@ export default function AdminDashboard() {
                   <div className="p-12 text-center text-brand-muted">No contact messages received yet.</div>
                 ) : (
                   <div className="relative">
-                    <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                    <div className="px-4 py-1.5 bg-brand-light/60 text-xs text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
                       <span>↔ Swipe horizontally to view all columns</span>
                     </div>
                     <div className="overflow-x-auto overscroll-x-contain pb-1">
@@ -4547,7 +4547,7 @@ export default function AdminDashboard() {
                                 </td>
                                 <td className="p-4">
                                   <div className="font-bold text-primary text-sm">{contact.name}</div>
-                                  <div className="text-brand-muted text-[11px] font-semibold">{contact.city}</div>
+                                  <div className="text-brand-muted text-xs font-semibold">{contact.city}</div>
                                 </td>
                                 <td className="p-4 space-y-0.5">
                                   <div className="font-semibold text-brand-dark">{contact.phone}</div>
@@ -4560,12 +4560,12 @@ export default function AdminDashboard() {
 
                                   {(contact.adminReply || contact.admin_reply) && (
                                     <div className="mt-3 p-3 bg-emerald-50/90 border border-emerald-200/90 rounded-xl text-left shadow-sm">
-                                      <div className="flex items-center justify-between gap-2 text-[11px] font-bold text-emerald-900 mb-1">
+                                      <div className="flex items-center justify-between gap-2 text-xs font-bold text-emerald-900 mb-1">
                                         <span className="flex items-center gap-1.5">
                                           <MailCheck size={13} className="text-emerald-700" />
                                           <span>Admin Response Sent</span>
                                         </span>
-                                        <span className="text-emerald-800/80 text-[10px] font-medium">
+                                        <span className="text-emerald-800/80 text-xs font-medium">
                                           {contact.repliedAt || contact.replied_at
                                             ? new Date(contact.repliedAt || contact.replied_at).toLocaleDateString('en-IN', {
                                                 day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
@@ -4580,7 +4580,7 @@ export default function AdminDashboard() {
                                   )}
                                 </td>
                                 <td className="p-4">
-                                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                                  <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
                                     status === 'new' 
                                       ? 'bg-amber-100 text-amber-800 border border-amber-200' 
                                       : status === 'responded'
@@ -4673,13 +4673,13 @@ export default function AdminDashboard() {
               ) : (
                 <div className="bg-white border border-brand-border rounded-3xl shadow-sm overflow-hidden">
                   <div className="relative">
-                    <div className="px-4 py-1.5 bg-brand-light/60 text-[10px] text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                    <div className="px-4 py-1.5 bg-brand-light/60 text-xs text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
                       <span>↔ Swipe horizontally to view all columns</span>
                     </div>
                     <div className="overflow-x-auto overscroll-x-contain pb-1">
                       <table className="w-full min-w-[850px] text-left border-collapse">
                       <thead>
-                        <tr className="bg-brand-light/60 border-b border-brand-border text-[10px] text-brand-muted uppercase font-bold tracking-wider">
+                        <tr className="bg-brand-light/60 border-b border-brand-border text-xs text-brand-muted uppercase font-bold tracking-wider">
                           <th className="p-4">Submitted Date</th>
                           <th className="p-4">Parent / ID</th>
                           <th className="p-4">Service & City</th>
@@ -4702,11 +4702,11 @@ export default function AdminDashboard() {
                               </td>
                               <td className="p-4">
                                 <div className="font-bold text-primary">{rev.parent_name}</div>
-                                <div className="text-[10px] text-brand-muted font-mono">{rev.parent_registration_id}</div>
+                                <div className="text-xs text-brand-muted font-mono">{rev.parent_registration_id}</div>
                               </td>
                               <td className="p-4">
                                 <div className="font-bold text-primary">{rev.service_type}</div>
-                                <div className="text-[10px] text-brand-muted font-semibold">{rev.city}</div>
+                                <div className="text-xs text-brand-muted font-semibold">{rev.city}</div>
                               </td>
                               <td className="p-4">
                                 <div className="flex gap-0.5">{ratingStars}</div>
@@ -4716,13 +4716,13 @@ export default function AdminDashboard() {
                                   "{rev.review_text}"
                                 </p>
                                 {rev.child_first_name && (
-                                  <div className="text-[10px] text-accent font-bold mt-1 uppercase tracking-wider">
+                                  <div className="text-xs text-accent font-bold mt-1 uppercase tracking-wider">
                                     Child Display Name: {rev.child_first_name}
                                   </div>
                                 )}
                               </td>
                               <td className="p-4">
-                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold inline-block border ${
+                                <span className={`px-2.5 py-1 rounded-full text-xs font-bold inline-block border ${
                                   rev.status === 'approved'
                                     ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                                     : rev.status === 'rejected'
@@ -4732,7 +4732,7 @@ export default function AdminDashboard() {
                                   {rev.status}
                                 </span>
                                 {rev.status === 'rejected' && rev.rejection_note && (
-                                  <p className="text-[9px] text-rose-600 mt-1 italic leading-tight">
+                                  <p className="text-xs text-rose-600 mt-1 italic leading-tight">
                                     Note: {rev.rejection_note}
                                   </p>
                                 )}
@@ -4742,7 +4742,7 @@ export default function AdminDashboard() {
                                   {rev.status !== 'approved' && (
                                     <button
                                       onClick={() => handleReviewAction(rev.id, 'approve')}
-                                      className="px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-[10px] font-bold hover:bg-emerald-700 transition-all cursor-pointer shadow-sm"
+                                      className="px-2.5 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700 transition-all cursor-pointer shadow-sm"
                                     >
                                       Approve
                                     </button>
@@ -4753,7 +4753,7 @@ export default function AdminDashboard() {
                                       setReviewEditText(rev.review_text);
                                       setIsEditingReview(true);
                                     }}
-                                    className="px-2.5 py-1.5 border border-brand-border bg-white text-primary rounded-lg text-[10px] font-bold hover:bg-brand-light transition-all cursor-pointer shadow-sm"
+                                    className="px-2.5 py-1.5 border border-brand-border bg-white text-primary rounded-lg text-xs font-bold hover:bg-brand-light transition-all cursor-pointer shadow-sm"
                                   >
                                     Edit Typos
                                   </button>
@@ -4763,7 +4763,7 @@ export default function AdminDashboard() {
                                         setModeratingReviewId(rev.id);
                                         setIsRejectingReview(true);
                                       }}
-                                      className="px-2.5 py-1.5 bg-rose-600 text-white rounded-lg text-[10px] font-bold hover:bg-rose-700 transition-all cursor-pointer shadow-sm"
+                                      className="px-2.5 py-1.5 bg-rose-600 text-white rounded-lg text-xs font-bold hover:bg-rose-700 transition-all cursor-pointer shadow-sm"
                                     >
                                       Reject
                                     </button>
@@ -4822,7 +4822,7 @@ export default function AdminDashboard() {
               {/* Modal Header */}
               <div className="p-6 border-b border-brand-border/60 bg-brand-light/20 flex justify-between items-center shrink-0">
                 <div className="space-y-1">
-                  <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">
+                  <span className="text-xs font-bold text-secondary uppercase tracking-widest">
                     {selectedRecord.type.replace('_', ' ').replace('parent ', 'Parent ')} Details
                   </span>
                   <h3 className="font-serif text-xl font-black text-primary">
@@ -4984,19 +4984,19 @@ export default function AdminDashboard() {
                         <div className="space-y-3">
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs bg-white p-3 rounded-xl border border-purple-100">
                             <div>
-                              <span className="text-[10px] text-brand-muted uppercase font-bold block">Monthly Salary</span>
+                              <span className="text-xs text-brand-muted uppercase font-bold block">Monthly Salary</span>
                               <span className="font-bold text-brand-dark">₹{comm.monthlySalary?.toLocaleString('en-IN')}</span>
                             </div>
                             <div>
-                              <span className="text-[10px] text-brand-muted uppercase font-bold block">Commission Rate</span>
+                              <span className="text-xs text-brand-muted uppercase font-bold block">Commission Rate</span>
                               <span className="font-bold text-brand-dark">{comm.commissionPercentage}%</span>
                             </div>
                             <div>
-                              <span className="text-[10px] text-brand-muted uppercase font-bold block">Total Commission</span>
+                              <span className="text-xs text-brand-muted uppercase font-bold block">Total Commission</span>
                               <span className="font-bold text-primary">₹{comm.totalCommission?.toLocaleString('en-IN')}</span>
                             </div>
                             <div>
-                              <span className="text-[10px] text-brand-muted uppercase font-bold block">Balance Pending</span>
+                              <span className="text-xs text-brand-muted uppercase font-bold block">Balance Pending</span>
                               <span className={`font-bold ${comm.totalPending > 0 ? 'text-amber-700' : 'text-emerald-700'}`}>
                                 ₹{comm.totalPending?.toLocaleString('en-IN')}
                               </span>
@@ -5005,7 +5005,7 @@ export default function AdminDashboard() {
 
                           {/* Installments List */}
                           <div className="space-y-1.5">
-                            <span className="text-[10px] font-bold text-brand-muted uppercase tracking-wider">Installments ({comm.installments?.length || 0})</span>
+                            <span className="text-xs font-bold text-brand-muted uppercase tracking-wider">Installments ({comm.installments?.length || 0})</span>
                             <div className="space-y-1.5">
                               {(comm.installments || []).map((inst: any) => {
                                 const isOverdue = inst.status !== 'Paid' && inst.dueDate && inst.dueDate < new Date().toISOString().split('T')[0];
@@ -5017,7 +5017,7 @@ export default function AdminDashboard() {
                                       <div className="font-bold text-brand-dark">
                                         Inst #{inst.installmentNumber} • {inst.month}
                                       </div>
-                                      <div className="text-[10px] text-brand-muted">
+                                      <div className="text-xs text-brand-muted">
                                         Due: {inst.dueDate ? new Date(inst.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                                       </div>
                                     </div>
@@ -5025,7 +5025,7 @@ export default function AdminDashboard() {
                                     <div className="flex items-center gap-3">
                                       <div className="text-right">
                                         <div className="font-bold text-primary">₹{inst.amount.toLocaleString('en-IN')}</div>
-                                        <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold ${
+                                        <span className={`inline-block px-2 py-0.5 rounded text-xs font-bold ${
                                           effectiveStatus === 'Paid'
                                             ? 'bg-emerald-50 text-emerald-700'
                                             : (effectiveStatus === 'Partially Paid'
@@ -5038,7 +5038,7 @@ export default function AdminDashboard() {
                                       <button
                                         type="button"
                                         onClick={() => openPaymentLogger(selectedRecord.data, inst)}
-                                        className="px-2.5 py-1 bg-brand-light hover:bg-brand-light/80 text-primary font-bold text-[11px] rounded-lg border border-brand-border cursor-pointer transition-colors"
+                                        className="px-2.5 py-1 bg-brand-light hover:bg-brand-light/80 text-primary font-bold text-xs rounded-lg border border-brand-border cursor-pointer transition-colors"
                                       >
                                         Update
                                       </button>
@@ -5077,7 +5077,7 @@ export default function AdminDashboard() {
                     </h4>
                     
                     <div className="flex flex-col gap-1.5">
-                      <span className="text-[10px] text-brand-muted uppercase font-bold">Select Candidate Match Proposal</span>
+                      <span className="text-xs text-brand-muted uppercase font-bold">Select Candidate Match Proposal</span>
                       <select
                         value={editMatchId}
                         onChange={(e) => setEditMatchId(e.target.value)}
@@ -5110,7 +5110,7 @@ export default function AdminDashboard() {
                           >
                             {updating ? 'Processing Proposal...' : 'Confirm Match & Request Placement Payment'}
                           </button>
-                          <p className="text-[9px] text-emerald-600 font-bold">
+                          <p className="text-xs text-emerald-600 font-bold">
                             *Confirming this match proposals will update request status to 'Match Proposed' and requests placement onboarding fees of ₹5,000 / ₹3,000 on the parent dashboard.
                           </p>
                         </div>
@@ -5125,7 +5125,7 @@ export default function AdminDashboard() {
               <form onSubmit={handleUpdateRecord} className="p-6 border-t border-brand-border bg-brand-light/20 space-y-4 shrink-0 text-left">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider">Update Current Status</label>
+                    <label className="text-xs font-bold text-brand-dark uppercase tracking-wider">Update Current Status</label>
                     <select
                       value={editStatus}
                       onChange={(e) => setEditStatus(e.target.value)}
@@ -5189,7 +5189,7 @@ export default function AdminDashboard() {
 
                   {selectedRecord.type === 'parent_therapy_requests' && (
                     <div className="flex flex-col gap-1">
-                      <label className="text-[10px] font-bold text-purple-950 uppercase tracking-wider">
+                      <label className="text-xs font-bold text-purple-950 uppercase tracking-wider">
                         Assigned Therapist (Internal Note)
                       </label>
                       <input
@@ -5203,9 +5203,9 @@ export default function AdminDashboard() {
                   )}
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider flex items-center justify-between">
+                    <label className="text-xs font-bold text-brand-dark uppercase tracking-wider flex items-center justify-between">
                       <span>Internal Notes / Comments</span>
-                      <span className="text-[9px] text-rose-500 font-bold lowercase">(private - admin eyes only)</span>
+                      <span className="text-xs text-rose-500 font-bold lowercase">(private - admin eyes only)</span>
                     </label>
                     <textarea
                       rows={1}
@@ -5219,12 +5219,12 @@ export default function AdminDashboard() {
 
                 {/* Candidate Message (Emailed directly to recipient) */}
                 <div className="flex flex-col gap-1 border-t border-brand-border/40 pt-3">
-                  <label className="text-[10px] font-bold text-primary uppercase tracking-wider flex items-center justify-between">
+                  <label className="text-xs font-bold text-primary uppercase tracking-wider flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
                       <Mail size={12} className="text-secondary" />
                       Message to Candidate / User
                     </span>
-                    <span className="text-[9px] text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                    <span className="text-xs text-emerald-600 font-bold lowercase bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                       emailed to recipient on save
                     </span>
                   </label>
@@ -5344,7 +5344,7 @@ export default function AdminDashboard() {
           <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full border border-brand-border shadow-2xl text-left animate-fade-in-up space-y-5">
             <div className="flex justify-between items-start">
               <div>
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full text-[10px] font-bold uppercase tracking-wider mb-1">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-wider mb-1">
                   <Reply size={10} /> Contact Response Email
                 </div>
                 <h3 className="font-serif text-xl font-bold text-primary">Reply to {replyModalContact.name}</h3>
@@ -5360,7 +5360,7 @@ export default function AdminDashboard() {
 
             {/* Quoted Original Message */}
             <div className="p-3.5 bg-brand-light/60 border border-brand-border rounded-2xl text-xs space-y-1">
-              <div className="text-[10px] font-bold uppercase text-brand-muted tracking-wider flex items-center gap-1">
+              <div className="text-xs font-bold uppercase text-brand-muted tracking-wider flex items-center gap-1">
                 <MessageSquareQuote size={11} className="text-secondary" /> Original Inquiry ({replyModalContact.city}):
               </div>
               <p className="text-brand-dark italic line-clamp-4 leading-relaxed font-medium">
@@ -5622,13 +5622,13 @@ export default function AdminDashboard() {
                     </div>
                     {/* Quick Presets */}
                     <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                      <span className="text-[10px] text-brand-muted font-bold">Presets:</span>
+                      <span className="text-xs text-brand-muted font-bold">Presets:</span>
                       {[16000, 22000, 25000, 35000].map((amt) => (
                         <button
                           key={amt}
                           type="button"
                           onClick={() => handleSalaryChange(amt)}
-                          className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border transition-colors cursor-pointer ${
+                          className={`px-2 py-0.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
                             Number(commissionSalary) === amt
                               ? 'bg-primary text-white border-primary'
                               : 'bg-brand-light text-brand-dark border-brand-border hover:bg-brand-light/80'
@@ -5671,7 +5671,7 @@ export default function AdminDashboard() {
                         <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-bold text-brand-muted">%</span>
                       </div>
                     </div>
-                    <p className="text-[10px] text-brand-muted">
+                    <p className="text-xs text-brand-muted">
                       Standard placement commission is typically 40% or 50% of the first month's salary.
                     </p>
                   </div>
@@ -5681,7 +5681,7 @@ export default function AdminDashboard() {
                 {/* Auto-Calculated Total Commission Banner */}
                 <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200/80 rounded-2xl flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <span className="text-[10px] font-bold text-purple-900 uppercase tracking-wider block">
+                    <span className="text-xs font-bold text-purple-900 uppercase tracking-wider block">
                       Total One-Time Commission (Payable by Teacher)
                     </span>
                     <span className="text-xs text-brand-muted font-medium">
@@ -5702,7 +5702,7 @@ export default function AdminDashboard() {
                       Payment Schedule &amp; Distribution
                     </label>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[11px] text-brand-muted font-bold">Split into:</span>
+                      <span className="text-xs text-brand-muted font-bold">Split into:</span>
                       {[1, 2, 3, 4].map((count) => (
                         <button
                           key={count}
@@ -5722,13 +5722,13 @@ export default function AdminDashboard() {
 
                   {/* Installments Table / Editable Grid */}
                   <div className="border border-brand-border rounded-2xl overflow-hidden shadow-xs relative">
-                    <div className="px-3 py-1 bg-purple-50 text-[10px] text-purple-900 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
+                    <div className="px-3 py-1 bg-purple-50 text-xs text-purple-900 font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
                       <span>↔ Swipe to edit all installment fields</span>
                     </div>
                     <div className="overflow-x-auto overscroll-x-contain pb-1">
                       <table className="w-full min-w-[550px] text-left border-collapse text-xs">
                       <thead>
-                        <tr className="bg-brand-light/60 text-brand-muted text-[10px] uppercase font-bold border-b border-brand-border">
+                        <tr className="bg-brand-light/60 text-brand-muted text-xs uppercase font-bold border-b border-brand-border">
                           <th className="py-2.5 px-3">#</th>
                           <th className="py-2.5 px-3">Target Month</th>
                           <th className="py-2.5 px-3">Due Date</th>
@@ -5774,7 +5774,7 @@ export default function AdminDashboard() {
                               <select
                                 value={inst.status}
                                 onChange={(e) => handleInstallmentFieldChange(idx, 'status', e.target.value)}
-                                className="w-full p-1.5 bg-brand-light/40 border border-brand-border rounded-lg text-[11px] font-bold text-brand-dark focus:bg-white cursor-pointer"
+                                className="w-full p-1.5 bg-brand-light/40 border border-brand-border rounded-lg text-xs font-bold text-brand-dark focus:bg-white cursor-pointer"
                               >
                                 <option value="Pending">Pending</option>
                                 <option value="Paid">Paid</option>
@@ -5811,7 +5811,7 @@ export default function AdminDashboard() {
                       <button
                         type="button"
                         onClick={() => setCommissionInstallments(generateDefaultInstallments(calcTotal, commissionInstallmentCount))}
-                        className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[10px] font-bold cursor-pointer transition-colors"
+                        className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold cursor-pointer transition-colors"
                       >
                         Auto-Balance
                       </button>
@@ -5832,7 +5832,7 @@ export default function AdminDashboard() {
                       Send branded confirmation email to Shadow Teacher with full payment schedule
                     </span>
                   </label>
-                  <p className="text-[11px] text-brand-muted pl-6.5">
+                  <p className="text-xs text-brand-muted pl-6.5">
                     An official email will be sent to the teacher outlining their monthly salary, {commissionPercentage}% placement commission terms, and installment due dates.
                   </p>
                 </div>
@@ -5928,12 +5928,12 @@ export default function AdminDashboard() {
                 <span className="font-bold text-brand-dark block">
                   Installment #{paymentTargetInstallment.installmentNumber} ({paymentTargetInstallment.month})
                 </span>
-                <span className="text-[10px] text-brand-muted">
+                <span className="text-xs text-brand-muted">
                   Due: {paymentTargetInstallment.dueDate ? new Date(paymentTargetInstallment.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                 </span>
               </div>
               <div className="text-right">
-                <span className="text-[10px] text-brand-muted uppercase font-bold block">Scheduled Due</span>
+                <span className="text-xs text-brand-muted uppercase font-bold block">Scheduled Due</span>
                 <span className="font-sans font-black text-sm text-primary">
                   ₹{paymentTargetInstallment.amount.toLocaleString('en-IN')}
                 </span>
@@ -5945,7 +5945,7 @@ export default function AdminDashboard() {
               
               {/* Payment Status */}
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider block">
+                <label className="text-xs font-bold text-brand-dark uppercase tracking-wider block">
                   Payment Status
                 </label>
                 <select
@@ -5963,7 +5963,7 @@ export default function AdminDashboard() {
               {/* Amount Paid & Date */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider block">
+                  <label className="text-xs font-bold text-brand-dark uppercase tracking-wider block">
                     Amount Paid (₹)
                   </label>
                   <div className="relative">
@@ -5978,7 +5978,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider block">
+                  <label className="text-xs font-bold text-brand-dark uppercase tracking-wider block">
                     Payment Date
                   </label>
                   <input
@@ -5993,7 +5993,7 @@ export default function AdminDashboard() {
               {/* Method & Ref */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider block">
+                  <label className="text-xs font-bold text-brand-dark uppercase tracking-wider block">
                     Payment Method
                   </label>
                   <select
@@ -6010,7 +6010,7 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider block">
+                  <label className="text-xs font-bold text-brand-dark uppercase tracking-wider block">
                     Txn Ref / UTR # (Optional)
                   </label>
                   <input
@@ -6025,7 +6025,7 @@ export default function AdminDashboard() {
 
               {/* Installment Notes */}
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-brand-dark uppercase tracking-wider block">
+                <label className="text-xs font-bold text-brand-dark uppercase tracking-wider block">
                   Remarks / Note
                 </label>
                 <input
@@ -6039,7 +6039,7 @@ export default function AdminDashboard() {
 
               {/* Error Banner */}
               {paymentModalError && (
-                <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-[11px] text-rose-800 font-bold">
+                <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 font-bold">
                   {paymentModalError}
                 </div>
               )}
@@ -6110,8 +6110,8 @@ export default function AdminDashboard() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-bold text-sm text-primary">{stName}</span>
-                      <span className="text-[10px] font-mono bg-brand-light text-brand-muted px-1.5 py-0.5 rounded">{stRegId}</span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      <span className="text-xs font-mono bg-brand-light text-brand-muted px-1.5 py-0.5 rounded">{stRegId}</span>
+                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                         stStatus === 'Shortlisted' ? 'bg-emerald-100 text-emerald-800' :
                         stStatus === 'Onboarding' ? 'bg-blue-100 text-blue-800' :
                         stStatus === 'Interview Scheduled' ? 'bg-amber-100 text-amber-800' :
@@ -6145,7 +6145,7 @@ export default function AdminDashboard() {
                       setEditStatus(stStatus);
                       setEditNotes(st.notes || '');
                     }}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-[11px] font-bold shrink-0 cursor-pointer transition-colors"
+                    className="flex items-center gap-1 px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-xs font-bold shrink-0 cursor-pointer transition-colors"
                   >
                     <Eye size={12} />
                     <span>View Profile</span>
@@ -6212,7 +6212,7 @@ export default function AdminDashboard() {
                     <div className="flex items-center gap-2 mb-2">
                       <User size={14} className="text-primary" />
                       <span className="text-xs font-bold text-primary uppercase tracking-wider">Parent Requirement</span>
-                      <span className="text-[10px] font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">{regId}</span>
+                      <span className="text-xs font-mono bg-primary/10 text-primary px-1.5 py-0.5 rounded">{regId}</span>
                     </div>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
                       <p className="text-xs text-brand-dark"><span className="font-semibold">Parent:</span> {parentName}</p>

@@ -186,12 +186,12 @@ export default function ForParents() {
                     <div className="bg-white/10 border border-white/15 p-4 rounded-2xl text-center">
                       <p className="text-xs uppercase tracking-wider text-gray-300 font-bold">Shadow Teacher Fee</p>
                       <p className="text-3xl font-black text-accent mt-1">₹5,000</p>
-                      <p className="text-[10px] text-gray-400 mt-1">One-time placement</p>
+                      <p className="text-xs text-gray-400 mt-1">One-time placement</p>
                     </div>
                     <div className="bg-white/10 border border-white/15 p-4 rounded-2xl text-center">
                       <p className="text-xs uppercase tracking-wider text-gray-300 font-bold">Home Tutor Fee</p>
                       <p className="text-3xl font-black text-accent mt-1">₹3,000</p>
-                      <p className="text-[10px] text-gray-400 mt-1">One-time placement</p>
+                      <p className="text-xs text-gray-400 mt-1">One-time placement</p>
                     </div>
                   </div>
                 </div>
@@ -200,7 +200,7 @@ export default function ForParents() {
                     <Info size={14} className="text-accent flex-shrink-0 mt-0.5" />
                     <p>*Placement fees are separate from the initial ₹99 consultation and are only applicable after we gain a clear understanding of your child's needs, learning goals, and your expectations.</p>
                   </div>
-                  <p className="text-[11px] text-gray-300 pl-5 font-medium">
+                  <p className="text-xs text-gray-300 pl-5 font-medium">
                     For full details on fees, refunds, and payment terms, please see our{' '}
                     <Link href="/terms" className="text-accent font-bold underline hover:text-white transition-colors">
                       Terms &amp; Conditions
@@ -228,7 +228,7 @@ export default function ForParents() {
                       </div>
                       <div className="space-y-1">
                         <h4 className="font-serif font-bold text-primary text-sm leading-tight">{flow.title}</h4>
-                        <p className="text-[11px] text-brand-muted leading-relaxed">{flow.desc}</p>
+                        <p className="text-xs text-brand-muted leading-relaxed">{flow.desc}</p>
                       </div>
                       
                       {/* Connection arrows for larger screens */}

@@ -540,7 +540,7 @@ export default function ShadowTeacherRegister() {
                               ))}
                             </div>
                           ) : (
-                            <p className="text-[11px] text-brand-muted italic mt-1">*Select one or more localities from the city dropdown above.</p>
+                            <p className="text-xs text-brand-muted italic mt-1">*Select one or more localities from the city dropdown above.</p>
                           )}
                         </div>
 

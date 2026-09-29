@@ -406,7 +406,7 @@ function PlacementFeeContent() {
                     {applyingPromo ? 'Applying...' : 'Apply Code'}
                   </button>
                 </div>
-                <p className="text-[11px] text-purple-800">
+                <p className="text-xs text-purple-800">
                   {isTherapy
                     ? 'Enter your promo code if provided by our advisory team.'
                     : 'Enter your authorized promo code to waive or discount the placement onboarding fee.'}

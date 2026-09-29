@@ -241,7 +241,7 @@ export default function SchoolsPage() {
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-secondary/15 border border-secondary/30 text-secondary text-xs font-extrabold uppercase tracking-wider">
                 <Sparkles size={13} />
                 <span>Collaboration — Schools</span>
-                <span className="px-2 py-0.5 rounded-full bg-secondary text-white text-[9px] font-black">NEW</span>
+                <span className="px-2 py-0.5 rounded-full bg-secondary text-white text-xs font-black">NEW</span>
               </div>
 
               <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-black text-primary leading-tight tracking-tight">
@@ -351,7 +351,7 @@ export default function SchoolsPage() {
             {/* Left Column: Form (Section B) */}
             <div className="lg:col-span-7 bg-white border border-brand-border rounded-3xl p-6 sm:p-8 shadow-xl text-left">
               <div className="border-b border-brand-border/60 pb-5 mb-6">
-                <span className="text-[10px] font-extrabold text-secondary uppercase tracking-widest bg-secondary/10 px-2.5 py-1 rounded-full border border-secondary/20">
+                <span className="text-xs font-extrabold text-secondary uppercase tracking-widest bg-secondary/10 px-2.5 py-1 rounded-full border border-secondary/20">
                   Step 1: Requirement Consultation
                 </span>
                 <h2 className="font-serif text-2xl sm:text-3xl font-black text-primary mt-2">
@@ -557,7 +557,7 @@ export default function SchoolsPage() {
                             type="button"
                             key={grade}
                             onClick={() => handleGradeToggle(grade)}
-                            className={`p-2 rounded-lg border text-[11px] font-semibold flex items-center gap-2 transition-all cursor-pointer ${
+                            className={`p-2 rounded-lg border text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer ${
                               checked 
                                 ? 'bg-secondary text-white border-secondary shadow-xs font-bold' 
                                 : 'bg-white border-brand-border text-brand-dark hover:border-secondary/40'
@@ -670,7 +670,7 @@ export default function SchoolsPage() {
                     {appliedPromo === 'SCHOOL199' && (
                       <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold flex items-center justify-between">
                         <span>🎉 Fee-waiver code <strong>SCHOOL199</strong> applied!</span>
-                        <span className="bg-emerald-600 text-white text-[10px] px-2 py-0.5 rounded-full font-black">100% OFF</span>
+                        <span className="bg-emerald-600 text-white text-xs px-2 py-0.5 rounded-full font-black">100% OFF</span>
                       </div>
                     )}
                   </div>
@@ -690,13 +690,13 @@ export default function SchoolsPage() {
                         )}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center text-[11px] text-brand-muted border-t border-brand-border/40 pt-2">
+                    <div className="flex justify-between items-center text-xs text-brand-muted border-t border-brand-border/40 pt-2">
                       <span>Placement Fee (Payable after teacher shortlist)</span>
                       <span>₹5,000 (Later)</span>
                     </div>
                   </div>
 
-                  <div className="p-4 bg-brand-light/60 border border-brand-border rounded-2xl text-[11px] text-brand-muted leading-relaxed">
+                  <div className="p-4 bg-brand-light/60 border border-brand-border rounded-2xl text-xs text-brand-muted leading-relaxed">
                     By submitting this form, you agree to be contacted by The Shadow Bridge team for consultation and candidate alignment.
                   </div>
 
@@ -729,8 +729,8 @@ export default function SchoolsPage() {
               {/* Section G: Commission Structure Card */}
               <div className="bg-gradient-to-br from-primary to-[#2A1D4E] text-white rounded-3xl p-6 shadow-xl border border-primary/40 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-extrabold text-accent uppercase tracking-widest">Pricing Structure</span>
-                  <span className="px-2.5 py-0.5 bg-secondary text-white text-[10px] font-black rounded-full uppercase">For Schools</span>
+                  <span className="text-xs font-extrabold text-accent uppercase tracking-widest">Pricing Structure</span>
+                  <span className="px-2.5 py-0.5 bg-secondary text-white text-xs font-black rounded-full uppercase">For Schools</span>
                 </div>
 
                 <h3 className="font-serif text-xl font-bold text-white">
@@ -739,17 +739,17 @@ export default function SchoolsPage() {
 
                 <div className="space-y-3 pt-1">
                   <div className="bg-white/10 border border-white/20 rounded-2xl p-3.5 space-y-1">
-                    <p className="text-[11px] text-accent font-extrabold uppercase">1. Booking Fee</p>
+                    <p className="text-xs text-accent font-extrabold uppercase">1. Booking Fee</p>
                     <p className="text-xl font-black text-white">₹199/- <span className="text-xs font-normal text-white/70">(Consultation Call)</span></p>
                   </div>
 
                   <div className="bg-white/10 border border-white/20 rounded-2xl p-3.5 space-y-1">
-                    <p className="text-[11px] text-accent font-extrabold uppercase">2. One-time Placement Fee</p>
+                    <p className="text-xs text-accent font-extrabold uppercase">2. One-time Placement Fee</p>
                     <p className="text-2xl font-black text-white">₹5,000/- <span className="text-xs font-normal text-white/70">(Charged once per requirement)</span></p>
                   </div>
 
                   <div className="bg-emerald-500/20 border border-emerald-400/40 rounded-2xl p-3.5 space-y-1">
-                    <p className="text-[11px] text-emerald-300 font-extrabold uppercase">3. Commission from School</p>
+                    <p className="text-xs text-emerald-300 font-extrabold uppercase">3. Commission from School</p>
                     <p className="text-xl font-black text-white">50% of First Month's Salary <span className="text-xs font-normal text-white/80">(One-time)</span></p>
                   </div>
                 </div>
@@ -786,7 +786,7 @@ export default function SchoolsPage() {
                       </div>
                       <div className="space-y-0.5">
                         <h4 className="font-bold text-xs text-primary">{s.title}</h4>
-                        <p className="text-[11px] text-brand-muted leading-relaxed">{s.desc}</p>
+                        <p className="text-xs text-brand-muted leading-relaxed">{s.desc}</p>
                       </div>
                     </div>
                   ))}

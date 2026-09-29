@@ -100,17 +100,85 @@ export default function Navbar() {
                   <img src="/favicon-192.png" alt="The Shadow Bridge Logo" className="w-full h-full object-contain" />
                 </span>
                 <div className="flex flex-col min-w-0">
-                  <span className="font-serif text-[13px] xs:text-base sm:text-2xl font-black text-primary tracking-tight leading-none truncate">
+                  <span className="font-serif text-xs xs:text-base sm:text-2xl font-black text-primary tracking-tight leading-none truncate">
                     The Shadow Bridge
                   </span>
-                  <span className="text-[7.5px] xs:text-[8.5px] sm:text-[10px] text-accent font-bold tracking-wider sm:tracking-widest uppercase mt-0.5 leading-none truncate">
+                  <span className="text-xs text-accent font-semibold tracking-normal mt-0.5 leading-none truncate">
                     by Pratibha Mishra
                   </span>
                 </div>
               </Link>
             </div>
 
-            {/* 2. Right Side: Theme Toggle + Book Consultation CTA + Unified Hamburger Icon */}
+            {/* Desktop Horizontal Navigation Links (visible on lg+ screens) */}
+            <div className="hidden lg:flex items-center gap-1 xl:gap-2">
+              <Link
+                href="/services"
+                className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold transition-colors ${
+                  pathname === '/services' ? 'text-primary bg-primary/10' : 'text-brand-dark hover:text-primary hover:bg-brand-light'
+                }`}
+              >
+                Services
+              </Link>
+              <Link
+                href="/shadow-teachers"
+                className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold transition-colors ${
+                  pathname === '/shadow-teachers' ? 'text-primary bg-primary/10' : 'text-brand-dark hover:text-primary hover:bg-brand-light'
+                }`}
+              >
+                Shadow Teachers
+              </Link>
+              <Link
+                href="/tutors"
+                className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold transition-colors ${
+                  pathname === '/tutors' ? 'text-primary bg-primary/10' : 'text-brand-dark hover:text-primary hover:bg-brand-light'
+                }`}
+              >
+                Home Tutors
+              </Link>
+              <Link
+                href="/therapies"
+                className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold transition-colors ${
+                  pathname === '/therapies' ? 'text-primary bg-primary/10' : 'text-brand-dark hover:text-primary hover:bg-brand-light'
+                }`}
+              >
+                Therapies
+              </Link>
+              <Link
+                href="/schools"
+                className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold transition-colors ${
+                  pathname === '/schools' ? 'text-primary bg-primary/10' : 'text-brand-dark hover:text-primary hover:bg-brand-light'
+                }`}
+              >
+                Schools
+              </Link>
+              <Link
+                href="/resources"
+                className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold transition-colors ${
+                  pathname.startsWith('/resources') ? 'text-primary bg-primary/10' : 'text-brand-dark hover:text-primary hover:bg-brand-light'
+                }`}
+              >
+                Resources
+              </Link>
+              <Link
+                href="/about"
+                className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold transition-colors ${
+                  pathname === '/about' ? 'text-primary bg-primary/10' : 'text-brand-dark hover:text-primary hover:bg-brand-light'
+                }`}
+              >
+                About
+              </Link>
+              <Link
+                href="/check-status"
+                className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold transition-colors ${
+                  pathname === '/check-status' ? 'text-secondary bg-secondary/10' : 'text-brand-dark hover:text-secondary hover:bg-brand-light'
+                }`}
+              >
+                Status
+              </Link>
+            </div>
+
+            {/* 2. Right Side: Theme Toggle + Book Consultation CTA + Mobile/Tablet Hamburger Icon */}
             <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
               {/* Theme Toggle */}
               <ThemeToggle />
@@ -118,19 +186,19 @@ export default function Navbar() {
               {/* Primary CTA Button - Compact on Mobile, Full on Desktop */}
               <Link
                 href="/book"
-                className="btn-gradient px-2.5 py-1.5 sm:px-5 sm:py-2.5 rounded-full text-[11px] sm:text-sm font-bold flex items-center gap-1 sm:gap-1.5 hover:scale-105 active:scale-95 transition-all shadow-xs sm:shadow-md whitespace-nowrap cursor-pointer shrink-0"
+                className="btn-gradient px-2.5 py-1.5 sm:px-5 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold flex items-center gap-1 sm:gap-1.5 hover:scale-105 active:scale-95 transition-all shadow-xs sm:shadow-md whitespace-nowrap cursor-pointer shrink-0"
               >
                 <PhoneCall size={12} className="shrink-0 sm:w-3.5 sm:h-3.5" />
                 <span className="sm:hidden">Book Call</span>
                 <span className="hidden sm:inline">Book Consultation</span>
-                <span className="hidden md:inline-block bg-white/20 px-2 py-0.5 rounded-full text-[10px] font-extrabold ml-1">₹99</span>
+                <span className="hidden md:inline-block bg-white/20 px-2 py-0.5 rounded-full text-xs font-extrabold ml-1">₹99</span>
               </Link>
 
-              {/* Unified Hamburger Menu Button (☰ Icon) - Visible on BOTH Desktop & Mobile */}
+              {/* Mobile/Tablet Hamburger Menu Button - Hidden on lg+ screens */}
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 type="button"
-                className={`p-2 sm:p-3 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex items-center gap-1.5 shadow-xs sm:shadow-sm shrink-0 ${
+                className={`lg:hidden p-2 sm:p-3 rounded-xl sm:rounded-2xl border transition-all cursor-pointer flex items-center gap-1.5 shadow-xs sm:shadow-sm shrink-0 ${
                   isOpen
                     ? 'bg-primary text-white border-primary shadow-indigo-100'
                     : 'bg-brand-light/90 text-primary border-brand-border hover:bg-brand-light hover:border-primary/40'
@@ -181,7 +249,7 @@ export default function Navbar() {
                     
                     {/* Column 1: Main Pages & Check Status */}
                     <div className="space-y-1.5">
-                      <div className="text-[10px] font-bold text-primary uppercase tracking-widest px-3 mb-1.5 flex items-center gap-1.5">
+                      <div className="text-xs font-bold text-primary uppercase tracking-widest px-3 mb-1.5 flex items-center gap-1.5">
                         <Sparkles size={12} className="text-secondary" /> Main Navigation
                       </div>
                       
@@ -222,7 +290,7 @@ export default function Navbar() {
                       >
                         <span className="font-bold">Why I Started (Founder Story)</span>
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded-md bg-purple-100 text-purple-900 border border-purple-200/60 text-[9px] uppercase font-bold tracking-wider">
+                          <span className="px-2 py-0.5 rounded-md bg-purple-100 text-purple-900 border border-purple-200/60 text-xs uppercase font-bold tracking-wider">
                             Story
                           </span>
                           <ArrowRight size={14} className="text-brand-muted/70 opacity-60" />
@@ -254,7 +322,7 @@ export default function Navbar() {
                       >
                         <span className="font-bold">Therapies – Home Sessions (Delhi NCR)</span>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="px-2 py-0.5 bg-purple-100 text-purple-900 border border-purple-200 text-[9px] font-bold rounded-md uppercase tracking-wider">
+                          <span className="px-2 py-0.5 bg-purple-100 text-purple-900 border border-purple-200 text-xs font-bold rounded-md uppercase tracking-wider">
                             NEW
                           </span>
                           <ArrowRight size={14} className="text-brand-muted/70 opacity-60" />
@@ -273,7 +341,7 @@ export default function Navbar() {
                       >
                         <span className="font-bold">Collaboration — Schools</span>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="px-2 py-0.5 bg-purple-100 text-purple-900 border border-purple-200 text-[9px] font-bold rounded-md uppercase tracking-wider">
+                          <span className="px-2 py-0.5 bg-purple-100 text-purple-900 border border-purple-200 text-xs font-bold rounded-md uppercase tracking-wider">
                             NEW
                           </span>
                           <ArrowRight size={14} className="text-brand-muted/70 opacity-60" />
@@ -292,7 +360,7 @@ export default function Navbar() {
                       >
                         <span className="font-bold">Resources &amp; Guides</span>
                         <div className="flex items-center gap-2 shrink-0">
-                          <span className="px-2 py-0.5 bg-purple-100 text-purple-900 border border-purple-200 text-[9px] font-bold rounded-md uppercase tracking-wider">
+                          <span className="px-2 py-0.5 bg-purple-100 text-purple-900 border border-purple-200 text-xs font-bold rounded-md uppercase tracking-wider">
                             Guides
                           </span>
                           <ArrowRight size={14} className="text-brand-muted/70 opacity-60" />
@@ -314,7 +382,7 @@ export default function Navbar() {
                           <span>Check Status</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 bg-secondary/15 text-secondary text-[9px] font-bold rounded-md uppercase tracking-wider border border-secondary/20">
+                          <span className="px-2 py-0.5 bg-secondary/15 text-secondary text-xs font-bold rounded-md uppercase tracking-wider border border-secondary/20">
                             Lookup
                           </span>
                           <ArrowRight size={14} className="text-secondary opacity-70" />
@@ -324,7 +392,7 @@ export default function Navbar() {
 
                     {/* Column 2: Program Sections (Parents & Shadow Teachers Dropdowns) */}
                     <div className="space-y-3 md:col-span-1">
-                      <div className="text-[10px] font-bold text-primary uppercase tracking-widest px-3 mb-1.5 flex items-center gap-1.5">
+                      <div className="text-xs font-bold text-primary uppercase tracking-widest px-3 mb-1.5 flex items-center gap-1.5">
                         <Sparkles size={12} className="text-secondary" /> Programs &amp; Registration
                       </div>
 
@@ -417,7 +485,7 @@ export default function Navbar() {
 
                     {/* Column 3: Support & Community + Consultation Action Card */}
                     <div className="space-y-3">
-                      <div className="text-[10px] font-bold text-primary uppercase tracking-widest px-3 mb-1.5 flex items-center gap-1.5">
+                      <div className="text-xs font-bold text-primary uppercase tracking-widest px-3 mb-1.5 flex items-center gap-1.5">
                         <Sparkles size={12} className="text-secondary" /> Support &amp; Community
                       </div>
 
@@ -478,14 +546,14 @@ export default function Navbar() {
                       {/* Featured Consultation Action Card */}
                       <div className="bg-gradient-to-br from-primary to-[#2A1D4E] text-white p-4 sm:p-5 rounded-2xl shadow-lg border border-primary/40 space-y-2.5">
                         <div className="flex items-center justify-between">
-                          <span className="text-[9px] sm:text-[10px] font-bold text-accent uppercase tracking-widest">Assessment Call</span>
-                          <span className="px-2 py-0.5 bg-secondary text-white text-[10px] font-black rounded-full">₹99 Only</span>
+                          <span className="text-xs font-bold text-accent uppercase tracking-widest">Assessment Call</span>
+                          <span className="px-2 py-0.5 bg-secondary text-white text-xs font-black rounded-full">₹99 Only</span>
                         </div>
                         <div>
                           <h4 className="font-serif text-sm sm:text-base font-bold text-white leading-tight">
                             Book 1-on-1 Consultation Call
                           </h4>
-                          <p className="text-[11px] sm:text-xs text-brand-muted/90 mt-0.5 leading-relaxed">
+                          <p className="text-xs text-brand-muted/90 mt-0.5 leading-relaxed">
                             Speak directly with Founder Pratibha Mishra to assess your child's educational needs.
                           </p>
                         </div>

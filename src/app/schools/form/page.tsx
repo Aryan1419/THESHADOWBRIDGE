@@ -164,7 +164,7 @@ function SchoolFormContent() {
               
               {/* Header */}
               <div className="border-b border-brand-border/60 pb-5">
-                <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-black uppercase tracking-wider border border-emerald-200">
+                <span className="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full text-xs font-black uppercase tracking-wider border border-emerald-200">
                   Unlocked Registration Form
                 </span>
                 <h1 className="font-serif text-2xl sm:text-3xl font-black text-primary mt-2">
