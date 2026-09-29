@@ -631,10 +631,11 @@ export default function Home() {
           </p>
           <div className="pt-2">
             <Button
-              variant="secondary"
+              variant="white"
               size="lg"
               href="/book"
-              className="bg-white text-primary hover:bg-brand-light font-black text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-5 rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all"
+              icon={<PhoneCall size={20} className="text-secondary" />}
+              className="px-8 sm:px-12 py-4 sm:py-5 !text-primary !bg-white hover:!bg-brand-light font-black text-base sm:text-lg rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all"
             >
               Book Now
             </Button>
