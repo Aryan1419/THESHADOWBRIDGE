@@ -12,7 +12,14 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
   const pathname = usePathname();
+
+  const isServicesActive = pathname.startsWith('/services') || 
+    pathname === '/shadow-teachers' || 
+    pathname === '/tutors' || 
+    pathname === '/therapies' || 
+    pathname === '/schools';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,12 +37,14 @@ export default function Navbar() {
   useEffect(() => {
     setIsOpen(false);
     setExpandedSection(null);
+    setServicesDropdownOpen(false);
   }, [pathname]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsOpen(false);
+        setServicesDropdownOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -112,46 +121,90 @@ export default function Navbar() {
 
             {/* Desktop Horizontal Navigation Links (visible on lg+ screens) */}
             <div className="hidden lg:flex items-center gap-1 xl:gap-2">
-              <Link
-                href="/services"
-                className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold transition-colors ${
-                  pathname === '/services' ? 'text-primary bg-primary/10' : 'text-brand-dark hover:text-primary hover:bg-brand-light'
-                }`}
+              {/* Consolidated Services Dropdown */}
+              <div 
+                className="relative"
+                onMouseEnter={() => setServicesDropdownOpen(true)}
+                onMouseLeave={() => setServicesDropdownOpen(false)}
               >
-                Services
-              </Link>
-              <Link
-                href="/shadow-teachers"
-                className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold transition-colors ${
-                  pathname === '/shadow-teachers' ? 'text-primary bg-primary/10' : 'text-brand-dark hover:text-primary hover:bg-brand-light'
-                }`}
-              >
-                Shadow Teachers
-              </Link>
-              <Link
-                href="/tutors"
-                className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold transition-colors ${
-                  pathname === '/tutors' ? 'text-primary bg-primary/10' : 'text-brand-dark hover:text-primary hover:bg-brand-light'
-                }`}
-              >
-                Home Tutors
-              </Link>
-              <Link
-                href="/therapies"
-                className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold transition-colors ${
-                  pathname === '/therapies' ? 'text-primary bg-primary/10' : 'text-brand-dark hover:text-primary hover:bg-brand-light'
-                }`}
-              >
-                Therapies
-              </Link>
-              <Link
-                href="/schools"
-                className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold transition-colors ${
-                  pathname === '/schools' ? 'text-primary bg-primary/10' : 'text-brand-dark hover:text-primary hover:bg-brand-light'
-                }`}
-              >
-                Schools
-              </Link>
+                <button
+                  type="button"
+                  onClick={() => setServicesDropdownOpen(!servicesDropdownOpen)}
+                  aria-expanded={servicesDropdownOpen}
+                  aria-haspopup="true"
+                  className={`px-3 py-1.5 rounded-lg text-xs xl:text-sm font-semibold transition-colors flex items-center gap-1 cursor-pointer ${
+                    isServicesActive ? 'text-primary bg-primary/10' : 'text-brand-dark hover:text-primary hover:bg-brand-light'
+                  }`}
+                >
+                  <span>Services</span>
+                  <ChevronDown size={14} className={`transition-transform duration-200 ${servicesDropdownOpen ? 'rotate-180 text-primary' : 'text-brand-muted'}`} />
+                </button>
+
+                <AnimatePresence>
+                  {servicesDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 6, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute top-full left-0 mt-1 w-64 bg-white rounded-2xl shadow-xl border border-brand-border py-2 z-50 overflow-hidden"
+                    >
+                      <Link
+                        href="/services"
+                        onClick={() => setServicesDropdownOpen(false)}
+                        className={`px-4 py-2.5 text-xs xl:text-sm font-semibold flex items-center justify-between hover:bg-brand-light hover:text-primary transition-colors ${
+                          pathname === '/services' ? 'text-primary bg-primary/5 font-bold' : 'text-brand-dark'
+                        }`}
+                      >
+                        <span>All Services Overview</span>
+                        <ArrowRight size={13} className="text-brand-muted" />
+                      </Link>
+                      <div className="border-t border-brand-border/60 my-1"></div>
+                      <Link
+                        href="/shadow-teachers"
+                        onClick={() => setServicesDropdownOpen(false)}
+                        className={`px-4 py-2.5 text-xs xl:text-sm font-semibold flex items-center justify-between hover:bg-brand-light hover:text-primary transition-colors ${
+                          pathname === '/shadow-teachers' ? 'text-primary bg-primary/5 font-bold' : 'text-brand-dark'
+                        }`}
+                      >
+                        <span>Shadow Teachers</span>
+                        <span className="text-2xs text-secondary font-bold">1-on-1</span>
+                      </Link>
+                      <Link
+                        href="/tutors"
+                        onClick={() => setServicesDropdownOpen(false)}
+                        className={`px-4 py-2.5 text-xs xl:text-sm font-semibold flex items-center justify-between hover:bg-brand-light hover:text-primary transition-colors ${
+                          pathname === '/tutors' ? 'text-primary bg-primary/5 font-bold' : 'text-brand-dark'
+                        }`}
+                      >
+                        <span>Home Tutors</span>
+                        <span className="text-2xs text-primary font-bold">Academic</span>
+                      </Link>
+                      <Link
+                        href="/therapies"
+                        onClick={() => setServicesDropdownOpen(false)}
+                        className={`px-4 py-2.5 text-xs xl:text-sm font-semibold flex items-center justify-between hover:bg-brand-light hover:text-primary transition-colors ${
+                          pathname === '/therapies' ? 'text-primary bg-primary/5 font-bold' : 'text-brand-dark'
+                        }`}
+                      >
+                        <span>Therapy Sessions</span>
+                        <span className="text-2xs bg-secondary/15 text-secondary px-1.5 py-0.5 rounded-full font-bold">Delhi NCR</span>
+                      </Link>
+                      <Link
+                        href="/schools"
+                        onClick={() => setServicesDropdownOpen(false)}
+                        className={`px-4 py-2.5 text-xs xl:text-sm font-semibold flex items-center justify-between hover:bg-brand-light hover:text-primary transition-colors ${
+                          pathname === '/schools' ? 'text-primary bg-primary/5 font-bold' : 'text-brand-dark'
+                        }`}
+                      >
+                        <span>School Partnerships</span>
+                        <span className="text-2xs bg-accent/20 text-accent px-1.5 py-0.5 rounded-full font-bold">Schools</span>
+                      </Link>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <Link
                 href="/resources"
                 className={`px-2.5 py-1.5 rounded-lg text-xs xl:text-sm font-semibold transition-colors ${

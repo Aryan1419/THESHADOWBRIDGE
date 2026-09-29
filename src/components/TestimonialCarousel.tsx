@@ -16,6 +16,15 @@ interface Review {
   status: 'approved';
 }
 
+function formatSentenceCase(text: string) {
+  if (!text) return '';
+  const letters = text.replace(/[^a-zA-Z]/g, '');
+  if (letters.length > 3 && letters === letters.toUpperCase()) {
+    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
+  }
+  return text;
+}
+
 export default function TestimonialCarousel() {
   const [testimonials, setTestimonials] = useState<Review[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -140,7 +149,7 @@ export default function TestimonialCarousel() {
                   ))}
                 </div>
                 <p className="text-brand-muted text-sm italic leading-relaxed mb-6 relative z-10 font-sans">
-                  "{t.review_text}"
+                  "{formatSentenceCase(t.review_text)}"
                 </p>
               </div>
               
@@ -150,7 +159,7 @@ export default function TestimonialCarousel() {
                 </div>
                 <div className="text-left">
                   <h3 className="font-serif font-bold text-primary text-base">
-                    {t.parent_name}
+                    {formatSentenceCase(t.parent_name)}
                     {t.child_first_name && <span className="text-xs font-normal text-brand-muted block font-sans">Parent of {t.child_first_name}</span>}
                   </h3>
                   <p className="text-xs text-brand-muted font-sans font-medium">
@@ -186,7 +195,7 @@ export default function TestimonialCarousel() {
                 ))}
               </div>
               <p className="text-brand-muted text-sm italic leading-relaxed mb-6 font-sans">
-                "{testimonials[index].review_text}"
+                "{formatSentenceCase(testimonials[index].review_text)}"
               </p>
             </div>
             
@@ -196,7 +205,7 @@ export default function TestimonialCarousel() {
               </div>
               <div className="text-left">
                 <h3 className="font-serif font-bold text-primary text-base">
-                  {testimonials[index].parent_name}
+                  {formatSentenceCase(testimonials[index].parent_name)}
                   {testimonials[index].child_first_name && <span className="text-xs font-normal text-brand-muted block font-sans">Parent of {testimonials[index].child_first_name}</span>}
                 </h3>
                 <p className="text-xs text-brand-muted font-sans font-medium">

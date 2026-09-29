@@ -23,7 +23,7 @@ export default function Footer() {
                 </span>
               </div>
             </Link>
-            <p className="text-gray-300 text-sm mb-6 leading-relaxed max-w-sm">
+            <p className="text-white/80 text-sm mb-6 leading-relaxed max-w-sm">
               We empower children by bridging the gap in inclusive education. Our professionally trained Shadow Teachers and Home Tutors provide compassionate, child-centered guidance to build confidence, independence, and educational success.
             </p>
             <div className="flex items-center gap-3">
@@ -58,50 +58,54 @@ export default function Footer() {
 
           {/* Column 2: Quick Links */}
           <div>
-            <h3 className="font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">Quick Links</h3>
-            <ul className="space-y-2.5 text-sm text-gray-300">
-              <li><Link href="/" className="hover:text-accent transition-colors">Home</Link></li>
-              <li><Link href="/founder-story" className="hover:text-accent transition-colors font-bold text-amber-300">Why I Started (Founder Story)</Link></li>
-              <li><Link href="/about" className="hover:text-accent transition-colors">About Us</Link></li>
-              <li><Link href="/services" className="hover:text-accent transition-colors">Services</Link></li>
-              <li><Link href="/resources" className="hover:text-accent transition-colors font-bold text-amber-200">Resources &amp; Guides</Link></li>
-              <li><Link href="/schools" className="hover:text-accent transition-colors font-bold text-pink-300">Collaboration — Schools (NEW)</Link></li>
-              <li><Link href="/check-status" className="hover:text-accent transition-colors font-bold text-accent">Check Application Status</Link></li>
-              <li><Link href="/testimonials" className="hover:text-accent transition-colors">Testimonials</Link></li>
-              <li><Link href="/leave-review" className="hover:text-accent transition-colors text-amber-300 font-semibold flex items-center gap-1">⭐ Leave a Review</Link></li>
-              <li><Link href="/faqs" className="hover:text-accent transition-colors">FAQs</Link></li>
-              <li><Link href="/contact" className="hover:text-accent transition-colors">Contact Us</Link></li>
+            <h3 className="w-full block font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">Quick Links</h3>
+            <ul className="space-y-2.5 text-sm text-white/80">
+              <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
+              <li><Link href="/founder-story" className="hover:text-white transition-colors">Why I Started (Founder Story)</Link></li>
+              <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
+              <li><Link href="/services" className="hover:text-white transition-colors">Services</Link></li>
+              <li><Link href="/resources" className="hover:text-white transition-colors">Resources &amp; Guides</Link></li>
+              <li>
+                <Link href="/schools" className="hover:text-white transition-colors flex items-center gap-1.5">
+                  <span>Collaboration — Schools</span>
+                  <span className="text-2xs text-accent font-bold bg-accent/15 px-1.5 py-0.5 rounded-full uppercase">NEW</span>
+                </Link>
+              </li>
+              <li><Link href="/check-status" className="hover:text-white transition-colors">Check Application Status</Link></li>
+              <li><Link href="/testimonials" className="hover:text-white transition-colors">Testimonials</Link></li>
+              <li><Link href="/leave-review" className="hover:text-white transition-colors flex items-center gap-1">Leave a Review</Link></li>
+              <li><Link href="/faqs" className="hover:text-white transition-colors">FAQs</Link></li>
             </ul>
           </div>
 
           {/* Column 3: For Parents & Students Links */}
           <div>
-            <h3 className="font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">For Parents</h3>
-            <ul className="space-y-2.5 text-sm text-gray-300">
-              <li><Link href="/parents" className="hover:text-accent transition-colors">Parent Overview</Link></li>
-              <li><Link href="/parents#shadow-teacher" className="hover:text-accent transition-colors">Need a Shadow Teacher?</Link></li>
-              <li><Link href="/parents#home-tutor" className="hover:text-accent transition-colors">Searching for a Home Tutor?</Link></li>
-              <li><Link href="/register/parent" className="hover:text-accent transition-colors">Register as Parent</Link></li>
-              <li><Link href="/book" className="hover:text-accent transition-colors">Book Consultation (₹99)</Link></li>
-              <li><Link href="/leave-review" className="hover:text-accent transition-colors text-amber-300 font-semibold">Share Your Experience</Link></li>
+            <h3 className="w-full block font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">For Parents</h3>
+            <ul className="space-y-2.5 text-sm text-white/80">
+              <li><Link href="/parents" className="hover:text-white transition-colors">Parent Overview</Link></li>
+              <li><Link href="/parents#shadow-teacher" className="hover:text-white transition-colors">Need a Shadow Teacher?</Link></li>
+              <li><Link href="/parents#home-tutor" className="hover:text-white transition-colors">Searching for a Home Tutor?</Link></li>
+              <li><Link href="/register/parent" className="hover:text-white transition-colors">Register as Parent</Link></li>
+              <li><Link href="/book" className="hover:text-white transition-colors">Book Consultation (₹99)</Link></li>
+              <li><Link href="/leave-review" className="hover:text-white transition-colors">Share Your Experience</Link></li>
             </ul>
           </div>
 
           {/* Column 4: For Shadow Teachers & Tutors Links */}
           <div>
-            <h3 className="font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">For Educators</h3>
-            <ul className="space-y-2.5 text-sm text-gray-300">
-              <li><Link href="/shadow-teachers" className="hover:text-accent transition-colors">Shadow Teacher Careers</Link></li>
-              <li><Link href="/tutors" className="hover:text-accent transition-colors">Home Tutor Careers</Link></li>
-              <li><Link href="/register/shadow-teacher" className="hover:text-accent transition-colors">Register as Shadow Teacher</Link></li>
-              <li><Link href="/register/tutor" className="hover:text-accent transition-colors">Register as Home Tutor</Link></li>
+            <h3 className="w-full block font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">For Educators</h3>
+            <ul className="space-y-2.5 text-sm text-white/80">
+              <li><Link href="/shadow-teachers" className="hover:text-white transition-colors">Shadow Teacher Careers</Link></li>
+              <li><Link href="/tutors" className="hover:text-white transition-colors">Home Tutor Careers</Link></li>
+              <li><Link href="/register/shadow-teacher" className="hover:text-white transition-colors">Register as Shadow Teacher</Link></li>
+              <li><Link href="/register/tutor" className="hover:text-white transition-colors">Register as Home Tutor</Link></li>
             </ul>
           </div>
 
           {/* Column 5: Contact Info */}
-          <div>
-            <h3 className="font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">Contact Us</h3>
-            <ul className="space-y-3.5 text-sm text-gray-300">
+          <div className="mt-4 md:mt-0">
+            <h3 className="w-full block font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">Contact Us</h3>
+            <ul className="space-y-3.5 text-sm text-white/80">
               <li className="flex gap-2">
                 <Mail size={16} className="text-accent flex-shrink-0 mt-0.5" />
                 <a href="mailto:theshadowbridgesupport@gmail.com" className="hover:text-accent transition-colors break-all">
@@ -117,7 +121,7 @@ export default function Footer() {
         <div className="border-t border-white/10 my-8"></div>
 
         {/* Bottom footer bar */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-gray-400">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-white/60">
           <p>© {new Date().getFullYear()} The Shadow Bridge. All rights reserved.</p>
           <div className="flex gap-6">
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { 
   Sparkles, CheckCircle2, Award, Users, BookOpen, Compass, 
-  MapPin, Send, HelpCircle, ArrowRight, Star, Heart, GraduationCap, ShieldCheck, Clock, PhoneCall
+  MapPin, Send, HelpCircle, ArrowRight, Star, Heart, GraduationCap, ShieldCheck, Clock, PhoneCall, Lock
 } from 'lucide-react';
 
 import Navbar from '@/components/Navbar';
@@ -199,19 +199,21 @@ export default function Home() {
               <div className="pt-2">
                 <div className="flex flex-col sm:flex-row gap-3.5 justify-center lg:justify-start">
                   <Button
-                    variant="primary"
+                    variant="outline"
                     size="lg"
                     href="/services"
-                    icon={<Compass size={20} />}
+                    icon={<Compass size={20} className="text-primary" />}
+                    className="tracking-wide"
                   >
-                    EXPLORE SERVICES
+                    Explore Services
                   </Button>
 
                   <Button
-                    variant="outline"
+                    variant="primary"
                     size="lg"
                     href="/book"
-                    icon={<PhoneCall size={18} className="text-secondary" />}
+                    icon={<PhoneCall size={18} className="text-accent" />}
+                    className="font-bold"
                   >
                     Book Consultation (₹99)
                   </Button>
@@ -315,12 +317,12 @@ export default function Home() {
             <h2 className="font-serif text-3xl sm:text-4xl font-black mb-4">
               We Serve in Major Cities
             </h2>
-            <p className="text-gray-300 text-base sm:text-lg">
+            <p className="text-white/80 text-base sm:text-lg">
               Our verified special needs educators and academic home tutors are active locally, working in partnership with top schools.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
             {cities.map((city, idx) => (
               <motion.div
                 key={idx}
@@ -328,14 +330,14 @@ export default function Home() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.15 }}
-                className="bg-white/10 backdrop-blur-sm border border-white/10 p-8 rounded-2xl text-center flex flex-col items-center justify-center min-h-[200px] hover:bg-white/15 transition-all group animate-fade-in"
+                className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-white/10 backdrop-blur-sm border border-white/10 p-8 rounded-2xl text-center flex flex-col items-center justify-center min-h-[200px] hover:bg-white/15 transition-all group animate-fade-in"
               >
                 <div className="text-5xl mb-4 group-hover:scale-110 transition-transform select-none">
                   {city.skyline}
                 </div>
                 <div>
                   <h3 className="font-serif text-2xl font-bold text-white mb-2">{city.name}</h3>
-                  <p className="text-gray-300 text-sm leading-relaxed">{city.desc}</p>
+                  <p className="text-white/80 text-sm leading-relaxed">{city.desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -416,10 +418,10 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 bg-brand-light/30 border-y border-brand-border">
+      <section className="py-14 sm:py-16 bg-brand-light/30 border-y border-brand-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
-            <h2 className="font-serif text-3xl sm:text-4xl font-extrabold text-primary mb-4">
+          <div className="text-center max-w-3xl mx-auto mb-10 sm:mb-12">
+            <h2 className="font-serif text-3xl sm:text-4xl font-extrabold text-primary mb-3">
               How It Works
             </h2>
             <p className="text-brand-muted text-base sm:text-lg">
@@ -432,30 +434,35 @@ export default function Home() {
             {/* Timeline center line */}
             <div className="hidden lg:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-brand-border/80 transform -translate-x-1/2 z-0"></div>
 
-            <div className="space-y-12 lg:space-y-16">
+            <div className="space-y-8 lg:space-y-10">
               {steps.map((step, idx) => {
                 const isEven = idx % 2 === 0;
                 return (
                   <div key={idx} className={`relative flex flex-col lg:flex-row items-center z-10 ${isEven ? 'lg:flex-row-reverse' : ''}`}>
                     {/* Empty block for layout spacer in desktop */}
                     <div className="hidden lg:block lg:w-1/2"></div>
-                    
-                    {/* Circle Node indicator */}
-                    <div className="absolute left-1/2 top-0 lg:top-1/2 w-10 h-10 bg-gradient-to-r from-primary to-secondary text-white rounded-full flex items-center justify-center font-bold text-sm transform -translate-x-1/2 lg:-translate-y-1/2 shadow-md z-20">
-                      {step.number}
-                    </div>
 
-                    {/* Content Box */}
+                    {/* Content Box with attached overlapping circle */}
                     <motion.div
                       initial={{ opacity: 0, x: isEven ? -40 : 40 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true, margin: "-100px" }}
-                      transition={{ duration: 0.6 }}
-                      className="w-full lg:w-[45%] bg-white p-8 rounded-2xl border border-brand-border shadow-sm mt-8 lg:mt-0 hover:shadow-md transition-shadow"
+                      transition={{ duration: 0.5 }}
+                      className="relative w-full lg:w-[46%] bg-white p-6 sm:p-8 rounded-2xl border border-brand-border shadow-sm mt-6 lg:mt-0 hover:shadow-md transition-shadow"
                     >
-                      <h3 className="font-serif font-black text-primary text-xl mb-3 flex items-center gap-2">
+                      {/* Circle Node indicator overlapping card's edge */}
+                      <div className={`absolute -top-5 left-6 ${isEven ? 'lg:-right-5 lg:left-auto lg:top-8' : 'lg:-left-5 lg:top-8'} w-10 h-10 bg-gradient-to-r from-primary to-secondary text-white rounded-full flex items-center justify-center font-bold text-sm ring-4 ring-white shadow-md z-20`}>
+                        {step.number}
+                      </div>
+
+                      <h3 className="font-serif font-black text-primary text-xl mb-2 flex items-center gap-2">
                         {step.title}
                       </h3>
+                      {idx === 1 && (
+                        <p className="text-xs text-accent font-semibold mb-2">
+                          Unlocks automatically once your consultation is marked complete
+                        </p>
+                      )}
                       <p className="text-brand-muted text-sm sm:text-base leading-relaxed">
                         {step.desc}
                       </p>
@@ -470,6 +477,17 @@ export default function Home() {
                           </Link>
                         </div>
                       )}
+                      {idx === 1 && (
+                        <div className="mt-4">
+                          <div
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-brand-light border border-brand-border text-xs font-semibold text-brand-muted cursor-default select-none"
+                            aria-label="Available after Step 1"
+                          >
+                            <Lock size={13} className="text-brand-muted" />
+                            <span>Available after Step 1</span>
+                          </div>
+                        </div>
+                      )}
                     </motion.div>
                   </div>
                 );
@@ -479,42 +497,44 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Quick Explore Section (Relocated out of Hero for cleaner decision hierarchy) */}
-      <section className="py-8 bg-brand-light/60 border-b border-brand-border/60">
+      {/* Quick Explore Section (Contained subtle block) */}
+      <section className="py-6 sm:py-8 bg-white/60 border-b border-brand-border/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
-            <span className="text-xs font-bold text-brand-muted uppercase tracking-wider mr-1">
+          <div className="bg-brand-light/40 border border-brand-border/60 rounded-2xl py-4 px-4 sm:px-6 max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 shadow-xs">
+            <span className="text-xs font-bold text-brand-muted uppercase tracking-wider shrink-0">
               Quick Explore:
             </span>
-            <Link
-              href="/shadow-teachers"
-              className="px-3.5 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
-            >
-              <Users size={14} className="text-secondary" />
-              <span>Shadow Teachers</span>
-            </Link>
-            <Link
-              href="/tutors"
-              className="px-3.5 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
-            >
-              <GraduationCap size={14} className="text-primary" />
-              <span>Home Tutors</span>
-            </Link>
-            <Link
-              href="/therapies"
-              className="px-3.5 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
-            >
-              <Heart size={14} className="text-secondary" />
-              <span>Therapy Sessions</span>
-              <span className="bg-secondary/15 text-secondary text-xs font-black px-1.5 py-0.5 rounded-full">Delhi NCR</span>
-            </Link>
-            <Link
-              href="/schools"
-              className="px-3.5 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
-            >
-              <BookOpen size={14} className="text-accent" />
-              <span>For Schools</span>
-            </Link>
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
+              <Link
+                href="/shadow-teachers"
+                className="px-3.5 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
+              >
+                <Users size={14} className="text-secondary" />
+                <span>Shadow Teachers</span>
+              </Link>
+              <Link
+                href="/tutors"
+                className="px-3.5 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
+              >
+                <GraduationCap size={14} className="text-primary" />
+                <span>Home Tutors</span>
+              </Link>
+              <Link
+                href="/therapies"
+                className="px-3.5 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
+              >
+                <Heart size={14} className="text-secondary" />
+                <span>Therapy Sessions</span>
+                <span className="bg-secondary/15 text-secondary text-2xs font-black px-1.5 py-0.5 rounded-full">Delhi NCR</span>
+              </Link>
+              <Link
+                href="/schools"
+                className="px-3.5 py-1.5 rounded-full bg-white border border-brand-border text-primary hover:border-primary hover:bg-primary/5 text-xs font-extrabold transition-all flex items-center gap-1.5 shadow-2xs"
+              >
+                <BookOpen size={14} className="text-accent" />
+                <span>For Schools</span>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -551,10 +571,10 @@ export default function Home() {
                 </div>
                 <div className="p-8 pt-0 mt-auto">
                   <Button
-                    variant="ghost"
+                    variant="primary"
                     size="md"
                     href={srv.link}
-                    className="w-full"
+                    className="w-full shadow-sm"
                   >
                     {srv.btnText}
                   </Button>
@@ -606,7 +626,7 @@ export default function Home() {
           <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-black">
             Book Your Consultation Today – Just ₹99
           </h2>
-          <p className="text-lg text-gray-200 max-w-2xl mx-auto">
+          <p className="text-lg text-white/90 max-w-2xl mx-auto">
             Take the first step towards understanding your child's needs. Let's plan their inclusive pathway together.
           </p>
           <div className="pt-2">
@@ -614,7 +634,7 @@ export default function Home() {
               variant="secondary"
               size="lg"
               href="/book"
-              className="bg-white text-primary hover:bg-brand-light font-black shadow-lg hover:scale-105 active:scale-95"
+              className="bg-white text-primary hover:bg-brand-light font-black text-base sm:text-lg px-8 sm:px-10 py-4 sm:py-5 rounded-2xl shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all"
             >
               Book Now
             </Button>
@@ -625,38 +645,52 @@ export default function Home() {
       {/* Contact Section */}
       <section className="py-20 bg-white" id="contact">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
             
             {/* Contact Details Column */}
-            <div className="lg:col-span-5 space-y-6">
-              <div className="space-y-3">
+            <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
+              <div className="space-y-4">
                 <h2 className="font-serif text-3xl sm:text-4xl font-extrabold text-primary">
                   Get In Touch
                 </h2>
                 <p className="text-brand-muted text-sm sm:text-base leading-relaxed">
                   Have questions about special education tutors, shadow teacher pricing, or registrations? Send a query and our team will get back to you within 24 hours.
                 </p>
+                <div className="space-y-2.5 pt-2 text-xs text-brand-muted">
+                  <p className="flex items-center gap-2">
+                    <span className="text-secondary font-bold">✓</span> Direct Founder Mentorship &amp; Case Review
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span className="text-secondary font-bold">✓</span> Quick 24-48hr Matching Turnaround
+                  </p>
+                  <p className="flex items-center gap-2">
+                    <span className="text-secondary font-bold">✓</span> Active in Delhi NCR, Ahmedabad, Hyderabad, Bangalore &amp; Pune
+                  </p>
+                </div>
               </div>
 
-              <div className="pt-1">
-                <div className="flex items-center gap-3.5 p-4 rounded-2xl bg-brand-light/60 border border-brand-border/80">
-                  <div className="p-2.5 bg-white rounded-xl text-primary shadow-xs flex-shrink-0 flex items-center justify-center w-11 h-11 border border-brand-border">
-                    <Send size={20} className="text-secondary" />
+              {/* Email Support Card - Wrapped entirely in mailto: link with consistent card style */}
+              <a
+                href="mailto:theshadowbridgesupport@gmail.com"
+                className="block bg-white border border-brand-border rounded-2xl shadow-sm p-6 hover:shadow-md hover:border-primary/40 transition-all group cursor-pointer"
+                title="Send email to The Shadow Bridge Support"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="p-3 bg-brand-light rounded-xl text-primary group-hover:bg-primary group-hover:text-white transition-colors flex-shrink-0 flex items-center justify-center w-12 h-12 border border-brand-border">
+                    <Send size={20} className="text-secondary group-hover:text-white transition-colors" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-brand-dark text-sm sm:text-base">Email Support</h3>
-                    <p className="text-brand-muted text-xs sm:text-sm font-semibold">
-                      <a href="mailto:theshadowbridgesupport@gmail.com" className="hover:text-secondary transition-colors break-all">
-                        theshadowbridgesupport@gmail.com
-                      </a>
+                    <h3 className="font-bold text-brand-dark text-base group-hover:text-primary transition-colors">Email Support</h3>
+                    <p className="text-brand-muted text-sm font-semibold break-all">
+                      theshadowbridgesupport@gmail.com
                     </p>
                   </div>
                 </div>
-              </div>
+              </a>
             </div>
 
-            {/* Quick Query Form Column */}
-            <div className="lg:col-span-7 bg-brand-light/30 border border-brand-border p-8 sm:p-10 rounded-3xl shadow-sm">
+            {/* Quick Query Form Column - Consistent card styling */}
+            <div className="lg:col-span-7 bg-white border border-brand-border p-6 sm:p-8 rounded-2xl shadow-sm">
               <h3 className="font-serif font-extrabold text-primary text-2xl mb-6">Send Us a Message</h3>
               
               {formSubmitted ? (
