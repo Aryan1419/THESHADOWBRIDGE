@@ -194,7 +194,10 @@ function SchoolPlacementFeeContent() {
   };
 
   const teachersCount = Math.max(1, Number(record?.teachersCount || record?.teachers_count || 1));
-  const placementAmount = record?.placement_amount || record?.placementAmount || (5000 * teachersCount);
+  const isPaid = Boolean(record?.placementPaid || record?.placement_paid);
+  const placementAmount = isPaid
+    ? (record?.placement_amount || record?.placementAmount || (5000 * teachersCount))
+    : (5000 * teachersCount);
 
   return (
     <div className="min-h-screen bg-brand-light/30 flex flex-col font-sans">

@@ -3857,7 +3857,9 @@ export default function AdminDashboard() {
                                 <td className="p-4 text-center whitespace-nowrap">
                                   {(() => {
                                     const tCount = Math.max(1, Number(r.teachersCount || r.teachers_count || 1));
-                                    const dynamicFee = r.placement_amount || r.placementAmount || (tCount * 5000);
+                                    const dynamicFee = isPlacePaid
+                                      ? (r.placement_amount || r.placementAmount || (tCount * 5000))
+                                      : (tCount * 5000);
                                     if (isPlacePaid) {
                                       return (
                                         <span className="px-2 py-0.5 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-black uppercase">
@@ -4972,8 +4974,10 @@ export default function AdminDashboard() {
                     {/* School Requests specific */}
                     {selectedRecord.type === 'school_requests' && (() => {
                       const count = Math.max(1, Number(selectedRecord.data.teachersCount || selectedRecord.data.teachers_count || 1));
-                      const fee = selectedRecord.data.placement_amount || selectedRecord.data.placementAmount || (count * 5000);
                       const isPlacePaid = selectedRecord.data.placementPaid || selectedRecord.data.placement_paid;
+                      const fee = isPlacePaid
+                        ? (selectedRecord.data.placement_amount || selectedRecord.data.placementAmount || (count * 5000))
+                        : (count * 5000);
                       const payId = (selectedRecord.data.razorpayPaymentId || selectedRecord.data.razorpay_payment_id || '').toUpperCase();
                       const notes = (selectedRecord.data.notes || '').toUpperCase();
                       const isWaived = payId.includes('SCHOOL199') || notes.includes('SCHOOL199') || selectedRecord.data.consultation_amount === 0;

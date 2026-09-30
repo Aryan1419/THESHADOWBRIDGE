@@ -62,8 +62,16 @@ const getSchoolTimeline = (teachersCount: number = 1) => {
 const getStatusExplanation = (status: string, role?: string, record?: any) => {
   if (role === 'school') {
     const sLower = (status || '').toLowerCase().trim();
+    const isPlacePaid = Boolean(
+      record?.isPlacementPaid ||
+      record?.placementPaid ||
+      record?.placement_paid ||
+      record?.placementPaymentId ||
+      record?.placement_payment_id ||
+      sLower.includes('placement fee paid')
+    );
     const count = Math.max(1, Number(record?.teachersCount || record?.teachers_count || 1));
-    const feeStr = (record?.placement_amount || record?.placementAmount || (count * 5000)).toLocaleString('en-IN');
+    const feeStr = (isPlacePaid ? (record?.placement_amount || record?.placementAmount || (count * 5000)) : (count * 5000)).toLocaleString('en-IN');
 
     if (sLower.includes('booked')) {
       return "Your ₹199 consultation fee is received. Founder Pratibha Mishra will conduct a dedicated consultation call to assess your school's shadow teacher and inclusion requirements.";
@@ -657,7 +665,6 @@ export default function CheckStatusPage() {
               {/* DYNAMIC NEXT ACTION BANNER FOR SCHOOL COLLABORATION FLOW */}
               {role === 'school' && (() => {
                 const teachersCount = Math.max(1, Number(record.teachersCount || record.teachers_count || 1));
-                const placementAmount = record.placement_amount || record.placementAmount || (teachersCount * 5000);
                 const regId = record.registrationId || record.registration_id || '';
                 const schoolName = record.schoolName || record.school_name || 'School';
                 const contactName = record.contactName || record.contact_name || 'Representative';
@@ -671,6 +678,10 @@ export default function CheckStatusPage() {
                   (record.notes || '').includes('Placement Fee Paid') ||
                   currentStatus.toLowerCase().includes('placement fee paid')
                 );
+
+                const placementAmount = isPlacementPaid 
+                  ? (record.placement_amount || record.placementAmount || (teachersCount * 5000))
+                  : (teachersCount * 5000);
 
                 const isConsultationCompleted = Boolean(
                   currentStatus.toLowerCase().includes('pending') ||

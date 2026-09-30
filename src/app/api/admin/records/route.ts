@@ -530,7 +530,8 @@ export async function POST(request: Request) {
           const schoolName = targetRecord?.school_name || targetRecord?.schoolName || 'School';
           const contactName = targetRecord?.contact_name || targetRecord?.contactName || 'Representative';
           const teachersCount = Math.max(1, Number(targetRecord?.teachers_count || targetRecord?.teachersCount || 1));
-          const feeAmount = targetRecord?.placement_amount || (teachersCount * 5000);
+          const isPaid = Boolean(targetRecord?.placement_paid || targetRecord?.placementPaid);
+          const feeAmount = isPaid ? (targetRecord?.placement_amount || (teachersCount * 5000)) : (teachersCount * 5000);
           const schoolPlacementLink = `${protocol}://${host}/schools/placement-fee?regId=${encodeURIComponent(actualRegId)}`;
 
           sendEmail({
