@@ -350,20 +350,58 @@ export async function POST(request: Request) {
     if (action === 'mark_consultation_completed') {
       const { bookingId, regId, email, phone } = body;
 
-      // Find in parent_therapy_requests, parent_shadow_requests, parent_tutor_requests, and bookings
+      // Find in school_requests, parent_therapy_requests, parent_shadow_requests, parent_tutor_requests, and bookings
       let targetRecord: any = null;
       let targetTable = '';
 
       if (regId) {
-        const { data: pth } = await supabase.from('parent_therapy_requests').select('*').eq('registration_id', regId).maybeSingle();
-        if (pth) { targetRecord = pth; targetTable = 'parent_therapy_requests'; }
-        else {
-          const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('registration_id', regId).maybeSingle();
-          if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+        const cleanReg = regId.trim().toUpperCase();
+        if (cleanReg.startsWith('SCH-')) {
+          const { data: sch } = await supabase.from('school_requests').select('*').eq('registration_id', regId).maybeSingle();
+          if (sch) { targetRecord = sch; targetTable = 'school_requests'; }
+        }
+        
+        if (!targetRecord) {
+          const { data: pth } = await supabase.from('parent_therapy_requests').select('*').eq('registration_id', regId).maybeSingle();
+          if (pth) { targetRecord = pth; targetTable = 'parent_therapy_requests'; }
           else {
-            const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('registration_id', regId).maybeSingle();
-            if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+            const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('registration_id', regId).maybeSingle();
+            if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+            else {
+              const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('registration_id', regId).maybeSingle();
+              if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+              else {
+                const { data: sch } = await supabase.from('school_requests').select('*').eq('registration_id', regId).maybeSingle();
+                if (sch) { targetRecord = sch; targetTable = 'school_requests'; }
+              }
+            }
           }
+        }
+      }
+
+      // Check local DB if Supabase did not find the record
+      if (!targetRecord && regId) {
+        const localDb = readDb();
+        const cleanReg = regId.trim().toUpperCase();
+        if (cleanReg.startsWith('SCH-') && localDb.school_requests) {
+          const sch = localDb.school_requests.find((s: any) => s.registration_id === regId || s.id === regId);
+          if (sch) { targetRecord = sch; targetTable = 'school_requests'; }
+        }
+        if (!targetRecord && localDb.parent_therapy_requests) {
+          const pth = localDb.parent_therapy_requests.find((s: any) => s.registration_id === regId || s.id === regId);
+          if (pth) { targetRecord = pth; targetTable = 'parent_therapy_requests'; }
+        }
+        if (!targetRecord && localDb.parent_shadow_requests) {
+          const ps = localDb.parent_shadow_requests.find((s: any) => s.registration_id === regId || s.id === regId);
+          if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+        }
+        if (!targetRecord && localDb.parent_tutor_requests) {
+          const pt = localDb.parent_tutor_requests.find((s: any) => s.registration_id === regId || s.id === regId);
+          if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+        }
+        if (!targetRecord && localDb.school_requests) {
+          const sch = localDb.school_requests.find((s: any) => s.registration_id === regId || s.id === regId);
+          if (sch) { targetRecord = sch; targetTable = 'school_requests'; }
         }
       }
 
@@ -396,14 +434,35 @@ export async function POST(request: Request) {
               else {
                 const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('email', cleanEmail).maybeSingle();
                 if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+                else {
+                  const { data: sch } = await supabase.from('school_requests').select('*').eq('email', cleanEmail).maybeSingle();
+                  if (sch) { targetRecord = sch; targetTable = 'school_requests'; }
+                }
               }
             }
           }
         }
       }
 
+      const isSchoolRecord = targetTable === 'school_requests';
+      const completedStatus = isSchoolRecord ? 'Placement Fee Pending' : 'Consultation Completed';
+
       if (targetRecord && targetTable) {
-        await supabase.from(targetTable).update({ status: 'Consultation Completed' }).eq('id', targetRecord.id);
+        await supabase.from(targetTable).update({ status: completedStatus }).eq('id', targetRecord.id);
+
+        // Sync local DB
+        try {
+          const localDb = readDb();
+          if ((localDb as any)[targetTable]) {
+            const idx = (localDb as any)[targetTable].findIndex((item: any) => item.id === targetRecord.id || item.registration_id === targetRecord.registration_id);
+            if (idx !== -1) {
+              (localDb as any)[targetTable][idx].status = completedStatus;
+              writeDb(localDb);
+            }
+          }
+        } catch (e) {
+          console.warn('Local db sync warning in mark_consultation_completed:', e);
+        }
       }
 
       // Also update status in bookings table if present
@@ -458,46 +517,79 @@ export async function POST(request: Request) {
         }
       }
 
-      // Send Email to Parent notifying them their form is unlocked
+      // Send Email notifying user that consultation is complete and next step is unlocked
       const recipientEmail = email || targetRecord?.email;
-      const parentName = targetRecord?.parent_name || targetRecord?.parentName || 'Parent';
       const actualRegId = regId || targetRecord?.registration_id || '';
       const isTherapyRecord = targetTable === 'parent_therapy_requests';
 
       if (recipientEmail) {
         const host = request.headers.get('host') || 'localhost:3000';
         const protocol = host.includes('localhost') ? 'http' : 'https';
-        const formLink = `${protocol}://${host}/register/parent/form?regId=${actualRegId}`;
 
-        sendEmail({
-          to: recipientEmail,
-          subject: isTherapyRecord 
-            ? `Therapy Consultation Completed - Registration Form Unlocked [${actualRegId}]` 
-            : `Consultation Completed - Registration Form Unlocked [${actualRegId}]`,
-          type: 'status_change',
-          bodyHtml: `
-            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
-            <p style="margin: 0 0 16px 0;">Thank you for taking the time to complete your 1-on-1 assessment consultation call with Founder Pratibha Mishra!</p>
-            <p style="margin: 0 0 16px 0;">We have marked your consultation as <strong>Completed</strong>. Your detailed ${isTherapyRecord ? 'Therapy' : 'Child'} Registration Form is now fully unlocked.</p>
-            
-            <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 20px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
-              <h3 style="margin: 0 0 8px 0; color: #3B2A6B; font-size: 16px; font-family: Georgia, serif;">Next Step: Fill ${isTherapyRecord ? 'Therapy' : 'Child'} Registration Form</h3>
-              <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: bold; color: #3B2A6B;">Your Unique ID: <span style="font-family: monospace; color: #B0206B; font-size: 16px;">${actualRegId}</span></p>
-              <p style="margin: 0 0 16px 0; font-size: 13px; color: #6A5B7C;">Please provide your child's specific developmental details, therapy goals, and schedule preferences to finalize therapist allocation.</p>
-              <a href="${formLink}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Open Registration Form →</a>
-            </div>
+        if (isSchoolRecord) {
+          const schoolName = targetRecord?.school_name || targetRecord?.schoolName || 'School';
+          const contactName = targetRecord?.contact_name || targetRecord?.contactName || 'Representative';
+          const teachersCount = Math.max(1, Number(targetRecord?.teachers_count || targetRecord?.teachersCount || 1));
+          const feeAmount = targetRecord?.placement_amount || (teachersCount * 5000);
+          const schoolPlacementLink = `${protocol}://${host}/schools/placement-fee?regId=${encodeURIComponent(actualRegId)}`;
 
-            <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 16px 20px; border-radius: 4px; font-size: 13px; color: #5C4300; line-height: 1.6;">
-              <strong>How to Access or Check Status Anytime:</strong><br />
-              You can access your registration form or check application progress anytime at <a href="${protocol}://${host}/check-status" style="color: #B0206B; font-weight: bold; text-decoration: underline;">theshadowbridge.com/check-status</a> by entering your <strong>ID (${actualRegId})</strong> along with your registered phone number or email address.
-            </div>
-          `
-        }).catch(err => console.error('Consultation completed email fail:', err));
+          sendEmail({
+            to: recipientEmail,
+            subject: `School Consultation Completed - Placement Fee Unlocked [${actualRegId}]`,
+            type: 'status_change',
+            bodyHtml: `
+              <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${contactName},</h2>
+              <p style="margin: 0 0 16px 0;">Thank you for completing your dedicated 1-on-1 consultation call with Founder Pratibha Mishra regarding <strong>${schoolName}</strong>'s inclusion requirements!</p>
+              <p style="margin: 0 0 16px 0;">We have marked your consultation as <strong>Completed</strong>. Your school requirement for <strong>${teachersCount} Shadow Teacher${teachersCount > 1 ? 's' : ''}</strong> is now progressing to the placement onboarding stage.</p>
+              
+              <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 20px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+                <h3 style="margin: 0 0 8px 0; color: #3B2A6B; font-size: 16px; font-family: Georgia, serif;">Next Step: Pay One-time Placement Fee</h3>
+                <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: bold; color: #3B2A6B;">Registration ID: <span style="font-family: monospace; color: #B0206B; font-size: 16px;">${actualRegId}</span></p>
+                <p style="margin: 0 0 8px 0; font-size: 13px; color: #2D253A;"><strong>Teachers Requested:</strong> ${teachersCount}</p>
+                <p style="margin: 0 0 16px 0; font-size: 13px; color: #2D253A;"><strong>One-time Placement Fee:</strong> ₹${feeAmount.toLocaleString('en-IN')} (₹5,000 × ${teachersCount} ${teachersCount > 1 ? 'Teachers' : 'Teacher'})</p>
+                <a href="${schoolPlacementLink}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Pay Placement Fee & Unlock Form →</a>
+              </div>
+
+              <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 16px 20px; border-radius: 4px; font-size: 13px; color: #5C4300; line-height: 1.6;">
+                <strong>How to Check Status Anytime:</strong><br />
+                You can track your school collaboration progress anytime at <a href="${protocol}://${host}/check-status" style="color: #B0206B; font-weight: bold; text-decoration: underline;">theshadowbridge.com/check-status</a> by entering your <strong>ID (${actualRegId})</strong> along with your registered phone number or email address.
+              </div>
+            `
+          }).catch(err => console.error('School consultation completed email fail:', err));
+        } else {
+          const parentName = targetRecord?.parent_name || targetRecord?.parentName || 'Parent';
+          const formLink = `${protocol}://${host}/register/parent/form?regId=${encodeURIComponent(actualRegId)}`;
+
+          sendEmail({
+            to: recipientEmail,
+            subject: isTherapyRecord 
+              ? `Therapy Consultation Completed - Registration Form Unlocked [${actualRegId}]` 
+              : `Consultation Completed - Registration Form Unlocked [${actualRegId}]`,
+            type: 'status_change',
+            bodyHtml: `
+              <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
+              <p style="margin: 0 0 16px 0;">Thank you for taking the time to complete your 1-on-1 assessment consultation call with Founder Pratibha Mishra!</p>
+              <p style="margin: 0 0 16px 0;">We have marked your consultation as <strong>Completed</strong>. Your detailed ${isTherapyRecord ? 'Therapy' : 'Child'} Registration Form is now fully unlocked.</p>
+              
+              <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 20px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
+                <h3 style="margin: 0 0 8px 0; color: #3B2A6B; font-size: 16px; font-family: Georgia, serif;">Next Step: Fill ${isTherapyRecord ? 'Therapy' : 'Child'} Registration Form</h3>
+                <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: bold; color: #3B2A6B;">Your Unique ID: <span style="font-family: monospace; color: #B0206B; font-size: 16px;">${actualRegId}</span></p>
+                <p style="margin: 0 0 16px 0; font-size: 13px; color: #6A5B7C;">Please provide your child's specific developmental details, therapy goals, and schedule preferences to finalize therapist allocation.</p>
+                <a href="${formLink}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Open Registration Form →</a>
+              </div>
+
+              <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 16px 20px; border-radius: 4px; font-size: 13px; color: #5C4300; line-height: 1.6;">
+                <strong>How to Access or Check Status Anytime:</strong><br />
+                You can access your registration form or check application progress anytime at <a href="${protocol}://${host}/check-status" style="color: #B0206B; font-weight: bold; text-decoration: underline;">theshadowbridge.com/check-status</a> by entering your <strong>ID (${actualRegId})</strong> along with your registered phone number or email address.
+              </div>
+            `
+          }).catch(err => console.error('Consultation completed email fail:', err));
+        }
       }
 
       return NextResponse.json({
         success: true,
-        message: `Consultation marked completed for ${actualRegId || bookingId}. Registration form unlocked!`
+        message: `Consultation marked completed for ${actualRegId || bookingId}. Next step unlocked!`
       });
     }
 
@@ -508,15 +600,36 @@ export async function POST(request: Request) {
       let targetTable = '';
 
       if (regId) {
-        const { data: pth } = await supabase.from('parent_therapy_requests').select('*').eq('registration_id', regId).maybeSingle();
-        if (pth) { targetRecord = pth; targetTable = 'parent_therapy_requests'; }
-        else {
-          const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('registration_id', regId).maybeSingle();
-          if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+        const cleanReg = regId.trim().toUpperCase();
+        if (cleanReg.startsWith('SCH-')) {
+          const { data: sch } = await supabase.from('school_requests').select('*').eq('registration_id', regId).maybeSingle();
+          if (sch) { targetRecord = sch; targetTable = 'school_requests'; }
+        }
+
+        if (!targetRecord) {
+          const { data: pth } = await supabase.from('parent_therapy_requests').select('*').eq('registration_id', regId).maybeSingle();
+          if (pth) { targetRecord = pth; targetTable = 'parent_therapy_requests'; }
           else {
-            const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('registration_id', regId).maybeSingle();
-            if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+            const { data: ps } = await supabase.from('parent_shadow_requests').select('*').eq('registration_id', regId).maybeSingle();
+            if (ps) { targetRecord = ps; targetTable = 'parent_shadow_requests'; }
+            else {
+              const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('registration_id', regId).maybeSingle();
+              if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+              else {
+                const { data: sch } = await supabase.from('school_requests').select('*').eq('registration_id', regId).maybeSingle();
+                if (sch) { targetRecord = sch; targetTable = 'school_requests'; }
+              }
+            }
           }
+        }
+      }
+
+      if (!targetRecord && regId) {
+        const localDb = readDb();
+        const cleanReg = regId.trim().toUpperCase();
+        if (cleanReg.startsWith('SCH-') && localDb.school_requests) {
+          const sch = localDb.school_requests.find((s: any) => s.registration_id === regId || s.id === regId);
+          if (sch) { targetRecord = sch; targetTable = 'school_requests'; }
         }
       }
 
@@ -532,16 +645,34 @@ export async function POST(request: Request) {
             else {
               const { data: pt } = await supabase.from('parent_tutor_requests').select('*').eq('email', cleanEmail).maybeSingle();
               if (pt) { targetRecord = pt; targetTable = 'parent_tutor_requests'; }
+              else {
+                const { data: sch } = await supabase.from('school_requests').select('*').eq('email', cleanEmail).maybeSingle();
+                if (sch) { targetRecord = sch; targetTable = 'school_requests'; }
+              }
             }
           }
         }
       }
 
+      const isSchoolRecord = targetTable === 'school_requests';
+      const declinedStatus = isSchoolRecord ? 'Closed' : 'Consultation Declined';
+
       if (targetRecord && targetTable) {
         await supabase.from(targetTable).update({
-          status: 'Consultation Declined',
+          status: declinedStatus,
           candidate_message: reason ? `Reason: ${reason}` : undefined
         }).eq('id', targetRecord.id);
+
+        try {
+          const localDb = readDb();
+          if ((localDb as any)[targetTable]) {
+            const idx = (localDb as any)[targetTable].findIndex((item: any) => item.id === targetRecord.id || item.registration_id === targetRecord.registration_id);
+            if (idx !== -1) {
+              (localDb as any)[targetTable][idx].status = declinedStatus;
+              writeDb(localDb);
+            }
+          }
+        } catch (e) {}
       }
 
       if (bookingId) {
@@ -550,25 +681,44 @@ export async function POST(request: Request) {
 
       // Send polite rejection email
       const recipientEmail = email || targetRecord?.email;
-      const parentName = targetRecord?.parent_name || targetRecord?.parentName || 'Parent';
 
       if (recipientEmail) {
         const reasonSnippet = reason && reason.trim()
           ? `<div style="background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 12px 16px; margin: 20px 0; border-radius: 4px; font-size: 13px; color: #5C4300;"><strong>Context:</strong> ${reason.trim()}</div>`
           : '';
 
-        sendEmail({
-          to: recipientEmail,
-          subject: `Consultation Update - The Shadow Bridge`,
-          type: 'status_change',
-          bodyHtml: `
-            <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
-            <p style="margin: 0 0 16px 0;">Thank you for taking the time to speak with Founder Pratibha Mishra for your 1-on-1 assessment consultation call.</p>
-            <p style="margin: 0 0 16px 0;">After evaluating our current educator availability and specific scope of service, we have determined that we are unable to move forward with a match at this time.</p>
-            ${reasonSnippet}
-            <p style="margin: 0 0 16px 0;">We sincerely appreciate your interest in The Shadow Bridge and wish your child the absolute best in their educational journey.</p>
-          `
-        }).catch(err => console.error('Parent consultation decline email fail:', err));
+        if (isSchoolRecord) {
+          const schoolName = targetRecord?.school_name || targetRecord?.schoolName || 'School';
+          const contactName = targetRecord?.contact_name || targetRecord?.contactName || 'Representative';
+
+          sendEmail({
+            to: recipientEmail,
+            subject: `School Collaboration Update - The Shadow Bridge`,
+            type: 'status_change',
+            bodyHtml: `
+              <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${contactName},</h2>
+              <p style="margin: 0 0 16px 0;">Thank you for your interest in collaborating with The Shadow Bridge for <strong>${schoolName}</strong>.</p>
+              <p style="margin: 0 0 16px 0;">After evaluating our current educator availability and specific scope of service for your location, we are unable to fulfill this partnership request at this time.</p>
+              ${reasonSnippet}
+              <p style="margin: 0 0 16px 0;">We sincerely appreciate your initiative towards inclusive education and hope to collaborate with your institution in the future.</p>
+            `
+          }).catch(err => console.error('School consultation decline email fail:', err));
+        } else {
+          const parentName = targetRecord?.parent_name || targetRecord?.parentName || 'Parent';
+
+          sendEmail({
+            to: recipientEmail,
+            subject: `Consultation Update - The Shadow Bridge`,
+            type: 'status_change',
+            bodyHtml: `
+              <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${parentName},</h2>
+              <p style="margin: 0 0 16px 0;">Thank you for taking the time to speak with Founder Pratibha Mishra for your 1-on-1 assessment consultation call.</p>
+              <p style="margin: 0 0 16px 0;">After evaluating our current educator availability and specific scope of service, we have determined that we are unable to move forward with a match at this time.</p>
+              ${reasonSnippet}
+              <p style="margin: 0 0 16px 0;">We sincerely appreciate your interest in The Shadow Bridge and wish your child the absolute best in their educational journey.</p>
+            `
+          }).catch(err => console.error('Parent consultation decline email fail:', err));
+        }
       }
 
       return NextResponse.json({

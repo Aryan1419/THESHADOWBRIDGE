@@ -62,12 +62,16 @@ export async function POST(request: Request) {
       );
     }
 
+    const teachersCount = Math.max(1, Number(record.teachers_count || record.teachersCount || 1));
+    const dynamicAmount = 5000 * teachersCount;
+    const finalAmount = Number(amount || record.placement_amount || dynamicAmount);
+
     const updates = {
       placement_paid: true,
       status: 'Placement Fee Paid' as const,
       placement_payment_id: razorpayPaymentId,
       placement_order_id: razorpayOrderId,
-      placement_amount: Number(amount || 5000)
+      placement_amount: finalAmount
     };
 
     // Update Supabase
@@ -93,6 +97,7 @@ export async function POST(request: Request) {
     const schoolEmail = record.email;
     const schoolName = record.school_name || record.schoolName || 'School';
     const contactName = record.contact_name || record.contactName || 'Representative';
+    const formattedAmount = finalAmount.toLocaleString('en-IN');
 
     await Promise.allSettled([
       sendEmail({
@@ -101,15 +106,16 @@ export async function POST(request: Request) {
         type: 'placement_confirmed',
         bodyHtml: `
           <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Dear ${contactName},</h2>
-          <p style="margin: 0 0 16px 0;">We are pleased to confirm receipt of the one-time placement fee of <strong>₹${amount}</strong> for <strong>${schoolName}</strong>'s shadow teacher requirement.</p>
+          <p style="margin: 0 0 16px 0;">We are pleased to confirm receipt of the one-time placement fee of <strong>₹${formattedAmount}</strong> for <strong>${schoolName}</strong>'s shadow teacher requirement.</p>
 
           <div style="background-color: #F8F5FB; border-left: 4px solid #C89B3C; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
             <h4 style="margin: 0 0 8px 0; color: #3B2A6B; font-size: 14px;">Payment Summary</h4>
             <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #6A5B7C;">
               <strong>Registration ID:</strong> ${registrationId}<br />
               <strong>School Name:</strong> ${schoolName}<br />
+              <strong>Teachers Count:</strong> ${teachersCount} Shadow Teacher${teachersCount > 1 ? 's' : ''}<br />
               <strong>Razorpay Payment ID:</strong> ${razorpayPaymentId}<br />
-              <strong>Amount Paid:</strong> ₹${amount}<br />
+              <strong>Amount Paid:</strong> ₹${formattedAmount}<br />
               <strong>Date:</strong> ${new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}
             </p>
           </div>
@@ -123,17 +129,18 @@ export async function POST(request: Request) {
 
       sendEmail({
         to: 'theshadowbridgesupport@gmail.com',
-        subject: `SCHOOL PLACEMENT FEE PAID: ${schoolName} (₹${amount}) [${registrationId}]`,
+        subject: `SCHOOL PLACEMENT FEE PAID: ${schoolName} (₹${formattedAmount}) [${registrationId}]`,
         type: 'contact_alert',
         bodyHtml: `
           <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">School Placement Fee Received</h2>
-          <p style="margin: 0 0 16px 0;">A school has successfully paid the ₹${amount} placement fee.</p>
+          <p style="margin: 0 0 16px 0;">A school has successfully paid the ₹${formattedAmount} placement fee for ${teachersCount} shadow teacher${teachersCount > 1 ? 's' : ''}.</p>
 
           <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
             <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${registrationId}</p>
             <p style="margin: 0 0 8px 0;"><strong>School Name:</strong> ${schoolName}</p>
             <p style="margin: 0 0 8px 0;"><strong>Contact Person:</strong> ${contactName}</p>
-            <p style="margin: 0 0 8px 0;"><strong>Amount Paid:</strong> ₹${amount}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Teachers Requested:</strong> ${teachersCount}</p>
+            <p style="margin: 0 0 8px 0;"><strong>Amount Paid:</strong> ₹${formattedAmount}</p>
             <p style="margin: 0;"><strong>Razorpay Payment ID:</strong> ${razorpayPaymentId}</p>
           </div>
 

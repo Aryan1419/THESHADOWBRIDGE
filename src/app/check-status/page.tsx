@@ -46,15 +46,56 @@ const PARENT_TIMELINE = [
   { name: 'Matching in Progress', desc: 'Background-Verified Candidate Trial Match' }
 ];
 
-const SCHOOL_TIMELINE = [
-  { name: 'Consultation Booked', desc: 'Requirement Form Submitted • Booking Fee Received' },
-  { name: 'Requirement Analysis', desc: 'Consultation Call with Educational Specialist' },
-  { name: 'Placement Fee Pending', desc: 'Placement Fee Unlocked (₹5,000)' },
-  { name: 'Placement Fee Paid', desc: 'Placement Paid • Detailed Registration Completed' },
-  { name: 'Profiles Shared', desc: 'Candidate Profiles Shortlisted for School' },
-  { name: 'Interview Scheduled', desc: 'Interviews Conducted at School Convenience' },
-  { name: 'Support Started', desc: 'Shadow Teacher Joined & Support Commenced' }
-];
+const getSchoolTimeline = (teachersCount: number = 1) => {
+  const dynamicFee = (Math.max(1, teachersCount) * 5000).toLocaleString('en-IN');
+  return [
+    { name: 'Consultation Booked', desc: 'Requirement Form Submitted • ₹199 Booking Fee Received' },
+    { name: 'Requirement Analysis', desc: 'Consultation Call with Educational Specialist' },
+    { name: 'Placement Fee Pending', desc: `Placement Fee Unlocked (₹${dynamicFee})` },
+    { name: 'Placement Fee Paid', desc: `Placement Paid (₹${dynamicFee}) • Form Unlocked` },
+    { name: 'Profiles Shared', desc: 'Candidate Profiles Shortlisted for School' },
+    { name: 'Interview Scheduled', desc: 'Interviews Conducted at School Convenience' },
+    { name: 'Support Started', desc: 'Shadow Teacher Joined & Support Commenced' }
+  ];
+};
+
+const getStatusExplanation = (status: string, role?: string, record?: any) => {
+  if (role === 'school') {
+    const sLower = (status || '').toLowerCase().trim();
+    const count = Math.max(1, Number(record?.teachersCount || record?.teachers_count || 1));
+    const feeStr = (record?.placement_amount || record?.placementAmount || (count * 5000)).toLocaleString('en-IN');
+
+    if (sLower.includes('booked')) {
+      return "Your ₹199 consultation fee is received. Founder Pratibha Mishra will conduct a dedicated consultation call to assess your school's shadow teacher and inclusion requirements.";
+    }
+    if (sLower.includes('analysis') || sLower.includes('proposal')) {
+      return `Consultation call in progress. Our educational specialist is assessing placement parameters for ${count} shadow teacher${count > 1 ? 's' : ''}.`;
+    }
+    if (sLower.includes('pending') || sLower.includes('completed')) {
+      return `Your 1-on-1 consultation is complete! The one-time placement fee of ₹${feeStr} is now unlocked below to begin educator matching.`;
+    }
+    if (sLower.includes('paid')) {
+      return `Your one-time placement fee of ₹${feeStr} is confirmed! Our placement team is actively shortlisting background-verified shadow teachers for your school.`;
+    }
+    if (sLower.includes('profiles')) {
+      return "Candidate educator profiles have been shortlisted and shared with your school administration for review.";
+    }
+    if (sLower.includes('interview')) {
+      return "Educator interviews are scheduled to be conducted at your school's convenience.";
+    }
+    if (sLower.includes('selection')) {
+      return "Educator selection is complete! Onboarding documentation and classroom placement are underway.";
+    }
+    if (sLower.includes('support') || sLower.includes('started') || sLower.includes('active')) {
+      return "Congratulations, shadow teachers have joined and inclusive learning support has commenced at your school.";
+    }
+    if (sLower.includes('closed')) {
+      return "This school collaboration request has been archived or closed by the administration.";
+    }
+  }
+
+  return STATUS_EXPLANATIONS[status] || `Your application status is currently marked as "${status}".`;
+};
 
 export default function CheckStatusPage() {
   const [registrationId, setRegistrationId] = useState('');
@@ -161,7 +202,8 @@ export default function CheckStatusPage() {
 
   const isTeacherRole = role === 'shadow' || role === 'tutor';
   const isSchoolRole = role === 'school';
-  const timelineSteps = isTeacherRole ? TEACHER_TIMELINE : (isSchoolRole ? SCHOOL_TIMELINE : PARENT_TIMELINE);
+  const schoolTeachersCount = Math.max(1, Number(record?.teachersCount || record?.teachers_count || 1));
+  const timelineSteps = isTeacherRole ? TEACHER_TIMELINE : (isSchoolRole ? getSchoolTimeline(schoolTeachersCount) : PARENT_TIMELINE);
   const currentStatus = record?.status || (isTeacherRole ? 'Interview Awaiting' : (isSchoolRole ? 'Consultation Booked' : 'Consultation Booked'));
 
   const getStepStatusIndex = (status: string) => {
@@ -178,9 +220,9 @@ export default function CheckStatusPage() {
     if (isSchoolRole) {
       if (sLower.includes('started') || sLower.includes('active')) return 6;
       if (sLower.includes('interview')) return 5;
-      if (sLower.includes('profiles') || sLower.includes('shortlist')) return 4;
+      if (sLower.includes('profiles') || sLower.includes('shortlist') || sLower.includes('selection')) return 4;
       if (sLower.includes('placement fee paid') || record?.placementPaid || record?.placement_paid) return 3;
-      if (sLower.includes('pending') || sLower.includes('placement fee')) return 2;
+      if (sLower.includes('pending') || sLower.includes('placement fee') || sLower.includes('completed')) return 2;
       if (sLower.includes('analysis') || sLower.includes('proposal') || sLower.includes('call')) return 1;
       return 0;
     }
@@ -287,7 +329,7 @@ export default function CheckStatusPage() {
                     required
                     value={registrationId}
                     onChange={(e) => setRegistrationId(e.target.value)}
-                    placeholder="e.g. SB-2026-8714 or TSB-2026-9942 or TUT-2026-5541"
+                    placeholder="e.g. SCH-2026-4814, SB-2026-8714, or TSB-2026-9942"
                     className="w-full pl-9 pr-4 py-3 bg-brand-light/50 border border-brand-border rounded-xl text-sm font-semibold text-brand-dark placeholder-brand-muted focus:outline-none focus:ring-2 focus:ring-primary/30 uppercase"
                   />
                 </div>
@@ -388,10 +430,10 @@ export default function CheckStatusPage() {
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-brand-border pb-6 mb-6">
                 <div>
                   <span className="px-3 py-1 bg-brand-light border border-brand-border text-brand-dark text-xs font-bold rounded-full uppercase tracking-wider inline-block mb-2">
-                    {role === 'shadow' ? 'Shadow Teacher Candidate' : role === 'tutor' ? 'Home Tutor Candidate' : 'Parent Inquiry'}
+                    {role === 'shadow' ? 'Shadow Teacher Candidate' : role === 'tutor' ? 'Home Tutor Candidate' : role === 'school' ? 'School Inquiry' : 'Parent Inquiry'}
                   </span>
                   <h2 className="font-serif text-2xl font-bold text-primary">
-                    {record.name || record.parentName || 'Registered User'}
+                    {record.schoolName || record.school_name || record.name || record.parentName || 'Registered User'}
                   </h2>
                   <p className="text-xs text-brand-muted mt-1">
                     Submitted on {new Date(record.created_at || record.createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
@@ -410,7 +452,7 @@ export default function CheckStatusPage() {
                 <div>
                   <h4 className="text-xs font-bold text-primary uppercase tracking-wider mb-1">Status Overview</h4>
                   <p className="text-xs sm:text-sm text-brand-dark leading-relaxed font-medium">
-                    {STATUS_EXPLANATIONS[currentStatus] || `Your application status is currently marked as "${currentStatus}".`}
+                    {getStatusExplanation(currentStatus, role, record)}
                   </p>
                 </div>
               </div>
@@ -612,6 +654,138 @@ export default function CheckStatusPage() {
                 </>
               )}
 
+              {/* DYNAMIC NEXT ACTION BANNER FOR SCHOOL COLLABORATION FLOW */}
+              {role === 'school' && (() => {
+                const teachersCount = Math.max(1, Number(record.teachersCount || record.teachers_count || 1));
+                const placementAmount = record.placement_amount || record.placementAmount || (teachersCount * 5000);
+                const regId = record.registrationId || record.registration_id || '';
+                const schoolName = record.schoolName || record.school_name || 'School';
+                const contactName = record.contactName || record.contact_name || 'Representative';
+                
+                const isPlacementPaid = Boolean(
+                  recordData?.isPlacementPaid ||
+                  record.placementPaid ||
+                  record.placement_paid ||
+                  record.placementPaymentId ||
+                  record.placement_payment_id ||
+                  (record.notes || '').includes('Placement Fee Paid') ||
+                  currentStatus.toLowerCase().includes('placement fee paid')
+                );
+
+                const isConsultationCompleted = Boolean(
+                  currentStatus.toLowerCase().includes('pending') ||
+                  currentStatus.toLowerCase().includes('completed') ||
+                  currentStatus.toLowerCase().includes('proposal') ||
+                  currentStatus.toLowerCase().includes('profiles') ||
+                  currentStatus.toLowerCase().includes('interview') ||
+                  currentStatus.toLowerCase().includes('support') ||
+                  isPlacementPaid
+                );
+
+                const isFormCompleted = Boolean(
+                  record.termsAccepted ||
+                  record.terms_accepted ||
+                  record.detailedAddress ||
+                  record.detailed_address
+                );
+
+                return (
+                  <div className="space-y-4 mb-8">
+                    {/* 1. Consultation Pending Call Notice if consultation is not yet marked completed */}
+                    {!isConsultationCompleted && !isPlacementPaid && (
+                      <div className="bg-gradient-to-r from-amber-50 to-purple-50 border-2 border-purple-200 rounded-2xl p-6 shadow-sm">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                          <div>
+                            <span className="px-3 py-1 bg-purple-100 text-purple-900 border border-purple-300 text-xs font-extrabold uppercase rounded-full tracking-wider">
+                              ⏳ Step 1 • Consultation Call Pending
+                            </span>
+                            <h3 className="font-serif text-lg font-bold text-primary mt-2">
+                              Dedicated School Consultation Call in Progress
+                            </h3>
+                            <p className="text-xs text-brand-dark mt-1 leading-relaxed">
+                              Founder &amp; Lead Mentor Pratibha Mishra will phone your school contact representative (<strong>{contactName}</strong>) on your registered contact number to assess your institution's requirement for <strong>{teachersCount} Shadow Teacher{teachersCount > 1 ? 's' : ''}</strong>. Once completed by the mentor, your placement fee and detailed registration form will unlock automatically.
+                            </p>
+                            <div className="mt-3 flex flex-wrap gap-2 text-xs text-brand-muted">
+                              <span className="px-2.5 py-1 bg-white rounded-lg border border-brand-border">
+                                <strong>School:</strong> {schoolName}
+                              </span>
+                              <span className="px-2.5 py-1 bg-white rounded-lg border border-brand-border">
+                                <strong>Teachers Needed:</strong> {teachersCount}
+                              </span>
+                              <span className="px-2.5 py-1 bg-white rounded-lg border border-brand-border">
+                                <strong>Grades:</strong> {record.specificGrades || record.specific_grades || record.levelsRequired || record.levels_required || 'All Classes'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 2. Consultation Completed & Placement Fee Pending */}
+                    {isConsultationCompleted && !isPlacementPaid && (
+                      <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-6 shadow-md">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                          <div>
+                            <span className="px-3 py-1 bg-amber-200 text-amber-950 border border-amber-400 text-xs font-extrabold uppercase rounded-full tracking-wider flex items-center gap-1.5 w-fit">
+                              <Sparkles size={12} className="text-amber-700" />
+                              <span>Step 3 • Placement Fee Unlocked</span>
+                            </span>
+                            <h3 className="font-serif text-lg font-bold text-amber-950 mt-2">
+                              Consultation Complete — Placement Fee Unlocked
+                            </h3>
+                            <p className="text-xs text-amber-900 mt-1 leading-relaxed">
+                              Your 1-on-1 consultation for <strong>{schoolName}</strong> is complete! Please complete the one-time placement fee of <strong>₹{placementAmount.toLocaleString('en-IN')}</strong> (₹5,000 × {teachersCount} {teachersCount > 1 ? 'Shadow Teachers' : 'Shadow Teacher'}) to unlock your full registration form and begin educator matchmaking.
+                            </p>
+                          </div>
+
+                          <a
+                            href={`/schools/placement-fee?regId=${encodeURIComponent(regId)}`}
+                            className="px-6 py-3.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-extrabold text-xs shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 whitespace-nowrap cursor-pointer shrink-0"
+                          >
+                            <span>Pay Placement Fee (₹{placementAmount.toLocaleString('en-IN')}) Now</span>
+                            <ArrowRight size={16} />
+                          </a>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 3. Placement Fee Paid Confirmed */}
+                    {isPlacementPaid && (
+                      <div className="bg-gradient-to-r from-emerald-50 to-teal-50 border-2 border-emerald-300 rounded-2xl p-6 shadow-md">
+                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-md">
+                              ✓
+                            </div>
+                            <div>
+                              <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-900 text-xs font-extrabold uppercase rounded-full tracking-wider border border-emerald-300">
+                                Placement Payment Confirmed
+                              </span>
+                              <h3 className="font-serif text-lg font-bold text-emerald-950 mt-1">
+                                Placement Fee Received &amp; Requirement Locked!
+                              </h3>
+                              <p className="text-xs text-emerald-900 mt-0.5">
+                                Your placement fee of ₹{placementAmount.toLocaleString('en-IN')} for {teachersCount} shadow teacher{teachersCount > 1 ? 's' : ''} is verified. Our clinical placement team is actively shortlisting verified educators for {schoolName}.
+                              </p>
+                            </div>
+                          </div>
+
+                          {!isFormCompleted && (
+                            <a
+                              href={`/schools/form?regId=${encodeURIComponent(regId)}`}
+                              className="px-6 py-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer"
+                            >
+                              <span>Complete School Form</span>
+                              <ArrowRight size={16} />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
               {/* CANDIDATE CUSTOM MESSAGE FROM ADMIN (IF PROVIDED) */}
               {record.candidateMessage && (
                 <div className="bg-secondary/10 border-2 border-secondary/30 rounded-2xl p-6 mb-8 shadow-sm">
@@ -633,7 +807,7 @@ export default function CheckStatusPage() {
                   Application Progress Timeline
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+                <div className={isSchoolRole ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3" : "grid grid-cols-1 md:grid-cols-5 gap-3"}>
                   {timelineSteps.map((step, idx) => {
                     const isCompleted = idx <= currentStepIndex;
                     const isCurrent = idx === currentStepIndex;
@@ -678,7 +852,9 @@ export default function CheckStatusPage() {
                   <div className="bg-gradient-to-r from-primary/5 to-secondary/5 border border-primary/20 rounded-3xl p-6">
                     <div className="flex items-center gap-2 mb-4">
                       <Sparkles size={20} className="text-secondary" />
-                      <h3 className="font-serif text-lg font-bold text-primary">Proposed Candidate Profile Match</h3>
+                      <h3 className="font-serif text-lg font-bold text-primary">
+                        {role === 'school' ? `Proposed Educator Match for ${record.schoolName || record.school_name || 'School'}` : 'Proposed Candidate Profile Match'}
+                      </h3>
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-brand-dark">

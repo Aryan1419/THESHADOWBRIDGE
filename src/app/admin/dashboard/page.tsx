@@ -3855,20 +3855,28 @@ export default function AdminDashboard() {
                                   })()}
                                 </td>
                                 <td className="p-4 text-center whitespace-nowrap">
-                                  {isPlacePaid ? (
-                                    <span className="px-2 py-0.5 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-black uppercase">
-                                      ₹5,000 Paid
-                                    </span>
-                                  ) : (
-                                    <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold uppercase">
-                                      Unpaid
-                                    </span>
-                                  )}
+                                  {(() => {
+                                    const tCount = Math.max(1, Number(r.teachersCount || r.teachers_count || 1));
+                                    const dynamicFee = r.placement_amount || r.placementAmount || (tCount * 5000);
+                                    if (isPlacePaid) {
+                                      return (
+                                        <span className="px-2 py-0.5 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-black uppercase">
+                                          ₹{dynamicFee.toLocaleString('en-IN')} Paid
+                                        </span>
+                                      );
+                                    }
+                                    return (
+                                      <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold uppercase" title={`Due: ₹${dynamicFee.toLocaleString('en-IN')} (${tCount} teacher${tCount > 1 ? 's' : ''})`}>
+                                        Unpaid (₹{dynamicFee.toLocaleString('en-IN')})
+                                      </span>
+                                    );
+                                  })()}
                                 </td>
                                 <td className="p-4 text-center whitespace-nowrap">
                                   <span className={`px-2.5 py-1 rounded-full text-xs font-extrabold uppercase border ${
                                     statusStr.includes('Support Started') ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
-                                    statusStr.includes('Paid') ? 'bg-purple-50 border-purple-200 text-purple-700' :
+                                    statusStr.includes('Placement Fee Paid') || statusStr.includes('Selection') ? 'bg-purple-50 border-purple-200 text-purple-700' :
+                                    statusStr.includes('Placement Fee Pending') || statusStr.includes('Completed') ? 'bg-blue-50 border-blue-200 text-blue-700' :
                                     statusStr.includes('Closed') ? 'bg-slate-100 border-slate-200 text-slate-600' :
                                     'bg-amber-50 border-amber-200 text-amber-800'
                                   }`}>
@@ -3876,19 +3884,41 @@ export default function AdminDashboard() {
                                   </span>
                                 </td>
                                 <td className="p-4 text-center whitespace-nowrap">
-                                  <button
-                                    onClick={() => {
-                                      setSelectedRecord({
-                                        type: 'school_requests',
-                                        data: r
-                                      });
-                                      setEditStatus(r.status || 'Consultation Booked');
-                                      setEditNotes(r.notes || '');
-                                    }}
-                                    className="px-3 py-1.5 bg-primary text-white hover:bg-primary/90 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                                  >
-                                    View / Edit
-                                  </button>
+                                  <div className="flex items-center justify-center gap-1.5">
+                                    {statusStr === 'Consultation Booked' && (
+                                      <button
+                                        onClick={() => handleMarkConsultationCompleted({
+                                          registration_id: r.registration_id || r.registrationId,
+                                          email: r.email,
+                                          phone: r.phone,
+                                          name: r.school_name || r.schoolName || r.contact_name || 'School'
+                                        })}
+                                        disabled={updating}
+                                        className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-xs transition-all cursor-pointer shadow-2xs disabled:opacity-50 flex items-center gap-1 whitespace-nowrap"
+                                        title="Mark School Consultation Completed (Unlocks Placement Fee)"
+                                      >
+                                        <CheckCircle size={12} /> Mark Completed
+                                      </button>
+                                    )}
+                                    {statusStr === 'Placement Fee Pending' && (
+                                      <span className="text-xs font-bold text-emerald-600 flex items-center justify-center gap-1">
+                                        <CheckCircle size={12} /> Fee Unlocked
+                                      </span>
+                                    )}
+                                    <button
+                                      onClick={() => {
+                                        setSelectedRecord({
+                                          type: 'school_requests',
+                                          data: r
+                                        });
+                                        setEditStatus(r.status || 'Consultation Booked');
+                                        setEditNotes(r.notes || '');
+                                      }}
+                                      className="px-3 py-1.5 bg-primary text-white hover:bg-primary/90 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                                    >
+                                      View / Edit
+                                    </button>
+                                  </div>
                                 </td>
                               </tr>
                             );
@@ -4940,18 +4970,32 @@ export default function AdminDashboard() {
                     )}
 
                     {/* School Requests specific */}
-                    {selectedRecord.type === 'school_requests' && (
-                      <>
-                        <div className="col-span-2"><strong>School Name:</strong> {selectedRecord.data.schoolName || selectedRecord.data.school_name}</div>
-                        <div><strong>Contact Person:</strong> {selectedRecord.data.contactName || selectedRecord.data.contact_name}</div>
-                        <div><strong>Designation:</strong> {selectedRecord.data.designation || 'Not Specified'}</div>
-                        <div className="col-span-2"><strong>Preferred Location:</strong> {selectedRecord.data.preferredLocation || selectedRecord.data.preferred_location}</div>
-                        <div className="col-span-2"><strong>Levels Required:</strong> {selectedRecord.data.levelsRequired || selectedRecord.data.levels_required}</div>
-                        <div className="col-span-2"><strong>Specific Grades:</strong> {selectedRecord.data.specificGrades || selectedRecord.data.specific_grades}</div>
-                        <div><strong>Shadow Teachers Needed:</strong> {selectedRecord.data.teachersCount || selectedRecord.data.teachers_count || 1}</div>
-                        <div><strong>Expected Start Date:</strong> {selectedRecord.data.startDate || selectedRecord.data.start_date || 'ASAP'}</div>
-                      </>
-                    )}
+                    {selectedRecord.type === 'school_requests' && (() => {
+                      const count = Math.max(1, Number(selectedRecord.data.teachersCount || selectedRecord.data.teachers_count || 1));
+                      const fee = selectedRecord.data.placement_amount || selectedRecord.data.placementAmount || (count * 5000);
+                      const isPlacePaid = selectedRecord.data.placementPaid || selectedRecord.data.placement_paid;
+                      const payId = (selectedRecord.data.razorpayPaymentId || selectedRecord.data.razorpay_payment_id || '').toUpperCase();
+                      const notes = (selectedRecord.data.notes || '').toUpperCase();
+                      const isWaived = payId.includes('SCHOOL199') || notes.includes('SCHOOL199') || selectedRecord.data.consultation_amount === 0;
+
+                      return (
+                        <>
+                          <div className="col-span-2"><strong>School Name:</strong> {selectedRecord.data.schoolName || selectedRecord.data.school_name}</div>
+                          <div><strong>Contact Person:</strong> {selectedRecord.data.contactName || selectedRecord.data.contact_name}</div>
+                          <div><strong>Designation:</strong> {selectedRecord.data.designation || 'Not Specified'}</div>
+                          <div className="col-span-2"><strong>Preferred Location:</strong> {selectedRecord.data.preferredLocation || selectedRecord.data.preferred_location}</div>
+                          <div className="col-span-2"><strong>Levels Required:</strong> {selectedRecord.data.levelsRequired || selectedRecord.data.levels_required}</div>
+                          <div className="col-span-2"><strong>Specific Grades:</strong> {selectedRecord.data.specificGrades || selectedRecord.data.specific_grades}</div>
+                          <div><strong>Shadow Teachers Needed:</strong> {count}</div>
+                          <div><strong>Expected Start Date:</strong> {selectedRecord.data.startDate || selectedRecord.data.start_date || 'ASAP'}</div>
+                          <div><strong>Consultation Booking:</strong> <span className={isWaived ? 'text-purple-700 font-bold' : 'text-emerald-700 font-bold'}>{isWaived ? 'Waived (SCHOOL199)' : '₹199 Paid'}</span></div>
+                          <div><strong>Placement Fee:</strong> <span className={isPlacePaid ? 'text-emerald-700 font-bold' : 'text-primary font-bold'}>₹{fee.toLocaleString('en-IN')} ({isPlacePaid ? 'Paid' : 'Unpaid'})</span></div>
+                          <div className="col-span-2 text-xs text-brand-muted font-medium bg-brand-light/60 p-2.5 rounded-xl border border-brand-border/40">
+                            Calculation: ₹5,000 × {count} shadow teacher{count > 1 ? 's' : ''} = ₹{fee.toLocaleString('en-IN')} one-time placement onboarding fee.
+                          </div>
+                        </>
+                      );
+                    })()}
 
                   </div>
                 </div>

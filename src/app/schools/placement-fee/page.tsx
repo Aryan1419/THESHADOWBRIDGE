@@ -51,18 +51,21 @@ function SchoolPlacementFeeContent() {
     setPaying(true);
     setErrorMsg(null);
 
+    const teachersCount = Math.max(1, Number(record.teachersCount || record.teachers_count || 1));
+    const placementAmount = 5000 * teachersCount;
+
     try {
-      // Create Razorpay order for ₹5,000 placement fee
+      // Create Razorpay order for dynamic placement fee (₹5,000 * teachers_count)
       const orderRes = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          amount: 5000,
+          amount: placementAmount,
           regId: record.registration_id,
           parentName: record.school_name || record.contact_name,
           phone: record.phone,
           email: record.email,
-          serviceNeeded: 'School Shadow Teacher Placement',
+          serviceNeeded: `School Shadow Teacher Placement (${teachersCount} teachers)`,
           type: 'school_placement'
         })
       });
@@ -77,7 +80,7 @@ function SchoolPlacementFeeContent() {
         amount: orderData.amount,
         currency: orderData.currency || 'INR',
         name: 'The Shadow Bridge',
-        description: `School One-time Placement Fee (₹5,000) [${regId}]`,
+        description: `School One-time Placement Fee (₹${placementAmount.toLocaleString('en-IN')}) [${regId}]`,
         image: '/favicon-512.png',
         order_id: orderData.orderId,
         handler: async function (response: any) {
@@ -87,7 +90,7 @@ function SchoolPlacementFeeContent() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 registrationId: regId,
-                amount: 5000,
+                amount: placementAmount,
                 razorpayPaymentId: response.razorpay_payment_id,
                 razorpayOrderId: response.razorpay_order_id,
                 razorpaySignature: response.razorpay_signature
@@ -131,6 +134,9 @@ function SchoolPlacementFeeContent() {
     }
   };
 
+  const teachersCount = Math.max(1, Number(record?.teachersCount || record?.teachers_count || 1));
+  const placementAmount = record?.placement_amount || record?.placementAmount || (5000 * teachersCount);
+
   return (
     <div className="min-h-screen bg-brand-light/30 flex flex-col font-sans">
       <Navbar />
@@ -157,7 +163,7 @@ function SchoolPlacementFeeContent() {
               <CheckCircle2 size={48} className="text-emerald-600 mx-auto" />
               <h2 className="font-serif text-2xl font-black text-emerald-950">Placement Fee Already Paid!</h2>
               <p className="text-xs text-emerald-900">
-                Your one-time placement fee of ₹5,000 for <strong>{record.schoolName || record.school_name}</strong> is verified.
+                Your one-time placement fee of ₹{placementAmount.toLocaleString('en-IN')} for <strong>{record.schoolName || record.school_name}</strong> ({teachersCount} Shadow Teacher{teachersCount > 1 ? 's' : ''}) is verified.
               </p>
               <Link
                 href={`/schools/form?regId=${encodeURIComponent(regId)}`}
@@ -193,7 +199,10 @@ function SchoolPlacementFeeContent() {
                   <div className="flex items-baseline justify-between">
                     <div>
                       <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider">One-time Placement Fee</p>
-                      <p className="text-3xl font-black text-primary mt-1">₹ 5,000/-</p>
+                      <p className="text-3xl font-black text-primary mt-1">₹ {placementAmount.toLocaleString('en-IN')}/-</p>
+                      <span className="text-xs text-brand-muted font-bold block mt-0.5">
+                        ₹5,000 × {teachersCount} {teachersCount === 1 ? 'Shadow Teacher' : 'Shadow Teachers'}
+                      </span>
                     </div>
                     <span className="text-xs text-brand-muted font-semibold bg-brand-light px-2.5 py-1 rounded-md border border-brand-border">
                       Non-refundable
@@ -203,7 +212,8 @@ function SchoolPlacementFeeContent() {
                   <div className="border-t border-brand-border/40 pt-3 text-xs text-brand-dark/80 space-y-1.5 font-medium">
                     <p>• <strong>School:</strong> {record.schoolName || record.school_name}</p>
                     <p>• <strong>Registration ID:</strong> <span className="font-mono font-bold text-secondary">{regId}</span></p>
-                    <p>• <strong>Teachers Count:</strong> {record.teachersCount || record.teachers_count || 1}</p>
+                    <p>• <strong>Shadow Teachers Count:</strong> {teachersCount}</p>
+                    <p>• <strong>Fee Breakdown:</strong> ₹5,000 × {teachersCount} = ₹{placementAmount.toLocaleString('en-IN')}</p>
                   </div>
 
                   {errorMsg && (
@@ -223,7 +233,7 @@ function SchoolPlacementFeeContent() {
                     ) : (
                       <>
                         <CreditCard size={18} />
-                        <span>Proceed to Pay ₹5,000</span>
+                        <span>Proceed to Pay ₹{placementAmount.toLocaleString('en-IN')}</span>
                       </>
                     )}
                   </button>
