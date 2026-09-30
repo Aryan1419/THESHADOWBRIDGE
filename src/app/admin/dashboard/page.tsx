@@ -1537,7 +1537,7 @@ export default function AdminDashboard() {
         const orderId = (r as any).razorpayOrderId || (r as any).razorpay_order_id || 'N/A';
         const notesStr = ((r as any).notes || '').toUpperCase();
         const isWaived = paymentId.includes('SCHOOL199') || notesStr.includes('SCHOOL199') || (r as any).consultation_amount === 0 || (r as any).consultationAmount === 0;
-        const isRealSuccess = paymentId.startsWith('pay_');
+        const isRealSuccess = (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_')) && !paymentId.toLowerCase().includes('test') && !paymentId.toLowerCase().includes('demo');
         const key = `${r.registration_id || r.id}-sch-cons`;
         processedKeys.add(key);
         if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
@@ -1564,7 +1564,7 @@ export default function AdminDashboard() {
       if ((r as any).placementPaid || (r as any).placement_paid) {
         const paymentId = (r as any).placementPaymentId || (r as any).placement_payment_id || 'N/A';
         const orderId = (r as any).placementOrderId || (r as any).placement_order_id || 'N/A';
-        const isRealSuccess = paymentId.startsWith('pay_');
+        const isRealSuccess = (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_')) && !paymentId.toLowerCase().includes('test') && !paymentId.toLowerCase().includes('demo');
         const amt = Number((r as any).placementAmount || (r as any).placement_amount || 5000);
         const key = `${r.registration_id || r.id}-sch-place`;
         processedKeys.add(key);
