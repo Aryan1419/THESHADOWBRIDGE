@@ -735,7 +735,7 @@ export default function SchoolsPage() {
                   </div>
 
                   {/* Fee Summary */}
-                  <div className="p-4 bg-white border border-brand-border rounded-2xl space-y-2">
+                  <div className="p-4 bg-white border border-brand-border rounded-2xl">
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-brand-muted font-medium">Consultation Booking Fee</span>
                       <span className="font-bold text-primary">
@@ -748,10 +748,6 @@ export default function SchoolsPage() {
                           '₹199'
                         )}
                       </span>
-                    </div>
-                    <div className="flex justify-between items-center text-xs text-brand-muted border-t border-brand-border/40 pt-2">
-                      <span>Placement Fee (Payable after teacher shortlist)</span>
-                      <span>₹5,000 (Later)</span>
                     </div>
                   </div>
 
@@ -811,10 +807,6 @@ export default function SchoolsPage() {
                     <p className="text-xs text-emerald-300 font-extrabold uppercase">3. Commission from School</p>
                     <p className="text-xl font-black text-white">50% of First Month's Salary <span className="text-xs font-normal text-white/80">(One-time)</span></p>
                   </div>
-                </div>
-
-                <div className="p-3 bg-white/10 rounded-xl text-center text-xs font-bold text-accent border border-white/10">
-                  🚫 No monthly or recurring charges from the school after this.
                 </div>
               </div>
 
