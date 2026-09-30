@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Script from 'next/script';
 import { motion } from 'framer-motion';
 import { 
   Building2, PhoneCall, CheckCircle2, Sparkles, ShieldCheck, Clock, Award, 
@@ -16,6 +17,35 @@ declare global {
     Razorpay: any;
   }
 }
+
+const loadRazorpayScript = () => {
+  return new Promise<boolean>((resolve) => {
+    if (typeof window !== 'undefined' && window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    if (typeof document !== 'undefined') {
+      const existing = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+      if (existing) {
+        if (window.Razorpay) {
+          resolve(true);
+          return;
+        }
+        existing.addEventListener('load', () => resolve(true));
+        existing.addEventListener('error', () => resolve(false));
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    } else {
+      resolve(false);
+    }
+  });
+};
 
 export default function SchoolsPage() {
   // Form State
@@ -40,6 +70,10 @@ export default function SchoolsPage() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successData, setSuccessData] = useState<{ registrationId: string } | null>(null);
+
+  useEffect(() => {
+    loadRazorpayScript();
+  }, []);
 
   const levelOptions = ['Pre-Primary', 'Primary', 'Secondary', 'Higher Secondary'];
   const gradeOptions = Array.from({ length: 12 }, (_, i) => `Grade / Class ${i + 1}`);
@@ -136,7 +170,13 @@ export default function SchoolsPage() {
     }
 
     try {
-      // 1. Create Razorpay order for ₹199 school consultation fee
+      // 1. Ensure Razorpay SDK is loaded
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        throw new Error('Razorpay SDK failed to load. Please check your internet connection.');
+      }
+
+      // 2. Create Razorpay order for ₹199 school consultation fee
       const orderRes = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -156,14 +196,22 @@ export default function SchoolsPage() {
         throw new Error(orderData.error || 'Failed to initialize payment gateway.');
       }
 
+      const razorpayKey = orderData.keyId || orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_live_TGX30c7BZKYQ6t';
+      const orderAmount = orderData.order?.amount || orderData.amount;
+      const orderId = orderData.order?.id || orderData.orderId;
+
+      if (!razorpayKey || !orderAmount || !orderId) {
+        throw new Error('Incomplete Razorpay order parameters returned by server.');
+      }
+
       const options = {
-        key: orderData.keyId || orderData.key_id,
-        amount: orderData.amount,
+        key: razorpayKey,
+        amount: orderAmount,
         currency: orderData.currency || 'INR',
         name: 'The Shadow Bridge',
         description: 'School Requirement Consultation Booking Fee (₹199)',
         image: '/favicon-512.png',
-        order_id: orderData.orderId,
+        order_id: orderId,
         handler: async function (response: any) {
           try {
             // Verify payment & save school request
@@ -211,11 +259,21 @@ export default function SchoolsPage() {
         },
         theme: {
           color: '#3B2A6B'
+        },
+        modal: {
+          ondismiss: function () {
+            setLoading(false);
+          }
         }
       };
 
       if (typeof window !== 'undefined' && window.Razorpay) {
         const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function (resp: any) {
+          console.error('Razorpay Payment Failed:', resp.error);
+          setErrorMsg(resp.error?.description || 'Payment was cancelled or failed.');
+          setLoading(false);
+        });
         rzp.open();
       } else {
         throw new Error('Razorpay SDK failed to load. Please refresh the page.');
@@ -229,6 +287,7 @@ export default function SchoolsPage() {
 
   return (
     <div className="min-h-screen bg-brand-light/30 flex flex-col font-sans">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <Navbar />
 
       {/* Hero Section (Section A) */}

@@ -3,12 +3,42 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Script from 'next/script';
 import { 
   Building2, CheckCircle2, Lock, ShieldCheck, AlertCircle, ArrowRight, Sparkles, CreditCard
 } from 'lucide-react';
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+
+const loadRazorpayScript = () => {
+  return new Promise<boolean>((resolve) => {
+    if (typeof window !== 'undefined' && (window as any).Razorpay) {
+      resolve(true);
+      return;
+    }
+    if (typeof document !== 'undefined') {
+      const existing = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+      if (existing) {
+        if ((window as any).Razorpay) {
+          resolve(true);
+          return;
+        }
+        existing.addEventListener('load', () => resolve(true));
+        existing.addEventListener('error', () => resolve(false));
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    } else {
+      resolve(false);
+    }
+  });
+};
 
 function SchoolPlacementFeeContent() {
   const searchParams = useSearchParams();
@@ -19,6 +49,11 @@ function SchoolPlacementFeeContent() {
   const [record, setRecord] = useState<any | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [paying, setPaying] = useState(false);
+
+  useEffect(() => {
+    // Preload Razorpay SDK as soon as page mounts
+    loadRazorpayScript();
+  }, []);
 
   useEffect(() => {
     if (!regId) {
@@ -55,7 +90,13 @@ function SchoolPlacementFeeContent() {
     const placementAmount = 5000 * teachersCount;
 
     try {
-      // Create Razorpay order for dynamic placement fee (₹5,000 * teachers_count)
+      // 1. Ensure Razorpay SDK is loaded
+      const scriptLoaded = await loadRazorpayScript();
+      if (!scriptLoaded) {
+        throw new Error('Razorpay SDK failed to load. Please check your internet connection and try again.');
+      }
+
+      // 2. Create Razorpay order for dynamic placement fee (₹5,000 * teachers_count)
       const orderRes = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -75,14 +116,22 @@ function SchoolPlacementFeeContent() {
         throw new Error(orderData.error || 'Failed to initialize payment gateway.');
       }
 
+      const razorpayKey = orderData.keyId || orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_live_TGX30c7BZKYQ6t';
+      const orderAmount = orderData.order?.amount || orderData.amount;
+      const orderId = orderData.order?.id || orderData.orderId;
+
+      if (!razorpayKey || !orderAmount || !orderId) {
+        throw new Error('Incomplete Razorpay order parameters returned by server.');
+      }
+
       const options = {
-        key: orderData.keyId || orderData.key_id,
-        amount: orderData.amount,
+        key: razorpayKey,
+        amount: orderAmount,
         currency: orderData.currency || 'INR',
         name: 'The Shadow Bridge',
         description: `School One-time Placement Fee (₹${placementAmount.toLocaleString('en-IN')}) [${regId}]`,
         image: '/favicon-512.png',
-        order_id: orderData.orderId,
+        order_id: orderId,
         handler: async function (response: any) {
           try {
             const verifyRes = await fetch('/api/payments/verify-school-placement', {
@@ -118,11 +167,21 @@ function SchoolPlacementFeeContent() {
         },
         theme: {
           color: '#3B2A6B'
+        },
+        modal: {
+          ondismiss: function () {
+            setPaying(false);
+          }
         }
       };
 
       if (typeof window !== 'undefined' && (window as any).Razorpay) {
         const rzp = new (window as any).Razorpay(options);
+        rzp.on('payment.failed', function (resp: any) {
+          console.error('Razorpay Payment Failed:', resp.error);
+          setErrorMsg(resp.error?.description || 'Payment was cancelled or failed.');
+          setPaying(false);
+        });
         rzp.open();
       } else {
         throw new Error('Razorpay SDK failed to load. Please refresh the page.');
@@ -139,6 +198,7 @@ function SchoolPlacementFeeContent() {
 
   return (
     <div className="min-h-screen bg-brand-light/30 flex flex-col font-sans">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <Navbar />
 
       <main className="flex-grow pt-28 sm:pt-36 pb-16">
