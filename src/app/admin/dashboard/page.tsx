@@ -49,6 +49,7 @@ export default function AdminDashboard() {
   const [filterSubject, setFilterSubject] = useState('');
   const [filterSpecialNeeds, setFilterSpecialNeeds] = useState('');
   const [filterComfortableArea, setFilterComfortableArea] = useState('');
+  const [paymentLedgerFilter, setPaymentLedgerFilter] = useState<'all' | 'real' | 'waived'>('all');
 
   // Selected item detail view modal state
   const [selectedRecord, setSelectedRecord] = useState<{
@@ -1277,6 +1278,18 @@ export default function AdminDashboard() {
     const list: any[] = [];
     const processedKeys = new Set<string>();
 
+    const isTestOrDemoString = (str?: string | null) => {
+      if (!str) return false;
+      const s = String(str).toLowerCase().trim();
+      return s.includes('test') || s.includes('demo') || s.includes('dummy') || s.includes('mock') || s.includes('sample') || s.includes('fake');
+    };
+
+    const isRealRazorpayPaymentId = (paymentId?: string | null) => {
+      if (!paymentId) return false;
+      const s = String(paymentId).trim();
+      return (s.startsWith('pay_') || s.startsWith('PAY_')) && !isTestOrDemoString(s);
+    };
+
     const isRecordWaived = (r: any) => {
       const ps = (r.paymentStatus || r.payment_status || '').toLowerCase();
       const notesStr = ((r.notes || '') + ' ' + (r.message || '')).toUpperCase();
@@ -1311,23 +1324,30 @@ export default function AdminDashboard() {
         return 'N/A (VIP Outreach)';
       }
       
-      let pid = isPlacement 
-        ? (r.placementPaymentId || r.placement_payment_id || r.razorpayPaymentId || r.razorpay_payment_id)
+      const pid = isPlacement 
+        ? (r.placementPaymentId || r.placement_payment_id)
         : (r.razorpayPaymentId || r.razorpay_payment_id);
       
-      if (pid && (pid.startsWith('pay_') || pid.startsWith('PAY_'))) return pid;
+      if (pid && isRealRazorpayPaymentId(pid)) return pid;
 
       // Fallback: check matching booking in db.bookings
       if (!isPlacement) {
         const matchedBk = findBookingForRecord(r);
-        if (matchedBk && matchedBk.razorpay_payment_id && (matchedBk.razorpay_payment_id.startsWith('pay_') || matchedBk.razorpay_payment_id.startsWith('PAY_'))) {
-          return matchedBk.razorpay_payment_id;
+        const bkPayId = matchedBk?.razorpay_payment_id || matchedBk?.razorpayPaymentId;
+        if (bkPayId && isRealRazorpayPaymentId(bkPayId)) {
+          return bkPayId;
         }
       }
 
+      // Check notes, ensuring placement payment IDs are never mistaken for consultation payment IDs
+      const placePid = r.placementPaymentId || r.placement_payment_id || '';
       const notesStr = (r.notes || '') + ' ' + (r.message || '');
       const match = notesStr.match(/(pay_[a-zA-Z0-9]+)/i);
-      if (match && match[1]) return match[1];
+      if (match && match[1] && isRealRazorpayPaymentId(match[1])) {
+        if (isPlacement || match[1] !== placePid) {
+          return match[1];
+        }
+      }
 
       return 'N/A (No Razorpay ID)';
     };
@@ -1341,38 +1361,46 @@ export default function AdminDashboard() {
         return 'N/A (VIP Outreach)';
       }
 
-      let oid = isPlacement
-        ? (r.placementOrderId || r.placement_order_id || r.razorpayOrderId || r.razorpay_order_id)
+      const oid = isPlacement
+        ? (r.placementOrderId || r.placement_order_id)
         : (r.razorpayOrderId || r.razorpay_order_id);
 
-      if (oid && (oid.startsWith('order_') || oid.startsWith('ORDER_'))) return oid;
+      if (oid && (oid.startsWith('order_') || oid.startsWith('ORDER_')) && !isTestOrDemoString(oid)) return oid;
 
       // Fallback: check matching booking in db.bookings
       if (!isPlacement) {
         const matchedBk = findBookingForRecord(r);
-        if (matchedBk && matchedBk.razorpay_order_id && (matchedBk.razorpay_order_id.startsWith('order_') || matchedBk.razorpay_order_id.startsWith('ORDER_'))) {
-          return matchedBk.razorpay_order_id;
+        const bkOid = matchedBk?.razorpay_order_id || matchedBk?.razorpayOrderId;
+        if (bkOid && (bkOid.startsWith('order_') || bkOid.startsWith('ORDER_')) && !isTestOrDemoString(bkOid)) {
+          return bkOid;
         }
       }
 
+      const placeOid = r.placementOrderId || r.placement_order_id || '';
       const notesStr = (r.notes || '') + ' ' + (r.message || '');
       const match = notesStr.match(/(order_[a-zA-Z0-9]+)/i);
-      if (match && match[1]) return match[1];
+      if (match && match[1] && !isTestOrDemoString(match[1])) {
+        if (isPlacement || match[1] !== placeOid) {
+          return match[1];
+        }
+      }
 
       return 'N/A (No Order ID)';
     };
 
     // 1. Parent Shadow Requests
     (db.parent_shadow_requests || []).forEach(r => {
+      if (isTestOrDemoString(r.registration_id) || isTestOrDemoString((r as any).parentName || (r as any).parent_name) || isTestOrDemoString(r.notes)) return;
+
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
         const isWaived = isRecordWaived(r);
         const paymentId = getRealPaymentId(r, false, isWaived);
         const orderId = getRealOrderId(r, false, isWaived);
-        const isRealSuccess = !isWaived && (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_'));
+        const isRealSuccess = !isWaived && isRealRazorpayPaymentId(paymentId) && !isTestOrDemoString(orderId);
 
         const key = `${r.registration_id || r.id}-cons`;
         processedKeys.add(key);
-        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
+        if (isRealRazorpayPaymentId(paymentId)) processedKeys.add(paymentId);
         if (r.registration_id) processedKeys.add(r.registration_id);
 
         list.push({
@@ -1402,11 +1430,11 @@ export default function AdminDashboard() {
 
         const paymentId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealPaymentId(r, true, false);
         const orderId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealOrderId(r, true, false);
-        const isRealSuccess = !isPlacementWaived && (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_'));
+        const isRealSuccess = !isPlacementWaived && isRealRazorpayPaymentId(paymentId) && !isTestOrDemoString(orderId);
 
         const key = `${r.registration_id || r.id}-place`;
         processedKeys.add(key);
-        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
+        if (isRealRazorpayPaymentId(paymentId)) processedKeys.add(paymentId);
 
         list.push({
           id: r.id + '-place',
@@ -1431,15 +1459,17 @@ export default function AdminDashboard() {
 
     // 2. Parent Tutor Requests
     (db.parent_tutor_requests || []).forEach(r => {
+      if (isTestOrDemoString(r.registration_id) || isTestOrDemoString((r as any).parentName || (r as any).parent_name) || isTestOrDemoString(r.notes)) return;
+
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
         const isWaived = isRecordWaived(r);
         const paymentId = getRealPaymentId(r, false, isWaived);
         const orderId = getRealOrderId(r, false, isWaived);
-        const isRealSuccess = !isWaived && (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_'));
+        const isRealSuccess = !isWaived && isRealRazorpayPaymentId(paymentId) && !isTestOrDemoString(orderId);
 
         const key = `${r.registration_id || r.id}-cons`;
         processedKeys.add(key);
-        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
+        if (isRealRazorpayPaymentId(paymentId)) processedKeys.add(paymentId);
         if (r.registration_id) processedKeys.add(r.registration_id);
 
         list.push({
@@ -1469,11 +1499,11 @@ export default function AdminDashboard() {
 
         const paymentId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealPaymentId(r, true, false);
         const orderId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealOrderId(r, true, false);
-        const isRealSuccess = !isPlacementWaived && (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_'));
+        const isRealSuccess = !isPlacementWaived && isRealRazorpayPaymentId(paymentId) && !isTestOrDemoString(orderId);
 
         const key = `${r.registration_id || r.id}-place`;
         processedKeys.add(key);
-        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
+        if (isRealRazorpayPaymentId(paymentId)) processedKeys.add(paymentId);
 
         list.push({
           id: r.id + '-place',
@@ -1498,6 +1528,8 @@ export default function AdminDashboard() {
 
     // 3. Parent Therapy Requests
     (db.parent_therapy_requests || []).forEach(r => {
+      if (isTestOrDemoString(r.registration_id) || isTestOrDemoString((r as any).parentName || (r as any).parent_name) || isTestOrDemoString(r.notes)) return;
+
       const therapyConsFee = getConsultationFee('therapy');
       const therapyPlaceFee = getPlacementFee('therapy');
 
@@ -1505,12 +1537,12 @@ export default function AdminDashboard() {
         const isWaived = isRecordWaived(r);
         const paymentId = getRealPaymentId(r, false, isWaived);
         const orderId = getRealOrderId(r, false, isWaived);
-        const isRealSuccess = !isWaived && (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_'));
+        const isRealSuccess = !isWaived && isRealRazorpayPaymentId(paymentId) && !isTestOrDemoString(orderId);
         const thType = (r as any).therapyType || (r as any).therapy_type || 'Therapy';
 
         const key = `${r.registration_id || r.id}-cons`;
         processedKeys.add(key);
-        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
+        if (isRealRazorpayPaymentId(paymentId)) processedKeys.add(paymentId);
         if (r.registration_id) processedKeys.add(r.registration_id);
 
         list.push({
@@ -1541,11 +1573,11 @@ export default function AdminDashboard() {
 
         const paymentId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealPaymentId(r, true, false);
         const orderId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealOrderId(r, true, false);
-        const isRealSuccess = !isPlacementWaived && (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_'));
+        const isRealSuccess = !isPlacementWaived && isRealRazorpayPaymentId(paymentId) && !isTestOrDemoString(orderId);
 
         const key = `${r.registration_id || r.id}-place`;
         processedKeys.add(key);
-        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
+        if (isRealRazorpayPaymentId(paymentId)) processedKeys.add(paymentId);
 
         list.push({
           id: r.id + '-place',
@@ -1570,6 +1602,8 @@ export default function AdminDashboard() {
 
     // 4. School Requests (Consultation & Dynamic Placement Fee)
     (db.school_requests || []).forEach(r => {
+      if (isTestOrDemoString(r.registration_id) || isTestOrDemoString((r as any).schoolName || (r as any).school_name) || isTestOrDemoString(r.notes)) return;
+
       const teachersCount = Math.max(1, Number((r as any).teachersCount || (r as any).teachers_count || 1));
       const schoolConsFee = getConsultationFee('school');
       const schoolPlaceFee = getPlacementFee('school', { teachersCount });
@@ -1579,10 +1613,10 @@ export default function AdminDashboard() {
         const orderId = (r as any).razorpayOrderId || (r as any).razorpay_order_id || 'N/A';
         const notesStr = ((r as any).notes || '').toUpperCase();
         const isWaived = paymentId.includes('SCHOOL199') || notesStr.includes('SCHOOL199') || (r as any).consultation_amount === 0 || (r as any).consultationAmount === 0;
-        const isRealSuccess = (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_')) && !paymentId.toLowerCase().includes('test') && !paymentId.toLowerCase().includes('demo');
+        const isRealSuccess = !isWaived && isRealRazorpayPaymentId(paymentId) && !isTestOrDemoString(orderId);
         const key = `${r.registration_id || r.id}-sch-cons`;
         processedKeys.add(key);
-        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
+        if (isRealRazorpayPaymentId(paymentId)) processedKeys.add(paymentId);
 
         list.push({
           id: r.id + '-sch-cons',
@@ -1606,11 +1640,11 @@ export default function AdminDashboard() {
       if ((r as any).placementPaid || (r as any).placement_paid) {
         const paymentId = (r as any).placementPaymentId || (r as any).placement_payment_id || 'N/A';
         const orderId = (r as any).placementOrderId || (r as any).placement_order_id || 'N/A';
-        const isRealSuccess = (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_')) && !paymentId.toLowerCase().includes('test') && !paymentId.toLowerCase().includes('demo');
+        const isRealSuccess = isRealRazorpayPaymentId(paymentId) && !isTestOrDemoString(orderId);
         const amt = Number((r as any).placementAmount || (r as any).placement_amount || schoolPlaceFee);
         const key = `${r.registration_id || r.id}-sch-place`;
         processedKeys.add(key);
-        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
+        if (isRealRazorpayPaymentId(paymentId)) processedKeys.add(paymentId);
 
         list.push({
           id: r.id + '-sch-place',
@@ -1635,17 +1669,22 @@ export default function AdminDashboard() {
 
     // 5. Standalone Bookings from /book or Webhook Backup
     (db.bookings || []).forEach(b => {
+      if (isTestOrDemoString(b.booking_id) || isTestOrDemoString(b.name) || isTestOrDemoString((b as any).notes || (b as any).message)) return;
+
       const payId = b.razorpay_payment_id || b.razorpayPaymentId || '';
       const orderId = b.razorpay_order_id || b.razorpayOrderId || '';
       const bId = b.booking_id || b.id || '';
 
-      // Skip if already captured through parent requests above
+      // Skip if already captured through parent requests above or duplicate booking
       if (processedKeys.has(bId) || (payId && processedKeys.has(payId))) {
         return;
       }
 
+      if (bId) processedKeys.add(bId);
+      if (isRealRazorpayPaymentId(payId)) processedKeys.add(payId);
+
       const isWaived = (b.payment_status || '').includes('waived') || payId.includes('VIP') || payId.includes('SHADOW100') || payId.includes('THERAPY99');
-      const isRealSuccess = !isWaived && (payId.startsWith('pay_') || payId.startsWith('PAY_'));
+      const isRealSuccess = !isWaived && isRealRazorpayPaymentId(payId) && !isTestOrDemoString(orderId);
       const amt = Number(b.amount || 99);
 
       list.push({
@@ -1668,7 +1707,10 @@ export default function AdminDashboard() {
       });
     });
 
-    return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    // Strictly keep ONLY verified real payments and authorized outreach waivers; completely exclude test transactions and unverified non-payments
+    return list
+      .filter(p => (p.isRealSuccess || p.isWaived) && !isTestOrDemoString(p.paymentId) && !isTestOrDemoString(p.orderId))
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   };
 
   const paymentsList = getPaymentsList();
@@ -4125,6 +4167,12 @@ export default function AdminDashboard() {
             const totalWaivedValue = paymentsList.filter(p => p.isWaived).reduce((sum, p) => sum + (p.originalFee || 99), 0);
             const realPaymentsCount = paymentsList.filter(p => !p.isWaived && p.status === 'SUCCESS').length;
 
+            const displayedPayments = paymentsList.filter(p => {
+              if (paymentLedgerFilter === 'real') return !p.isWaived && p.status === 'SUCCESS';
+              if (paymentLedgerFilter === 'waived') return p.isWaived;
+              return true;
+            });
+
             return (
               <div className="space-y-6 animate-fade-in-up">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -4169,6 +4217,40 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
+                {/* Filter Pills */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    onClick={() => setPaymentLedgerFilter('all')}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      paymentLedgerFilter === 'all'
+                        ? 'bg-primary text-white shadow-sm'
+                        : 'bg-white border border-brand-border text-brand-dark hover:bg-brand-light'
+                    }`}
+                  >
+                    All Verified Entries ({paymentsList.length})
+                  </button>
+                  <button
+                    onClick={() => setPaymentLedgerFilter('real')}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      paymentLedgerFilter === 'real'
+                        ? 'bg-emerald-700 text-white shadow-sm'
+                        : 'bg-white border border-brand-border text-emerald-800 hover:bg-emerald-50'
+                    }`}
+                  >
+                    Successful Real Payments ({realPaymentsCount})
+                  </button>
+                  <button
+                    onClick={() => setPaymentLedgerFilter('waived')}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      paymentLedgerFilter === 'waived'
+                        ? 'bg-purple-700 text-white shadow-sm'
+                        : 'bg-white border border-brand-border text-purple-800 hover:bg-purple-50'
+                    }`}
+                  >
+                    Waived Outreach ({totalWaivedCount})
+                  </button>
+                </div>
+
                 {/* Test Mode warning banner */}
                 {process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.startsWith('rzp_test') && (
                   <div className="p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl flex items-center gap-3 text-xs font-bold text-left shadow-sm">
@@ -4189,8 +4271,8 @@ export default function AdminDashboard() {
                       <RefreshCw className="animate-spin mx-auto mb-2 text-primary" size={24} />
                       <span>Loading transactions ledger...</span>
                     </div>
-                  ) : paymentsList.length === 0 ? (
-                    <div className="p-12 text-center text-brand-muted">No successful transactions found.</div>
+                  ) : displayedPayments.length === 0 ? (
+                    <div className="p-12 text-center text-brand-muted">No transactions found matching the selected filter.</div>
                   ) : (
                     <div className="relative">
                       <div className="px-4 py-1.5 bg-brand-light/60 text-xs text-brand-muted font-bold border-b border-brand-border/40 sm:hidden flex items-center justify-between">
@@ -4212,7 +4294,7 @@ export default function AdminDashboard() {
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-brand-border/40 text-brand-dark font-medium">
-                          {paymentsList.map((p) => (
+                          {displayedPayments.map((p) => (
                             <tr key={p.id} className={p.isWaived ? 'bg-purple-50/20 hover:bg-purple-50/40' : 'hover:bg-brand-light/20'}>
                               <td className="p-4 text-brand-muted">{formatDate(p.date)}</td>
                               <td className="p-4 font-bold text-secondary">{p.regId}</td>
