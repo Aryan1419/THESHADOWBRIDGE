@@ -3,6 +3,7 @@ import { supabaseAdmin as supabase } from '@/lib/supabase';
 import crypto from 'crypto';
 import { sendEmail } from '@/lib/notifications';
 import { readDb, writeDb } from '@/lib/db';
+import { getPlacementFee } from '@/lib/pricing';
 
 export async function POST(request: Request) {
   try {
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
     }
 
     const teachersCount = Math.max(1, Number(record.teachers_count || record.teachersCount || 1));
-    const dynamicAmount = 5000 * teachersCount;
+    const dynamicAmount = getPlacementFee('school', { teachersCount });
     const finalAmount = Number(amount || record.placement_amount || dynamicAmount);
 
     const updates = {

@@ -15,6 +15,7 @@ import {
 
 import { DatabaseSchema, TutorRecord, ShadowTeacherRecord, ParentShadowRequestRecord, ParentTutorRequestRecord } from '@/lib/db';
 import { areNearbyLocalities } from '@/lib/constants';
+import { PRICING, getPlacementFee, getConsultationFee, normalizeServiceType, formatCurrency } from '@/lib/pricing';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -1394,7 +1395,7 @@ export default function AdminDashboard() {
         });
       }
       if ((r as any).placementPaid || (r as any).placement_paid) {
-        const placementAmt = Number((r as any).placementAmount || (r as any).placement_amount || 5000);
+        const placementAmt = Number((r as any).placementAmount || (r as any).placement_amount || getPlacementFee('shadow'));
         const pidStr = (r as any).placementPaymentId || (r as any).placement_payment_id || '';
         const notesStr = ((r as any).notes || '').toUpperCase();
         const isPlacementWaived = pidStr.includes('HI5000') || notesStr.includes('HI5000') || pidStr === 'N/A (VIP HI5000)';
@@ -1461,7 +1462,7 @@ export default function AdminDashboard() {
         });
       }
       if ((r as any).placementPaid || (r as any).placement_paid) {
-        const placementAmt = Number((r as any).placementAmount || (r as any).placement_amount || 3000);
+        const placementAmt = Number((r as any).placementAmount || (r as any).placement_amount || getPlacementFee('tutor'));
         const pidStr = (r as any).placementPaymentId || (r as any).placement_payment_id || '';
         const notesStr = ((r as any).notes || '').toUpperCase();
         const isPlacementWaived = pidStr.includes('HI5000') || notesStr.includes('HI5000') || pidStr === 'N/A (VIP HI5000)';
@@ -1483,7 +1484,7 @@ export default function AdminDashboard() {
           phone: r.phone,
           email: r.email,
           type: 'Placement Fee (Home Tutor)',
-          amount: isPlacementWaived ? '₹0 (Waived)' : (isRealSuccess ? `₹${placementAmt.toLocaleString()}` : '₹0 (Unverified)'),
+          amount: isPlacementWaived ? '₹0 (Waived)' : (isRealSuccess ? formatCurrency(placementAmt) : '₹0 (Unverified)'),
           numericAmount: isRealSuccess ? placementAmt : 0,
           originalFee: placementAmt,
           paymentId,
@@ -1497,6 +1498,9 @@ export default function AdminDashboard() {
 
     // 3. Parent Therapy Requests
     (db.parent_therapy_requests || []).forEach(r => {
+      const therapyConsFee = getConsultationFee('therapy');
+      const therapyPlaceFee = getPlacementFee('therapy');
+
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
         const isWaived = isRecordWaived(r);
         const paymentId = getRealPaymentId(r, false, isWaived);
@@ -1518,9 +1522,9 @@ export default function AdminDashboard() {
           phone: r.phone,
           email: r.email,
           type: `Consultation Fee (${thType})`,
-          amount: isWaived ? '₹0 (Waived)' : (isRealSuccess ? '₹99' : '₹0 (Unverified)'),
-          numericAmount: isRealSuccess ? 99 : 0,
-          originalFee: 99,
+          amount: isWaived ? '₹0 (Waived)' : (isRealSuccess ? formatCurrency(therapyConsFee) : '₹0 (Unverified)'),
+          numericAmount: isRealSuccess ? therapyConsFee : 0,
+          originalFee: therapyConsFee,
           paymentId,
           orderId,
           status: isWaived ? (paymentId.includes('THERAPY99') ? 'WAIVED (Coupon THERAPY99)' : 'WAIVED (Outreach Code)') : (isRealSuccess ? 'SUCCESS' : 'UNVERIFIED (No Razorpay ID)'),
@@ -1528,10 +1532,48 @@ export default function AdminDashboard() {
           isRealSuccess
         });
       }
+
+      if ((r as any).placementPaid || (r as any).placement_paid) {
+        const placementAmt = Number((r as any).placementAmount || (r as any).placement_amount || therapyPlaceFee);
+        const pidStr = (r as any).placementPaymentId || (r as any).placement_payment_id || '';
+        const notesStr = ((r as any).notes || '').toUpperCase();
+        const isPlacementWaived = pidStr.includes('HI5000') || notesStr.includes('HI5000') || pidStr === 'N/A (VIP HI5000)';
+
+        const paymentId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealPaymentId(r, true, false);
+        const orderId = isPlacementWaived ? 'N/A (VIP HI5000)' : getRealOrderId(r, true, false);
+        const isRealSuccess = !isPlacementWaived && (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_'));
+
+        const key = `${r.registration_id || r.id}-place`;
+        processedKeys.add(key);
+        if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
+
+        list.push({
+          id: r.id + '-place',
+          date: (r as any).placementPaidAt || (r as any).placement_paid_at || r.created_at,
+          regId: r.registration_id,
+          parentName: r.parentName || (r as any).parent_name,
+          childName: r.childName || (r as any).child_name,
+          phone: r.phone,
+          email: r.email,
+          type: 'Placement Fee (Therapy)',
+          amount: isPlacementWaived ? '₹0 (Waived)' : (isRealSuccess ? formatCurrency(placementAmt) : '₹0 (Unverified)'),
+          numericAmount: isRealSuccess ? placementAmt : 0,
+          originalFee: placementAmt,
+          paymentId,
+          orderId,
+          status: isPlacementWaived ? 'WAIVED (Placement Code HI5000)' : (isRealSuccess ? 'SUCCESS' : 'UNVERIFIED (No Razorpay ID)'),
+          isWaived: isPlacementWaived,
+          isRealSuccess
+        });
+      }
     });
 
-    // 4. School Requests (Consultation ₹199 & Placement ₹5,000)
+    // 4. School Requests (Consultation & Dynamic Placement Fee)
     (db.school_requests || []).forEach(r => {
+      const teachersCount = Math.max(1, Number((r as any).teachersCount || (r as any).teachers_count || 1));
+      const schoolConsFee = getConsultationFee('school');
+      const schoolPlaceFee = getPlacementFee('school', { teachersCount });
+
       if ((r as any).consultationPaid || (r as any).consultation_paid) {
         const paymentId = (r as any).razorpayPaymentId || (r as any).razorpay_payment_id || 'N/A';
         const orderId = (r as any).razorpayOrderId || (r as any).razorpay_order_id || 'N/A';
@@ -1547,13 +1589,13 @@ export default function AdminDashboard() {
           date: r.created_at,
           regId: r.registration_id,
           parentName: (r as any).schoolName || (r as any).school_name || (r as any).contactName || (r as any).contact_name,
-          childName: `School (${(r as any).teachersCount || (r as any).teachers_count || 1} Shadow Teachers)`,
+          childName: `School (${teachersCount} Shadow Teacher${teachersCount > 1 ? 's' : ''})`,
           phone: r.phone,
           email: r.email,
           type: 'School Consultation Fee',
-          amount: isWaived ? '₹0 (Waived via SCHOOL199)' : (isRealSuccess ? '₹199' : '₹199 (Unverified)'),
-          numericAmount: isRealSuccess ? 199 : 0,
-          originalFee: 199,
+          amount: isWaived ? '₹0 (Waived via SCHOOL199)' : (isRealSuccess ? formatCurrency(schoolConsFee) : `${formatCurrency(schoolConsFee)} (Unverified)`),
+          numericAmount: isRealSuccess ? schoolConsFee : 0,
+          originalFee: schoolConsFee,
           paymentId,
           orderId,
           status: isWaived ? 'WAIVED' : (isRealSuccess ? 'SUCCESS' : 'UNVERIFIED'),
@@ -1565,7 +1607,7 @@ export default function AdminDashboard() {
         const paymentId = (r as any).placementPaymentId || (r as any).placement_payment_id || 'N/A';
         const orderId = (r as any).placementOrderId || (r as any).placement_order_id || 'N/A';
         const isRealSuccess = (paymentId.startsWith('pay_') || paymentId.startsWith('PAY_')) && !paymentId.toLowerCase().includes('test') && !paymentId.toLowerCase().includes('demo');
-        const amt = Number((r as any).placementAmount || (r as any).placement_amount || 5000);
+        const amt = Number((r as any).placementAmount || (r as any).placement_amount || schoolPlaceFee);
         const key = `${r.registration_id || r.id}-sch-place`;
         processedKeys.add(key);
         if (paymentId.startsWith('pay_')) processedKeys.add(paymentId);
@@ -1575,11 +1617,11 @@ export default function AdminDashboard() {
           date: (r as any).placementPaidAt || (r as any).placement_paid_at || r.created_at,
           regId: r.registration_id,
           parentName: (r as any).schoolName || (r as any).school_name || (r as any).contactName || (r as any).contact_name,
-          childName: `School Placement`,
+          childName: `School Placement (${teachersCount} Teacher${teachersCount > 1 ? 's' : ''})`,
           phone: r.phone,
           email: r.email,
           type: 'School Placement Fee',
-          amount: isRealSuccess ? `₹${amt.toLocaleString()}` : '₹0 (Unverified)',
+          amount: isRealSuccess ? formatCurrency(amt) : `${formatCurrency(amt)} (Unverified)`,
           numericAmount: isRealSuccess ? amt : 0,
           originalFee: amt,
           paymentId,
@@ -3541,12 +3583,12 @@ export default function AdminDashboard() {
                             <td className="p-4 text-center">
                               {(() => {
                                 const isPaid = Boolean((r as any).placementPaid || (r as any).placement_paid);
-                                const amount = (r as any).placementAmount || (r as any).placement_amount || (parentSubTab === 'shadow' ? 5000 : 3000);
+                                const amount = Number((r as any).placementAmount || (r as any).placement_amount || getPlacementFee(parentSubTab));
                                 return (
                                   <span className={`px-2 py-0.5 rounded-full text-xs font-bold ${
                                     isPaid ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
                                   }`}>
-                                    {isPaid ? `Yes (₹${amount.toLocaleString()})` : 'No'}
+                                    {isPaid ? `Yes (${formatCurrency(amount)})` : 'No'}
                                   </span>
                                 );
                               })()}
@@ -3843,7 +3885,7 @@ export default function AdminDashboard() {
                                     if (isConsultPaid) {
                                       return (
                                         <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-black uppercase">
-                                          ₹199 Paid
+                                          {formatCurrency(getConsultationFee('school'))} Paid
                                         </span>
                                       );
                                     }
@@ -3858,18 +3900,18 @@ export default function AdminDashboard() {
                                   {(() => {
                                     const tCount = Math.max(1, Number(r.teachersCount || r.teachers_count || 1));
                                     const dynamicFee = isPlacePaid
-                                      ? (r.placement_amount || r.placementAmount || (tCount * 5000))
-                                      : (tCount * 5000);
+                                      ? Number(r.placement_amount || r.placementAmount || getPlacementFee('school', { teachersCount: tCount }))
+                                      : getPlacementFee('school', { teachersCount: tCount });
                                     if (isPlacePaid) {
                                       return (
                                         <span className="px-2 py-0.5 rounded-full bg-purple-50 border border-purple-200 text-purple-700 text-xs font-black uppercase">
-                                          ₹{dynamicFee.toLocaleString('en-IN')} Paid
+                                          {formatCurrency(dynamicFee)} Paid
                                         </span>
                                       );
                                     }
                                     return (
-                                      <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold uppercase" title={`Due: ₹${dynamicFee.toLocaleString('en-IN')} (${tCount} teacher${tCount > 1 ? 's' : ''})`}>
-                                        Unpaid (₹{dynamicFee.toLocaleString('en-IN')})
+                                      <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-bold uppercase" title={`Due: ${formatCurrency(dynamicFee)} (${tCount} teacher${tCount > 1 ? 's' : ''})`}>
+                                        Unpaid ({formatCurrency(dynamicFee)})
                                       </span>
                                     );
                                   })()}
@@ -4418,17 +4460,22 @@ export default function AdminDashboard() {
                   <div className="space-y-3 text-xs">
                     <div className="flex items-center justify-between p-2.5 bg-brand-light/40 rounded-xl border border-brand-border/40">
                       <span className="font-bold text-brand-dark">Consultation Booking Fee</span>
-                      <span className="font-black text-primary">₹99</span>
+                      <span className="font-black text-primary">Parent: {formatCurrency(PRICING.CONSULTATION.PARENT_DEFAULT)} | School: {formatCurrency(PRICING.CONSULTATION.SCHOOL)}</span>
                     </div>
 
                     <div className="flex items-center justify-between p-2.5 bg-brand-light/40 rounded-xl border border-brand-border/40">
                       <span className="font-bold text-brand-dark">Shadow Teacher Placement Fee</span>
-                      <span className="font-black text-primary">₹5,000</span>
+                      <span className="font-black text-primary">{formatCurrency(PRICING.PLACEMENT.SHADOW)}</span>
                     </div>
 
                     <div className="flex items-center justify-between p-2.5 bg-brand-light/40 rounded-xl border border-brand-border/40">
-                      <span className="font-bold text-brand-dark">Home Tutor Placement Fee</span>
-                      <span className="font-black text-primary">₹3,000</span>
+                      <span className="font-bold text-brand-dark">Home Tutor &amp; Therapy Placement</span>
+                      <span className="font-black text-primary">{formatCurrency(PRICING.PLACEMENT.TUTOR)}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between p-2.5 bg-brand-light/40 rounded-xl border border-brand-border/40">
+                      <span className="font-bold text-brand-dark">School Placement Fee</span>
+                      <span className="font-black text-primary">{formatCurrency(PRICING.PLACEMENT.SCHOOL_PER_TEACHER)} / teacher</span>
                     </div>
 
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 bg-brand-light/40 rounded-xl border border-brand-border/40 gap-1.5">
@@ -4976,8 +5023,8 @@ export default function AdminDashboard() {
                       const count = Math.max(1, Number(selectedRecord.data.teachersCount || selectedRecord.data.teachers_count || 1));
                       const isPlacePaid = selectedRecord.data.placementPaid || selectedRecord.data.placement_paid;
                       const fee = isPlacePaid
-                        ? (selectedRecord.data.placement_amount || selectedRecord.data.placementAmount || (count * 5000))
-                        : (count * 5000);
+                        ? Number(selectedRecord.data.placement_amount || selectedRecord.data.placementAmount || getPlacementFee('school', { teachersCount: count }))
+                        : getPlacementFee('school', { teachersCount: count });
                       const payId = (selectedRecord.data.razorpayPaymentId || selectedRecord.data.razorpay_payment_id || '').toUpperCase();
                       const notes = (selectedRecord.data.notes || '').toUpperCase();
                       const isWaived = payId.includes('SCHOOL199') || notes.includes('SCHOOL199') || selectedRecord.data.consultation_amount === 0;
@@ -4992,10 +5039,10 @@ export default function AdminDashboard() {
                           <div className="col-span-2"><strong>Specific Grades:</strong> {selectedRecord.data.specificGrades || selectedRecord.data.specific_grades}</div>
                           <div><strong>Shadow Teachers Needed:</strong> {count}</div>
                           <div><strong>Expected Start Date:</strong> {selectedRecord.data.startDate || selectedRecord.data.start_date || 'ASAP'}</div>
-                          <div><strong>Consultation Booking:</strong> <span className={isWaived ? 'text-purple-700 font-bold' : 'text-emerald-700 font-bold'}>{isWaived ? 'Waived (SCHOOL199)' : '₹199 Paid'}</span></div>
-                          <div><strong>Placement Fee:</strong> <span className={isPlacePaid ? 'text-emerald-700 font-bold' : 'text-primary font-bold'}>₹{fee.toLocaleString('en-IN')} ({isPlacePaid ? 'Paid' : 'Unpaid'})</span></div>
+                          <div><strong>Consultation Booking:</strong> <span className={isWaived ? 'text-purple-700 font-bold' : 'text-emerald-700 font-bold'}>{isWaived ? 'Waived (SCHOOL199)' : `${formatCurrency(getConsultationFee('school'))} Paid`}</span></div>
+                          <div><strong>Placement Fee:</strong> <span className={isPlacePaid ? 'text-emerald-700 font-bold' : 'text-primary font-bold'}>{formatCurrency(fee)} ({isPlacePaid ? 'Paid' : 'Unpaid'})</span></div>
                           <div className="col-span-2 text-xs text-brand-muted font-medium bg-brand-light/60 p-2.5 rounded-xl border border-brand-border/40">
-                            Calculation: ₹5,000 × {count} shadow teacher{count > 1 ? 's' : ''} = ₹{fee.toLocaleString('en-IN')} one-time placement onboarding fee.
+                            Calculation: {formatCurrency(PRICING.PLACEMENT.SCHOOL_PER_TEACHER)} × {count} shadow teacher{count > 1 ? 's' : ''} = {formatCurrency(fee)} one-time placement onboarding fee.
                           </div>
                         </>
                       );
@@ -5159,7 +5206,7 @@ export default function AdminDashboard() {
                             {updating ? 'Processing Proposal...' : 'Confirm Match & Request Placement Payment'}
                           </button>
                           <p className="text-xs text-emerald-600 font-bold">
-                            *Confirming this match proposals will update request status to 'Match Proposed' and requests placement onboarding fees of ₹5,000 / ₹3,000 on the parent dashboard.
+                            *Confirming this match proposal will update request status to &apos;Match Proposed&apos; and request placement onboarding fees ({formatCurrency(PRICING.PLACEMENT.SHADOW)} for Shadow Teachers / {formatCurrency(PRICING.PLACEMENT.TUTOR)} for Home Tutors) on the parent dashboard.
                           </p>
                         </div>
                       )}

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin as supabase } from '@/lib/supabase';
 import crypto from 'crypto';
 import { sendEmail } from '@/lib/notifications';
+import { normalizeServiceType, getServiceDisplayName } from '@/lib/pricing';
 
 export async function POST(request: Request) {
   try {
@@ -33,16 +34,41 @@ export async function POST(request: Request) {
       );
     }
 
-    const table = subType === 'shadow' ? 'parent_shadow_requests' : 'parent_tutor_requests';
+    const norm = normalizeServiceType(subType);
+    let table = 'parent_shadow_requests';
+    if (norm === 'tutor') table = 'parent_tutor_requests';
+    else if (norm === 'therapy' || norm === 'online_parent_training') table = 'parent_therapy_requests';
 
     // 1. Fetch the parent request record to get their email and details
-    const { data: record, error: fetchErr } = await supabase
+    let record: any = null;
+    let actualTable = table;
+
+    const { data: directMatch, error: fetchErr } = await supabase
       .from(table)
       .select('*')
       .eq('registration_id', registrationId)
       .maybeSingle();
 
-    if (fetchErr || !record) {
+    if (directMatch) {
+      record = directMatch;
+    } else {
+      // Fallback check in other parent tables in case of table discrepancy
+      for (const t of ['parent_shadow_requests', 'parent_tutor_requests', 'parent_therapy_requests']) {
+        if (t === table) continue;
+        const { data: fallbackData } = await supabase
+          .from(t)
+          .select('*')
+          .eq('registration_id', registrationId)
+          .maybeSingle();
+        if (fallbackData) {
+          record = fallbackData;
+          actualTable = t;
+          break;
+        }
+      }
+    }
+
+    if (!record) {
       return NextResponse.json(
         { error: 'Parent request record not found for this ID' },
         { status: 404 }
@@ -60,7 +86,7 @@ export async function POST(request: Request) {
     };
 
     const { error: updateErr } = await supabase
-      .from(table)
+      .from(actualTable)
       .update(updates)
       .eq('registration_id', registrationId);
 
@@ -113,7 +139,7 @@ export async function POST(request: Request) {
             <p style="margin: 0 0 8px 0;"><strong>Child Name:</strong> ${childName}</p>
             <p style="margin: 0 0 8px 0;"><strong>Amount Paid:</strong> ₹${amount}</p>
             <p style="margin: 0 0 8px 0;"><strong>Razorpay Payment ID:</strong> ${razorpayPaymentId}</p>
-            <p style="margin: 0;"><strong>Service Type:</strong> ${subType === 'shadow' ? 'Shadow Teacher' : 'Home Tutor'}</p>
+            <p style="margin: 0;"><strong>Service Type:</strong> ${getServiceDisplayName(norm)}</p>
           </div>
 
           <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to finalize educator deployment.</p>

@@ -3,6 +3,7 @@ import { supabaseAdmin as supabase } from '@/lib/supabase';
 import crypto from 'crypto';
 import { sendEmail } from '@/lib/notifications';
 import { readDb, writeDb, SchoolRequestRecord } from '@/lib/db';
+import { getConsultationFee, getPlacementFee, formatCurrency } from '@/lib/pricing';
 
 export async function POST(request: Request) {
   try {
@@ -56,6 +57,10 @@ export async function POST(request: Request) {
       ? (formData.notes ? `${formData.notes} | Fee Waived via SCHOOL199` : 'Fee Waived via SCHOOL199')
       : (formData.notes || '');
 
+    const teachersCount = Math.max(1, Number(formData.teachersCount || 1));
+    const schoolConsultationFee = getConsultationFee('school');
+    const schoolPlacementFee = getPlacementFee('school', { teachersCount });
+
     const recordPayload = {
       registration_id: registrationId,
       school_name: formData.schoolName,
@@ -67,14 +72,14 @@ export async function POST(request: Request) {
       preferred_location: formData.preferredLocation || '',
       levels_required: Array.isArray(formData.levelsRequired) ? formData.levelsRequired.join(', ') : (formData.levelsRequired || ''),
       specific_grades: Array.isArray(formData.specificGrades) ? formData.specificGrades.join(', ') : (formData.specificGrades || ''),
-      teachers_count: Math.max(1, Number(formData.teachersCount || 1)),
+      teachers_count: teachersCount,
       start_date: formData.startDate || '',
       notes: notesWithPromo,
       status: 'Consultation Booked',
       consultation_paid: true,
-      consultation_amount: isSchoolWaiver ? 0 : 199,
+      consultation_amount: isSchoolWaiver ? 0 : schoolConsultationFee,
       placement_paid: false,
-      placement_amount: 5000 * Math.max(1, Number(formData.teachersCount || 1)),
+      placement_amount: schoolPlacementFee,
       razorpay_payment_id: isSchoolWaiver ? 'WAIVED-SCHOOL199' : (razorpayPaymentId || 'PAID-199-DIRECT'),
       razorpay_order_id: isSchoolWaiver ? 'WAIVED-SCHOOL199' : (razorpayOrderId || 'ORD-199-DIRECT'),
       created_at: createdAt
@@ -119,7 +124,7 @@ export async function POST(request: Request) {
 
     const paymentStatusText = isSchoolWaiver
       ? '₹0.00 (Waived 100% via Promo Code SCHOOL199)'
-      : `₹199.00 (Razorpay ID: ${razorpayPaymentId || 'Verified'})`;
+      : `${formatCurrency(schoolConsultationFee)}.00 (Razorpay ID: ${razorpayPaymentId || 'Verified'})`;
 
     await Promise.allSettled([
       sendEmail({
@@ -157,7 +162,7 @@ export async function POST(request: Request) {
         type: 'contact_alert',
         bodyHtml: `
           <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New School Consultation Requirement Submitted</h2>
-          <p style="margin: 0 0 16px 0;">A school has booked a consultation call ${isSchoolWaiver ? 'with the ₹199 fee waived via <strong>SCHOOL199</strong>' : 'and paid the ₹199 booking fee'}.</p>
+          <p style="margin: 0 0 16px 0;">A school has booked a consultation call ${isSchoolWaiver ? 'with the ' + formatCurrency(schoolConsultationFee) + ' fee waived via <strong>SCHOOL199</strong>' : 'and paid the ' + formatCurrency(schoolConsultationFee) + ' booking fee'}.</p>
 
           <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
             <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${registrationId}</p>

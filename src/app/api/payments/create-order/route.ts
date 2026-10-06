@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
+import { PRICING } from '@/lib/pricing';
 
 export async function POST(request: Request) {
   try {
@@ -19,13 +20,13 @@ export async function POST(request: Request) {
     });
 
     const body = await request.json().catch(() => ({}));
-    const reqAmount = body.amount ? Number(body.amount) : 99;
+    const reqAmount = body.amount ? Number(body.amount) : PRICING.CONSULTATION.PARENT_DEFAULT;
     const amountInPaise = Math.round(reqAmount * 100);
 
     const receiptId = `rcpt_${Math.random().toString(36).substring(2, 10)}`;
 
-    const defaultPurpose = reqAmount === 99 
-      ? 'The Shadow Bridge Diagnostic Child Assessment Consultation Fee' 
+    const defaultPurpose = reqAmount === PRICING.CONSULTATION.PARENT_DEFAULT || reqAmount === PRICING.CONSULTATION.SCHOOL 
+      ? 'The Shadow Bridge Diagnostic Consultation Assessment Fee' 
       : 'The Shadow Bridge Program Placement Vetting Fee';
 
     const orderNotes: Record<string, string> = {

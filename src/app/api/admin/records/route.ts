@@ -3,6 +3,7 @@ import { supabaseAdmin as supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { sendEmail, sendCommissionNotificationEmail, STATUS_EXPLANATIONS } from '@/lib/notifications';
 import { readDb, writeDb } from '@/lib/db';
 import { verifyAdminToken } from '@/lib/auth';
+import { getPlacementFee, normalizeServiceType, formatCurrency } from '@/lib/pricing';
 
 export const dynamic = 'force-dynamic';
 
@@ -500,15 +501,15 @@ export async function POST(request: Request) {
               : (reqStr.includes('parent training') ? 'Online Parent Training (PAN India)' : 'ABA Online Therapy (PAN India)');
             newParent.challenges = 'Pending Consultation';
             newParent.goals = 'Pending Consultation';
-            newParent.placement_amount = 3000;
+            newParent.placement_amount = getPlacementFee('therapy');
           } else if (isTutor) {
             newParent.child_grade = 'Pending Consultation';
             newParent.tutor_type = 'Academic Tuition/Subjects';
-            newParent.placement_amount = 3000;
+            newParent.placement_amount = getPlacementFee('tutor');
           } else {
             newParent.child_grade = 'Pending Consultation';
             newParent.relationship = 'Mother';
-            newParent.placement_amount = 5000;
+            newParent.placement_amount = getPlacementFee('shadow');
           }
 
           const { data: createdP } = await supabase.from(targetTab).insert([newParent]).select().single();
@@ -531,7 +532,7 @@ export async function POST(request: Request) {
           const contactName = targetRecord?.contact_name || targetRecord?.contactName || 'Representative';
           const teachersCount = Math.max(1, Number(targetRecord?.teachers_count || targetRecord?.teachersCount || 1));
           const isPaid = Boolean(targetRecord?.placement_paid || targetRecord?.placementPaid);
-          const feeAmount = isPaid ? (targetRecord?.placement_amount || (teachersCount * 5000)) : (teachersCount * 5000);
+          const feeAmount = isPaid ? (targetRecord?.placement_amount || getPlacementFee('school', { teachersCount })) : getPlacementFee('school', { teachersCount });
           const schoolPlacementLink = `${protocol}://${host}/schools/placement-fee?regId=${encodeURIComponent(actualRegId)}`;
 
           sendEmail({
@@ -547,7 +548,7 @@ export async function POST(request: Request) {
                 <h3 style="margin: 0 0 8px 0; color: #3B2A6B; font-size: 16px; font-family: Georgia, serif;">Next Step: Pay One-time Placement Fee</h3>
                 <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: bold; color: #3B2A6B;">Registration ID: <span style="font-family: monospace; color: #B0206B; font-size: 16px;">${actualRegId}</span></p>
                 <p style="margin: 0 0 8px 0; font-size: 13px; color: #2D253A;"><strong>Teachers Requested:</strong> ${teachersCount}</p>
-                <p style="margin: 0 0 16px 0; font-size: 13px; color: #2D253A;"><strong>One-time Placement Fee:</strong> ₹${feeAmount.toLocaleString('en-IN')} (₹5,000 × ${teachersCount} ${teachersCount > 1 ? 'Teachers' : 'Teacher'})</p>
+                <p style="margin: 0 0 16px 0; font-size: 13px; color: #2D253A;"><strong>One-time Placement Fee:</strong> ${formatCurrency(feeAmount)} (${formatCurrency(getPlacementFee('school', { teachersCount: 1 }))} × ${teachersCount} ${teachersCount > 1 ? 'Teachers' : 'Teacher'})</p>
                 <a href="${schoolPlacementLink}" style="display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15);">Pay Placement Fee & Unlock Form →</a>
               </div>
 
@@ -793,7 +794,7 @@ export async function POST(request: Request) {
         const dashboardLink = `${protocol}://${host}/dashboard?regId=${regId}`;
 
         if (status === 'Match Proposed') {
-          const amountDue = type === 'parent_shadow_requests' ? 5000 : 3000;
+          const amountDue = getPlacementFee(normalizeServiceType(type));
           const childName = record.childName || 'your child';
           const alreadyPaid = updatedRecord.placement_paid === true || record.placementPaid === true;
           const cleanCandidateMsg = candidateMessage ? candidateMessage.trim() : '';

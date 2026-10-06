@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { normalizeServiceType } from '@/lib/pricing';
 
 function toCamelCase(obj: any): any {
   if (Array.isArray(obj)) return obj.map(toCamelCase);
@@ -244,7 +245,7 @@ export async function POST(request: Request) {
       .maybeSingle();
 
     if (booking && isContactMatch(booking.email, booking.phone)) {
-      const isTutor = booking.requirement?.toLowerCase().includes('tutor');
+      const subType = normalizeServiceType(booking.requirement, 'shadow');
       const msg = (booking.message || '').toLowerCase();
       const isCompleted = msg.includes('completed') || msg.includes('analysis') || msg.includes('unlocked');
       
@@ -264,8 +265,8 @@ export async function POST(request: Request) {
 
       return NextResponse.json({
         success: true,
-        role: 'parent',
-        subType: isTutor ? 'tutor' : 'shadow',
+        role: subType === 'school' ? 'school' : 'parent',
+        subType,
         isConsultationBookingOnly: true,
         isCompleted,
         record

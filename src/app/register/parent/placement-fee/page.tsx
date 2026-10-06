@@ -12,6 +12,7 @@ import {
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { getPlacementFee, normalizeServiceType } from '@/lib/pricing';
 
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
@@ -102,11 +103,10 @@ function PlacementFeeContent() {
       });
   }, [searchParams]);
 
-  const isShadow = gatedStatus?.subType === 'shadow';
-  const isTherapy = gatedStatus?.subType === 'therapy' || 
-    gatedStatus?.serviceType?.toLowerCase().includes('therapy') ||
-    gatedStatus?.serviceType?.toLowerCase().includes('parent training');
-  const feeAmount = isShadow ? 5000 : 3000;
+  const subType = normalizeServiceType(gatedStatus?.subType || gatedStatus?.serviceType || gatedStatus?.record?.therapy_type || gatedStatus?.record?.requirement, 'shadow');
+  const isShadow = subType === 'shadow';
+  const isTherapy = subType === 'therapy' || subType === 'online_parent_training';
+  const feeAmount = gatedStatus?.feeAmount || gatedStatus?.record?.placementAmount || gatedStatus?.record?.placement_amount || getPlacementFee(subType);
   const isRegistrationSubmitted = gatedStatus?.isRegistrationSubmitted;
   const record = gatedStatus?.record;
 

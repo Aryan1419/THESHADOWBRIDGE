@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabaseAdmin as supabase, isSupabaseConfigured } from '@/lib/supabase';
 import crypto from 'crypto';
 import { sendEmail } from '@/lib/notifications';
+import { getConsultationFee, formatCurrency } from '@/lib/pricing';
 
 export async function POST(request: Request) {
   try {
@@ -44,6 +45,9 @@ export async function POST(request: Request) {
     const randomSuffix = Math.floor(Math.random() * 89999 + 10000);
     const bookingId = `TSB-BK-2026-${randomSuffix}`;
 
+    const fee = getConsultationFee(requirement);
+    const feeFormatted = formatCurrency(fee);
+
     const newBooking: any = {
       booking_id: bookingId,
       name,
@@ -54,7 +58,7 @@ export async function POST(request: Request) {
       requirement,
       message: message || '',
       payment_status: 'paid',
-      amount: 99,
+      amount: fee,
       razorpay_payment_id: razorpayPaymentId,
       razorpay_order_id: razorpayOrderId,
       razorpay_signature: razorpaySignature
@@ -94,12 +98,12 @@ export async function POST(request: Request) {
         bodyHtml: `
           <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Consultation Booking Confirmed</h2>
           <p style="margin: 0 0 16px 0;">Dear ${name},</p>
-          <p style="margin: 0 0 16px 0;">Thank you for booking a 1-on-1 consultation session with Founder & Lead Mentor Pratibha Mishra at The Shadow Bridge. We have successfully received your payment of <strong>₹99</strong>.</p>
+          <p style="margin: 0 0 16px 0;">Thank you for booking a 1-on-1 consultation session with Founder & Lead Mentor Pratibha Mishra at The Shadow Bridge. We have successfully received your payment of <strong>${feeFormatted}</strong>.</p>
           
           <div style="background-color: #F8F5FB; border-left: 4px solid #C89B3C; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
             <p style="margin: 0; font-size: 13px; line-height: 1.6; color: #3B2A6B;">
               <strong>Booking Reference ID:</strong> ${bookingId}<br />
-              <strong>Amount Paid:</strong> ₹99.00 (Non-refundable)<br />
+              <strong>Amount Paid:</strong> ${feeFormatted}.00 (Non-refundable)<br />
               <strong>Payment Transaction ID:</strong> ${razorpayPaymentId}<br />
               <strong>Date & Time:</strong> ${bookingDateStr} IST<br />
               <strong>City:</strong> ${city}${preferredLocation ? ` (${preferredLocation})` : ''}
@@ -113,11 +117,11 @@ export async function POST(request: Request) {
 
       sendEmail({
         to: 'theshadowbridgesupport@gmail.com',
-        subject: `New Consultation Booked: ${name} (₹99 Paid)`,
+        subject: `New Consultation Booked: ${name} (${feeFormatted} Paid)`,
         type: 'contact_alert',
         bodyHtml: `
           <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Consultation Booking Received</h2>
-          <p style="margin: 0 0 16px 0;">A new parent has successfully booked a ₹99 consultation session through The Shadow Bridge website.</p>
+          <p style="margin: 0 0 16px 0;">A new parent has successfully booked a ${feeFormatted} consultation session through The Shadow Bridge website.</p>
 
           <div style="background-color: #F8F5FB; border-left: 4px solid #C89B3C; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
             <p style="margin: 0 0 8px 0; font-size: 14px; color: #3B2A6B;"><strong>Parent Name:</strong> ${name}</p>
@@ -133,7 +137,7 @@ export async function POST(request: Request) {
           <div style="background-color: #EFEBF4; border: 1px solid #D4CCE3; padding: 14px; margin: 20px 0; border-radius: 8px;">
             <p style="margin: 0; font-size: 13px; color: #3B2A6B;">
               <strong>Booking Reference:</strong> ${bookingId}<br />
-              <strong>Payment Status:</strong> ₹99.00 Paid (Razorpay Payment ID: ${razorpayPaymentId})<br />
+              <strong>Payment Status:</strong> ${feeFormatted}.00 Paid (Razorpay Payment ID: ${razorpayPaymentId})<br />
               <strong>Booking Date/Time:</strong> ${bookingDateStr} IST
             </p>
           </div>

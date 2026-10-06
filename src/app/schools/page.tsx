@@ -11,6 +11,7 @@ import {
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { PRICING, getConsultationFee, getPlacementFee, formatCurrency } from '@/lib/pricing';
 
 declare global {
   interface Window {
@@ -176,12 +177,13 @@ export default function SchoolsPage() {
         throw new Error('Razorpay SDK failed to load. Please check your internet connection.');
       }
 
-      // 2. Create Razorpay order for ₹199 school consultation fee
+      // 2. Create Razorpay order for school consultation fee
+      const consultFee = getConsultationFee('school');
       const orderRes = await fetch('/api/payments/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          amount: 199,
+          amount: consultFee,
           parentName: contactName || schoolName,
           phone: phone,
           email: email,
@@ -209,7 +211,7 @@ export default function SchoolsPage() {
         amount: orderAmount,
         currency: orderData.currency || 'INR',
         name: 'The Shadow Bridge',
-        description: 'School Requirement Consultation Booking Fee (₹199)',
+        description: `School Requirement Consultation Booking Fee (${formatCurrency(consultFee)})`,
         image: '/favicon-512.png',
         order_id: orderId,
         handler: async function (response: any) {
@@ -417,7 +419,7 @@ export default function SchoolsPage() {
                   Tell Us About Your Requirement
                 </h2>
                 <p className="text-xs sm:text-sm text-brand-muted mt-1">
-                  Fill in the details below and book a 1-on-1 consultation call (₹199 fee).
+                  Fill in the details below and book a 1-on-1 consultation call ({formatCurrency(getConsultationFee('school'))} fee).
                 </p>
               </div>
 
@@ -741,11 +743,11 @@ export default function SchoolsPage() {
                       <span className="font-bold text-primary">
                         {isFeeWaived ? (
                           <span className="flex items-center gap-2">
-                            <span className="line-through text-brand-muted">₹199</span>
+                            <span className="line-through text-brand-muted">{formatCurrency(getConsultationFee('school'))}</span>
                             <span className="text-emerald-600 font-extrabold">₹0 (Waived)</span>
                           </span>
                         ) : (
-                          '₹199'
+                          formatCurrency(getConsultationFee('school'))
                         )}
                       </span>
                     </div>
@@ -770,7 +772,7 @@ export default function SchoolsPage() {
                     ) : (
                       <>
                         <PhoneCall size={18} />
-                        <span>Book a Consultation (₹199)</span>
+                        <span>Book a Consultation ({formatCurrency(getConsultationFee('school'))})</span>
                       </>
                     )}
                   </button>
@@ -795,12 +797,12 @@ export default function SchoolsPage() {
                 <div className="space-y-3 pt-1">
                   <div className="bg-white/10 border border-white/20 rounded-2xl p-3.5 space-y-1">
                     <p className="text-xs text-accent font-extrabold uppercase">1. Booking Fee</p>
-                    <p className="text-xl font-black text-white">₹199/- <span className="text-xs font-normal text-white/70">(Consultation Call)</span></p>
+                    <p className="text-xl font-black text-white">{formatCurrency(getConsultationFee('school'))}/- <span className="text-xs font-normal text-white/70">(Consultation Call)</span></p>
                   </div>
 
                   <div className="bg-white/10 border border-white/20 rounded-2xl p-3.5 space-y-1">
                     <p className="text-xs text-accent font-extrabold uppercase">2. One-time Placement Fee</p>
-                    <p className="text-2xl font-black text-white">₹5,000/- <span className="text-xs font-normal text-white/70">(Charged once per requirement)</span></p>
+                    <p className="text-2xl font-black text-white">{formatCurrency(getPlacementFee('school', { teachersCount: 1 }))}/- <span className="text-xs font-normal text-white/70">(Per shadow teacher requested)</span></p>
                   </div>
 
                   <div className="bg-emerald-500/20 border border-emerald-400/40 rounded-2xl p-3.5 space-y-1">
@@ -824,7 +826,7 @@ export default function SchoolsPage() {
                     { step: '1', title: 'School Fills Requirement Form', desc: 'School fills all details about their requirement & submits.' },
                     { step: '2', title: 'Consultation Call', desc: 'We call the school to understand their needs in detail.' },
                     { step: '3', title: 'Proposal & Terms Shared', desc: 'We share the process, terms, fees and available options.' },
-                    { step: '4', title: 'One-time Placement Fee Paid', desc: 'School pays the one-time placement fee of ₹5,000.' },
+                    { step: '4', title: 'One-time Placement Fee Paid', desc: `School pays the placement fee of ${formatCurrency(getPlacementFee('school', { teachersCount: 1 }))} per teacher requested.` },
                     { step: '5', title: 'Shortlisting & Interviews', desc: 'We shortlist suitable shadow teachers and schedule interviews with the school.' },
                     { step: '6', title: 'Final Selection', desc: 'School selects the shadow teacher.' },
                     { step: '7', title: 'First Month Commission', desc: 'School pays 50% of the first month\'s salary as our commission.' },

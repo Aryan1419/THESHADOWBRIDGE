@@ -10,6 +10,7 @@ import {
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { getPlacementFee, formatCurrency } from '@/lib/pricing';
 
 const loadRazorpayScript = () => {
   return new Promise<boolean>((resolve) => {
@@ -87,7 +88,7 @@ function SchoolPlacementFeeContent() {
     setErrorMsg(null);
 
     const teachersCount = Math.max(1, Number(record.teachersCount || record.teachers_count || 1));
-    const placementAmount = 5000 * teachersCount;
+    const placementAmount = getPlacementFee('school', { teachersCount });
 
     try {
       // 1. Ensure Razorpay SDK is loaded
@@ -196,8 +197,8 @@ function SchoolPlacementFeeContent() {
   const teachersCount = Math.max(1, Number(record?.teachersCount || record?.teachers_count || 1));
   const isPaid = Boolean(record?.placementPaid || record?.placement_paid);
   const placementAmount = isPaid
-    ? (record?.placement_amount || record?.placementAmount || (5000 * teachersCount))
-    : (5000 * teachersCount);
+    ? (record?.placement_amount || record?.placementAmount || getPlacementFee('school', { teachersCount }))
+    : getPlacementFee('school', { teachersCount });
 
   return (
     <div className="min-h-screen bg-brand-light/30 flex flex-col font-sans">

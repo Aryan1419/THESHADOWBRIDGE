@@ -11,6 +11,7 @@ import {
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { normalizeServiceType } from '@/lib/pricing';
 
 function GatedRegistrationContent() {
   const searchParams = useSearchParams();
@@ -116,6 +117,28 @@ function GatedRegistrationContent() {
     }
   };
 
+  const currentSubType = normalizeServiceType(
+    gatedStatus?.subType || gatedStatus?.serviceType || gatedStatus?.record?.requirement || gatedStatus?.record?.serviceType,
+    'shadow'
+  );
+  const isShadow = currentSubType === 'shadow';
+  const isTutor = currentSubType === 'tutor';
+  const isTherapy = currentSubType === 'therapy' || currentSubType === 'online_parent_training';
+
+  const isConsultationCompleted = Boolean(
+    gatedStatus &&
+    gatedStatus.isConsultationCompleted &&
+    (gatedStatus.statusIdx !== undefined ? gatedStatus.statusIdx >= 1 : true) &&
+    !gatedStatus.currentStatus?.toLowerCase().includes('booked')
+  );
+
+  const isOnlineTherapy = therapyType.includes('Online') || 
+    therapyType.includes('PAN India') || 
+    therapyType.includes('Parent Training') ||
+    (gatedStatus?.record?.therapyType || gatedStatus?.record?.therapy_type || '').includes('Online') ||
+    (gatedStatus?.record?.therapyType || gatedStatus?.record?.therapy_type || '').includes('PAN India') ||
+    (gatedStatus?.record?.therapyType || gatedStatus?.record?.therapy_type || '').includes('Parent Training');
+
   const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!gatedStatus || !gatedStatus.record) return;
@@ -136,6 +159,7 @@ function GatedRegistrationContent() {
       const rec = gatedStatus.record;
       const regId = rec.registrationId || rec.registration_id || rec.bookingId || rec.booking_id;
       
+      const isShadowRequest = isShadow;
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -144,21 +168,23 @@ function GatedRegistrationContent() {
           regId,
           email: rec.email,
           phone: rec.phone,
+          subType: isTherapy ? (gatedStatus?.subType || 'therapy') : (isTutor ? 'tutor' : 'shadow'),
+          serviceType: gatedStatus?.serviceType,
           childName: childName.trim(),
           childAge: childAge.trim(),
           childGender,
           childGrade: childGrade.trim(),
-          schoolLocation: schoolLocation.trim(),
+          schoolLocation: isShadowRequest ? schoolLocation.trim() : '',
           homeLocation: homeLocation.trim(),
           hasDiagnosis,
           diagnosis: diagnosis.trim(),
           difficulties,
-          therapyType,
-          goals: goals.trim(),
-          preferredDays: preferredDays.trim(),
-          preferredTime: preferredTime.trim(),
-          tutorType,
-          subjects,
+          therapyType: isTherapy ? therapyType : undefined,
+          goals: isTherapy ? goals.trim() : undefined,
+          preferredDays: isTherapy ? preferredDays.trim() : undefined,
+          preferredTime: isTherapy ? preferredTime.trim() : undefined,
+          tutorType: isTutor ? tutorType : undefined,
+          subjects: isTutor ? subjects : undefined,
           additionalNotes: additionalNotes.trim()
         })
       });
@@ -177,24 +203,6 @@ function GatedRegistrationContent() {
       setSubmitting(false);
     }
   };
-
-  const isConsultationCompleted = Boolean(
-    gatedStatus &&
-    gatedStatus.isConsultationCompleted &&
-    (gatedStatus.statusIdx !== undefined ? gatedStatus.statusIdx >= 1 : true) &&
-    !gatedStatus.currentStatus?.toLowerCase().includes('booked')
-  );
-  const isShadow = gatedStatus?.subType === 'shadow';
-  const isTherapy = gatedStatus?.subType === 'therapy' || 
-    (gatedStatus?.serviceType || '').toLowerCase().includes('therapy') ||
-    (gatedStatus?.serviceType || '').toLowerCase().includes('parent training');
-
-  const isOnlineTherapy = therapyType.includes('Online') || 
-    therapyType.includes('PAN India') || 
-    therapyType.includes('Parent Training') ||
-    (gatedStatus?.record?.therapyType || gatedStatus?.record?.therapy_type || '').includes('Online') ||
-    (gatedStatus?.record?.therapyType || gatedStatus?.record?.therapy_type || '').includes('PAN India') ||
-    (gatedStatus?.record?.therapyType || gatedStatus?.record?.therapy_type || '').includes('Parent Training');
 
   return (
     <section className="pt-32 pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto w-full flex-grow">

@@ -10,6 +10,7 @@ import confetti from 'canvas-confetti';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { CITY_LOCALITIES } from '@/lib/constants';
+import { PRICING, getConsultationFee, formatCurrency } from '@/lib/pricing';
 
 const loadRazorpayScript = () => {
   return new Promise((resolve) => {
@@ -210,7 +211,7 @@ function BookConsultationForm() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          amount: 99,
+          amount: getConsultationFee(formData.requirement),
           parentName: formData.name,
           phone: formData.phone,
           email: formData.email,
@@ -278,7 +279,7 @@ function BookConsultationForm() {
         modal: {
           ondismiss: function () {
             setLoading(false);
-            setPaymentError('⚠️ Payment Cancelled: The payment window was closed before completion. No money was deducted. You can retry clicking "Pay ₹99 & Complete Booking".');
+            setPaymentError(`⚠️ Payment Cancelled: The payment window was closed before completion. No money was deducted. You can retry clicking "Pay ${formatCurrency(getConsultationFee(formData.requirement))} & Complete Booking".`);
           }
         },
         prefill: {
@@ -348,7 +349,7 @@ function BookConsultationForm() {
                       <Calendar className="text-accent animate-pulse" size={22} />
                       1. Child &amp; Parent Details
                     </span>
-                    <span className="text-sm font-bold text-accent px-3 py-1 bg-accent/10 rounded-full">₹99 Only</span>
+                    <span className="text-sm font-bold text-accent px-3 py-1 bg-accent/10 rounded-full">{formatCurrency(PRICING.CONSULTATION.PARENT_DEFAULT)} Only</span>
                   </div>
 
                   <form onSubmit={handleDetailsSubmit} className="space-y-5">
@@ -605,13 +606,13 @@ function BookConsultationForm() {
                       {isTherapyCouponValid && (
                         <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2 mt-1">
                           <Sparkles size={16} className="text-emerald-600 shrink-0" />
-                          <span>✨ Coupon Applied! ₹99 Therapy Fee Waived (100% OFF).</span>
+                          <span>✨ Coupon Applied! {formatCurrency(PRICING.CONSULTATION.PARENT_DEFAULT)} Therapy Fee Waived (100% OFF).</span>
                         </div>
                       )}
                       {isShadowVipValid && (
                         <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-bold flex items-center gap-2 mt-1">
                           <Sparkles size={16} className="text-emerald-600 shrink-0" />
-                          <span>✨ VIP Access Code Applied! ₹99 Consultation Fee Waived (100% OFF).</span>
+                          <span>✨ VIP Access Code Applied! {formatCurrency(PRICING.CONSULTATION.PARENT_DEFAULT)} Consultation Fee Waived (100% OFF).</span>
                         </div>
                       )}
                       {isTherapyUsingShadowCode && (
@@ -715,7 +716,7 @@ function BookConsultationForm() {
                         <p><strong>City Branch:</strong> {formData.city}</p>
                         {finalLocation && <p><strong>Preferred Area:</strong> {finalLocation}</p>}
                       </div>
-                      <span className="font-black text-secondary text-lg shrink-0">₹99</span>
+                      <span className="font-black text-secondary text-lg shrink-0">{formatCurrency(PRICING.CONSULTATION.PARENT_DEFAULT)}</span>
                     </div>
                   </div>
 
@@ -745,7 +746,7 @@ function BookConsultationForm() {
                       disabled={loading}
                       className="btn-gradient w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                     >
-                      {loading ? 'Processing transaction...' : 'Pay ₹99 & Complete Booking'}
+                      {loading ? 'Processing transaction...' : `Pay ${formatCurrency(PRICING.CONSULTATION.PARENT_DEFAULT)} & Complete Booking`}
                     </button>
                   </form>
                 </motion.div>
@@ -768,7 +769,7 @@ function BookConsultationForm() {
                     <p className="text-sm text-brand-muted">
                       {isWaivedCode 
                         ? 'Your consultation booking has been registered successfully.' 
-                        : 'Your payment of ₹99 was processed successfully.'}
+                        : `Your payment of ${formatCurrency(PRICING.CONSULTATION.PARENT_DEFAULT)} was processed successfully.`}
                       {' '}Unique ID: <span className="font-mono font-bold text-accent">{receiptCode}</span>
                     </p>
                   </div>

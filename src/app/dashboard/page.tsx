@@ -11,6 +11,7 @@ import {
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { getPlacementFee, normalizeServiceType } from '@/lib/pricing';
 
 // Dynamic script loader for Razorpay Checkout
 const loadRazorpayScript = () => {
@@ -135,7 +136,7 @@ function DashboardContent() {
     setPaymentLoading(true);
 
     try {
-      const amount = subType === 'shadow' ? 5000 : 3000;
+      const amount = getPlacementFee(subType);
       
       // 1. Create order on backend
       const orderRes = await fetch('/api/payments/create-order', {
@@ -730,7 +731,7 @@ function DashboardContent() {
                       <div className="bg-emerald-50/40 p-4 border border-emerald-100 rounded-2xl space-y-2 text-xs font-medium text-brand-dark">
                         <div className="flex justify-between">
                           <span className="text-brand-muted">Amount Paid:</span>
-                          <span className="font-bold">₹{(dbRecord.placementAmount || (subType === 'shadow' ? 5000 : 3000)).toLocaleString('en-IN')}.00</span>
+                          <span className="font-bold">₹{(dbRecord.placementAmount || getPlacementFee(subType)).toLocaleString('en-IN')}.00</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-brand-muted">Payment ID:</span>

@@ -205,7 +205,7 @@ export async function POST(request: Request) {
       // ─── B. PLACEMENT FEE (₹5,000 / ₹3,000) ───────────────────────
       if (isPlacement) {
         if (isSupabaseConfigured) {
-          const placementTables = ['parent_shadow_requests', 'parent_tutor_requests', 'school_requests'];
+          const placementTables = ['parent_shadow_requests', 'parent_tutor_requests', 'parent_therapy_requests', 'school_requests'];
           let updated = false;
 
           for (const tbl of placementTables) {

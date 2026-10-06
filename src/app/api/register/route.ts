@@ -3,6 +3,7 @@ import { supabaseAdmin as supabase } from '@/lib/supabase';
 import crypto from 'crypto';
 import { sendEmail } from '@/lib/notifications';
 import { readDb, writeDb } from '@/lib/db';
+import { PRICING, getConsultationFee, getPlacementFee, normalizeServiceType, formatCurrency } from '@/lib/pricing';
 
 // Helpers to translate between frontend camelCase and Postgres snake_case
 function toSnakeCase(obj: any): any {
@@ -80,12 +81,14 @@ export async function GET(request: Request) {
         .maybeSingle();
 
       if (parentTherapy) {
+        const thNorm = normalizeServiceType(parentTherapy.therapy_type, 'therapy');
+        const feeAmount = getPlacementFee(thNorm);
         return NextResponse.json({ 
           success: true, 
           role: 'parent', 
-          subType: 'therapy', 
-          feeAmount: 3000,
-          record: toCamelCase({ ...parentTherapy, feeAmount: 3000 })
+          subType: thNorm, 
+          feeAmount,
+          record: toCamelCase({ ...parentTherapy, feeAmount })
         });
       }
     } catch (err) {
@@ -110,12 +113,13 @@ export async function GET(request: Request) {
         matchedCandidate = shadow ? toCamelCase(shadow) : null;
       }
 
+      const feeAmount = getPlacementFee('shadow');
       return NextResponse.json({ 
         success: true, 
         role: 'parent', 
         subType: 'shadow', 
-        feeAmount: 5000,
-        record: toCamelCase({ ...parentShadow, feeAmount: 5000 }),
+        feeAmount,
+        record: toCamelCase({ ...parentShadow, feeAmount }),
         matchedCandidate
       });
     }
@@ -138,12 +142,13 @@ export async function GET(request: Request) {
         matchedCandidate = tutor ? toCamelCase(tutor) : null;
       }
 
+      const feeAmount = getPlacementFee('tutor');
       return NextResponse.json({ 
         success: true, 
         role: 'parent', 
         subType: 'tutor', 
-        feeAmount: 3000,
-        record: toCamelCase({ ...parentTutor, feeAmount: 3000 }),
+        feeAmount,
+        record: toCamelCase({ ...parentTutor, feeAmount }),
         matchedCandidate
       });
     }
@@ -286,7 +291,7 @@ export async function POST(request: Request) {
         requirement: isTherapy ? `Therapy: ${therapyTypeSelected}` : (isShadow ? 'Shadow Teacher' : 'Home Tutor'),
         message: bookingMessage,
         payment_status: paymentStatus,
-        amount: isVipCode ? 0 : 99,
+        amount: isVipCode ? 0 : getConsultationFee(isTherapy ? 'therapy' : (isShadow ? 'shadow' : 'tutor')),
         razorpay_payment_id: promoPaymentId,
         razorpay_order_id: promoOrderId,
         razorpay_signature: promoSignature
@@ -323,15 +328,16 @@ export async function POST(request: Request) {
         parentRecord.therapy_type = therapyTypeSelected;
         parentRecord.challenges = 'Pending Registration Form';
         parentRecord.goals = 'Pending Registration Form';
-        parentRecord.placement_amount = 3000;
+        const thNorm = normalizeServiceType(therapyTypeSelected, 'therapy');
+        parentRecord.placement_amount = getPlacementFee(thNorm);
       } else if (isShadow) {
         parentRecord.child_grade = 'Pending Registration Form';
         parentRecord.relationship = 'Mother';
-        parentRecord.placement_amount = 5000;
+        parentRecord.placement_amount = getPlacementFee('shadow');
       } else {
         parentRecord.child_grade = 'Pending Registration Form';
         parentRecord.tutor_type = 'Academic Tuition/Subjects';
-        parentRecord.placement_amount = 3000;
+        parentRecord.placement_amount = getPlacementFee('tutor');
       }
 
       const { error: pErr } = await supabase.from(parentTable).insert([parentRecord]);
@@ -368,11 +374,13 @@ export async function POST(request: Request) {
       const protocol = host.includes('localhost') ? 'http' : 'https';
 
       // Send Parent Receipt & Admin Alert Emails concurrently and await completion
+      const feeAmount = getConsultationFee(serviceNeeded);
+      const feeFormatted = formatCurrency(feeAmount);
       const feeStatusText = isTherapyCoupon 
-        ? 'Your consultation fee of ₹99 has been waived 100% via coupon code <strong>THERAPY99</strong>.' 
+        ? `Your consultation fee of ${feeFormatted} has been waived 100% via coupon code <strong>THERAPY99</strong>.` 
         : (isShadowVip 
-          ? 'Your consultation fee of ₹99 has been waived 100% via VIP code <strong>SHADOW100</strong>.' 
-          : 'We have received your consultation fee payment of <strong>₹99</strong>.');
+          ? `Your consultation fee of ${feeFormatted} has been waived 100% via VIP code <strong>SHADOW100</strong>.` 
+          : `We have received your consultation fee payment of <strong>${feeFormatted}</strong>.`);
 
       await Promise.allSettled([
         sendEmail({
@@ -410,7 +418,7 @@ export async function POST(request: Request) {
           type: 'contact_alert',
           bodyHtml: `
             <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Parent Consultation Booked</h2>
-            <p style="margin: 0 0 16px 0; color: #4A3E5E;">${isTherapyCoupon ? 'A new parent has registered for therapy with fee waived via coupon <strong>THERAPY99</strong>.' : (isShadowVip ? 'A new parent has registered with fee waived via VIP code <strong>SHADOW100</strong>.' : 'A new parent has booked and paid the ₹99 consultation fee.')}</p>
+            <p style="margin: 0 0 16px 0; color: #4A3E5E;">${isTherapyCoupon ? 'A new parent has registered for therapy with fee waived via coupon <strong>THERAPY99</strong>.' : (isShadowVip ? 'A new parent has registered with fee waived via VIP code <strong>SHADOW100</strong>.' : 'A new parent has booked and paid the ' + feeFormatted + ' consultation fee.')}</p>
             
             <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
               <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
@@ -498,15 +506,10 @@ export async function POST(request: Request) {
         }
       }
 
-      // Detect if ps was actually a therapy booking (e.g. notes contains Therapy, city is Online, or therapy fields submitted)
-      const isActuallyTherapy = Boolean(
-        pth || 
-        (data.therapyType && !pt) || 
-        (ps && ((ps.notes || '').toLowerCase().includes('therapy') || (ps.city || '').toLowerCase().includes('online') || ps.therapy_type))
-      );
-
-      let parentRecord = pth || (isActuallyTherapy ? ps : (ps || pt));
-      let targetTable = isActuallyTherapy ? 'parent_therapy_requests' : (ps ? 'parent_shadow_requests' : (pt ? 'parent_tutor_requests' : 'parent_therapy_requests'));
+      // Determine existing record & table accurately
+      let parentRecord = ps || pt || pth;
+      let isTherapy = Boolean(pth);
+      let targetTable = ps ? 'parent_shadow_requests' : (pt ? 'parent_tutor_requests' : (pth ? 'parent_therapy_requests' : ''));
 
       // If missing, check bookings table and auto-create appropriate request row
       if (!parentRecord) {
@@ -517,10 +520,12 @@ export async function POST(request: Request) {
           .maybeSingle();
 
         if (bk) {
-          const reqStr = (bk.requirement || '').toLowerCase();
-          const isTherapy = reqStr.includes('therapy') || reqStr.includes('parent training') || Boolean(data.therapyType);
-          const isTutor = !isTherapy && reqStr.includes('tutor');
-          targetTable = isTherapy ? 'parent_therapy_requests' : (isTutor ? 'parent_tutor_requests' : 'parent_shadow_requests');
+          const norm = normalizeServiceType(data.subType || data.serviceType || bk.requirement);
+          const isShadow = norm === 'shadow';
+          const isTutor = norm === 'tutor';
+          const isTherapyBooking = norm === 'therapy' || norm === 'online_parent_training';
+          targetTable = isTherapyBooking ? 'parent_therapy_requests' : (isTutor ? 'parent_tutor_requests' : 'parent_shadow_requests');
+          isTherapy = isTherapyBooking;
           const generatedRegId = bk.booking_id || cleanRegId || `SB-${year}-${randomNumericId()}`;
 
           const newRecord: any = {
@@ -539,11 +544,11 @@ export async function POST(request: Request) {
 
           if (isTherapy) {
             newRecord.child_age = childAge || childGrade || 'Pending Consultation';
-            newRecord.therapy_type = data.therapyType || 'ABA Therapy';
+            newRecord.therapy_type = data.therapyType || (norm === 'online_parent_training' ? 'Online Parent Training (PAN India)' : 'ABA Therapy');
             newRecord.diagnosis = diagnosis || '';
             newRecord.challenges = difficulties || data.challenges || '';
             newRecord.goals = data.goals || '';
-            newRecord.placement_amount = 3000;
+            newRecord.placement_amount = getPlacementFee(norm);
           } else if (isTutor) {
             newRecord.child_dob = childAge || '';
             newRecord.child_gender = childGender || 'Boy';
@@ -551,7 +556,7 @@ export async function POST(request: Request) {
             newRecord.home_location = homeLocation || bk.city || 'Delhi NCR';
             newRecord.tutor_type = tutorType || 'Academic Tuition/Subjects';
             newRecord.subjects = Array.isArray(subjects) ? subjects.join(', ') : (subjects || '');
-            newRecord.placement_amount = 3000;
+            newRecord.placement_amount = getPlacementFee('tutor');
           } else {
             newRecord.child_dob = childAge || '';
             newRecord.child_gender = childGender || 'Boy';
@@ -562,7 +567,7 @@ export async function POST(request: Request) {
             newRecord.has_diagnosis = hasDiagnosis || 'No';
             newRecord.diagnosis = diagnosis || '';
             newRecord.difficulties = Array.isArray(difficulties) ? difficulties.join(', ') : (difficulties || '');
-            newRecord.placement_amount = 5000;
+            newRecord.placement_amount = getPlacementFee('shadow');
           }
 
           try {
@@ -570,28 +575,6 @@ export async function POST(request: Request) {
             if (!cErr && created) parentRecord = created;
           } catch (e) {
             console.warn(`Supabase insert failed for ${targetTable}:`, e);
-          }
-
-          // Fallback to local DB
-          if (isTherapy) {
-            const localDb = readDb();
-            if (!localDb.parent_therapy_requests) localDb.parent_therapy_requests = [];
-            localDb.parent_therapy_requests.push({
-              id: newRecord.id,
-              parentName: newRecord.parent_name,
-              phone: newRecord.phone,
-              email: newRecord.email,
-              city: 'Online / PAN India',
-              childName: newRecord.child_name,
-              therapyType: newRecord.therapy_type,
-              challenges: newRecord.challenges,
-              goals: newRecord.goals,
-              status: 'Registration Form Submitted',
-              consultation_paid: true,
-              registration_id: generatedRegId,
-              created_at: createdAt
-            });
-            writeDb(localDb);
           }
 
           return NextResponse.json({
@@ -612,9 +595,9 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Please complete your consultation call first before submitting this form.' }, { status: 403 });
       }
 
-      if (isActuallyTherapy) {
+      if (isTherapy) {
+        const thNorm = normalizeServiceType(data.therapyType || parentRecord.therapy_type, 'therapy');
         const therapyRecord: any = {
-          id: pth?.id || ('parent-therapy-' + randomId()),
           parent_name: parentRecord.parent_name || parentRecord.parentName || 'Parent',
           phone: parentRecord.phone,
           email: parentRecord.email,
@@ -625,50 +608,29 @@ export async function POST(request: Request) {
           diagnosis: diagnosis || '',
           challenges: Array.isArray(difficulties) ? difficulties.join(', ') : (difficulties || data.challenges || ''),
           goals: data.goals || '',
-          therapy_type: data.therapyType || parentRecord.therapy_type || ((parentRecord.requirement || '').toLowerCase().includes('parent training') ? 'Online Parent Training (PAN India)' : 'ABA Online Therapy (PAN India)'),
+          therapy_type: data.therapyType || parentRecord.therapy_type || 'ABA Therapy',
           preferred_days: data.preferredDays || 'Mon, Wed, Fri',
           preferred_time: data.preferredTime || 'Morning (9 AM - 12 PM)',
           status: 'Registration Submitted',
           consultation_paid: true,
-          placement_paid: false,
-          placement_amount: 3000,
+          placement_paid: Boolean(parentRecord.placement_paid),
+          placement_amount: getPlacementFee(thNorm),
           registration_id: cleanRegId,
           notes: additionalNotes || parentRecord.notes || '',
-          created_at: parentRecord.created_at || createdAt
         };
 
-        if (pth) {
+        if (pth && pth.id) {
           await supabase.from('parent_therapy_requests').update(therapyRecord).eq('id', pth.id);
         } else {
-          await supabase.from('parent_therapy_requests').insert([therapyRecord]);
-          // Clean up misplaced parent_shadow_requests record
-          if (ps && ps.id) {
-            try {
-              await supabase.from('parent_shadow_requests').delete().eq('id', ps.id);
-            } catch (e) {}
-          }
+          await supabase.from('parent_therapy_requests').insert([{ id: 'parent-therapy-' + randomId(), created_at: createdAt, ...therapyRecord }]);
         }
-
-        // Update local db.json
-        const localDb = readDb();
-        if (!localDb.parent_therapy_requests) localDb.parent_therapy_requests = [];
-        const idx = localDb.parent_therapy_requests.findIndex((s: any) => s.registration_id === cleanRegId || s.id === therapyRecord.id);
-        if (idx !== -1) {
-          localDb.parent_therapy_requests[idx] = {
-            ...localDb.parent_therapy_requests[idx],
-            ...toCamelCase(therapyRecord)
-          };
-        } else {
-          localDb.parent_therapy_requests.push(toCamelCase(therapyRecord));
-        }
-        writeDb(localDb);
 
         return NextResponse.json({
           success: true,
           registration_id: cleanRegId,
           status: 'Registration Submitted',
           nextStep: 'therapy_fee',
-          record: toCamelCase(therapyRecord)
+          record: toCamelCase({ ...parentRecord, ...therapyRecord })
         });
       }
 
@@ -679,7 +641,8 @@ export async function POST(request: Request) {
         child_gender: childGender || 'Boy',
         child_grade: childGrade || 'Preschool',
         home_location: homeLocation || parentRecord.city || 'Delhi NCR',
-        status: 'Registration Submitted'
+        status: 'Registration Submitted',
+        placement_amount: ps ? getPlacementFee('shadow') : getPlacementFee('tutor')
       };
 
       if (ps) {
@@ -967,11 +930,11 @@ export async function POST(request: Request) {
             type: 'payment_receipt',
             bodyHtml: `
               <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Payment Confirmation</h2>
-              <p style="margin: 0 0 16px 0;">Thank you for your payment of <strong>₹99</strong> toward the diagnostic consultation assessment fee.</p>
+              <p style="margin: 0 0 16px 0;">Thank you for your payment of <strong>${formatCurrency(getConsultationFee('shadow'))}</strong> toward the diagnostic consultation assessment fee.</p>
               
               <div style="background-color: #F8F5FB; border-left: 4px solid #C89B3C; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
                 <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #6A5B7C;">
-                  <strong>Amount Paid:</strong> ₹99.00<br />
+                  <strong>Amount Paid:</strong> ${formatCurrency(getConsultationFee('shadow'))}.00<br />
                   <strong>Payment ID:</strong> ${razorpayPaymentId}<br />
                   <strong>Registration ID:</strong> ${generatedId}<br />
                   <strong>Date:</strong> ${new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}<br />
@@ -987,7 +950,7 @@ export async function POST(request: Request) {
             type: 'contact_alert',
             bodyHtml: `
               <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Parent Inquiry (Shadow Teacher Support)</h2>
-              <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new parent has registered and paid the ₹99 consultation fee for Shadow Teacher support.</p>
+              <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new parent has registered and paid the ${formatCurrency(getConsultationFee('shadow'))} consultation fee for Shadow Teacher support.</p>
               
               <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
                 <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
@@ -998,7 +961,7 @@ export async function POST(request: Request) {
                 <p style="margin: 0 0 8px 0;"><strong>Child Name / Grade:</strong> ${childName} (${childGrade})</p>
                 <p style="margin: 0 0 8px 0;"><strong>Diagnosis:</strong> ${hasDiagnosis === 'Yes' ? diagnosis || 'Yes' : 'No'}</p>
                 <p style="margin: 0 0 8px 0;"><strong>Difficulties:</strong> ${Array.isArray(difficulties) ? difficulties.join(', ') : (difficulties || 'None')}</p>
-                <p style="margin: 0;"><strong>Consultation Status:</strong> Paid ₹99 (Payment ID: ${razorpayPaymentId})</p>
+                <p style="margin: 0;"><strong>Consultation Status:</strong> Paid ${formatCurrency(getConsultationFee('shadow'))} (Payment ID: ${razorpayPaymentId})</p>
               </div>
 
               <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to review this inquiry and schedule the consultation.</p>
@@ -1082,11 +1045,11 @@ export async function POST(request: Request) {
             type: 'payment_receipt',
             bodyHtml: `
               <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">Payment Confirmation</h2>
-              <p style="margin: 0 0 16px 0;">Thank you for your payment of <strong>₹99</strong> toward the diagnostic consultation assessment fee.</p>
+              <p style="margin: 0 0 16px 0;">Thank you for your payment of <strong>${formatCurrency(getConsultationFee('tutor'))}</strong> toward the diagnostic consultation assessment fee.</p>
               
               <div style="background-color: #F8F5FB; border-left: 4px solid #C89B3C; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
                 <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #6A5B7C;">
-                  <strong>Amount Paid:</strong> ₹99.00<br />
+                  <strong>Amount Paid:</strong> ${formatCurrency(getConsultationFee('tutor'))}.00<br />
                   <strong>Payment ID:</strong> ${razorpayPaymentId}<br />
                   <strong>Registration ID:</strong> ${generatedId}<br />
                   <strong>Date:</strong> ${new Date().toLocaleDateString('en-IN', { timeZone: 'Asia/Kolkata' })}<br />
@@ -1102,7 +1065,7 @@ export async function POST(request: Request) {
             type: 'contact_alert',
             bodyHtml: `
               <h2 style="color: #3B2A6B; font-family: Georgia, serif; font-size: 20px; margin: 0 0 16px 0;">New Parent Inquiry (Home Tutor Support)</h2>
-              <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new parent has registered and paid the ₹99 consultation fee for Home Tutor support.</p>
+              <p style="margin: 0 0 16px 0; color: #4A3E5E;">A new parent has registered and paid the ${formatCurrency(getConsultationFee('tutor'))} consultation fee for Home Tutor support.</p>
               
               <div style="background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 16px; margin: 20px 0; border-radius: 4px 12px 12px 4px;">
                 <p style="margin: 0 0 8px 0;"><strong>Registration ID:</strong> ${generatedId}</p>
@@ -1113,7 +1076,7 @@ export async function POST(request: Request) {
                 <p style="margin: 0 0 8px 0;"><strong>Child Name / Grade:</strong> ${childName} (${childGrade})</p>
                 <p style="margin: 0 0 8px 0;"><strong>Tutor Type Needed:</strong> ${tutorType || 'Academic Tuition'}</p>
                 <p style="margin: 0 0 8px 0;"><strong>Subjects Required:</strong> ${Array.isArray(subjects) ? subjects.join(', ') : (subjects || 'All Subjects')}</p>
-                <p style="margin: 0;"><strong>Consultation Status:</strong> Paid ₹99 (Payment ID: ${razorpayPaymentId})</p>
+                <p style="margin: 0;"><strong>Consultation Status:</strong> Paid ${formatCurrency(getConsultationFee('tutor'))} (Payment ID: ${razorpayPaymentId})</p>
               </div>
 
               <p style="margin: 16px 0 0 0; font-size: 13px; color: #6A5B7C;">Log in to the Admin Panel to review this inquiry and begin tutor matchmaking.</p>

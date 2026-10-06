@@ -10,6 +10,7 @@ import {
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { PRICING, getConsultationFee, getPlacementFee, normalizeServiceType, formatCurrency } from '@/lib/pricing';
 
 const STATUS_EXPLANATIONS: Record<string, string> = {
   'Interview Awaiting': 'Your educator application has been received. Our clinical team is currently reviewing your resume.',
@@ -18,7 +19,7 @@ const STATUS_EXPLANATIONS: Record<string, string> = {
   'Onboarding': 'We are performing address, ID, and reference background verification prior to your school placement.',
   'Active': 'You are currently active and matched with a student family.',
   
-  'Consultation Booked': 'Your ₹99 consultation fee is received. Founder Pratibha Mishra will call you to assess your child\'s requirements.',
+  'Consultation Booked': `Your ${formatCurrency(PRICING.CONSULTATION.PARENT_DEFAULT)} consultation fee is received. Founder Pratibha Mishra will call you to assess your child's requirements.`,
   'Consultation Completed': 'Your 1-on-1 consultation is complete! Your Child Registration Form is now unlocked below.',
   'Registration Submitted': 'Your detailed child profile has been submitted. Please complete the placement fee to initiate educator matching.',
   'Placement Fee Paid': 'Your requirement is locked! Our placement team is actively shortlisting verified educators for your location.',
@@ -39,7 +40,7 @@ const TEACHER_TIMELINE = [
 ];
 
 const PARENT_TIMELINE = [
-  { name: 'Consultation Booked', desc: '₹99 Paid • Assessment Call Scheduled' },
+  { name: 'Consultation Booked', desc: `${formatCurrency(PRICING.CONSULTATION.PARENT_DEFAULT)} Paid • Assessment Call Scheduled` },
   { name: 'Consultation Completed', desc: 'Consultation Call Done • Form Unlocked' },
   { name: 'Registration Submitted', desc: 'Child Details Provided • Ready for Placement Fee' },
   { name: 'Placement Fee Paid', desc: 'Placement Onboarded • Educator Matching Active' },
@@ -47,12 +48,14 @@ const PARENT_TIMELINE = [
 ];
 
 const getSchoolTimeline = (teachersCount: number = 1) => {
-  const dynamicFee = (Math.max(1, teachersCount) * 5000).toLocaleString('en-IN');
+  const count = Math.max(1, teachersCount);
+  const dynamicFee = formatCurrency(getPlacementFee('school', { teachersCount: count }));
+  const consultFee = formatCurrency(getConsultationFee('school'));
   return [
-    { name: 'Consultation Booked', desc: 'Requirement Form Submitted • ₹199 Booking Fee Received' },
+    { name: 'Consultation Booked', desc: `Requirement Form Submitted • ${consultFee} Booking Fee Received` },
     { name: 'Requirement Analysis', desc: 'Consultation Call with Educational Specialist' },
-    { name: 'Placement Fee Pending', desc: `Placement Fee Unlocked (₹${dynamicFee})` },
-    { name: 'Placement Fee Paid', desc: `Placement Paid (₹${dynamicFee}) • Form Unlocked` },
+    { name: 'Placement Fee Pending', desc: `Placement Fee Unlocked (${dynamicFee})` },
+    { name: 'Placement Fee Paid', desc: `Placement Paid (${dynamicFee}) • Form Unlocked` },
     { name: 'Profiles Shared', desc: 'Candidate Profiles Shortlisted for School' },
     { name: 'Interview Scheduled', desc: 'Interviews Conducted at School Convenience' },
     { name: 'Support Started', desc: 'Shadow Teacher Joined & Support Commenced' }
@@ -71,10 +74,14 @@ const getStatusExplanation = (status: string, role?: string, record?: any) => {
       sLower.includes('placement fee paid')
     );
     const count = Math.max(1, Number(record?.teachersCount || record?.teachers_count || 1));
-    const feeStr = (isPlacePaid ? (record?.placement_amount || record?.placementAmount || (count * 5000)) : (count * 5000)).toLocaleString('en-IN');
+    const feeNum = isPlacePaid 
+      ? (record?.placement_amount || record?.placementAmount || getPlacementFee('school', { teachersCount: count }))
+      : getPlacementFee('school', { teachersCount: count });
+    const feeStr = feeNum.toLocaleString('en-IN');
+    const consultFeeStr = formatCurrency(getConsultationFee('school'));
 
     if (sLower.includes('booked')) {
-      return "Your ₹199 consultation fee is received. Founder Pratibha Mishra will conduct a dedicated consultation call to assess your school's shadow teacher and inclusion requirements.";
+      return `Your ${consultFeeStr} consultation fee is received. Founder Pratibha Mishra will conduct a dedicated consultation call to assess your school's shadow teacher and inclusion requirements.`;
     }
     if (sLower.includes('analysis') || sLower.includes('proposal')) {
       return `Consultation call in progress. Our educational specialist is assessing placement parameters for ${count} shadow teacher${count > 1 ? 's' : ''}.`;
@@ -547,14 +554,14 @@ export default function CheckStatusPage() {
                       !currentStatus.toLowerCase().includes('booked')
                     );
 
-                    const isTherapy = recordData?.subType === 'therapy' || 
-                      (record.therapyType || record.therapy_type || record.requirement || record.serviceType || '').toLowerCase().includes('therapy') ||
-                      (record.therapyType || record.therapy_type || record.requirement || record.serviceType || '').toLowerCase().includes('parent training');
-                    const isShadow = !isTherapy && (
-                      recordData?.subType === 'shadow' || 
-                      (record.requirement || record.serviceType || '').toLowerCase().includes('shadow')
+                    const parentSubType = normalizeServiceType(
+                      recordData?.subType || record.subType || record.requirement || record.serviceType || record.therapyType || record.therapy_type,
+                      'shadow'
                     );
-                    const feeDisplay = isTherapy ? '₹3,000' : (isShadow ? '₹5,000' : '₹3,000');
+                    const isTherapy = parentSubType === 'therapy' || parentSubType === 'online_parent_training';
+                    const isShadow = parentSubType === 'shadow';
+                    const placementAmtNum = record.placement_amount || record.placementAmount || getPlacementFee(parentSubType);
+                    const feeDisplay = formatCurrency(placementAmtNum);
 
                     const regId = record.registrationId || record.registration_id || record.bookingId || record.booking_id || '';
 
@@ -680,8 +687,8 @@ export default function CheckStatusPage() {
                 );
 
                 const placementAmount = isPlacementPaid 
-                  ? (record.placement_amount || record.placementAmount || (teachersCount * 5000))
-                  : (teachersCount * 5000);
+                  ? (record.placement_amount || record.placementAmount || getPlacementFee('school', { teachersCount }))
+                  : getPlacementFee('school', { teachersCount });
 
                 const isConsultationCompleted = Boolean(
                   currentStatus.toLowerCase().includes('pending') ||
