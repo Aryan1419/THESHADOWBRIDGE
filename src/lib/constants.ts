@@ -1,4 +1,37 @@
+export const CITIES = [
+  'Delhi NCR',
+  'Mumbai',
+  'Ahmedabad',
+  'Hyderabad',
+  'Bangalore',
+  'Pune'
+] as const;
+
+export type ServedCity = typeof CITIES[number];
+
 export const CITY_LOCALITIES: Record<string, string[]> = {
+  'Mumbai': [
+    'Andheri',
+    'Bandra',
+    'Borivali',
+    'Chembur',
+    'Dadar',
+    'Ghatkopar',
+    'Goregaon',
+    'Juhu',
+    'Kandivali',
+    'Malad',
+    'Mulund',
+    'Powai',
+    'Santacruz',
+    'Vikhroli',
+    'Worli',
+    'Thane',
+    'Navi Mumbai',
+    'Vashi',
+    'Kharghar',
+    'Other (please specify)'
+  ],
   'Hyderabad': [
     'Bachupally',
     'Gachibowli',
@@ -99,6 +132,12 @@ export const CITY_LOCALITIES: Record<string, string[]> = {
 // for location-based shadow teacher matching alerts.
 
 export const NEARBY_LOCALITY_GROUPS: Record<string, string[][]> = {
+  'Mumbai': [
+    ['Andheri', 'Juhu', 'Santacruz', 'Bandra', 'Goregaon', 'Malad', 'Kandivali', 'Borivali'], // Western suburbs
+    ['Dadar', 'Ghatkopar', 'Chembur', 'Vikhroli', 'Mulund', 'Powai'],                         // Central / Eastern
+    ['Worli', 'Dadar'],                                                                      // South
+    ['Thane', 'Navi Mumbai', 'Vashi', 'Kharghar'],                                           // Thane & Navi Mumbai
+  ],
   'Hyderabad': [
     ['Gachibowli', 'Kondapur', 'Madhapur', 'Hitec City', 'Manikonda'],       // West Hyd tech corridor
     ['Miyapur', 'Kukatpally', 'Bachupally'],                                  // Northwest Hyd
@@ -136,6 +175,123 @@ export const NEARBY_LOCALITY_GROUPS: Record<string, string[][]> = {
     ['Kothrud', 'Shivajinagar'],
   ],
 };
+
+// ─── SERVICE AVAILABILITY PER CITY ──────────────────────────────────────
+export interface CityServiceAvailability {
+  shadowTeacher: boolean;
+  homeTutor: boolean;
+  schoolCollaboration: boolean;
+  inPersonTherapy: boolean;
+  onlineTherapy: boolean; // PAN India
+  onlineParentTraining: boolean; // PAN India
+}
+
+export const CITY_SERVICE_AVAILABILITY: Record<ServedCity, CityServiceAvailability> = {
+  'Delhi NCR': {
+    shadowTeacher: true,
+    homeTutor: true,
+    schoolCollaboration: true,
+    inPersonTherapy: true,
+    onlineTherapy: true,
+    onlineParentTraining: true,
+  },
+  'Mumbai': {
+    shadowTeacher: true,
+    homeTutor: true,
+    schoolCollaboration: true,
+    inPersonTherapy: false, // Delhi NCR only
+    onlineTherapy: true,
+    onlineParentTraining: true,
+  },
+  'Ahmedabad': {
+    shadowTeacher: true,
+    homeTutor: true,
+    schoolCollaboration: true,
+    inPersonTherapy: false,
+    onlineTherapy: true,
+    onlineParentTraining: true,
+  },
+  'Hyderabad': {
+    shadowTeacher: true,
+    homeTutor: true,
+    schoolCollaboration: true,
+    inPersonTherapy: false,
+    onlineTherapy: true,
+    onlineParentTraining: true,
+  },
+  'Bangalore': {
+    shadowTeacher: true,
+    homeTutor: true,
+    schoolCollaboration: true,
+    inPersonTherapy: false,
+    onlineTherapy: true,
+    onlineParentTraining: true,
+  },
+  'Pune': {
+    shadowTeacher: true,
+    homeTutor: true,
+    schoolCollaboration: true,
+    inPersonTherapy: false,
+    onlineTherapy: true,
+    onlineParentTraining: true,
+  },
+};
+
+export function isServiceAvailableInCity(
+  service: 'shadowTeacher' | 'homeTutor' | 'schoolCollaboration' | 'inPersonTherapy' | 'onlineTherapy' | 'onlineParentTraining',
+  city: string
+): boolean {
+  const config = CITY_SERVICE_AVAILABILITY[city as ServedCity];
+  if (!config) return false;
+  return !!config[service];
+}
+
+// ─── HOMEPAGE CITY CARDS CONFIG ─────────────────────────────────────────
+export interface CityCardData {
+  name: ServedCity;
+  skyline: string;
+  desc: string;
+  color: string;
+}
+
+export const HOMEPAGE_CITIES: CityCardData[] = [
+  {
+    name: "Delhi NCR",
+    skyline: "🕌🏛️🏙️",
+    desc: "Trusted Support for Your Child's Growth in Delhi NCR.",
+    color: "from-secondary/10 to-secondary/30"
+  },
+  {
+    name: "Mumbai",
+    skyline: "🌊🏙️🏛️",
+    desc: "Trusted Support for Your Child's Growth in Mumbai.",
+    color: "from-secondary/10 to-secondary/30"
+  },
+  {
+    name: "Ahmedabad",
+    skyline: "🏛️🕌🏢",
+    desc: "Trusted Support for Your Child's Growth in Ahmedabad.",
+    color: "from-accent/10 to-accent/30"
+  },
+  {
+    name: "Hyderabad",
+    skyline: "🏰🏢🏬",
+    desc: "Experienced & Verified Shadow Teachers in Hyderabad.",
+    color: "from-secondary/10 to-secondary/30"
+  },
+  {
+    name: "Bangalore",
+    skyline: "🌳🏢🏫",
+    desc: "Experienced & Verified Shadow Teachers and Tutors in Bangalore.",
+    color: "from-accent/10 to-accent/30"
+  },
+  {
+    name: "Pune",
+    skyline: "🏰🏢🌳",
+    desc: "Trusted Support for Your Child's Growth in Pune.",
+    color: "from-secondary/10 to-secondary/30"
+  }
+];
 
 /**
  * Find all localities in the same nearby group as the given locality.

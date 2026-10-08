@@ -13,8 +13,8 @@ export default function ShadowTeacherCostByCityPage() {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Article',
-    headline: 'How Much Does a Shadow Teacher Cost in Delhi NCR, Hyderabad, Bangalore, Ahmedabad, and Pune?',
-    description: 'A transparent guide detailing the two-stage placement-based fee structure for Shadow Teachers across Delhi NCR, Hyderabad, Bangalore, Ahmedabad, and Pune.',
+    headline: 'How Much Does a Shadow Teacher Cost in Delhi NCR, Mumbai, Bangalore, Hyderabad, Ahmedabad, and Pune?',
+    description: 'A transparent guide detailing the two-stage placement-based fee structure for Shadow Teachers across Delhi NCR, Mumbai, Bangalore, Hyderabad, Ahmedabad, and Pune.',
     author: {
       '@type': 'Organization',
       name: 'The Shadow Bridge',
@@ -56,10 +56,10 @@ export default function ShadowTeacherCostByCityPage() {
       },
       {
         '@type': 'Question',
-        name: 'Do fees differ between Delhi NCR, Bangalore, Pune, Ahmedabad, or Hyderabad?',
+        name: 'Do fees differ between Delhi NCR, Mumbai, Bangalore, Pune, Ahmedabad, or Hyderabad?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'No. The Shadow Bridge maintains the exact same transparent fee structure (₹99 consultation + ₹5,000 placement fee) across all 5 operational cities.'
+          text: 'No. The Shadow Bridge maintains the exact same transparent fee structure (₹99 consultation + ₹5,000 placement fee) across all 6 operational cities.'
         }
       }
     ]
@@ -67,6 +67,7 @@ export default function ShadowTeacherCostByCityPage() {
 
   const cities = [
     { name: 'Delhi NCR', areas: 'South Delhi, Gurugram, Noida, Greater Noida, Faridabad, Ghaziabad, West & North Delhi' },
+    { name: 'Mumbai', areas: 'Andheri, Bandra, Borivali, Chembur, Dadar, Ghatkopar, Goregaon, Juhu, Kandivali, Malad, Mulund, Powai, Santacruz, Vikhroli, Worli, Thane, Navi Mumbai, Vashi, Kharghar' },
     { name: 'Hyderabad', areas: 'Gachibowli, Hitec City, Madhapur, Jubilee Hills, Banjara Hills, Kondapur, Kukatpally' },
     { name: 'Bangalore', areas: 'Whitefield, Indiranagar, Koramangala, HSR Layout, Sarjapur Road, Jayanagar, Electronic City' },
     { name: 'Ahmedabad', areas: 'SG Highway, Bopal, Prahlad Nagar, Satellite, Bodakdev, Thaltej, Navrangpura' },
@@ -108,7 +109,7 @@ export default function ShadowTeacherCostByCityPage() {
           </div>
 
           <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-primary leading-tight">
-            How Much Does a Shadow Teacher Cost in Delhi NCR, Hyderabad, Bangalore, Ahmedabad, and Pune?
+            How Much Does a Shadow Teacher Cost in Delhi NCR, Mumbai, Bangalore, Hyderabad, Ahmedabad, and Pune?
           </h1>
 
           <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-gray-500 pt-1">
@@ -203,7 +204,7 @@ export default function ShadowTeacherCostByCityPage() {
         <section className="bg-white rounded-2xl p-6 sm:p-8 border border-brand-border space-y-5">
           <h2 className="font-serif text-2xl font-bold text-primary flex items-center gap-2">
             <MapPin className="text-secondary" size={24} />
-            Same Transparent Fee Across All Five Major Cities
+            Same Transparent Fee Across All Six Major Cities
           </h2>
           <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
             The Shadow Bridge maintains the exact same platform fee structure across all operational hubs. We do not inflate placement fees based on city tier:

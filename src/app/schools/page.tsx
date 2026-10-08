@@ -11,6 +11,7 @@ import {
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { CITIES } from '@/lib/constants';
 import { PRICING, getConsultationFee, getPlacementFee, formatCurrency } from '@/lib/pricing';
 
 declare global {
@@ -553,11 +554,9 @@ export default function SchoolsPage() {
                         className="w-full p-3 border border-brand-border rounded-xl text-xs bg-white focus:ring-2 focus:ring-primary/40 focus:outline-none text-brand-dark font-medium"
                       >
                         <option value="">Select City</option>
-                        <option value="Delhi NCR">Delhi NCR</option>
-                        <option value="Ahmedabad">Ahmedabad</option>
-                        <option value="Hyderabad">Hyderabad</option>
-                        <option value="Bangalore">Bangalore</option>
-                        <option value="Pune">Pune</option>
+                        {CITIES.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
                         <option value="Other">Other City</option>
                       </select>
                     </div>

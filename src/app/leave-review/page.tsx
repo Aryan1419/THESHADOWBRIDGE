@@ -205,7 +205,7 @@ export default function LeaveReviewPage() {
                     type="text"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
-                    placeholder="e.g. Noida, Delhi NCR"
+                    placeholder="e.g. Mumbai, Noida, Delhi NCR"
                     className="w-full p-3 border border-brand-border bg-white rounded-xl text-xs text-brand-dark focus:outline-none focus:ring-2 focus:ring-primary/40 font-medium"
                   />
                 </div>

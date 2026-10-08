@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Home Tutor Registration — Apply Now',
-  description: 'Register as a Home Tutor with The Shadow Bridge. Teach and support children across Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune.',
+  description: 'Register as a Home Tutor with The Shadow Bridge. Teach and support children across Delhi NCR, Mumbai, Ahmedabad, Hyderabad, Bangalore & Pune.',
   alternates: {
     canonical: 'https://www.theshadowbridge.com/register/tutor',
   },

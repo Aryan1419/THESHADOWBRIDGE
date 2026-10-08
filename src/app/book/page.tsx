@@ -9,7 +9,7 @@ import confetti from 'canvas-confetti';
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { CITY_LOCALITIES } from '@/lib/constants';
+import { CITIES, CITY_LOCALITIES } from '@/lib/constants';
 import { PRICING, getConsultationFee, formatCurrency } from '@/lib/pricing';
 
 const loadRazorpayScript = () => {
@@ -128,6 +128,11 @@ function BookConsultationForm() {
 
     if (isShadowUsingTherapyCode) {
       setPaymentError('This code is not valid for Shadow Teacher or Home Tutor requests.');
+      return;
+    }
+
+    if (formData.requirement.includes('Home Therapy') && formData.city && formData.city !== 'Delhi NCR') {
+      setPaymentError('In-Home Therapy Sessions are available exclusively in Delhi NCR. For other cities, please select Online Therapy Sessions (PAN India).');
       return;
     }
 
@@ -413,12 +418,15 @@ function BookConsultationForm() {
                           className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
                         >
                           <option value="">Select City</option>
-                          <option value="Delhi NCR">Delhi NCR</option>
-                          <option value="Ahmedabad">Ahmedabad</option>
-                          <option value="Hyderabad">Hyderabad</option>
-                          <option value="Bangalore">Bangalore</option>
-                          <option value="Pune">Pune</option>
+                          {CITIES.map((c) => (
+                            <option key={c} value={c}>{c}</option>
+                          ))}
                         </select>
+                        {formData.requirement.includes('Home Therapy') && formData.city && formData.city !== 'Delhi NCR' && (
+                          <p className="text-xs text-amber-800 bg-amber-50 p-2.5 rounded-xl border border-amber-200 font-medium mt-1">
+                            ⚠️ In-Home Therapy is exclusively available in <strong>Delhi NCR</strong>. For {formData.city}, please select <strong>🌐 Online Therapy Session (PAN India)</strong> or <strong>Online Parent Training</strong>.
+                          </p>
+                        )}
                       </div>
                       )}
                     </div>

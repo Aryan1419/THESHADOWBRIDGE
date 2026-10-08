@@ -2,8 +2,8 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'For Parents | Find Verified Shadow Teachers & Special Education Tutors',
-  description: 'Find verified, trained Shadow Teachers and Home Tutors for children with special needs across Delhi NCR, Hyderabad, Bangalore, Ahmedabad & Pune.',
-  keywords: ['hire shadow teacher', 'special needs tutor for child', 'autism support for parents', 'ADHD school mentor', 'inclusive education parent guide', 'Delhi NCR', 'Hyderabad', 'Bangalore', 'Ahmedabad', 'Pune'],
+  description: 'Find verified, trained Shadow Teachers and Home Tutors for children with special needs across Delhi NCR, Mumbai, Hyderabad, Bangalore & Pune.',
+  keywords: ['hire shadow teacher', 'special needs tutor for child', 'autism support for parents', 'ADHD school mentor', 'inclusive education parent guide', 'Delhi NCR', 'Mumbai', 'Hyderabad', 'Bangalore', 'Ahmedabad', 'Pune'],
   alternates: {
     canonical: 'https://www.theshadowbridge.com/parents',
   },

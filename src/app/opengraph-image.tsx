@@ -94,6 +94,8 @@ export default async function Image() {
         >
           <span>Delhi NCR</span>
           <span>•</span>
+          <span>Mumbai</span>
+          <span>•</span>
           <span>Ahmedabad</span>
           <span>•</span>
           <span>Hyderabad</span>

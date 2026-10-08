@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { CITIES } from '@/lib/constants';
 
 export default function Contact() {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -185,11 +186,9 @@ export default function Contact() {
                         className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
                       >
                         <option value="">Select City</option>
-                        <option value="Delhi NCR">Delhi NCR</option>
-                        <option value="Ahmedabad">Ahmedabad</option>
-                        <option value="Hyderabad">Hyderabad</option>
-                        <option value="Bangalore">Bangalore</option>
-                        <option value="Pune">Pune</option>
+                        {CITIES.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
                       </select>
                     </div>
                   </div>

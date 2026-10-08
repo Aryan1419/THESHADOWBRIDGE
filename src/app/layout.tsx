@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     default: "The Shadow Bridge | Trained Shadow Teachers & Home Tutors",
     template: "%s | The Shadow Bridge"
   },
-  description: "Connect with trained Shadow Teachers, Home Tutors & Therapists for special needs children across Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune.",
+  description: "Connect with trained Shadow Teachers, Home Tutors & Therapists for special needs children across Delhi NCR, Mumbai, Ahmedabad, Hyderabad, Bangalore & Pune.",
   keywords: [
     "shadow teacher",
     "home tutor",
@@ -28,6 +28,7 @@ export const metadata: Metadata = {
     "child support",
     "inclusive learning",
     "Delhi NCR",
+    "Mumbai",
     "Ahmedabad",
     "Hyderabad",
     "Bangalore",
@@ -53,7 +54,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "The Shadow Bridge | Shadow Teachers & Special Education Tutors",
-    description: "Empowering children with academic, behavioral, and inclusive support. Serving families across Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune.",
+    description: "Empowering children with academic, behavioral, and inclusive support. Serving families across Delhi NCR, Mumbai, Ahmedabad, Hyderabad, Bangalore & Pune.",
     url: "https://www.theshadowbridge.com",
     siteName: "The Shadow Bridge",
     locale: "en_IN",
@@ -70,7 +71,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "The Shadow Bridge | Shadow Teachers & Tutors",
-    description: "Connecting families with verified Shadow Teachers & Special Education Tutors in Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune.",
+    description: "Connecting families with verified Shadow Teachers & Special Education Tutors in Delhi NCR, Mumbai, Ahmedabad, Hyderabad, Bangalore & Pune.",
     images: ["https://www.theshadowbridge.com/og-image.png"]
   },
   robots: {
@@ -124,7 +125,7 @@ export default function RootLayout({
           "width": 512,
           "height": 512
         },
-        "description": "Connecting families with professionally trained Shadow Teachers and Special Education Home Tutors across Delhi NCR, Ahmedabad, Hyderabad, Bangalore & Pune.",
+        "description": "Connecting families with professionally trained Shadow Teachers and Special Education Home Tutors across Delhi NCR, Mumbai, Ahmedabad, Hyderabad, Bangalore & Pune.",
         "founder": {
           "@type": "Person",
           "name": "Pratibha Mishra",
@@ -134,6 +135,7 @@ export default function RootLayout({
         "priceRange": "₹99 - ₹5000",
         "areaServed": [
           { "@type": "City", "name": "Delhi NCR" },
+          { "@type": "City", "name": "Mumbai" },
           { "@type": "City", "name": "Ahmedabad" },
           { "@type": "City", "name": "Hyderabad" },
           { "@type": "City", "name": "Bangalore" },

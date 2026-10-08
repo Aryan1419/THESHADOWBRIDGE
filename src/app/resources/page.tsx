@@ -23,10 +23,10 @@ export const resourceArticles = [
   },
   {
     slug: 'shadow-teacher-cost-by-city',
-    title: 'How Much Does a Shadow Teacher Cost in Delhi NCR, Hyderabad, Bangalore, Ahmedabad, and Pune?',
+    title: 'How Much Does a Shadow Teacher Cost in Delhi NCR, Mumbai, Bangalore, Hyderabad & Pune?',
     category: 'Pricing & Placement',
     readTime: '4 min read',
-    summary: 'Clear, transparent breakdown of the consultation and placement-based fee structure across Delhi NCR, Hyderabad, Bangalore, Ahmedabad, and Pune.',
+    summary: 'Clear, transparent breakdown of the consultation and placement-based fee structure across Delhi NCR, Mumbai, Hyderabad, Bangalore, Ahmedabad, and Pune.',
     icon: Compass,
     badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
     popular: true,

@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { CITIES } from '@/lib/constants';
 
 interface Review {
   id: string;
@@ -109,7 +110,7 @@ export default function Testimonials() {
             <>
               {/* Filters */}
               <div className="flex justify-center gap-3 mb-12 flex-wrap">
-                {['All', 'Delhi NCR', 'Ahmedabad', 'Hyderabad', 'Bangalore', 'Pune'].map((city) => (
+                {['All', ...CITIES].map((city) => (
                   <button
                     key={city}
                     onClick={() => setSelectedCity(city)}

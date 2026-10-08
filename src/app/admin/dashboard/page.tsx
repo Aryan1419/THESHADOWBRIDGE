@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 
 import { DatabaseSchema, TutorRecord, ShadowTeacherRecord, ParentShadowRequestRecord, ParentTutorRequestRecord } from '@/lib/db';
-import { areNearbyLocalities } from '@/lib/constants';
+import { CITIES, areNearbyLocalities } from '@/lib/constants';
 import { PRICING, getPlacementFee, getConsultationFee, normalizeServiceType, formatCurrency } from '@/lib/pricing';
 
 export default function AdminDashboard() {
@@ -2224,11 +2224,9 @@ export default function AdminDashboard() {
                     className="p-2 border border-brand-border bg-white rounded-xl text-xs text-brand-dark focus:outline-none"
                   >
                     <option value="">All Cities</option>
-                    <option value="Delhi NCR">Delhi NCR</option>
-                    <option value="Ahmedabad">Ahmedabad</option>
-                    <option value="Hyderabad">Hyderabad</option>
-                    <option value="Bangalore">Bangalore</option>
-                    <option value="Pune">Pune</option>
+                    {CITIES.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -2399,11 +2397,9 @@ export default function AdminDashboard() {
                     className="p-2 border border-brand-border bg-white rounded-xl text-xs text-brand-dark focus:outline-none"
                   >
                     <option value="">All Cities</option>
-                    <option value="Delhi NCR">Delhi NCR</option>
-                    <option value="Ahmedabad">Ahmedabad</option>
-                    <option value="Hyderabad">Hyderabad</option>
-                    <option value="Bangalore">Bangalore</option>
-                    <option value="Pune">Pune</option>
+                    {CITIES.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -3495,11 +3491,9 @@ export default function AdminDashboard() {
                     className="p-2 border border-brand-border bg-white rounded-xl text-xs text-brand-dark focus:outline-none"
                   >
                     <option value="">All Cities</option>
-                    <option value="Delhi NCR">Delhi NCR</option>
-                    <option value="Ahmedabad">Ahmedabad</option>
-                    <option value="Hyderabad">Hyderabad</option>
-                    <option value="Bangalore">Bangalore</option>
-                    <option value="Pune">Pune</option>
+                    {CITIES.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
                   </select>
                 </div>
 
@@ -3767,11 +3761,9 @@ export default function AdminDashboard() {
                       className="px-3 py-2 border border-brand-border rounded-xl text-xs font-semibold text-brand-dark bg-white focus:outline-none"
                     >
                       <option value="">All Cities</option>
-                      <option value="Delhi NCR">Delhi NCR</option>
-                      <option value="Ahmedabad">Ahmedabad</option>
-                      <option value="Hyderabad">Hyderabad</option>
-                      <option value="Bangalore">Bangalore</option>
-                      <option value="Pune">Pune</option>
+                      {CITIES.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
                     </select>
 
                     <select
@@ -4561,9 +4553,9 @@ export default function AdminDashboard() {
                     </div>
 
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between p-2.5 bg-brand-light/40 rounded-xl border border-brand-border/40 gap-1.5">
-                      <span className="font-bold text-brand-dark">Active Cities (5)</span>
+                      <span className="font-bold text-brand-dark">Active Cities ({CITIES.length})</span>
                       <span className="text-xs font-bold text-primary">
-                        Delhi NCR, Ahmedabad, Hyderabad, Bangalore, Pune
+                        {CITIES.join(', ')}
                       </span>
                     </div>
                   </div>
@@ -4628,11 +4620,9 @@ export default function AdminDashboard() {
                       className="p-2 border border-brand-border bg-white rounded-xl text-xs text-brand-dark focus:outline-none"
                     >
                       <option value="">All Cities</option>
-                      <option value="Delhi NCR">Delhi NCR</option>
-                      <option value="Ahmedabad">Ahmedabad</option>
-                      <option value="Hyderabad">Hyderabad</option>
-                      <option value="Bangalore">Bangalore</option>
-                    <option value="Pune">Pune</option>
+                      {CITIES.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
                     </select>
                   </div>
 

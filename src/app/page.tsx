@@ -14,6 +14,7 @@ import Footer from '@/components/Footer';
 import TestimonialCarousel from '@/components/TestimonialCarousel';
 import FaqAccordion from '@/components/FaqAccordion';
 import Button from '@/components/ui/Button';
+import { CITIES, HOMEPAGE_CITIES } from '@/lib/constants';
 
 export default function Home() {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -80,39 +81,8 @@ export default function Home() {
     }
   ];
 
-  // Cities Section
-  const cities = [
-    {
-      name: "Delhi NCR",
-      skyline: "🕌🏛️🏙️",
-      desc: "Trusted Support for Your Child's Growth in Delhi NCR.",
-      color: "from-secondary/10 to-secondary/30"
-    },
-    {
-      name: "Ahmedabad",
-      skyline: "🏛️🕌🏢",
-      desc: "Trusted Support for Your Child's Growth in Ahmedabad.",
-      color: "from-accent/10 to-accent/30"
-    },
-    {
-      name: "Hyderabad",
-      skyline: "🏰🏢🏬",
-      desc: "Experienced & Verified Shadow Teachers in Hyderabad.",
-      color: "from-secondary/10 to-secondary/30"
-    },
-    {
-      name: "Bangalore",
-      skyline: "🌳🏢🏫",
-      desc: "Experienced & Verified Shadow Teachers and Tutors in Bangalore.",
-      color: "from-accent/10 to-accent/30"
-    },
-    {
-      name: "Pune",
-      skyline: "🏰🏢🌳",
-      desc: "Trusted Support for Your Child's Growth in Pune.",
-      color: "from-secondary/10 to-secondary/30"
-    }
-  ];
+  // Cities Section (Centralized in @/lib/constants)
+  const cities = HOMEPAGE_CITIES;
 
   // Timeline Step (How It Works)
   const steps = [
@@ -262,7 +232,7 @@ export default function Home() {
       <section className="py-6 sm:py-8 bg-brand-light border-y border-brand-border text-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-2">
           <p className="text-primary font-serif text-lg sm:text-xl font-bold flex flex-wrap items-center justify-center gap-2">
-            <span className="text-secondary font-black">✓</span> Trusted by Parents in Delhi NCR, Ahmedabad, Hyderabad, Bangalore &amp; Pune
+            <span className="text-secondary font-black">✓</span> Trusted by Parents in Delhi NCR, Mumbai, Ahmedabad, Hyderabad, Bangalore &amp; Pune
           </p>
           <p className="text-primary font-serif text-base sm:text-lg font-bold flex flex-wrap items-center justify-center gap-2">
             <span className="text-secondary font-black">✓</span> 1000+ Consultations &amp; Placements
@@ -322,7 +292,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {cities.map((city, idx) => (
               <motion.div
                 key={idx}
@@ -330,7 +300,7 @@ export default function Home() {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: idx * 0.15 }}
-                className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-white/10 backdrop-blur-sm border border-white/10 p-8 rounded-2xl text-center flex flex-col items-center justify-center min-h-[200px] hover:bg-white/15 transition-all group animate-fade-in"
+                className="w-full bg-white/10 backdrop-blur-sm border border-white/10 p-8 rounded-2xl text-center flex flex-col items-center justify-center min-h-[200px] hover:bg-white/15 transition-all group animate-fade-in"
               >
                 <div className="text-5xl mb-4 group-hover:scale-110 transition-transform select-none">
                   {city.skyline}
@@ -665,7 +635,7 @@ export default function Home() {
                     <span className="text-secondary font-bold">✓</span> Quick 24-48hr Matching Turnaround
                   </p>
                   <p className="flex items-center gap-2">
-                    <span className="text-secondary font-bold">✓</span> Active in Delhi NCR, Ahmedabad, Hyderabad, Bangalore &amp; Pune
+                    <span className="text-secondary font-bold">✓</span> Active in Delhi NCR, Mumbai, Ahmedabad, Hyderabad, Bangalore &amp; Pune
                   </p>
                 </div>
               </div>
@@ -766,11 +736,9 @@ export default function Home() {
                         className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
                       >
                         <option value="">Select City</option>
-                        <option value="Delhi NCR">Delhi NCR</option>
-                        <option value="Ahmedabad">Ahmedabad</option>
-                        <option value="Hyderabad">Hyderabad</option>
-                        <option value="Bangalore">Bangalore</option>
-                        <option value="Pune">Pune</option>
+                        {CITIES.map((c) => (
+                          <option key={c} value={c}>{c}</option>
+                        ))}
                       </select>
                     </div>
                   </div>

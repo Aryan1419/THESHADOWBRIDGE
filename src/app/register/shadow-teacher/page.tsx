@@ -12,7 +12,7 @@ import {
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { CITY_LOCALITIES } from '@/lib/constants';
+import { CITIES, CITY_LOCALITIES } from '@/lib/constants';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 
 export default function ShadowTeacherRegister() {
@@ -453,11 +453,9 @@ export default function ShadowTeacherRegister() {
                             className="p-3 border border-brand-border bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 text-brand-dark"
                           >
                             <option value="">Select City</option>
-                            <option value="Delhi NCR">Delhi NCR</option>
-                            <option value="Ahmedabad">Ahmedabad</option>
-                            <option value="Hyderabad">Hyderabad</option>
-                            <option value="Bangalore">Bangalore</option>
-                            <option value="Pune">Pune</option>
+                            {CITIES.map((c) => (
+                              <option key={c} value={c}>{c}</option>
+                            ))}
                           </select>
                         </div>
 
