@@ -11,7 +11,7 @@ import {
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import { getPlacementFee, normalizeServiceType } from '@/lib/pricing';
+import { getPlacementFee, normalizeServiceType, formatCurrency } from '@/lib/pricing';
 
 // Dynamic script loader for Razorpay Checkout
 const loadRazorpayScript = () => {
@@ -758,7 +758,7 @@ function DashboardContent() {
                         <div className="space-y-0.5">
                           <span className="text-xs text-brand-muted uppercase font-bold block">One-time Fee Amount</span>
                           <span className="font-serif text-2xl font-black text-primary">
-                            ₹{dbRecord ? (subType === 'shadow' ? '5,000' : '3,000') : '5,000'}
+                            {dbRecord ? formatCurrency(getPlacementFee(subType)) : '₹5,000'}
                           </span>
                         </div>
                         <span className="text-xs text-secondary font-bold bg-[#B0206B]/5 px-2.5 py-1 rounded-lg border border-[#B0206B]/15 uppercase">

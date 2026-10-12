@@ -579,7 +579,7 @@ function GatedRegistrationContent() {
                 <span>Submitting Registration Form...</span>
               ) : (
                 <>
-                  <span>{isTherapy ? 'Save & Proceed to Therapy Booking Payment (₹3,000)' : 'Save & Proceed to Placement Fee Payment'}</span>
+                  <span>{isTherapy ? 'Save & Proceed to Therapy Booking Payment (₹2,000)' : 'Save & Proceed to Placement Fee Payment'}</span>
                   <ArrowRight size={18} />
                 </>
               )}

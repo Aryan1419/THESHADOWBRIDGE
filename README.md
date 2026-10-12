@@ -42,7 +42,7 @@ We provide a seamless 5-step matching process for parents, rigorous background v
 - **Step 2: Status & Tracking**: Track application progress via phone, email, or unified Registration ID (`SB-2026-XXXX`).
 - **Step 3: Assessment & Evaluation**: Diagnostic assessment led by Founder Pratibha Mishra.
 - **Step 4: Detailed Child Registration Form**: Comprehensive submission covering academic goals, behavioral milestones, school placement needs, and IEP details.
-- **Step 5: Onboarding Placement Fee**: Finalize placement matching (₹5,000 / ₹3,000) with instant admin notification alerts.
+- **Step 5: Onboarding Placement Fee**: Finalize placement matching (₹5,000 / ₹3,000 / ₹2,000) with instant admin notification alerts.
 
 ### 2. For Shadow Teachers & Tutors
 - **Multi-Step Application Form**: Dedicated registration for Shadow Teachers (`/register/shadow-teacher`) and Special Needs Tutors (`/register/tutor`).

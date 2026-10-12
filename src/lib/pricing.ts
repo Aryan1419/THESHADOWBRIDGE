@@ -28,8 +28,8 @@ export const PRICING = {
   PLACEMENT: {
     SHADOW: 5000,
     TUTOR: 3000,
-    THERAPY: 3000,
-    ONLINE_PARENT_TRAINING: 3000,
+    THERAPY: 2000,
+    ONLINE_PARENT_TRAINING: 2000,
     SCHOOL_PER_TEACHER: 5000,
   },
   PROMO_CODES: {
@@ -68,7 +68,7 @@ export function normalizeServiceType(input?: string | null, fallback: ServiceTyp
   }
 
   // 5. Therapy check
-  if (s.includes('therapy') || s === 'parent_therapy_requests' || s.includes('aba') || s.includes('speech') || s.includes('occupational')) {
+  if (s.includes('therapy') || s === 'parent_therapy_requests' || s.includes('aba') || s.includes('speech') || s.includes('occupational') || s.includes('counsel') || s.includes('psycholog')) {
     return 'therapy';
   }
 
@@ -91,8 +91,8 @@ export function getConsultationFee(service?: string | null): number {
  * Returns the placement / onboarding fee for a given service type.
  * - Shadow Teacher: ₹5,000 flat
  * - Home Tutor: ₹3,000 flat
- * - Therapy Sessions: ₹3,000 flat
- * - Online Parent Training: ₹3,000 flat
+ * - Therapy Sessions: ₹2,000 flat
+ * - Online Parent Training: ₹2,000 flat
  * - School Collaboration: ₹5,000 × number of shadow teachers requested
  */
 export function getPlacementFee(service?: string | null, options?: PlacementFeeOptions): number {

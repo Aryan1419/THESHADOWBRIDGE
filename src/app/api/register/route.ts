@@ -614,7 +614,7 @@ export async function POST(request: Request) {
           status: 'Registration Submitted',
           consultation_paid: true,
           placement_paid: Boolean(parentRecord.placement_paid),
-          placement_amount: getPlacementFee(thNorm),
+          placement_amount: (parentRecord.placement_paid && parentRecord.placement_amount) ? parentRecord.placement_amount : getPlacementFee(thNorm),
           registration_id: cleanRegId,
           notes: additionalNotes || parentRecord.notes || '',
         };
@@ -642,7 +642,7 @@ export async function POST(request: Request) {
         child_grade: childGrade || 'Preschool',
         home_location: homeLocation || parentRecord.city || 'Delhi NCR',
         status: 'Registration Submitted',
-        placement_amount: ps ? getPlacementFee('shadow') : getPlacementFee('tutor')
+        placement_amount: (parentRecord.placement_paid && parentRecord.placement_amount) ? parentRecord.placement_amount : (ps ? getPlacementFee('shadow') : getPlacementFee('tutor'))
       };
 
       if (ps) {
