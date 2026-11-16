@@ -247,7 +247,7 @@ export default function ForShadowTeachers() {
           </p>
           <div className="pt-2">
             <Link
-              href="/register/shadow"
+              href="/register/shadow-teacher"
               className="px-10 py-4 btn-gradient text-white font-bold text-lg rounded-full inline-flex items-center gap-2 hover:scale-105 active:scale-95 transition-all shadow-lg"
             >
               Register as Shadow Teacher

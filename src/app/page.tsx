@@ -124,7 +124,7 @@ export default function Home() {
     {
       title: "For Shadow Teachers",
       desc: "Join our verified professional network, receive continuous training, and connect with families needing classroom integration support.",
-      link: "/register/shadow",
+      link: "/register/shadow-teacher",
       btnText: "Register Now"
     },
     {

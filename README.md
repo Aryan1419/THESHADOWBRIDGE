@@ -3,7 +3,7 @@
 > **Bridging the Gap in Inclusive Education & Special Needs Care**  
 > *Founded by Pratibha Mishra* — A specialized platform connecting parents of neurodivergent children with background-verified Shadow Teachers, Special Needs Tutors, and Academic Educators across India.
 
-🌐 **Live Website**: [https://theshadowbridge.com](https://theshadowbridge.com)
+🌐 **Live Website**: [https://www.theshadowbridge.com](https://www.theshadowbridge.com)
 
 ---
 
@@ -128,7 +128,7 @@ Create a `.env.local` file in the root directory and configure the following cre
 
 ```env
 # NEXT.JS PUBLIC CONFIGURATION
-NEXT_PUBLIC_SITE_URL=https://theshadowbridge.com
+NEXT_PUBLIC_SITE_URL=https://www.theshadowbridge.com
 NEXT_PUBLIC_SUPABASE_URL=https://your-supabase-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
 NEXT_PUBLIC_RAZORPAY_KEY_ID=your-razorpay-key-id

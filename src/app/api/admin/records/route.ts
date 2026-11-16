@@ -524,8 +524,10 @@ export async function POST(request: Request) {
       const isTherapyRecord = targetTable === 'parent_therapy_requests';
 
       if (recipientEmail) {
-        const host = request.headers.get('host') || 'localhost:3000';
-        const protocol = host.includes('localhost') ? 'http' : 'https';
+        const rawHost = request.headers.get('host') || 'localhost:3000';
+        const isLocal = rawHost.includes('localhost') || rawHost.includes('127.0.0.1');
+        const protocol = isLocal ? 'http' : 'https';
+        const host = isLocal ? rawHost : 'www.theshadowbridge.com';
 
         if (isSchoolRecord) {
           const schoolName = targetRecord?.school_name || targetRecord?.schoolName || 'School';
@@ -554,7 +556,7 @@ export async function POST(request: Request) {
 
               <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 16px 20px; border-radius: 4px; font-size: 13px; color: #5C4300; line-height: 1.6;">
                 <strong>How to Check Status Anytime:</strong><br />
-                You can track your school collaboration progress anytime at <a href="${protocol}://${host}/check-status" style="color: #B0206B; font-weight: bold; text-decoration: underline;">theshadowbridge.com/check-status</a> by entering your <strong>ID (${actualRegId})</strong> along with your registered phone number or email address.
+                You can track your school collaboration progress anytime at <a href="${protocol}://${host}/check-status" style="color: #B0206B; font-weight: bold; text-decoration: underline;">www.theshadowbridge.com/check-status</a> by entering your <strong>ID (${actualRegId})</strong> along with your registered phone number or email address.
               </div>
             `
           }).catch(err => console.error('School consultation completed email fail:', err));
@@ -582,7 +584,7 @@ export async function POST(request: Request) {
 
               <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 16px 20px; border-radius: 4px; font-size: 13px; color: #5C4300; line-height: 1.6;">
                 <strong>How to Access or Check Status Anytime:</strong><br />
-                You can access your registration form or check application progress anytime at <a href="${protocol}://${host}/check-status" style="color: #B0206B; font-weight: bold; text-decoration: underline;">theshadowbridge.com/check-status</a> by entering your <strong>ID (${actualRegId})</strong> along with your registered phone number or email address.
+                You can access your registration form or check application progress anytime at <a href="${protocol}://${host}/check-status" style="color: #B0206B; font-weight: bold; text-decoration: underline;">www.theshadowbridge.com/check-status</a> by entering your <strong>ID (${actualRegId})</strong> along with your registered phone number or email address.
               </div>
             `
           }).catch(err => console.error('Consultation completed email fail:', err));
@@ -789,8 +791,10 @@ export async function POST(request: Request) {
 
       // Send Email Notification synchronously via Resend if status is updated
       if (status && record.email) {
-        const host = request.headers.get('host') || 'localhost:3000';
-        const protocol = host.includes('localhost') ? 'http' : 'https';
+        const rawHost = request.headers.get('host') || 'localhost:3000';
+        const isLocal = rawHost.includes('localhost') || rawHost.includes('127.0.0.1');
+        const protocol = isLocal ? 'http' : 'https';
+        const host = isLocal ? rawHost : 'www.theshadowbridge.com';
         const dashboardLink = `${protocol}://${host}/dashboard?regId=${regId}`;
 
         if (status === 'Match Proposed') {
@@ -935,7 +939,7 @@ export async function POST(request: Request) {
               ${customMessageBlock}
 
               <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 14px 18px; border-radius: 4px; font-size: 13px; color: #5C4300; line-height: 1.6;">
-                <strong>Check Status Reminder:</strong> You can view real-time program updates anytime by visiting <a href="${dashboardLink}" style="color: #B0206B; font-weight: bold; text-decoration: underline;">theshadowbridge.com/check-status</a> and entering your <strong>ID (${regId})</strong> along with your registered phone number or email address.
+                <strong>Check Status Reminder:</strong> You can view real-time program updates anytime by visiting <a href="${dashboardLink}" style="color: #B0206B; font-weight: bold; text-decoration: underline;">www.theshadowbridge.com/check-status</a> and entering your <strong>ID (${regId})</strong> along with your registered phone number or email address.
               </div>
 
               <div style="margin: 20px 0;">

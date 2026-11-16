@@ -293,7 +293,7 @@ export async function sendCommissionNotificationEmail({
     <p style="margin: 24px 0 0 0; font-size: 14px; color: #2D253A;">
       Warm regards,<br />
       <strong>Pratibha Mishra &amp; The Shadow Bridge Team</strong><br />
-      <span style="font-size: 12px; color: #6A5B7C;">theshadowbridge.com</span>
+      <span style="font-size: 12px; color: #6A5B7C;">www.theshadowbridge.com</span>
     </p>
   `;
 

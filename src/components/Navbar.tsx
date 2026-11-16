@@ -387,7 +387,7 @@ export default function Navbar() {
                         href="/schools"
                         onClick={() => setIsOpen(false)}
                         className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all border ${
-                          pathname === '/schools' || pathname === '/collaboration-schools'
+                          pathname === '/schools'
                             ? 'bg-purple-50 text-purple-950 border-purple-200'
                             : 'bg-brand-light/40 hover:bg-purple-50/50 text-brand-dark border-purple-100/80 hover:border-purple-200'
                         }`}

@@ -370,8 +370,10 @@ export async function POST(request: Request) {
         writeDb(localDb);
       }
 
-      const host = request.headers.get('host') || 'localhost:3000';
-      const protocol = host.includes('localhost') ? 'http' : 'https';
+      const rawHost = request.headers.get('host') || 'localhost:3000';
+      const isLocal = rawHost.includes('localhost') || rawHost.includes('127.0.0.1');
+      const protocol = isLocal ? 'http' : 'https';
+      const host = isLocal ? rawHost : 'www.theshadowbridge.com';
 
       // Send Parent Receipt & Admin Alert Emails concurrently and await completion
       const feeAmount = getConsultationFee(serviceNeeded);
@@ -401,7 +403,7 @@ export async function POST(request: Request) {
 
             <div style="margin: 20px 0; background-color: #FFF9EB; border-left: 4px solid #C89B3C; padding: 16px 20px; border-radius: 4px; font-size: 13px; color: #5C4300; line-height: 1.6;">
               <strong>How to Check Your Status:</strong><br />
-              To check your consultation status or access your child registration form anytime, visit <a href="${protocol}://${host}/check-status" style="color: #B0206B; font-weight: bold; text-decoration: underline;">theshadowbridge.com/check-status</a> and enter your <strong>ID (${generatedId})</strong> along with the phone number (<strong>${phone}</strong>) or email (<strong>${cleanEmail}</strong>) you registered with.
+              To check your consultation status or access your child registration form anytime, visit <a href="${protocol}://${host}/check-status" style="color: #B0206B; font-weight: bold; text-decoration: underline;">www.theshadowbridge.com/check-status</a> and enter your <strong>ID (${generatedId})</strong> along with the phone number (<strong>${phone}</strong>) or email (<strong>${cleanEmail}</strong>) you registered with.
             </div>
 
             <p style="margin: 0 0 20px 0;">Founder Pratibha Mishra will call you directly within 24 hours to conduct your assessment consultation.</p>
@@ -888,8 +890,10 @@ export async function POST(request: Request) {
         if (error) throw error;
 
         // Trigger notifications
-        const host = request.headers.get('host') || 'localhost:3000';
-        const protocol = host.includes('localhost') ? 'http' : 'https';
+        const rawHost = request.headers.get('host') || 'localhost:3000';
+        const isLocal = rawHost.includes('localhost') || rawHost.includes('127.0.0.1');
+        const protocol = isLocal ? 'http' : 'https';
+        const host = isLocal ? rawHost : 'www.theshadowbridge.com';
         const statusLink = `${protocol}://${host}/check-status?regId=${generatedId}`;
 
         await Promise.allSettled([
@@ -912,7 +916,7 @@ export async function POST(request: Request) {
 
               <p style="margin: 0 0 20px 0;">Our team will contact you within 24 hours to schedule the consultation.</p>
               <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
-                You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
+                You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">www.theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
               </p>
               <p style="margin: 0 0 20px 0;">Thank you for choosing The Shadow Bridge.</p>
               
@@ -1003,8 +1007,10 @@ export async function POST(request: Request) {
         if (error) throw error;
 
         // Trigger notifications
-        const host = request.headers.get('host') || 'localhost:3000';
-        const protocol = host.includes('localhost') ? 'http' : 'https';
+        const rawHost = request.headers.get('host') || 'localhost:3000';
+        const isLocal = rawHost.includes('localhost') || rawHost.includes('127.0.0.1');
+        const protocol = isLocal ? 'http' : 'https';
+        const host = isLocal ? rawHost : 'www.theshadowbridge.com';
         const statusLink = `${protocol}://${host}/check-status?regId=${generatedId}`;
 
         await Promise.allSettled([
@@ -1027,7 +1033,7 @@ export async function POST(request: Request) {
 
               <p style="margin: 0 0 20px 0;">Our team will contact you within 24 hours to begin the matching process.</p>
               <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
-                You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
+                You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">www.theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
               </p>
               <p style="margin: 0 0 20px 0;">Thank you for choosing The Shadow Bridge.</p>
               
@@ -1144,8 +1150,10 @@ export async function POST(request: Request) {
       if (error) throw error;
 
       // Trigger notification
-      const host = request.headers.get('host') || 'localhost:3000';
-      const protocol = host.includes('localhost') ? 'http' : 'https';
+      const rawHost = request.headers.get('host') || 'localhost:3000';
+      const isLocal = rawHost.includes('localhost') || rawHost.includes('127.0.0.1');
+      const protocol = isLocal ? 'http' : 'https';
+      const host = isLocal ? rawHost : 'www.theshadowbridge.com';
       const statusLink = `${protocol}://${host}/check-status?regId=${generatedId}`;
 
       await Promise.allSettled([
@@ -1161,7 +1169,7 @@ export async function POST(request: Request) {
             <h3 style="color: #3B2A6B; font-size: 15px; margin: 24px 0 10px 0;">What Happens Next?</h3>
             <p style="margin: 0 0 20px 0;">Our clinical screening panel is vetting your credentials, qualifications, and special-needs experience. Pratibha Mishra's team will call you shortly to schedule a video panel assessment call.</p>
             <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
-              You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
+              You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">www.theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
             </p>
 
             <a href="${statusLink}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15); margin-bottom: 10px;">Check Status &amp; Access Portal</a>
@@ -1239,8 +1247,10 @@ export async function POST(request: Request) {
       if (error) throw error;
 
       // Trigger notification
-      const host = request.headers.get('host') || 'localhost:3000';
-      const protocol = host.includes('localhost') ? 'http' : 'https';
+      const rawHost = request.headers.get('host') || 'localhost:3000';
+      const isLocal = rawHost.includes('localhost') || rawHost.includes('127.0.0.1');
+      const protocol = isLocal ? 'http' : 'https';
+      const host = isLocal ? rawHost : 'www.theshadowbridge.com';
       const statusLink = `${protocol}://${host}/check-status?regId=${generatedId}`;
 
       await Promise.allSettled([
@@ -1256,7 +1266,7 @@ export async function POST(request: Request) {
             <h3 style="color: #3B2A6B; font-size: 15px; margin: 24px 0 10px 0;">What Happens Next?</h3>
             <p style="margin: 0 0 20px 0;">Our clinical screening panel is screening your academic credentials, teaching experience, and subject matching. Pratibha Mishra's team will call you shortly to schedule a video panel assessment call.</p>
             <p style="margin: 0 0 20px 0; background-color: #F8F5FB; border-left: 4px solid #3B2A6B; padding: 12px 16px; border-radius: 4px; font-size: 13px;">
-              You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
+              You can check your application status anytime at <a href="${protocol}://${host}/check-status" style="color: #3B2A6B; font-weight: bold;">www.theshadowbridge.com/check-status</a> using your Registration ID: <strong>${generatedId}</strong> and the phone/email you registered with.
             </p>
 
             <a href="${statusLink}" style="display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #3B2A6B 0%, #B0206B 100%); color: #ffffff; text-decoration: none; border-radius: 9999px; font-weight: bold; font-size: 14px; margin-top: 10px; box-shadow: 0 4px 6px rgba(176, 32, 107, 0.15); margin-bottom: 10px;">Check Status &amp; Access Portal</a>
