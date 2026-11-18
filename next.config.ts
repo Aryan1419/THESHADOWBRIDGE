@@ -12,7 +12,7 @@ const ContentSecurityPolicy = [
   "base-uri 'self'",
   "form-action 'self' https://api.razorpay.com",
   "frame-ancestors 'self'",
-  "upgrade-insecure-requests",
+  ...(process.env.NODE_ENV === 'production' ? ["upgrade-insecure-requests"] : []),
 ].join('; ');
 
 const nextConfig: NextConfig = {

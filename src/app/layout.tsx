@@ -201,20 +201,23 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
         <link rel="apple-touch-icon" href="/favicon-192.png" />
         <script
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var d=document.documentElement;if(localStorage.getItem('theme')==='dark'){d.classList.add('dark')}}catch(e){}})();`
           }}
         />
+      </head>
+      <body className="font-sans antialiased relative">
         <script
           type="application/ld+json"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <script
           type="speculationrules"
+          suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: JSON.stringify(speculationRules) }}
         />
-      </head>
-      <body className="font-sans antialiased relative">
         {children}
         <ScrollToTop />
       </body>
