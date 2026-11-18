@@ -7,6 +7,8 @@ import { Users, GraduationCap, BookOpen, Compass, CheckCircle2, ChevronRight, Sp
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { buildBreadcrumbSchema, buildServiceSchema } from '@/lib/schema';
+import { PRICING } from '@/lib/pricing';
 
 export default function Services() {
   const serviceDetails = [
@@ -92,9 +94,31 @@ export default function Services() {
     }
   ];
 
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Services', path: '/services' },
+  ]);
+
+  const shadowServiceSchema = buildServiceSchema({
+    name: 'Special Needs Shadow Teacher Placement',
+    serviceType: 'Shadow Teacher Support',
+    description: 'Verified full-time and part-time classroom Shadow Teachers supporting children with Autism, ADHD, Down Syndrome, and learning differences.',
+    path: '/services',
+    priceInr: PRICING.PLACEMENT.SHADOW,
+    priceNote: '₹99 consultation + ₹5,000 one-time placement fee',
+  });
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(shadowServiceSchema) }}
+      />
 
       {/* Header Banner */}
       <section className="pt-32 pb-16 bg-gradient-to-b from-[#F8F5FB] to-white border-b border-brand-border">
@@ -134,7 +158,7 @@ export default function Services() {
                   <div className="p-4 bg-brand-light rounded-2xl w-fit mb-6">
                     {service.icon}
                   </div>
-                  <h3 className="font-serif font-black text-primary text-2xl mb-1">{service.title}</h3>
+                  <h2 className="font-serif font-black text-primary text-2xl mb-1">{service.title}</h2>
                   <p className="text-accent font-bold text-sm mb-4">{service.subtitle}</p>
                   <p className="text-brand-muted text-sm sm:text-base leading-relaxed mb-6">
                     {service.description}
@@ -150,7 +174,7 @@ export default function Services() {
 
                 {/* Features Block */}
                 <div className="w-full lg:w-1/2 space-y-6">
-                  <h4 className="font-serif font-bold text-primary text-xl">What this service includes:</h4>
+                  <h3 className="font-serif font-bold text-primary text-xl">What this service includes:</h3>
                   <ul className="space-y-4">
                     {service.features.map((feature, fIdx) => (
                       <li key={fIdx} className="flex items-start gap-3">

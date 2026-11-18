@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
 import { 
@@ -8,31 +6,21 @@ import {
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import ResourceAuthorCard from '@/components/ResourceAuthorCard';
+import { buildArticleSchema, buildBreadcrumbSchema } from '@/lib/schema';
 
 export default function AbaTherapyForAutismPage() {
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
+  const jsonLd = buildArticleSchema({
     headline: 'What is ABA Therapy, and How Does It Help Children with Autism?',
     description: 'Applied Behavior Analysis (ABA) is a structured, evidence-based therapy approach that helps children build communication, social, and daily-living skills.',
-    author: {
-      '@type': 'Organization',
-      name: 'The Shadow Bridge',
-      url: 'https://www.theshadowbridge.com'
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'The Shadow Bridge',
-      logo: {
-        '@type': 'ImageObject',
-        url: 'https://www.theshadowbridge.com/favicon-512.png'
-      }
-    },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': 'https://www.theshadowbridge.com/resources/aba-therapy-for-autism'
-    }
-  };
+    path: '/resources/aba-therapy-for-autism',
+  });
+
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Resources', path: '/resources' },
+    { name: 'ABA Therapy for Autism', path: '/resources/aba-therapy-for-autism' },
+  ]);
 
   const faqSchema = {
     '@context': 'https://schema.org',
@@ -64,6 +52,10 @@ export default function AbaTherapyForAutismPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <script
         type="application/ld+json"
@@ -103,6 +95,8 @@ export default function AbaTherapyForAutismPage() {
             <span>Published by The Shadow Bridge</span>
           </div>
         </header>
+
+        <ResourceAuthorCard />
 
         {/* Lead Paragraph */}
         <div className="bg-white rounded-2xl p-6 sm:p-8 border border-primary/15 shadow-xs text-gray-700 leading-relaxed space-y-4">

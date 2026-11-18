@@ -172,7 +172,7 @@ export default function TherapiesLandingPage() {
                   </div>
                   <div>
                     <span className="text-xs font-extrabold text-secondary uppercase tracking-wider">Comprehensive Therapy Care</span>
-                    <h3 className="font-serif text-lg font-bold text-primary">PAN India &amp; Delhi NCR</h3>
+                    <h2 className="font-serif text-lg font-bold text-primary">PAN India &amp; Delhi NCR</h2>
                   </div>
                 </div>
 

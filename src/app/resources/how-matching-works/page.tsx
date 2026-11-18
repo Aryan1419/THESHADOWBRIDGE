@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
 import { 
@@ -8,31 +6,21 @@ import {
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import ResourceAuthorCard from '@/components/ResourceAuthorCard';
+import { buildArticleSchema, buildBreadcrumbSchema } from '@/lib/schema';
 
 export default function HowMatchingWorksPage() {
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
+  const jsonLd = buildArticleSchema({
     headline: 'How Does The Shadow Bridge\'s Matching Process Actually Work?',
     description: 'Unlike a simple listing or directory, every placement on The Shadow Bridge starts with a real, structured consultation.',
-    author: {
-      '@type': 'Organization',
-      name: 'The Shadow Bridge',
-      url: 'https://www.theshadowbridge.com'
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'The Shadow Bridge',
-      logo: {
-        '@type': 'ImageObject',
-        url: 'https://www.theshadowbridge.com/favicon-512.png'
-      }
-    },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': 'https://www.theshadowbridge.com/resources/how-matching-works'
-    }
-  };
+    path: '/resources/how-matching-works',
+  });
+
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Resources', path: '/resources' },
+    { name: 'How Matching Works', path: '/resources/how-matching-works' },
+  ]);
 
   const faqSchema = {
     '@context': 'https://schema.org',
@@ -98,6 +86,10 @@ export default function HowMatchingWorksPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
@@ -134,6 +126,8 @@ export default function HowMatchingWorksPage() {
             <span>Published by The Shadow Bridge</span>
           </div>
         </header>
+
+        <ResourceAuthorCard />
 
         {/* Lead Paragraph */}
         <div className="bg-white rounded-2xl p-6 sm:p-8 border border-primary/15 shadow-xs text-gray-700 leading-relaxed space-y-4">

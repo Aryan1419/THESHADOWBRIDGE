@@ -108,8 +108,9 @@ export default function About() {
                   <Image
                     src="/images/founder_pratibha.jpg"
                     alt="Pratibha Mishra - Founder & Lead Educational Mentor at The Shadow Bridge"
-                    fill
-                    className="object-cover"
+                    width={360}
+                    height={420}
+                    className="w-full h-full object-cover"
                   />
                 </div>
               </div>
@@ -119,7 +120,7 @@ export default function About() {
             <div className="lg:col-span-7 space-y-5">
               <span className="text-xs font-bold text-accent uppercase tracking-wider">Meet Our Founder</span>
               <h2 className="font-serif text-3xl font-extrabold text-primary">Pratibha Mishra</h2>
-              <h4 className="text-accent font-bold -mt-2">Founder | Lead Mentor | Child Integration Specialist</h4>
+              <p className="text-accent font-bold -mt-2">Founder | Lead Mentor | Child Integration Specialist</p>
               
               <p className="text-brand-muted text-sm sm:text-base leading-relaxed">
                 With over 11 years of experience in shadow teaching and inclusive education, Pratibha Mishra has supported children, families, and schools in creating meaningful learning experiences. She is a graduate and has completed professional diplomas in Child Psychology and School Counselling, along with advanced studies in leadership and management.
@@ -181,17 +182,17 @@ export default function About() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 text-brand-dark">
             <div className="bg-white p-6 rounded-2xl text-center shadow-md">
               <div className="w-10 h-10 bg-accent text-white rounded-full flex items-center justify-center font-bold mx-auto mb-3">1</div>
-              <h4 className="font-serif font-bold text-primary mb-1">Baseline Assessment</h4>
+              <h3 className="font-serif font-bold text-primary mb-1">Baseline Assessment</h3>
               <p className="text-xs text-brand-muted">Lead mentors define specific child milestones and hurdles.</p>
             </div>
             <div className="bg-white p-6 rounded-2xl text-center shadow-md">
               <div className="w-10 h-10 bg-secondary text-white rounded-full flex items-center justify-center font-bold mx-auto mb-3">2</div>
-              <h4 className="font-serif font-bold text-primary mb-1">Guided Integration</h4>
+              <h3 className="font-serif font-bold text-primary mb-1">Guided Integration</h3>
               <p className="text-xs text-brand-muted">Regular teacher supervision with weekly parent feedback loops.</p>
             </div>
             <div className="bg-white p-6 rounded-2xl text-center shadow-md">
               <div className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-bold mx-auto mb-3">3</div>
-              <h4 className="font-serif font-bold text-primary mb-1">Autonomy Phase</h4>
+              <h3 className="font-serif font-bold text-primary mb-1">Autonomy Phase</h3>
               <p className="text-xs text-brand-muted">Gradual support reduction as the child achieves learning confidence.</p>
             </div>
           </div>

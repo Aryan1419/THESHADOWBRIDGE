@@ -1,24 +1,17 @@
-import type { Metadata } from "next";
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: "Why I Started The Shadow Bridge | Founder's Story by Pratibha Mishra",
-  description: "Discover why Pratibha Mishra founded The Shadow Bridge to connect neurodivergent children with verified Shadow Teachers and Special Needs Home Tutors.",
-  alternates: {
-    canonical: "https://www.theshadowbridge.com/founder-story"
+export const metadata = buildPageMetadata({
+  title: 'Why I Started — Pratibha Mishra',
+  description: 'The personal journey of Founder Pratibha Mishra building The Shadow Bridge to support neurodivergent children with trained Shadow Teachers and Tutors.',
+  path: '/founder-story',
+  image: {
+    url: '/images/founder_pratibha.jpg',
+    width: 800,
+    height: 800,
+    alt: 'Pratibha Mishra — Founder of The Shadow Bridge',
   },
-  openGraph: {
-    title: "Why I Started The Shadow Bridge | Founder's Story",
-    description: "The story behind The Shadow Bridge by Founder Pratibha Mishra. Empowering inclusive learning for children across India.",
-    url: "https://www.theshadowbridge.com/founder-story",
-    siteName: "The Shadow Bridge",
-    images: [{ url: "/images/founder_pratibha.jpg", width: 800, height: 800, alt: "Pratibha Mishra - Founder of The Shadow Bridge" }]
-  }
-};
+});
 
-export default function FounderStoryLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return <>{children}</>;
+export default function FounderStoryLayout({ children }: { children: React.ReactNode }) {
+  return children;
 }

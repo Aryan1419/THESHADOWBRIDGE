@@ -109,10 +109,22 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@graph": [
       {
+        "@type": "WebSite",
+        "@id": "https://www.theshadowbridge.com/#website",
+        "url": "https://www.theshadowbridge.com",
+        "name": "The Shadow Bridge",
+        "inLanguage": "en-IN",
+        "publisher": { "@id": "https://www.theshadowbridge.com/#organization" }
+      },
+      {
         "@type": ["EducationalOrganization", "LocalBusiness"],
         "@id": "https://www.theshadowbridge.com/#organization",
         "name": "The Shadow Bridge",
         "url": "https://www.theshadowbridge.com",
+        "sameAs": [
+          "https://www.instagram.com/the_shadow_bridge",
+          "https://www.linkedin.com/in/pratibha-mishra-3992042ab/"
+        ],
         "logo": {
           "@type": "ImageObject",
           "url": "https://www.theshadowbridge.com/favicon-512.png",
@@ -121,17 +133,31 @@ export default function RootLayout({
         },
         "image": {
           "@type": "ImageObject",
-          "url": "https://www.theshadowbridge.com/favicon-512.png",
-          "width": 512,
-          "height": 512
+          "url": "https://www.theshadowbridge.com/og-image.png",
+          "width": 1200,
+          "height": 630
         },
-        "description": "Connecting families with professionally trained Shadow Teachers and Special Education Home Tutors across Delhi NCR, Mumbai, Ahmedabad, Hyderabad, Bangalore & Pune.",
+        "description": "Connecting families with professionally trained Shadow Teachers, Special Education Home Tutors, and Therapists across Delhi NCR, Mumbai, Ahmedabad, Hyderabad, Bangalore & Pune.",
         "founder": {
           "@type": "Person",
+          "@id": "https://www.theshadowbridge.com/founder-story#pratibha-mishra",
           "name": "Pratibha Mishra",
-          "jobTitle": "Founder & Lead Educational Mentor"
+          "jobTitle": "Founder & Lead Educational Mentor",
+          "url": "https://www.theshadowbridge.com/founder-story",
+          "sameAs": ["https://www.linkedin.com/in/pratibha-mishra-3992042ab/"]
         },
         "email": "theshadowbridgesupport@gmail.com",
+        "address": {
+          "@type": "PostalAddress",
+          "addressCountry": "IN"
+        },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "contactType": "customer support",
+          "email": "theshadowbridgesupport@gmail.com",
+          "availableLanguage": ["English", "Hindi"],
+          "areaServed": "IN"
+        },
         "priceRange": "₹99 - ₹5000",
         "areaServed": [
           { "@type": "City", "name": "Delhi NCR" },
@@ -139,17 +165,29 @@ export default function RootLayout({
           { "@type": "City", "name": "Ahmedabad" },
           { "@type": "City", "name": "Hyderabad" },
           { "@type": "City", "name": "Bangalore" },
-          { "@type": "City", "name": "Pune" }
+          { "@type": "City", "name": "Pune" },
+          { "@type": "Country", "name": "India" }
         ],
         "knowsAbout": [
           "Shadow Teacher Support",
           "Special Education Home Tutoring",
           "Inclusive Classroom Assistance",
           "Behavioral Management & Autism/ADHD Support",
+          "ABA Online Therapy & Parent Training",
           "Individualized Education Program (IEP)",
           "Down Syndrome & Learning Disability Support",
           "Shadow Teacher Jobs & Training"
         ]
+      }
+    ]
+  };
+
+  const speculationRules = {
+    prefetch: [
+      {
+        source: "list",
+        urls: ["/book", "/services", "/therapies", "/schools", "/resources", "/shadow-teachers", "/tutors"],
+        eagerness: "moderate"
       }
     ]
   };
@@ -170,6 +208,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="speculationrules"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(speculationRules) }}
         />
       </head>
       <body className="font-sans antialiased relative">

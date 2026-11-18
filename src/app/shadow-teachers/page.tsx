@@ -10,6 +10,8 @@ import {
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { buildBreadcrumbSchema, buildServiceSchema } from '@/lib/schema';
+import { PRICING } from '@/lib/pricing';
 
 export default function ForShadowTeachers() {
   const benefits = [
@@ -49,9 +51,24 @@ export default function ForShadowTeachers() {
     "Prior tutoring or volunteering experience with children is highly preferred."
   ];
 
+  const serviceSchema = buildServiceSchema({
+    name: 'Shadow Teacher Support & Placement Program',
+    serviceType: 'Shadow Teacher Placement',
+    description: 'Background-verified, trained Shadow Teachers assisting neurodivergent children (Autism, ADHD, Down Syndrome) inside mainstream classrooms across 6 Indian metros.',
+    path: '/shadow-teachers',
+    priceInr: PRICING.PLACEMENT.SHADOW,
+    priceNote: '₹99 consultation + ₹5,000 one-time placement fee',
+  });
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Shadow Teachers', path: '/shadow-teachers' },
+  ]);
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       {/* Hero Banner */}
       <section className="relative pt-32 pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-gradient-to-b from-[#F7F5FC] to-white border-b border-brand-border">

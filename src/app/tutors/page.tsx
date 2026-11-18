@@ -10,6 +10,8 @@ import {
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { buildBreadcrumbSchema, buildServiceSchema } from '@/lib/schema';
+import { PRICING } from '@/lib/pricing';
 
 export default function ForTutors() {
   const benefits = [
@@ -49,9 +51,24 @@ export default function ForTutors() {
     "Involve parent feedback constructively in alignment with school homework."
   ];
 
+  const serviceSchema = buildServiceSchema({
+    name: 'Special Education Home Tutoring Program',
+    serviceType: 'Special Education Home Tutoring',
+    description: '1-on-1 multisensory Special Education and Remedial Home Tutors for Dyslexia, Dysgraphia, Dyscalculia, ADHD, and Autism across 6 Indian cities.',
+    path: '/tutors',
+    priceInr: PRICING.PLACEMENT.TUTOR,
+    priceNote: '₹99 consultation + ₹3,000 one-time tutor placement fee',
+  });
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Home Tutors', path: '/tutors' },
+  ]);
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       {/* Hero Banner */}
       <section className="relative pt-32 pb-16 lg:pt-40 lg:pb-20 overflow-hidden bg-gradient-to-b from-[#F7F5FC] to-white border-b border-brand-border">

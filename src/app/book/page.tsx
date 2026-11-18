@@ -313,30 +313,15 @@ function BookConsultationForm() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
+    <>
+      {/* Stepper Indicator */}
+      <div className="flex items-center justify-center gap-2 mb-8 max-w-sm mx-auto">
+        <div className={`h-2.5 rounded-full flex-grow transition-all duration-300 ${step >= 1 ? 'bg-primary' : 'bg-brand-border'}`} />
+        <div className={`h-2.5 rounded-full flex-grow transition-all duration-300 ${step >= 2 ? 'bg-primary' : 'bg-brand-border'}`} />
+        <div className={`h-2.5 rounded-full flex-grow transition-all duration-300 ${step >= 3 ? 'bg-accent' : 'bg-brand-border'}`} />
+      </div>
 
-      <section className="pt-32 pb-20 bg-gradient-to-b from-[#F8F5FB] to-white flex-grow flex items-center">
-        <div className="max-w-4xl mx-auto px-4 w-full">
-          
-          {/* Progress Header */}
-          <div className="text-center mb-8">
-            <h1 className="font-serif text-3xl sm:text-4xl font-black text-primary mb-3">
-              Book Assessment Consultation
-            </h1>
-            <p className="text-brand-muted text-sm sm:text-base max-w-md mx-auto">
-              Evaluate your child's behavior, academic hurdles, and special needs programs with our expert mentors.
-            </p>
-
-            {/* Stepper Indicator */}
-            <div className="flex items-center justify-center gap-2 mt-8 max-w-sm mx-auto">
-              <div className={`h-2.5 rounded-full flex-grow transition-all duration-300 ${step >= 1 ? 'bg-primary' : 'bg-brand-border'}`} />
-              <div className={`h-2.5 rounded-full flex-grow transition-all duration-300 ${step >= 2 ? 'bg-primary' : 'bg-brand-border'}`} />
-              <div className={`h-2.5 rounded-full flex-grow transition-all duration-300 ${step >= 3 ? 'bg-accent' : 'bg-brand-border'}`} />
-            </div>
-          </div>
-
-          <div className="bg-white border border-brand-border rounded-3xl shadow-xl overflow-hidden max-w-2xl mx-auto">
+      <div className="bg-white border border-brand-border rounded-3xl shadow-xl overflow-hidden max-w-2xl mx-auto">
             <AnimatePresence mode="wait">
               
               {/* STEP 1: Details */}
@@ -817,19 +802,58 @@ function BookConsultationForm() {
               )}
 
             </AnimatePresence>
-          </div>
-        </div>
-      </section>
-
-      <Footer />
-    </div>
+      </div>
+    </>
   );
 }
 
 export default function BookConsultation() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-brand-light/30 flex items-center justify-center p-8 font-bold text-primary">Loading...</div>}>
-      <BookConsultationForm />
-    </Suspense>
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+
+      <main className="pt-32 pb-20 bg-gradient-to-b from-[#F8F5FB] to-white flex-grow flex items-center">
+        <div className="max-w-4xl mx-auto px-4 w-full">
+          {/* SSR-Rendered Consultation Header */}
+          <div className="text-center mb-6">
+            <h1 className="font-serif text-3xl sm:text-4xl font-black text-primary mb-3">
+              Book 1-on-1 Assessment Consultation
+            </h1>
+            <p className="text-brand-muted text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+              Schedule a ₹99 diagnostic consultation with Founder &amp; Lead Mentor Pratibha Mishra to evaluate your child&apos;s developmental needs, classroom goals, and personalized Shadow Teacher, Home Tutor, or Therapy plan across Delhi NCR, Mumbai, Bangalore, Hyderabad, Ahmedabad, Pune, or PAN-India Online.
+            </p>
+          </div>
+
+          <Suspense
+            fallback={
+              <div className="bg-white border border-brand-border rounded-3xl shadow-xl max-w-2xl mx-auto p-10 text-center space-y-3">
+                <p className="font-serif font-bold text-primary text-lg">Preparing Booking Form...</p>
+                <p className="text-xs text-brand-muted">1-on-1 Consultation Fee: ₹99 • Callback within 24 hours</p>
+              </div>
+            }
+          >
+            <BookConsultationForm />
+          </Suspense>
+
+          {/* SSR-Rendered Trust & Process Summary */}
+          <div className="mt-12 max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+            <div className="bg-white border border-brand-border rounded-2xl p-4">
+              <h2 className="font-serif font-bold text-primary text-sm mb-1">1. Clinical Assessment</h2>
+              <p className="text-xs text-brand-muted">Direct call with Founder Pratibha Mishra (11+ years experience) within 24 hours.</p>
+            </div>
+            <div className="bg-white border border-brand-border rounded-2xl p-4">
+              <h2 className="font-serif font-bold text-primary text-sm mb-1">2. Verified Matching</h2>
+              <p className="text-xs text-brand-muted">Background-checked Shadow Teachers, Special Educators, and ABA/Speech Therapists.</p>
+            </div>
+            <div className="bg-white border border-brand-border rounded-2xl p-4">
+              <h2 className="font-serif font-bold text-primary text-sm mb-1">3. Transparent Fees</h2>
+              <p className="text-xs text-brand-muted">₹99 consultation; one-time placement fee only after consultation (₹5,000 Shadow / ₹3,000 Tutor / ₹2,000 Therapy).</p>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <Footer />
+    </div>
   );
 }

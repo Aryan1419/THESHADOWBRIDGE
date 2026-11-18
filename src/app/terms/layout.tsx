@@ -1,13 +1,11 @@
-import { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Terms and Conditions | The Shadow Bridge',
-  description: 'Terms and Conditions governing the use of The Shadow Bridge platform, services, fees, and educator placement policies.',
-  alternates: {
-    canonical: 'https://www.theshadowbridge.com/terms',
-  },
-};
+export const metadata = buildPageMetadata({
+  title: 'Terms & Conditions',
+  description: 'Review The Shadow Bridge Terms and Conditions covering consultation fees, one-time placement fees, refund guarantees, and school collaboration policies.',
+  path: '/terms',
+});
 
 export default function TermsLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return children;
 }

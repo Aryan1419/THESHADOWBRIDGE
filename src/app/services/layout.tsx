@@ -1,19 +1,11 @@
-import { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Services & Inclusive Education Support | Delhi NCR, Mumbai, Hyderabad, Bangalore, Pune',
-  description: 'Special education services: 1-on-1 Shadow Teacher placements, Special Needs Home Tutors, and Therapy support across 6 major cities in India.',
-  keywords: ['shadow teacher services', 'special needs home tutor', 'inclusive education support', 'IEP guidance', 'autism shadow teacher', 'ADHD home tutor', 'Delhi NCR', 'Mumbai', 'Hyderabad', 'Bangalore', 'Ahmedabad', 'Pune'],
-  alternates: {
-    canonical: 'https://www.theshadowbridge.com/services',
-  },
-  openGraph: {
-    title: 'Services & Support Programs | The Shadow Bridge',
-    description: 'Empowering children with specialized Shadow Teachers and Academic Home Tutors across Delhi NCR, Mumbai, Hyderabad, Bangalore & Pune.',
-    url: 'https://www.theshadowbridge.com/services',
-  },
-};
+export const metadata = buildPageMetadata({
+  title: 'Special Education Services India',
+  description: 'Explore Shadow Teachers, Inclusive Home Tutoring, ABA Online Therapy, Online Parent Training, and Diagnostic Assessments across 6 metros & PAN-India.',
+  path: '/services',
+});
 
 export default function ServicesLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return children;
 }

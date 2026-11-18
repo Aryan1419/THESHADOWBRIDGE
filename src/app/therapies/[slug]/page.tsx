@@ -1,16 +1,15 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
-import { useParams, notFound } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { 
-  ChevronRight, CheckCircle2, PhoneCall, ArrowRight, HelpCircle, 
+import { notFound } from 'next/navigation';
+import {
+  ChevronRight, CheckCircle2, PhoneCall, ArrowRight, HelpCircle,
   Brain, MessageSquare, Activity, GraduationCap, Puzzle, Dumbbell, Smile, HeartPulse, Sparkles, MapPin
 } from 'lucide-react';
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { buildBreadcrumbSchema, buildFaqSchema, buildServiceSchema } from '@/lib/schema';
+import { PRICING } from '@/lib/pricing';
 
 interface TherapyDetail {
   slug: string;
@@ -395,40 +394,67 @@ const THERAPY_DETAILS: Record<string, TherapyDetail> = {
   }
 };
 
-export default function TherapyDetailPage() {
-  const params = useParams();
-  const slug = (params?.slug as string) || '';
+export function generateStaticParams() {
+  return Object.keys(THERAPY_DETAILS).map((slug) => ({ slug }));
+}
 
+export default async function TherapyDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
   const detail = THERAPY_DETAILS[slug];
 
   if (!detail) {
-    return (
-      <div className="min-h-screen bg-brand-light/30 flex flex-col font-sans">
-        <Navbar />
-        <main className="flex-grow pt-32 pb-16 text-center space-y-4">
-          <h1 className="font-serif text-2xl font-bold text-primary">Therapy Not Found</h1>
-          <p className="text-xs text-brand-muted">The requested therapy page does not exist.</p>
-          <Link href="/therapies" className="btn-gradient inline-flex px-6 py-2.5 rounded-xl font-bold text-xs">
-            View All 8 Therapies
-          </Link>
-        </main>
-        <Footer />
-      </div>
-    );
+    notFound();
   }
 
+  const isOnline = slug.includes('online');
   const IconComp = detail.icon;
+  const relatedTherapies = Object.values(THERAPY_DETAILS).filter((t) => t.slug !== slug);
+
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Therapies', path: '/therapies' },
+    { name: detail.name, path: `/therapies/${slug}` },
+  ]);
+
+  const serviceSchema = buildServiceSchema({
+    name: detail.name,
+    serviceType: detail.name,
+    description: detail.description,
+    path: `/therapies/${slug}`,
+    priceInr: PRICING.PLACEMENT.THERAPY,
+    priceNote: `₹${PRICING.CONSULTATION.PARENT_DEFAULT} diagnostic consultation followed by ₹${PRICING.PLACEMENT.THERAPY.toLocaleString('en-IN')} one-time therapy onboarding fee`,
+    areaServed: isOnline ? ['India'] : ['Delhi NCR'],
+  });
+
+  const faqSchema = buildFaqSchema(detail.faqs);
 
   return (
     <div className="min-h-screen bg-brand-light/30 flex flex-col font-sans">
       <Navbar />
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
 
       {/* Header & Breadcrumb */}
       <section className="pt-28 sm:pt-36 pb-12 bg-white border-b border-brand-border/40">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-left space-y-4">
           
           {/* Breadcrumbs */}
-          <nav className="flex items-center gap-2 text-xs font-semibold text-brand-muted">
+          <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-xs font-semibold text-brand-muted">
             <Link href="/" className="hover:text-primary">Home</Link>
             <ChevronRight size={12} />
             <Link href="/therapies" className="hover:text-primary">Therapies</Link>
@@ -438,7 +464,7 @@ export default function TherapyDetailPage() {
 
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-100 border border-purple-200 text-purple-950 text-xs font-extrabold uppercase">
             <Sparkles size={12} className="text-secondary" />
-            <span>{slug.includes('online') ? '🌐 PAN INDIA (ONLINE SERVICE)' : '📍 Delhi NCR Home Session'}</span>
+            <span>{isOnline ? '🌐 PAN INDIA (ONLINE SERVICE)' : '📍 Delhi NCR Home Session'}</span>
           </div>
 
           <div className="flex items-start gap-4">
@@ -458,7 +484,7 @@ export default function TherapyDetailPage() {
       </section>
 
       {/* Main Content Area */}
-      <section className="py-12 sm:py-16">
+      <main className="py-12 sm:py-16 flex-grow">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 text-left">
           
           {/* About Therapy Card */}
@@ -471,8 +497,12 @@ export default function TherapyDetailPage() {
             </p>
             <div className="p-4 bg-purple-50 rounded-2xl border border-purple-200 flex items-center justify-between text-xs text-purple-950 font-bold">
               <span className="flex items-center gap-2">
-                <MapPin size={16} className="text-secondary" />
-                <span>Available for 1-on-1 Home Visits across Delhi NCR (Delhi, Noida, Ghaziabad, Gurugram, Faridabad)</span>
+                <MapPin size={16} className="text-secondary shrink-0" />
+                <span>
+                  {isOnline
+                    ? 'Available Online PAN-India via Live 1-on-1 Video Sessions across all Indian states and cities'
+                    : 'Available for 1-on-1 Home Visits across Delhi NCR (Delhi, Noida, Ghaziabad, Gurugram, Faridabad)'}
+                </span>
               </span>
             </div>
           </div>
@@ -495,10 +525,12 @@ export default function TherapyDetailPage() {
           {/* CTA Banner */}
           <div className="bg-gradient-to-r from-primary via-[#2A1D4E] to-primary text-white rounded-3xl p-6 sm:p-8 shadow-xl text-center space-y-4 border border-accent/30">
             <h2 className="font-serif text-2xl sm:text-3xl font-black">
-              Ready to Book Home {detail.name}?
+              Ready to Book {detail.name}?
             </h2>
             <p className="text-xs sm:text-sm text-white/90 max-w-xl mx-auto font-medium">
-              Book a 1-on-1 consultation call (₹99 fee) with our Lead Educational Specialist to discuss your child&apos;s needs and schedule home sessions in Delhi NCR.
+              {isOnline
+                ? 'Book a 1-on-1 diagnostic consultation (₹99 fee) with our Lead Educational Specialist to personalize your child’s online program anywhere in India.'
+                : 'Book a 1-on-1 diagnostic consultation (₹99 fee) with our Lead Educational Specialist to discuss your child’s needs and schedule home sessions in Delhi NCR.'}
             </p>
             <div className="pt-2">
               <Link
@@ -535,8 +567,43 @@ export default function TherapyDetailPage() {
             </div>
           </div>
 
+          {/* Related Therapies & Guides (Internal Linking) */}
+          <div className="bg-white border border-brand-border rounded-3xl p-6 sm:p-8 shadow-lg space-y-5">
+            <div className="border-b border-brand-border/60 pb-3 flex items-center justify-between gap-2">
+              <h2 className="font-serif text-xl font-bold text-primary">
+                Explore Other Specialized Therapies &amp; Guides
+              </h2>
+              <Link href="/therapies" className="text-xs font-bold text-secondary hover:underline">
+                View All Therapies →
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {relatedTherapies.map((t) => (
+                <Link
+                  key={t.slug}
+                  href={`/therapies/${t.slug}`}
+                  className="p-3.5 rounded-2xl border border-brand-border hover:border-primary/40 hover:bg-brand-light/40 transition-all flex items-center justify-between gap-2"
+                >
+                  <span className="text-xs font-bold text-primary">{t.name}</span>
+                  <ArrowRight size={14} className="text-secondary shrink-0" />
+                </Link>
+              ))}
+            </div>
+            <div className="pt-2 flex flex-wrap gap-3 text-xs font-semibold">
+              <Link href="/resources/aba-therapy-for-autism" className="text-primary hover:underline">
+                Guide: ABA Therapy for Autism →
+              </Link>
+              <Link href="/resources/online-parent-training-explained" className="text-primary hover:underline">
+                Guide: Online Parent Training Explained →
+              </Link>
+              <Link href="/resources/shadow-teacher-cost-by-city" className="text-primary hover:underline">
+                Guide: Transparent Pricing &amp; Fees →
+              </Link>
+            </div>
+          </div>
+
         </div>
-      </section>
+      </main>
 
       <Footer />
     </div>

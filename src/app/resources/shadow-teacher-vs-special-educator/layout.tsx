@@ -1,19 +1,12 @@
-import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Shadow Teacher vs. Special Educator — What\'s the Difference? | The Shadow Bridge',
-  description: 'Understand the distinct differences between a Shadow Teacher (classroom integration) and a Special Educator (individualized academic instruction).',
-  alternates: {
-    canonical: 'https://www.theshadowbridge.com/resources/shadow-teacher-vs-special-educator',
-  },
-  openGraph: {
-    title: 'Shadow Teacher vs. Special Educator — What\'s the Difference?',
-    description: 'A detailed comparative guide between in-classroom Shadow Teaching and clinical/resource room Special Education.',
-    url: 'https://www.theshadowbridge.com/resources/shadow-teacher-vs-special-educator',
-    type: 'article',
-  },
-};
+export const metadata = buildPageMetadata({
+  title: 'Shadow Teacher vs. Special Educator',
+  description: 'Understand the key differences between a classroom Shadow Teacher and a Special Educator in India, their qualifications, roles, and which fits your child.',
+  path: '/resources/shadow-teacher-vs-special-educator',
+  type: 'article',
+});
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function ShadowVsSpecialEdLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

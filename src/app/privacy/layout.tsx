@@ -1,13 +1,11 @@
-import { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Privacy Policy | The Shadow Bridge',
-  description: 'Privacy Policy for The Shadow Bridge detailing data protection, child record confidentiality, and information handling practices.',
-  alternates: {
-    canonical: 'https://www.theshadowbridge.com/privacy',
-  },
-};
+export const metadata = buildPageMetadata({
+  title: 'Privacy Policy & Data Protection',
+  description: 'Read The Shadow Bridge Privacy Policy detailing how we protect parent records, child IEP details, and educator verification data.',
+  path: '/privacy',
+});
 
 export default function PrivacyLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return children;
 }

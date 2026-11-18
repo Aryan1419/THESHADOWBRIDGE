@@ -1,19 +1,11 @@
-import { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'For Parents | Find Verified Shadow Teachers & Special Education Tutors',
-  description: 'Find verified, trained Shadow Teachers and Home Tutors for children with special needs across Delhi NCR, Mumbai, Hyderabad, Bangalore & Pune.',
-  keywords: ['hire shadow teacher', 'special needs tutor for child', 'autism support for parents', 'ADHD school mentor', 'inclusive education parent guide', 'Delhi NCR', 'Mumbai', 'Hyderabad', 'Bangalore', 'Ahmedabad', 'Pune'],
-  alternates: {
-    canonical: 'https://www.theshadowbridge.com/parents',
-  },
-  openGraph: {
-    title: 'Parent Guide & Educator Matchmaking | The Shadow Bridge',
-    description: 'Trusted support for your child\'s learning and development with personalized shadow teachers and tutors.',
-    url: 'https://www.theshadowbridge.com/parents',
-  },
-};
+export const metadata = buildPageMetadata({
+  title: 'For Parents — Shadow Teachers',
+  description: 'Find verified Shadow Teachers and Special Education Home Tutors for Autism, ADHD, and learning disabilities across 6 major Indian metros.',
+  path: '/parents',
+});
 
 export default function ParentsLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return children;
 }

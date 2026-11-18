@@ -1,23 +1,11 @@
-import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Special Education & Child Support Resources | The Shadow Bridge',
-  description: 'Comprehensive guides and resources on Shadow Teaching, Special Education Home Tutoring, ABA Therapy, Parent Training, and Child Support across India.',
-  alternates: {
-    canonical: 'https://www.theshadowbridge.com/resources',
-  },
-  openGraph: {
-    title: 'Special Education & Child Support Resources | The Shadow Bridge',
-    description: 'Practical guides and clinical insights on Shadow Teachers, Home Tutors, ABA Therapy, and Inclusive Education in India.',
-    url: 'https://www.theshadowbridge.com/resources',
-    type: 'website',
-  },
-};
+export const metadata = buildPageMetadata({
+  title: 'Special Education Guides & Resources',
+  description: 'Expert guides for Indian parents on Shadow Teachers, city-wise placement costs, ABA therapy, IEP planning, educator vetting, and home tutoring.',
+  path: '/resources',
+});
 
-export default function ResourcesLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function ResourcesLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

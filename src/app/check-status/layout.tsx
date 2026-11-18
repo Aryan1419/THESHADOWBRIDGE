@@ -1,14 +1,11 @@
-import { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Check Application & Registration Status | The Shadow Bridge',
-  description: 'Check real-time progress for your consultation, child registration, or educator application using your Registration ID.',
-  keywords: ['check status', 'shadow teacher status check', 'registration tracker'],
-  alternates: {
-    canonical: 'https://www.theshadowbridge.com/check-status',
-  },
-};
+export const metadata = buildPageMetadata({
+  title: 'Check Application Status',
+  description: 'Track your parent consultation, child registration, school collaboration, or educator application status in real time using your Registration ID.',
+  path: '/check-status',
+});
 
 export default function CheckStatusLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return children;
 }

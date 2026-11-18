@@ -332,7 +332,7 @@ export default function TutorRegister() {
                         exit={{ opacity: 0, x: -20 }}
                         className="space-y-4"
                       >
-                        <h3 className="font-serif font-bold text-primary text-lg border-b border-brand-border pb-2 mb-4">Personal Details</h3>
+                        <h2 className="font-serif font-bold text-primary text-lg border-b border-brand-border pb-2 mb-4">Personal Details</h2>
                         
                         <div className="flex flex-col gap-1.5">
                           <label className="text-xs font-bold text-brand-dark uppercase tracking-wider">Full Name *</label>

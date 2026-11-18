@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
 import { 
@@ -8,31 +6,21 @@ import {
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import ResourceAuthorCard from '@/components/ResourceAuthorCard';
+import { buildArticleSchema, buildBreadcrumbSchema } from '@/lib/schema';
 
 export default function WhatIsAShadowTeacherPage() {
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
+  const jsonLd = buildArticleSchema({
     headline: 'What is a Shadow Teacher, and Does My Child Need One?',
     description: 'A Shadow Teacher is a trained professional who accompanies a child with special needs inside a mainstream classroom, sitting alongside them during school hours to support focus, participation, and emotional regulation.',
-    author: {
-      '@type': 'Organization',
-      name: 'The Shadow Bridge',
-      url: 'https://www.theshadowbridge.com'
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'The Shadow Bridge',
-      logo: {
-        '@type': 'ImageObject',
-        url: 'https://www.theshadowbridge.com/favicon-512.png'
-      }
-    },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': 'https://www.theshadowbridge.com/resources/what-is-a-shadow-teacher'
-    }
-  };
+    path: '/resources/what-is-a-shadow-teacher',
+  });
+
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Resources', path: '/resources' },
+    { name: 'What is a Shadow Teacher?', path: '/resources/what-is-a-shadow-teacher' },
+  ]);
 
   const faqSchema = {
     '@context': 'https://schema.org',
@@ -75,6 +63,10 @@ export default function WhatIsAShadowTeacherPage() {
       />
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
@@ -111,6 +103,8 @@ export default function WhatIsAShadowTeacherPage() {
             <span>Published by The Shadow Bridge</span>
           </div>
         </header>
+
+        <ResourceAuthorCard />
 
         {/* Lead Paragraph */}
         <div className="bg-white rounded-2xl p-6 sm:p-8 border border-primary/15 shadow-xs text-gray-700 leading-relaxed text-base sm:text-lg space-y-4">

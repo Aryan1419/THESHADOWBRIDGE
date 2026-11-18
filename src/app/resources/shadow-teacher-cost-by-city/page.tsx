@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
 import { 
@@ -8,31 +6,21 @@ import {
 } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import ResourceAuthorCard from '@/components/ResourceAuthorCard';
+import { buildArticleSchema, buildBreadcrumbSchema } from '@/lib/schema';
 
 export default function ShadowTeacherCostByCityPage() {
-  const jsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
+  const jsonLd = buildArticleSchema({
     headline: 'How Much Does a Shadow Teacher Cost in Delhi NCR, Mumbai, Bangalore, Hyderabad, Ahmedabad, and Pune?',
-    description: 'A transparent guide detailing the two-stage placement-based fee structure for Shadow Teachers across Delhi NCR, Mumbai, Bangalore, Hyderabad, Ahmedabad, and Pune.',
-    author: {
-      '@type': 'Organization',
-      name: 'The Shadow Bridge',
-      url: 'https://www.theshadowbridge.com'
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'The Shadow Bridge',
-      logo: {
-        '@type': 'ImageObject',
-        url: 'https://www.theshadowbridge.com/favicon-512.png'
-      }
-    },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': 'https://www.theshadowbridge.com/resources/shadow-teacher-cost-by-city'
-    }
-  };
+    description: 'A transparent guide detailing the two-stage placement-based fee structure for Shadow Teachers (₹5,000), Home Tutors (₹3,000), and Therapy Sessions (₹2,000) across India.',
+    path: '/resources/shadow-teacher-cost-by-city',
+  });
+
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Resources', path: '/resources' },
+    { name: 'Shadow Teacher Cost by City', path: '/resources/shadow-teacher-cost-by-city' },
+  ]);
 
   const faqSchema = {
     '@context': 'https://schema.org',
@@ -51,7 +39,7 @@ export default function ShadowTeacherCostByCityPage() {
         name: 'What are the exact fees charged by The Shadow Bridge?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'The platform fee consists of an initial ₹99 Consultation Fee (for clinical assessment and intake), followed by a ₹5,000 Placement Fee once a verified Shadow Teacher or Tutor match is identified and confirmed.'
+          text: 'The platform fee consists of an initial ₹99 Consultation Fee (for clinical assessment and intake), followed by a one-time Placement Fee once matching begins: ₹5,000 for Shadow Teachers, ₹3,000 for Special Education Home Tutors, and ₹2,000 for Therapy Sessions or Online Parent Training.'
         }
       },
       {
@@ -59,7 +47,7 @@ export default function ShadowTeacherCostByCityPage() {
         name: 'Do fees differ between Delhi NCR, Mumbai, Bangalore, Pune, Ahmedabad, or Hyderabad?',
         acceptedAnswer: {
           '@type': 'Answer',
-          text: 'No. The Shadow Bridge maintains the exact same transparent fee structure (₹99 consultation + ₹5,000 placement fee) across all 6 operational cities.'
+          text: 'No. The Shadow Bridge maintains the exact same transparent fee structure (₹99 consultation + ₹5,000 Shadow Teacher / ₹3,000 Home Tutor / ₹2,000 Therapy placement fee) across all 6 operational cities.'
         }
       }
     ]
@@ -81,6 +69,10 @@ export default function ShadowTeacherCostByCityPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <script
         type="application/ld+json"
@@ -117,9 +109,11 @@ export default function ShadowTeacherCostByCityPage() {
             <span>•</span>
             <span>Live Pricing Verified</span>
             <span>•</span>
-            <span>Published by The Shadow Bridge</span>
+            <span>Published by Pratibha Mishra • Updated Nov 2026</span>
           </div>
         </header>
+
+        <ResourceAuthorCard />
 
         {/* Core Pricing Model Summary */}
         <div className="bg-white rounded-2xl p-6 sm:p-8 border border-primary/15 shadow-xs text-gray-700 leading-relaxed space-y-4">
@@ -183,7 +177,7 @@ export default function ShadowTeacherCostByCityPage() {
                 </div>
               </div>
               <p className="text-xs text-gray-600 leading-relaxed">
-                One-time fee upon successful matching of a verified Shadow Teacher or Special Needs Home Tutor based on your requested school schedule, qualifications, and locality.
+                One-time placement fee upon matching your verified educator: <strong>₹5,000 for Shadow Teachers</strong>, <strong>₹3,000 for Special Needs Home Tutors</strong>, and <strong>₹2,000 for Home/Online Therapy or Online Parent Training</strong>.
               </p>
               <ul className="text-xs text-gray-700 space-y-1.5 pt-1">
                 <li className="flex items-center gap-2">

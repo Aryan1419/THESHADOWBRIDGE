@@ -1,13 +1,11 @@
-import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Parent Registration — Book Consultation',
-  description: 'Register as a parent at The Shadow Bridge. Book a ₹99 consultation to discuss your child\'s Shadow Teacher, Home Tutor, or Therapy needs.',
-  alternates: {
-    canonical: 'https://www.theshadowbridge.com/register/parent',
-  },
-};
+export const metadata = buildPageMetadata({
+  title: 'Register as Parent — Consultation',
+  description: 'Start Step 1 of parent registration with a ₹99 assessment consultation to match your child with a verified Shadow Teacher, Home Tutor, or Therapist.',
+  path: '/register/parent',
+});
 
-export default function ParentRegisterLayout({ children }: { children: React.ReactNode }) {
+export default function RegisterParentLayout({ children }: { children: React.ReactNode }) {
   return children;
 }

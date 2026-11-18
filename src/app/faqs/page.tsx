@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { buildBreadcrumbSchema, buildFaqSchema } from '@/lib/schema';
 
 interface FaqRecord {
   category: 'General' | 'Shadow Teaching' | 'Home Tutoring' | 'Pricing & Matching';
@@ -28,7 +29,7 @@ const faqData: FaqRecord[] = [
   {
     category: "Shadow Teaching",
     question: "Does the school need to approve having a shadow teacher?",
-    answer: "Yes. MAIN mainstream schools must permit shadow teachers in their classrooms. We actively cooperate with school counselors and administrators, providing credentials, school integration logs, and alignment reports."
+    answer: "Yes. Mainstream schools must permit shadow teachers in their classrooms. We actively cooperate with school counselors and administrators, providing credentials, school integration logs, and alignment reports."
   },
   {
     category: "Home Tutoring",
@@ -47,8 +48,8 @@ const faqData: FaqRecord[] = [
   },
   {
     category: "Pricing & Matching",
-    question: "How much does a monthly Shadow Teacher subscription cost?",
-    answer: "The monthly fee depends on the hours of school shadowing needed (full-day or half-day) and location. We provide transparent billing estimates directly after the lead mentor consultation call, with no upfront placement fee margins."
+    question: "How much does a Shadow Teacher or Home Tutor cost?",
+    answer: "The Shadow Bridge uses a transparent two-step model: an initial ₹99 assessment consultation, followed by a one-time placement fee only after matching (₹5,000 for Shadow Teachers, ₹3,000 for Special Education Home Tutors, and ₹2,000 for Therapy Sessions). Ongoing monthly educator remuneration is agreed transparently with zero recurring agency cuts."
   },
   {
     category: "Pricing & Matching",
@@ -75,9 +76,23 @@ export default function Faqs() {
     setOpenIndex(openIndex === idx ? null : idx);
   };
 
+  const faqSchema = buildFaqSchema(faqData);
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'FAQs', path: '/faqs' },
+  ]);
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
 
       {/* Header Banner */}
       <section className="pt-32 pb-16 bg-gradient-to-b from-[#F8F5FB] to-white border-b border-brand-border">

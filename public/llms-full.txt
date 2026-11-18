@@ -1,0 +1,46 @@
+# The Shadow Bridge — Complete Platform & Service Reference
+
+> Official structured reference for https://www.theshadowbridge.com/ — Inclusive Education, Shadow Teachers, Special Education Home Tutors, and Clinical Therapy Programs across India.
+
+## Organization Profile
+- **Brand Name**: The Shadow Bridge
+- **Website**: https://www.theshadowbridge.com/
+- **Founder & Lead Mentor**: Pratibha Mishra (11+ years in Special Education & Shadow Teacher Support; diplomas in Child Psychology, School Counselling, and Special Education)
+- **Contact Email**: theshadowbridgesupport@gmail.com
+- **Social Profiles**:
+  - Instagram: https://www.instagram.com/the_shadow_bridge
+  - Founder LinkedIn: https://www.linkedin.com/in/pratibha-mishra-3992042ab/
+
+## Exact Pricing Schedule (INR)
+1. **Parent Diagnostic Consultation**: ₹99 (one-time, non-refundable). 1-on-1 video/phone assessment led by Founder Pratibha Mishra.
+2. **School Institutional Consultation**: ₹199 (one-time, non-refundable). Dedicated scoping call for K-12 schools.
+3. **Shadow Teacher Placement Fee**: ₹5,000 (one-time, payable only after consultation & match initiation). Includes 100% refund if no suitable candidate is available in the parent's locality, or 50% refund (₹2,500) if profiles are shared but the family chooses not to proceed.
+4. **Special Education Home Tutor Placement Fee**: ₹3,000 (one-time). Includes 100% refund if unavailable, 50% refund (₹1,500) if candidates are shared and parent declines, and 40% refund (₹1,200) if a replacement cannot be arranged within validity.
+5. **Therapy Booking / Placement Fee (Home & Online ABA / Online Parent Training)**: ₹2,000 (one-time).
+6. **School Collaboration Placement Fee**: ₹5,000 per Shadow Teacher requested (dynamically calculated as `teachers_count × ₹5,000`).
+7. **Monthly Educator Compensation**: Paid transparently according to school hours, specialization, and metro city (quoted during consultation; educator baselines typically start around ₹15,000+/month for full-time school support).
+
+## Geographic Service Areas
+- **Shadow Teachers & Special Education Home Tutors (6 Indian Metros)**:
+  1. **Delhi NCR**: South Delhi, Gurgaon (DLF Phase 1–5, Cyber City, Sohna Road), Noida, Greater Noida, Indirapuram, Faridabad, Ghaziabad, Dwarka, Rohini, West & North Delhi.
+  2. **Mumbai**: Bandra, Andheri, Powai, Juhu, Goregaon, Malad, Kandivali, Borivali, Chembur, Dadar, Worli, Ghatkopar, Mulund, Thane, Navi Mumbai (Vashi, Kharghar).
+  3. **Bangalore**: Indiranagar, Koramangala, Whitefield, HSR Layout, Jayanagar, JP Nagar, Sarjapur Road, Marathahalli, Electronic City, Hebbal, Malleshwaram, Yelahanka.
+  4. **Hyderabad**: Gachibowli, Kondapur, Madhapur, Hitec City, Jubilee Hills, Banjara Hills, Miyapur, Kukatpally, Bachupally, Manikonda, Secunderabad, Begumpet.
+  5. **Pune**: Koregaon Park, Viman Nagar, Baner, Wakad, Hinjewadi, Aundh, Kothrud, Kharadi, Magarpatta, Hadapsar.
+  6. **Ahmedabad**: SG Highway, Bopal, Prahlad Nagar, Satellite, Bodakdev, Thaltej, Navrangpura, Science City, Gota.
+- **In-Home Clinical Therapy Sessions**: Delhi NCR (ABA Therapy, Speech Therapy, Occupational Therapy, Special Education, Behavior Therapy, Physical Therapy, Play Therapy, Counseling & Psychological Support).
+- **Online Telehealth Services (PAN-India)**: ABA Online Therapy and Online Parent Training across all Indian states and union territories.
+
+## 5-Step Parent Onboarding Pipeline
+1. **Step 1 — Book Consultation (₹99)**: Parent submits initial contact & requirement at https://www.theshadowbridge.com/book or https://www.theshadowbridge.com/register/parent and receives a unique Registration ID.
+2. **Step 2 — 1-on-1 Assessment Call**: Pratibha Mishra conducts a clinical/behavioral evaluation with the parent within 24 hours.
+3. **Step 3 — Detailed Child Registration Form**: Unlocked automatically after consultation completion at https://www.theshadowbridge.com/register/parent/form (covers IEP goals, sensory triggers, school routine, and locality).
+4. **Step 4 — Placement Fee & Shortlisting**: Parent completes one-time placement fee (₹5,000 Shadow / ₹3,000 Tutor / ₹2,000 Therapy); team shortlists 2–3 vetted educators for trial sessions.
+5. **Step 5 — Placement & Continuous Supervision**: Customized educator alignment with school guidelines, ongoing progress tracking, and founder mentoring check-ins.
+
+## Key Conditions Supported
+- Autism Spectrum Disorder (ASD)
+- Attention-Deficit/Hyperactivity Disorder (ADHD)
+- Learning Disabilities (Dyslexia, Dysgraphia, Dyscalculia)
+- Down Syndrome & Global Developmental Delay (GDD)
+- Speech & Language Delays, Sensory Processing Differences, Social & Behavioral Regulation

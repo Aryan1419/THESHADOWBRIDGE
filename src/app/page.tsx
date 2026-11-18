@@ -200,9 +200,11 @@ export default function Home() {
                   <Image
                     src="/images/teacher_child.png"
                     alt="Special Needs Home Tutor assisting student with inclusive learning in home setting"
-                    fill
-                    className="object-cover"
+                    width={480}
+                    height={460}
+                    className="w-full h-full object-cover"
                     priority
+                    fetchPriority="high"
                   />
                 </div>
 
@@ -328,8 +330,9 @@ export default function Home() {
                   <Image
                     src="/images/founder_pratibha.jpg"
                     alt="Pratibha Mishra - Founder & Lead Educational Mentor at The Shadow Bridge"
-                    fill
-                    className="object-cover"
+                    width={380}
+                    height={450}
+                    className="w-full h-full object-cover"
                   />
                 </div>
                 {/* Floating Card */}
@@ -689,6 +692,8 @@ export default function Home() {
                         type="text"
                         id="name"
                         name="name"
+                        aria-label="Your Name"
+                        autoComplete="name"
                         required
                         value={formData.name}
                         onChange={handleInputChange}
@@ -702,6 +707,8 @@ export default function Home() {
                         type="tel"
                         id="phone"
                         name="phone"
+                        aria-label="Phone Number"
+                        autoComplete="tel"
                         required
                         value={formData.phone}
                         onChange={handleInputChange}
@@ -718,6 +725,8 @@ export default function Home() {
                         type="email"
                         id="email"
                         name="email"
+                        aria-label="Email Address"
+                        autoComplete="email"
                         required
                         value={formData.email}
                         onChange={handleInputChange}

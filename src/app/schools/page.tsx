@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Script from 'next/script';
 import { motion } from 'framer-motion';
 import { 
@@ -11,6 +12,7 @@ import {
 
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { buildBreadcrumbSchema, buildServiceSchema } from '@/lib/schema';
 import { CITIES } from '@/lib/constants';
 import { PRICING, getConsultationFee, getPlacementFee, formatCurrency } from '@/lib/pricing';
 
@@ -288,10 +290,25 @@ export default function SchoolsPage() {
     }
   };
 
+  const schoolServiceSchema = buildServiceSchema({
+    name: 'School Shadow Teacher Collaboration Program',
+    serviceType: 'Institutional Special Education Staffing',
+    description: 'Deploy vetted, trained Shadow Teachers across Pre-Primary, Primary, and Secondary grades for mainstream K-12 schools in India.',
+    path: '/schools',
+    priceInr: PRICING.PLACEMENT.SCHOOL_PER_TEACHER,
+    priceNote: '₹199 institutional scoping consultation + ₹5,000 per requested Shadow Teacher',
+  });
+  const schoolBreadcrumbSchema = buildBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'School Collaboration', path: '/schools' },
+  ]);
+
   return (
     <div className="min-h-screen bg-brand-light/30 flex flex-col font-sans">
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       <Navbar />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schoolServiceSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schoolBreadcrumbSchema) }} />
 
       {/* Hero Section (Section A) */}
       <section className="pt-28 sm:pt-36 pb-12 bg-gradient-to-b from-white via-brand-light/50 to-white border-b border-brand-border/40 relative overflow-hidden">
@@ -347,9 +364,12 @@ export default function SchoolsPage() {
             {/* Right Image Column */}
             <div className="lg:col-span-5 relative">
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-white">
-                <img 
-                  src="/images/teacher_child.png" 
-                  alt="School Collaboration - The Shadow Bridge" 
+                <Image
+                  src="/images/teacher_child.png"
+                  alt="School Collaboration - The Shadow Bridge"
+                  width={800}
+                  height={600}
+                  priority
                   className="w-full h-[320px] sm:h-[380px] object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent flex items-end p-6">
@@ -394,7 +414,7 @@ export default function SchoolsPage() {
                     <IconComp size={20} />
                   </div>
                   <div>
-                    <h3 className="font-bold text-sm text-primary">{card.title}</h3>
+                    <h2 className="font-bold text-sm text-primary">{card.title}</h2>
                     <p className="text-xs text-brand-muted mt-1 leading-relaxed">{card.desc}</p>
                   </div>
                 </div>

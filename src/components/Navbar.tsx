@@ -106,7 +106,7 @@ export default function Navbar() {
             <div className="flex-shrink-0 min-w-0">
               <Link href="/" className="flex items-center gap-1.5 sm:gap-3 group">
                 <span className="w-8 h-8 sm:w-11 sm:h-11 rounded-lg sm:rounded-xl bg-white shadow-xs sm:shadow-sm group-hover:scale-105 transition-transform flex items-center justify-center overflow-hidden border border-brand-border p-0.5 sm:p-1 flex-shrink-0">
-                  <img src="/favicon-192.png" alt="The Shadow Bridge Logo" className="w-full h-full object-contain" />
+                  <img src="/favicon-192.png" alt="The Shadow Bridge Logo" width={44} height={44} className="w-full h-full object-contain" />
                 </span>
                 <div className="flex flex-col min-w-0">
                   <span className="font-serif text-xs xs:text-base sm:text-2xl font-black text-primary tracking-tight leading-none truncate">

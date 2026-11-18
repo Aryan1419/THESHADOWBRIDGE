@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { buildBreadcrumbSchema, FOUNDER_PERSON_SCHEMA } from '@/lib/schema';
 import { 
   Heart, 
   Sparkles, 
@@ -64,9 +65,21 @@ const timelineSteps = [
 ];
 
 export default function FounderStoryPage() {
+  const profileSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    mainEntity: FOUNDER_PERSON_SCHEMA,
+  };
+  const breadcrumbSchema = buildBreadcrumbSchema([
+    { name: 'Home', path: '/' },
+    { name: 'Founder Story', path: '/founder-story' },
+  ]);
+
   return (
     <main className="min-h-screen bg-brand-light flex flex-col font-sans text-brand-dark overflow-hidden">
       <Navbar />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(profileSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
       {/* Hero Banner */}
       <section className="pt-36 pb-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full relative">
@@ -116,11 +129,12 @@ export default function FounderStoryPage() {
 
           {/* Founder Image */}
           <div className="relative w-40 h-40 sm:w-48 sm:h-48 rounded-2xl overflow-hidden shrink-0 shadow-lg border-2 border-primary/20">
-            <Image 
+            <Image
               src="/images/founder_pratibha.jpg"
               alt="Pratibha Mishra - Founder of The Shadow Bridge"
-              fill
-              className="object-cover object-top"
+              width={192}
+              height={192}
+              className="w-full h-full object-cover object-top"
               priority
             />
           </div>
@@ -137,7 +151,7 @@ export default function FounderStoryPage() {
             </p>
 
             <div>
-              <h3 className="font-serif text-lg font-bold text-primary">Pratibha Mishra</h3>
+              <h2 className="font-serif text-lg font-bold text-primary">Pratibha Mishra</h2>
               <p className="text-xs text-brand-muted font-medium">Founder &amp; Lead Educational Mentor • The Shadow Bridge</p>
             </div>
 

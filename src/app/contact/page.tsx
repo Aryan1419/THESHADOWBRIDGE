@@ -94,7 +94,7 @@ export default function Contact() {
                 <div className="flex gap-4 p-4 border border-brand-border bg-brand-light/20 rounded-2xl">
                   <Mail className="text-primary flex-shrink-0 mt-1" size={20} />
                   <div>
-                    <h4 className="font-bold text-brand-dark">Email Support</h4>
+                    <h3 className="font-bold text-brand-dark">Email Support</h3>
                     <p className="text-brand-muted text-sm font-semibold">
                       <a href="mailto:theshadowbridgesupport@gmail.com" className="hover:text-accent transition-colors">
                         theshadowbridgesupport@gmail.com

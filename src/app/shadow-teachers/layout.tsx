@@ -1,19 +1,11 @@
-import { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Special Education Shadow Teachers | Delhi NCR, Mumbai, Hyderabad, Bangalore, Pune',
-  description: 'Join India\'s leading network of trained Shadow Teachers. Get placed in inclusive schools across Delhi NCR, Mumbai, Hyderabad, Bangalore & Pune.',
-  keywords: ['shadow teacher jobs', 'special education jobs', 'inclusive teacher vacancy', 'shadow teacher registration', 'autism shadow educator', 'Delhi NCR', 'Mumbai', 'Hyderabad', 'Bangalore', 'Ahmedabad', 'Pune'],
-  alternates: {
-    canonical: 'https://www.theshadowbridge.com/shadow-teachers',
-  },
-  openGraph: {
-    title: 'Shadow Teacher Careers & Placement | The Shadow Bridge',
-    description: 'Empowering special educators with professional placement, mentorship, and career growth in top inclusive schools.',
-    url: 'https://www.theshadowbridge.com/shadow-teachers',
-  },
-};
+export const metadata = buildPageMetadata({
+  title: 'Shadow Teacher Support & Careers',
+  description: 'Trained, background-verified Shadow Teachers for ASD, ADHD, and Down Syndrome in Delhi NCR, Mumbai, Bangalore, Hyderabad, Ahmedabad & Pune.',
+  path: '/shadow-teachers',
+});
 
 export default function ShadowTeachersLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return children;
 }

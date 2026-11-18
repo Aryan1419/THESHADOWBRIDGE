@@ -93,9 +93,9 @@ export default function ForParents() {
                     <div className="p-4 bg-[#F7F5FC] rounded-2xl w-fit mb-6 text-primary group-hover:scale-105 transition-transform">
                       <GraduationCap size={32} className="text-secondary" />
                     </div>
-                    <h3 className="font-serif font-black text-primary text-2xl mb-3">
+                    <h2 className="font-serif font-black text-primary text-2xl mb-3">
                       Need a Shadow Teacher?
-                    </h3>
+                    </h2>
                     <p className="text-brand-muted text-sm sm:text-base leading-relaxed mb-6">
                       For children requiring behavioral assistance, focus support, or integration helper inside a mainstream classroom environment.
                     </p>
@@ -132,9 +132,9 @@ export default function ForParents() {
                     <div className="p-4 bg-[#F7F5FC] rounded-2xl w-fit mb-6 text-primary group-hover:scale-105 transition-transform">
                       <BookOpen size={32} className="text-primary" />
                     </div>
-                    <h3 className="font-serif font-black text-primary text-2xl mb-3">
+                    <h2 className="font-serif font-black text-primary text-2xl mb-3">
                       Searching for a Home Tutor?
-                    </h3>
+                    </h2>
                     <p className="text-brand-muted text-sm sm:text-base leading-relaxed mb-6">
                       For academic supervision, customized learning, remedial teaching, and one-on-one subject coaching in the comfort of home.
                     </p>

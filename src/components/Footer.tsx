@@ -12,7 +12,7 @@ export default function Footer() {
           <div className="md:col-span-2 lg:col-span-2">
             <Link href="/" className="flex items-center gap-3 group mb-5">
               <span className="w-10 h-10 rounded-xl bg-white shadow-md flex items-center justify-center overflow-hidden border border-brand-border p-1 flex-shrink-0">
-                <img src="/favicon-192.png" alt="The Shadow Bridge Logo" className="w-full h-full object-contain" />
+                <img src="/favicon-192.png" alt="The Shadow Bridge Logo" width={40} height={40} loading="lazy" className="w-full h-full object-contain" />
               </span>
               <div className="flex flex-col">
                 <span className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-white leading-none animate-pulse">
@@ -58,7 +58,7 @@ export default function Footer() {
 
           {/* Column 2: Quick Links */}
           <div>
-            <h3 className="w-full block font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">Quick Links</h3>
+            <h2 className="w-full block font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">Quick Links</h2>
             <ul className="space-y-2.5 text-sm text-white/80">
               <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
               <li><Link href="/founder-story" className="hover:text-white transition-colors">Why I Started (Founder Story)</Link></li>
@@ -75,12 +75,13 @@ export default function Footer() {
               <li><Link href="/testimonials" className="hover:text-white transition-colors">Testimonials</Link></li>
               <li><Link href="/leave-review" className="hover:text-white transition-colors flex items-center gap-1">Leave a Review</Link></li>
               <li><Link href="/faqs" className="hover:text-white transition-colors">FAQs</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">Contact Us</Link></li>
             </ul>
           </div>
 
           {/* Column 3: For Parents & Students Links */}
           <div>
-            <h3 className="w-full block font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">For Parents</h3>
+            <h2 className="w-full block font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">For Parents</h2>
             <ul className="space-y-2.5 text-sm text-white/80">
               <li><Link href="/parents" className="hover:text-white transition-colors">Parent Overview</Link></li>
               <li><Link href="/parents#shadow-teacher" className="hover:text-white transition-colors">Need a Shadow Teacher?</Link></li>
@@ -93,7 +94,7 @@ export default function Footer() {
 
           {/* Column 4: For Shadow Teachers & Tutors Links */}
           <div>
-            <h3 className="w-full block font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">For Educators</h3>
+            <h2 className="w-full block font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">For Educators</h2>
             <ul className="space-y-2.5 text-sm text-white/80">
               <li><Link href="/shadow-teachers" className="hover:text-white transition-colors">Shadow Teacher Careers</Link></li>
               <li><Link href="/tutors" className="hover:text-white transition-colors">Home Tutor Careers</Link></li>
@@ -104,7 +105,7 @@ export default function Footer() {
 
           {/* Column 5: Contact Info */}
           <div className="mt-4 md:mt-0">
-            <h3 className="w-full block font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">Contact Us</h3>
+            <h2 className="w-full block font-serif text-lg font-bold mb-4 border-b border-white/20 pb-2">Contact Us</h2>
             <ul className="space-y-3.5 text-sm text-white/80">
               <li className="flex gap-2">
                 <Mail size={16} className="text-accent flex-shrink-0 mt-0.5" />

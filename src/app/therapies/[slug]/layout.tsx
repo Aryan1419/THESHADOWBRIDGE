@@ -1,46 +1,47 @@
 import type { Metadata } from 'next';
+import { buildPageMetadata } from '@/lib/seo';
 
-const THERAPY_TITLES: Record<string, { title: string; description: string }> = {
+const THERAPY_META: Record<string, { title: string; description: string }> = {
   'aba-online-therapy': {
-    title: 'ABA Online Therapy (PAN India) | 1-on-1 Video Sessions',
-    description: 'Live 1-on-1 video ABA therapy and behavioral coaching for children across India. Certified therapists, individualized goals, and parent coaching.'
+    title: 'ABA Online Therapy (PAN India)',
+    description: 'Live 1-on-1 video ABA therapy and behavioral coaching for children with Autism and ADHD across India. Certified analysts and monthly progress reports.',
   },
   'online-parent-training': {
-    title: 'Online Parent Training (PAN India) | Professional ABA Coaching',
-    description: 'Live 1-on-1 professional coaching empowering parents with practical ABA and behavioral tools at home across India.'
+    title: 'Online Parent Training (PAN India)',
+    description: 'Live 1-on-1 virtual parent coaching across India teaching practical ABA routines, visual schedules, meltdown de-escalation, and home support skills.',
   },
   'aba-therapy': {
-    title: 'In-Home ABA Therapy (Delhi NCR) | Certified Behavior Analysts',
-    description: 'Evidence-based Applied Behavior Analysis therapy delivered at your home in Delhi NCR. Supporting children with Autism and developmental delays.'
+    title: 'In-Home ABA Therapy (Delhi NCR)',
+    description: 'Certified Applied Behavior Analysis (ABA) home therapy in Delhi NCR for Autism, ADHD, communication, social skills, and positive behavior growth.',
   },
   'speech-therapy': {
-    title: 'In-Home Speech Therapy (Delhi NCR) | Communication & Articulation',
-    description: 'Specialized speech and language therapy at home in Delhi NCR. Verbal articulation, fluency, phonology, and social communication support.'
+    title: 'In-Home Speech Therapy (Delhi NCR)',
+    description: 'Personalized in-home Speech & Language Therapy in Delhi NCR for speech delays, articulation, fluency, stuttering, and functional communication.',
   },
   'occupational-therapy': {
-    title: 'In-Home Occupational Therapy (Delhi NCR) | Sensory & Motor Skills',
-    description: 'Pediatric occupational therapy for sensory integration, fine motor coordination, posture, and daily living independence in Delhi NCR.'
+    title: 'Occupational Therapy (Delhi NCR)',
+    description: 'In-home Pediatric Occupational Therapy in Delhi NCR improving sensory integration, fine & gross motor skills, handwriting, and daily independence.',
   },
   'special-education': {
-    title: 'Special Education Tutoring (Delhi NCR) | Remedial & IEP Support',
-    description: 'Structured special education and remedial teaching tailored to Individualized Education Plans (IEPs) for neurodivergent children in Delhi NCR.'
+    title: 'Special Education Support (Delhi NCR)',
+    description: 'Individualized Special Education home tutoring in Delhi NCR for Dyslexia, Dysgraphia, Dyscalculia, IEP implementation, and remedial learning.',
   },
   'behavior-therapy': {
-    title: 'Behavior Therapy (Delhi NCR) | Positive Behavior Support',
-    description: 'Targeted behavioral intervention to manage meltdowns, aggression, attention deficits, and encourage positive social interactions.'
+    title: 'Child Behavior Therapy (Delhi NCR)',
+    description: 'Compassionate in-home Behavior Therapy in Delhi NCR addressing tantrums, emotional regulation, impulse control, anxiety, and positive habits.',
   },
   'physical-therapy': {
-    title: 'Pediatric Physical Therapy (Delhi NCR) | Gross Motor & Mobility',
-    description: 'Pediatric physiotherapy addressing gross motor milestones, muscle tone, balance, posture, and physical coordination at home.'
+    title: 'Pediatric Physical Therapy (Delhi NCR)',
+    description: 'In-home Pediatric Physical Therapy in Delhi NCR strengthening balance, posture, muscle tone, gait training, and gross motor independence.',
   },
   'play-therapy': {
-    title: 'Play & Social Skills Therapy (Delhi NCR) | Developmental Growth',
-    description: 'Child-centered play therapy fostering emotional expression, peer interaction, turn-taking, and imaginative social play.'
+    title: 'Child Play Therapy (Delhi NCR)',
+    description: 'Child-centered in-home Play Therapy in Delhi NCR nurturing emotional expression, social turn-taking, peer bonding, and imaginative confidence.',
   },
   'counseling-psychological-support': {
-    title: 'Child & Parent Counseling (Delhi NCR) | Psychological Support',
-    description: 'Compassionate psychological guidance and counseling for neurodivergent children and their families navigating developmental journeys.'
-  }
+    title: 'Child Counseling Support (Delhi NCR)',
+    description: 'Confidential in-home Child Psychology & Parent Counseling in Delhi NCR for anxiety, school stress, emotional resilience, and family guidance.',
+  },
 };
 
 export async function generateMetadata({
@@ -49,27 +50,16 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const info = THERAPY_TITLES[slug] || {
-    title: 'Specialized Therapy Program',
-    description: 'Evidence-based therapy and intervention programs for children with special needs across India and Delhi NCR.'
+  const info = THERAPY_META[slug] || {
+    title: 'Specialized Child Therapy Program',
+    description: 'Evidence-based in-home and online therapy programs for neurodivergent children across Delhi NCR and PAN-India by The Shadow Bridge.',
   };
 
-  const canonicalUrl = `https://www.theshadowbridge.com/therapies/${slug}`;
-
-  return {
+  return buildPageMetadata({
     title: info.title,
     description: info.description,
-    alternates: {
-      canonical: canonicalUrl,
-    },
-    openGraph: {
-      title: `${info.title} | The Shadow Bridge`,
-      description: info.description,
-      url: canonicalUrl,
-      siteName: 'The Shadow Bridge',
-      type: 'website',
-    },
-  };
+    path: `/therapies/${slug}`,
+  });
 }
 
 export default function TherapyDetailLayout({
